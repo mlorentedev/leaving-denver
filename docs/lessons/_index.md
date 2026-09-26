@@ -19,3 +19,5 @@ tags: [lessons, index, docs, leaving-denver]
 | [lesson-004](lesson-004-dealer-recall-closure-prior-to-listing.md) | Closing Manufacturer Recalls at Dealer Prior to Listing | 2026-09-25 | [vehicle, sales, recalls] |
 | [lesson-005](lesson-005-in-modal-contextual-upselling-conversion.md) | Contextual In-Modal Upsells Outperform Static Footer Bundle Cards | 2026-09-25 | [conversion, merchandising, ui] |
 | [lesson-006](lesson-006-extract-private-data-before-first-public-push.md) | Extract Private Data Before the First Push of a Public Repo | 2026-09-25 | [security, git, secrets] |
+| [lesson-007](lesson-007-git-lfs-install-under-global-hookspath.md) | `git lfs install` Under a Global core.hooksPath | 2026-09-25 | [git, git-lfs, hooks] |
+| [lesson-008](lesson-008-honest-urgency-over-invented-scarcity.md) | Real Urgency, Not Invented Scarcity | 2026-09-25 | [copy, marketing, legal] |
