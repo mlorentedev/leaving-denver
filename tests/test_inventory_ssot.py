@@ -89,7 +89,7 @@ def test_seller_phone_not_in_public_inventory(inventory):
 
 
 def test_private_floors_consistent(inventory):
-    from src.private_data import floors
+    from leaving_denver.private_data import floors
 
     reserve = floors()
     if not reserve:

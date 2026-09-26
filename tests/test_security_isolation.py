@@ -1,6 +1,6 @@
 """
 Security and isolation regression tests.
-Verifies that no private seller data leaks into the public distribution (dist/).
+Verifies that no private seller data leaks into the public distribution (build/public/).
 """
 
 import re
@@ -9,8 +9,8 @@ from pathlib import Path
 import pytest
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-DIST_DIR = BASE_DIR / "dist"
-DIST_PRIVATE_DIR = BASE_DIR / "dist_private"
+DIST_DIR = BASE_DIR / "build" / "public"
+DIST_PRIVATE_DIR = BASE_DIR / "build" / "private"
 
 
 def test_public_build_exists():

@@ -4,7 +4,7 @@ Private seller data (reserve floors, phone) kept out of the public tree.
 Source of truth is data/private.sops.yaml, encrypted with sops/age. The public
 build only needs the phone, which can also come from the SELLER_PHONE env var
 (how CI gets it, as a repository secret). Floors are only ever needed locally,
-by the private seller workspace and `manage.py drops`.
+by the private seller workspace and `leaving-denver drops`.
 """
 
 import json
@@ -14,7 +14,7 @@ import shutil
 import subprocess
 from typing import Any
 
-from src.config import PRIVATE_SOPS_YAML
+from leaving_denver.config import PRIVATE_SOPS_YAML
 
 
 def load_private() -> dict[str, Any]:

@@ -37,11 +37,11 @@ Deploy a lightweight (<50 KB) static HTML/CSS/JS catalog hosted on Cloudflare Pa
 
 ### Negative
 - Requires internet access for buyers to view photos.
-- Requires Cloudflare Pages deployment pipeline (automated via `./manage.py deploy-cf`).
+- Requires Cloudflare Pages deployment pipeline (automated via `leaving-denver deploy-cf`).
 
 ### Neutral
 - Eliminates reliance on heavy frontend frameworks (React, Next.js); vanilla DOM manipulation is sufficient.
 
 ## References
 - `docs/lessons/lesson-001-mobile-html-monolith-attachment-failure.md`
-- `src/site_builder.py`
+- `src/leaving_denver/site_builder.py`

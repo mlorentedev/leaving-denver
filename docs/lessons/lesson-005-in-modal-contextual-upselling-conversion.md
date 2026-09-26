@@ -26,4 +26,4 @@ Do not clutter catalog footers with generic package cards that compete with sing
 
 ## References
 - `research/bundle_strategy.md` (Hormozi value bundle architecture)
-- `src/site_builder.py` (`_render_bundle_upsell` implementation)
+- `src/leaving_denver/site_builder.py` (`_render_bundle_upsell` implementation)

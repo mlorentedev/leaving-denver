@@ -9,7 +9,7 @@ from pathlib import Path
 
 from PIL import Image
 
-from src.config import (
+from leaving_denver.config import (
     DIST_DIR,
     JPEG_QUALITY,
     MAX_IMAGE_HEIGHT,
@@ -82,7 +82,7 @@ def process_image(src_path: Path, dest_path: Path) -> bool:
 def sync_all_photos() -> dict[str, list[str]]:
     """
     Scans all item subdirectories in content/photos/<item_id>/
-    processes each photo into dist/catalog/<item_id>/
+    processes each photo into build/public/catalog/<item_id>/
     and returns a mapping of item_id -> list of relative catalog paths.
     """
     catalog_map: dict[str, list[str]] = {}

@@ -1,9 +1,9 @@
 """
 Site Builder for Denver Tech Center Moving Sale.
 Compiles Single Source of Truth (data/inventory.yaml) into:
-1. dist/index.html - Sanitized, high-speed public catalog (Zero floor prices, obfuscated contacts).
-2. dist/robots.txt - Total crawler disallow directive.
-3. dist_private/ - Private local seller tool with multi-platform listing copy and PIN lock.
+1. build/public/index.html - Sanitized, high-speed public catalog (Zero floor prices, obfuscated contacts).
+2. build/public/robots.txt - Total crawler disallow directive.
+3. build/private/ - Private local seller tool with multi-platform listing copy and PIN lock.
 """
 
 import json
@@ -14,7 +14,7 @@ from typing import Any
 
 import yaml
 
-from src.config import (
+from leaving_denver.config import (
     DIST_DIR,
     DIST_PRIVATE_DIR,
     INVENTORY_JSON_PRIVATE,
@@ -23,8 +23,8 @@ from src.config import (
     PUBLIC_INDEX_HTML,
     PUBLIC_ROBOTS_TXT,
 )
-from src.image_processor import sync_all_photos
-from src.private_data import floors, load_private, phone_parts, seller_phone
+from leaving_denver.image_processor import sync_all_photos
+from leaving_denver.private_data import floors, load_private, phone_parts, seller_phone
 
 
 def load_inventory_yaml() -> dict[str, Any]:
@@ -140,7 +140,7 @@ def build_private_workspace(full_data: dict[str, Any]) -> None:
 
 
 def verify_security_guarantees() -> None:
-    """Verifies that no private files or floor prices leaked into dist/"""
+    """Verifies that no private files or floor prices leaked into build/public/"""
     dist_files = [f.name for f in DIST_DIR.glob("**/*") if f.is_file()]
     for fname in dist_files:
         if "poster" in fname.lower() or fname.lower() == "inventory.json":
@@ -170,13 +170,13 @@ def build_all() -> None:
 
     save_inventory_yaml(data)
 
-    print("3. Building sanitized public distribution (dist/)...")
+    print("3. Building sanitized public distribution (build/public/)...")
     build_public_site(data)
 
-    print("4. Building private seller assistant (dist_private/)...")
+    print("4. Building private seller assistant (build/private/)...")
     build_private_workspace(data)
 
     print("5. Verifying security & data isolation...")
     verify_security_guarantees()
 
-    print("Build complete: Public site ready in dist/, private tool ready in dist_private/")
+    print("Build complete: Public site ready in build/public/, private tool in build/private/")
