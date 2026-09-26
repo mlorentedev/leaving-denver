@@ -1,0 +1,39 @@
+# Environment & Secrets
+.env
+.env.*
+*.secret
+
+# Private Seller Distribution (Contains floor prices & PIN gate)
+dist_private/
+dist/
+data/inventory.json
+
+# Python & Tests
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Temporary / Scratch & Raw Assets
+.scratch/
+log/
+tmp/
+images/
+content/raw_heic/
+*.odt
+*.tmp
+*.swp
+*~
+.DS_Store
+
+# IDEs
+.idea/
+.vscode/
+
+# Tooling
+.venv/
+*.egg-info/
+.ruff_cache/
+.lfs-assets-id

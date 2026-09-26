@@ -1,0 +1,32 @@
+# CI scaffolded by `dotf init`. The Spec-Driven Development convention is
+# documented in AGENTS.md; wire an enforced spec-gate when your project wants one.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      # Placeholder so the public build can run; the real number is only used by
+      # the deploy job. The sops file is not decryptable here, so tests that need
+      # the reserve floors skip.
+      SELLER_PHONE: "+15555550100"
+    steps:
+      - uses: actions/checkout@v5
+
+      # LFS objects are cached so each run does not re-download every photo.
+      - name: Hash LFS object list
+        run: git lfs ls-files -l | cut -d' ' -f1 | sort | sha256sum | cut -d' ' -f1 > .lfs-assets-id
+      - uses: actions/cache@v4
+        with:
+          path: .git/lfs
+          key: lfs-${{ hashFiles('.lfs-assets-id') }}
+      - run: git lfs pull
+
+      - uses: astral-sh/setup-uv@v6
+      - run: make install
+      - run: make check

@@ -1,0 +1,32 @@
+seller:
+    phone: ENC[AES256_GCM,data:GF6JYN0FkJCiyq6uDHe5zl0=,iv:N5xwB6/iugk822DfMAuaEXPPya5lko3J/SH+NxQPZZ8=,tag:zGmBfaTIsUNMSq/iTmGbMw==,type:str]
+floors:
+    sofa-sleeper: ENC[AES256_GCM,data:rBnq,iv:I4uEcv4BjSgxZ8AGojPaZnc522ZLNjRItZYHUZ5cvls=,tag:j5htJsIQV+rEBhCAmZzHqQ==,type:int]
+    dell-monitor-32: ENC[AES256_GCM,data:We0=,iv:8Ixm/GG3iRqApXTjpizC5HAjxmBuzp8HeyoV2CkOz18=,tag:aD0fBMuVrqg55aNy7tlcSw==,type:int]
+    onn-43-4k-tv: ENC[AES256_GCM,data:LFU=,iv:9SInxaLvSNduO2rmUmKg5st32jGcjDW1QrIynehZkoI=,tag:QQyvMWGsvrv0gJpnNkFmtw==,type:int]
+    convertible-desk: ENC[AES256_GCM,data:nTc=,iv:HmgEc8UTTmZ/1QgUlWfic2yIwrcBCKprKIrWEr0fB9Y=,tag:jRjzzJ11BI4XtmzF6uY+Ow==,type:int]
+    coffee-table-lift-top: ENC[AES256_GCM,data:UFY=,iv:k1dMgsyoqwUqdiv0k7pN4zNT3gFTBJbOJClcnXcULTo=,tag:0n3ScdwcT/C/KzFRNO/hrw==,type:int]
+    ikea-mattress-topper: ENC[AES256_GCM,data:xBU=,iv:r0wJPiv26I52xI04XsaP7CgVC/jlFwSqM9ESkaRWp4I=,tag:DDeMGPTyA6Rn5+YNi2ZsHA==,type:int]
+    bar-stools-pair: ENC[AES256_GCM,data:BNM=,iv:tFwrv1SFDpsucWRyHBLHRwBFziMQHVLK4klC/A8Xk5k=,tag:6YdxUttHcAR+jt5120pKvw==,type:int]
+    tv-stand-canyon-walnut: ENC[AES256_GCM,data:Gb8=,iv:hnDo03850XoPIHBkH0X+JpfyE8Y/xj/FbUefKLKbgSI=,tag:RDKiWzeEQL6FxYXfCzsZxA==,type:int]
+    office-chair-ergonomic: ENC[AES256_GCM,data:XHs=,iv:Tn4ZPwHZ3Ik5Cel/BpkOjmA9Sx+OtL+Oy8zEmsYfmeM=,tag:5bhVEfk0Fp8Sb+IkoL126A==,type:int]
+    nightstand-espresso: ENC[AES256_GCM,data:MYM=,iv:oGjoxtAw/c7v4IogSC4NADUSObDMdQu1Yd/nk56O2p0=,tag:kZgWxZHAy7PgDapOipDt4g==,type:int]
+    air-mattress-twin-pump: ENC[AES256_GCM,data:jTA=,iv:gDwRbeDbsK6ezfpuxhxngvRBCd4HglSP3DPzZUaEvKE=,tag:ML+5QptIRcB6i3fokknLTg==,type:int]
+    dinnerware-glassware-set: ENC[AES256_GCM,data:QMU=,iv:xJ52J61jg3t5PmF+UtdVl1sBJ9wZ8zO3ujjOlItzvd0=,tag:0v38OZeeUX+9PIFjvWHyiQ==,type:int]
+    auxiliary-c-table: ENC[AES256_GCM,data:yKY=,iv:oChgMiW6hR3zqWVPN4GgzdIdBpfjGmWVfl+lgV0YfjE=,tag:JuSJ/ek2iXIvFOgoEdGw8A==,type:int]
+    2019-ford-escape-sel-awd: ENC[AES256_GCM,data:2Y5AUwk=,iv:2vLK6Cs7yPtmrrhv6vjBSNfZLe89xq+OioNrzm5Lqws=,tag:61CssPPytzXWsCvnfD5gtQ==,type:int]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSA5M0p1QTdGRUt6MVJrNXY0
+            TEp2QUVxRWdPdkNEUWZFZ3NZRHlnSjhaVVFNCnl1NDJOcFQ5L0VwMzkxeFd2ZWVm
+            eVdNeVk4WkVPcTZhcTFUd3JTTnoxd0EKLS0tIFEwRnRZQmdhV3l2M3R6ZHYvMGNU
+            S2R4NjBMRDZKVzBvOXpLR2gvcEdsZlkKoz4ys181Ld38t7LP8B4kRoPgWYUBXyC+
+            N5S0b6gn+J7t3Lg9zTalfJK5VHCwzBcjg5kbjsk7dea2bNSxWE/NQA==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age166v8efpskctmxxes5lcqpxkj0ny3q74l3v0pswpdpa63wlkqmc8q35fkdw
+    lastmodified: "2026-09-26T04:10:05Z"
+    mac: ENC[AES256_GCM,data:YqgTupPczE34snIRTrDjnpQOSgzjUD8PsS4ebbGbnQurV+zY4J9Bs5f0/efIEem5x5Cl/ZeKJlARQr/a6j12LY8XwG+y1MZA/XtiKtSNQDCMBzTYPgUBQgnUYeNui2OyMyO5nvYSmYvEeqLW4ijYhjC588r7CMqAw337qWUqk0Q=,iv:CNqonStRhS+6furneJZqYB4BpbvI9VBw6E7R26I8Flk=,tag:1ZVKzzllbSJTRto67F/M9A==,type:str]
+    unencrypted_suffix: _unencrypted
+    version: 3.13.1

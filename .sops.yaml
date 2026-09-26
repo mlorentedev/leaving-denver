@@ -1,0 +1,6 @@
+creation_rules:
+  # Public key, safe to commit. This is the canonical dotfiles age key
+  # (~/.config/age/key.txt), which has an offline backup: restoring it plus a
+  # clone of this repo is enough to decrypt on a new machine.
+  - path_regex: data/private\.sops\.yaml$
+    age: age166v8efpskctmxxes5lcqpxkj0ny3q74l3v0pswpdpa63wlkqmc8q35fkdw

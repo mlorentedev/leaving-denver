@@ -1,0 +1,74 @@
+{
+  "name": "Moving Sale - Inquiry to Telegram & Vikunja",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "moving-sale-inquiry",
+        "responseMode": "onReceived",
+        "responseData": "allEntries"
+      },
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $env.TELEGRAM_CHAT_ID }}",
+        "text": "=🚨 *NEW MOVING SALE INQUIRY*\n\n📦 *Item:* {{ $json.body.item_title }} (${{ $json.body.price }})\n👤 *Buyer:* {{ $json.body.buyer_name }}\n📞 *Phone:* {{ $json.body.buyer_phone }}\n📝 *Note:* {{ $json.body.notes }}\n\n📍 Location: Denver Tech Center (80111)",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "name": "Telegram Alert",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [500, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://vikunja.core.svc.cluster.local:3456/api/v1/projects/moving-sale/tasks",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $env.VIKUNJA_API_TOKEN }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"title\": \"Pickup: \" + $json.body.item_title + \" - \" + $json.body.buyer_name + \" (\" + $json.body.buyer_phone + \")\",\n  \"description\": \"Item: \" + $json.body.item_title + \" ($ \" + $json.body.price + \")\\nPhone: \" + $json.body.buyer_phone + \"\\nNotes: \" + $json.body.notes,\n  \"priority\": 3\n}"
+      },
+      "name": "Create Vikunja Task",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [500, 400]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Telegram Alert",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create Vikunja Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

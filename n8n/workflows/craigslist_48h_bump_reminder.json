@@ -1,0 +1,47 @@
+{
+  "name": "Moving Sale - Craigslist 48h Bump Reminder",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 */2 * *"
+            }
+          ]
+        }
+      },
+      "name": "Cron (Every 48 Hours at 9 AM)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $env.TELEGRAM_CHAT_ID }}",
+        "text": "=⏰ *CRAIGSLIST 48-HOUR BUMP REMINDER*\n\nIt's time to log into Craigslist Denver and hit *Renew* to put your listings back at the top of the feed:\n\n1. 2019 Ford Escape SEL AWD ($11,500)\n2. AFW Kent Sectional Sleeper ($220)\n3. Master Moving Sale Post\n4. WFH Workstation Setup ($150)\n\n👉 [Manage Craigslist Postings](https://post.craigslist.org/manage)",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "name": "Telegram Bump Reminder",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [500, 300]
+    }
+  ],
+  "connections": {
+    "Cron (Every 48 Hours at 9 AM)": {
+      "main": [
+        [
+          {
+            "node": "Telegram Bump Reminder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

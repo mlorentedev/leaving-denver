@@ -1,0 +1,619 @@
+seller:
+  location: Denver Tech Center (DTC), CO 80111
+  email: mlorente@duck.com
+  payment_methods:
+  - Cash (Preferred)
+  - Venmo (In-person)
+  - Zelle (In-person)
+  pickup_policy: Buyer must self-load and bring appropriate transportation. Fully
+    assembled, sold AS-IS.
+  moving_deadline: Within 2 weeks
+items:
+- id: sofa-sleeper
+  category: Living Room
+  title: AFW Kent Reversible Sectional Sofa w/ Pull-Out Sleeper & Storage Chaise
+  short_title: Kent Reversible Sleeper Sectional
+  brand: American Furniture Warehouse (AFW) / Kent
+  original_price: 578
+  current_asking: 200
+  recommended_list_price: 220
+  condition: Good
+  dimensions: 92" W x 60" D x 37" H
+  color: Gray Fabric
+  status: Available
+  primary_image: catalog/sofa-sleeper/afw_kent_sofa_dimensions.jpg
+  images:
+  - catalog/sofa-sleeper/afw_kent_sofa_dimensions.jpg
+  - catalog/sofa-sleeper/afw_kent_sofa_front.jpg
+  - catalog/sofa-sleeper/afw_kent_sofa_sleeper_open.jpg
+  - catalog/sofa-sleeper/afw_kent_sofa_storage_open.jpg
+  - catalog/sofa-sleeper/sofa-1.jpg
+  - catalog/sofa-sleeper/sofa-2.jpg
+  - catalog/sofa-sleeper/sofa-3.jpg
+  specs:
+  - Reversible chaise (configure left or right)
+  - Smooth pull-out bed mechanism converts from couch to double sleeper
+  - Spacious hidden storage chaise with lift mechanism
+  - Durable charcoal/slate gray polyester upholstery
+  - Disassembles into 2 main pieces in under 10 minutes for standard SUV/pickup transport
+  included:
+  - 'AFW Kent sectional sofa (2 modular pieces: chaise + loveseat)'
+  - Built-in pull-out sleeper mechanism
+  - All fitted back cushions
+  pickup_note: Currently assembled for in-person testing. Easily separates into 2
+    main modules in under 10 minutes for transport. Requires 2 people to carry. Fits
+    in pickup truck, cargo van, or large SUV.
+  tags:
+  - american furniture warehouse
+  - afw sofa
+  - kent sectional
+  - sleeper couch
+  - pull out bed
+  - storage chaise
+  - gray sectional
+  - apartment couch
+  - denver furniture
+  - convertible sofa
+- id: dell-monitor-32
+  category: Home Office & Tech
+  title: Dell 32" Curved 75Hz FHD Monitor (S3222HN) - Zero Dead Pixels
+  short_title: Dell 32" Curved Monitor
+  brand: Dell
+  model: S3222HN
+  original_price: 180
+  current_asking: 100
+  recommended_list_price: 95
+  condition: Like New
+  dimensions: 31.5" Diagonal Viewable, 1800R Curve
+  color: Platinum Silver / Black
+  status: Available
+  primary_image: catalog/dell-monitor-32/dell_s3222hn_front.jpg
+  images:
+  - catalog/dell-monitor-32/dell_s3222hn_front.jpg
+  - catalog/dell-monitor-32/monitor.jpg
+  specs:
+  - 31.5-inch 1800R curved VA panel with 178/178 wide viewing angles
+  - Full HD 1920 x 1080 resolution at 75Hz refresh rate
+  - AMD FreeSync technology for tear-free gaming & video
+  - Dual HDMI 1.4 ports + Audio line-out port
+  - Tested 100% functional with zero dead pixels, pristine condition
+  included:
+  - Dell S3222HN monitor
+  - Original factory stand
+  - Original power cable
+  pickup_note: No original box. Bring a clean towel or blanket to protect screen during
+    transport.
+  tags:
+  - dell monitor
+  - curved monitor
+  - 32 inch monitor
+  - gaming monitor
+  - wfh screen
+  - home office
+  - hdmi monitor
+  - freesync
+- id: onn-43-4k-tv
+  category: Living Room & Tech
+  title: onn. 43" Class 4K UHD (2160P) Smart Roku TV w/ Remote & Stands
+  short_title: onn. 43" 4K Smart Roku TV
+  brand: onn.
+  model: '100012584'
+  original_price: 200
+  current_asking: 80
+  recommended_list_price: 85
+  condition: Good
+  dimensions: 38.2" W x 22.4" H x 3.2" D (without stand)
+  color: Black
+  status: Available
+  primary_image: catalog/onn-43-4k-tv/tv-1.jpg
+  images:
+  - catalog/onn-43-4k-tv/tv-1.jpg
+  - catalog/onn-43-4k-tv/tv-2.jpg
+  specs:
+  - Crisp 4K UHD 2160p resolution with HDR10 support
+  - Built-in Roku smart streaming platform (Netflix, Disney+, Prime, Max, YouTube)
+  - 3 HDMI ports, composite AV, USB, optical audio, and headphone jack
+  - Fast 60Hz refresh rate, 802.11ac dual-band Wi-Fi built-in
+  - Fully tested, bright vivid display, reset to factory settings
+  included:
+  - 43" 4K Roku TV
+  - Original table stand legs
+  - Original remote control
+  - Power cable
+  pickup_note: No box. Bring a blanket to wrap the screen for pickup.
+  tags:
+  - 4k tv
+  - smart tv
+  - roku tv
+  - 43 inch tv
+  - onn tv
+  - bedroom tv
+  - budget tv
+  - streaming tv
+- id: convertible-desk
+  category: Home Office & Tech
+  title: Mainstays Two-Way Convertible L-Shaped / Long Computer Desk
+  short_title: Convertible L-Shaped Desk
+  brand: Mainstays
+  original_price: 159
+  current_asking: 50
+  recommended_list_price: 60
+  condition: Good
+  dimensions: 'L-Shape: 58.6" W x 50.4" D x 29.8" H (or straight 80"+ wide)'
+  color: Canyon Walnut Woodgrain + Black Metal
+  status: Available
+  primary_image: catalog/convertible-desk/desk-1.jpg
+  images:
+  - catalog/convertible-desk/desk-1.jpg
+  - catalog/convertible-desk/desk-2.jpg
+  specs:
+  - '2-in-1 modular design: assemble as corner L-shape or long straight executive
+    desk'
+  - Built-in lower storage shelf for PC tower, printer, or storage bins
+  - Sturdy powder-coated black steel frame with adjustable leveling feet
+  - Scratch-resistant Canyon Walnut melamine desktop
+  - Currently assembled; easily separable into 2 sections for transport
+  included:
+  - Convertible desk structure
+  - Lower storage shelf
+  pickup_note: Already assembled. Fits in midsize SUV with seats folded or truck bed.
+    Tools available on site if you wish to disassemble.
+  tags:
+  - computer desk
+  - l-shaped desk
+  - corner desk
+  - wfh desk
+  - office desk
+  - convertible desk
+  - industrial desk
+  - walnut desk
+- id: coffee-table-lift-top
+  category: Living Room
+  title: Mainstays Lift-Top Coffee Table w/ Hidden Storage & Bottom Shelf
+  short_title: Lift-Top Coffee Table
+  brand: Mainstays
+  original_price: 117
+  current_asking: 50
+  recommended_list_price: 55
+  condition: Like New
+  dimensions: 40.9" W x 18.0" D x 18.5" H (Lifts to 24" H)
+  color: Blackwood / Espresso Finish
+  status: Available
+  primary_image: catalog/coffee-table-lift-top/coffee-table-1.jpg
+  images:
+  - catalog/coffee-table-lift-top/coffee-table-1.jpg
+  - catalog/coffee-table-lift-top/coffee-table-2.jpg
+  specs:
+  - Mechanical spring-assisted lift top raises smoothly to dining/work height
+  - Large interior hidden storage compartment keeps remotes, laptops, and games out
+    of sight
+  - Open lower shelf for books, blankets, and storage baskets
+  - Durable, easy-wipe melamine surface in deep blackwood finish
+  - Solid, wobble-free construction in pristine condition
+  included:
+  - Fully assembled lift-top coffee table
+  pickup_note: Sturdy and relatively heavy. Ground floor/elevator access in DTC.
+  tags:
+  - lift top table
+  - coffee table
+  - storage coffee table
+  - living room table
+  - work from couch table
+  - blackwood table
+- id: ikea-mattress-topper
+  category: Bedroom
+  title: IKEA TANANGER Full Size Memory Foam Mattress Topper (Removable Washable Cover)
+  short_title: IKEA Memory Foam Mattress Topper
+  brand: IKEA
+  model: TANANGER Full
+  original_price: 129
+  current_asking: 35
+  recommended_list_price: 35
+  condition: Great Condition
+  dimensions: 'Full Size: 53 1/8" x 74 3/8" (2 3/8" thick)'
+  color: White / Light Gray
+  status: Available
+  primary_image: catalog/ikea-mattress-topper/topper-1.jpg
+  images:
+  - catalog/ikea-mattress-topper/topper-1.jpg
+  - catalog/ikea-mattress-topper/topper-2.jpg
+  specs:
+  - High-density pressure-relieving viscoelastic memory foam core
+  - Zippered stretch-knit cover is easily removable and machine washable
+  - Rollable and flexible for easy transport in any car
+  - Always used with a mattress protector in a smoke-free, pet-free home
+  - Transforms any firm mattress into a plush, supportive luxury bed
+  included:
+  - IKEA Tananger Full memory foam topper w/ zippered cover
+  pickup_note: Can be rolled up and secured with ties/tape to fit in any sedan trunk
+    or back seat.
+  tags:
+  - mattress topper
+  - full mattress topper
+  - ikea tananger
+  - memory foam topper
+  - bedding
+  - full size topper
+  - guest bed
+- id: bar-stools-pair
+  category: Dining & Kitchen
+  title: VASAGLE Industrial Bar Stools (Set of 2) - 28.7" Counter/Bar Height
+  short_title: VASAGLE Bar Stools (Pair)
+  brand: VASAGLE
+  original_price: 75
+  current_asking: 30
+  recommended_list_price: 35
+  condition: Like New
+  dimensions: 15.7" L x 11.8" W x 28.7" H each
+  color: Rustic Brown Woodgrain + Matte Black Metal
+  status: Available
+  primary_image: catalog/bar-stools-pair/bar-stools.jpg
+  images:
+  - catalog/bar-stools-pair/bar-stools.jpg
+  specs:
+  - Set of 2 matching industrial-style stools
+  - Sturdy steel frame with built-in all-around footrest
+  - Compact footprint slides completely under standard kitchen islands and bar counters
+  - Durable rustic particleboard top supports up to 264 lbs each
+  - Like new, zero scratches, wobble-free
+  included:
+  - Pair of 2 assembled VASAGLE stools
+  pickup_note: Compact and lightweight. Easily fits in the back seat of any car.
+  tags:
+  - bar stools
+  - counter stools
+  - kitchen stools
+  - vasagle stools
+  - industrial furniture
+  - pub stools
+  - set of 2 stools
+- id: tv-stand-canyon-walnut
+  category: Living Room
+  title: Mainstays Parsons TV Stand for TVs up to 50" - Canyon Walnut
+  short_title: Mainstays Parsons TV Stand
+  brand: Mainstays
+  original_price: 69
+  current_asking: 20
+  recommended_list_price: 25
+  condition: Good
+  dimensions: 45.5" W x 15.8" D x 18.9" H
+  color: Canyon Walnut Woodgrain
+  status: Available
+  primary_image: catalog/tv-stand-canyon-walnut/tv-stand.jpg
+  images:
+  - catalog/tv-stand-canyon-walnut/tv-stand.jpg
+  specs:
+  - Accommodates flat-panel TVs up to 50 inches (up to 55 lbs)
+  - 3 open storage cubbies for game consoles, soundbars, books, and media players
+  - Clean, minimalist Parsons design fits any modern living space
+  - Rear cutouts for easy cable management and ventilation
+  - Sturdy composite wood construction in rich Canyon Walnut finish
+  included:
+  - Assembled TV stand (Electronics and cables pictured not included)
+  pickup_note: Fully assembled. Bring an SUV or fit across the back seat of a sedan.
+  tags:
+  - tv stand
+  - entertainment center
+  - media console
+  - parsons tv stand
+  - canyon walnut
+  - living room console
+- id: office-chair-ergonomic
+  category: Home Office & Tech
+  title: Mainstays Ergonomic Breathable Mesh Office Chair w/ Flip-Up Arms
+  short_title: Ergonomic Mesh Office Chair
+  brand: Mainstays
+  original_price: 64
+  current_asking: 20
+  recommended_list_price: 25
+  condition: Good
+  dimensions: 24.5" W x 25.5" D x 37.5"-41.25" H
+  color: Black Mesh & Fabric
+  status: Available
+  primary_image: catalog/office-chair-ergonomic/chair-1.jpg
+  images:
+  - catalog/office-chair-ergonomic/chair-1.jpg
+  - catalog/office-chair-ergonomic/chair-2.jpg
+  - catalog/office-chair-ergonomic/chair-3.jpg
+  specs:
+  - Breathable tension mesh back keeps you cool during long work sessions
+  - Padded flip-up armrests allow chair to slide completely under desks to save space
+  - Smooth pneumatic seat height adjustment (1-touch lever)
+  - Tilt-lock and tilt-tension control for reclining
+  - Heavy-duty 5-star nylon base with smooth 360-degree swivel dual-wheel casters
+  - 275 lb weight capacity
+  included:
+  - Fully assembled ergonomic desk chair
+  pickup_note: Fits easily in any car back seat or trunk.
+  tags:
+  - office chair
+  - desk chair
+  - mesh chair
+  - ergonomic chair
+  - computer chair
+  - wfh chair
+  - swivel chair
+- id: nightstand-espresso
+  category: Bedroom
+  title: Mainstays Hillside 1-Drawer Nightstand w/ Open Lower Storage - Espresso
+  short_title: Mainstays 1-Drawer Nightstand
+  brand: Mainstays
+  original_price: 68
+  current_asking: 20
+  recommended_list_price: 25
+  condition: Like New
+  dimensions: 19.8" L x 17.6" W x 23.9" H
+  color: Espresso Finish
+  status: Available
+  primary_image: catalog/nightstand-espresso/nightstand.jpg
+  images:
+  - catalog/nightstand-espresso/nightstand.jpg
+  specs:
+  - Smooth-gliding drawer with metal runners and safety stops
+  - Lower open cubby shelf ideal for storage baskets, books, or phone charging
+  - Clean, contemporary design that complements modern bedroom decors
+  - Like new condition, no chips or peeling
+  included:
+  - Fully assembled nightstand
+  pickup_note: Compact and easily fits in any vehicle.
+  tags:
+  - nightstand
+  - bedside table
+  - end table
+  - espresso nightstand
+  - bedroom table
+  - 1 drawer nightstand
+- id: air-mattress-twin-pump
+  category: Bedroom
+  title: Intex Dura-Beam Plus Twin Air Mattress w/ Built-In Electric Pump (16.5" Elevated)
+  short_title: Intex Twin Air Mattress w/ Pump
+  brand: Intex
+  model: Dura-Beam Plus
+  original_price: 40
+  current_asking: 15
+  recommended_list_price: 20
+  condition: Like New (Used Once)
+  dimensions: 'Twin: 39" W x 75" L x 16.5" H'
+  color: Two-tone Blue / Gray Flocked Top
+  status: Available
+  primary_image: catalog/air-mattress-twin-pump/air-mattress.jpg
+  images:
+  - catalog/air-mattress-twin-pump/air-mattress.jpg
+  specs:
+  - High-strength Fiber-Tech interior construction prevents sagging
+  - Fast built-in 110-120V electric pump inflates and deflates in under 3 minutes
+  - Elevated 16.5-inch bed height makes getting in and out effortless
+  - Waterproof velvety flocked sleeping surface keeps sheets in place
+  - Tested 100% airtight; only used once for a visiting guest
+  - 300 lb weight capacity
+  included:
+  - Twin air mattress
+  - Built-in electric pump
+  - Original box and travel carry bag
+  pickup_note: Folded inside compact carry bag. Easy to carry by hand.
+  tags:
+  - air mattress
+  - intex airbed
+  - twin air mattress
+  - blow up bed
+  - built in pump
+  - guest bed
+  - camping mattress
+- id: dinnerware-glassware-set
+  category: Dining & Kitchen
+  title: '20-Piece Kitchen Dining Set: Stoneware Dinnerware (9-Pc) + Drinkware Glasses
+    (11-Pc)'
+  short_title: 20-Pc Dinnerware & Glassware Set
+  brand: Stoneware & Glassware
+  original_price: 40
+  current_asking: 15
+  recommended_list_price: 18
+  condition: Good Condition
+  dimensions: Full 20-piece assorted dining service
+  color: Neutral Stoneware & Clear Glass
+  status: Available
+  primary_image: catalog/dinnerware-glassware-set/dinnerware.jpg
+  images:
+  - catalog/dinnerware-glassware-set/dinnerware.jpg
+  specs:
+  - 9-piece durable ceramic stoneware dinnerware (dinner plates, side plates, bowls)
+  - 11-piece clear glassware drinkware set (tumblers and highball glasses)
+  - Microwave and dishwasher safe
+  - Zero cracks or chips, clean and sanitized
+  - Perfect instant starter kit for new apartments or student dorms
+  included:
+  - 9 stoneware ceramic pieces
+  - 11 glassware pieces
+  pickup_note: No original box. Please bring your own box/tote and packing paper/towels
+    for safe transport.
+  tags:
+  - dinnerware set
+  - glassware
+  - kitchen starter kit
+  - plates and bowls
+  - drinking glasses
+  - stoneware
+  - apartment dishes
+- id: auxiliary-c-table
+  category: Living Room
+  title: Mainstays C-Shaped Over-Couch Side Table / Laptop Stand - Canyon Walnut
+  short_title: C-Shaped Couch Side Table
+  brand: Mainstays
+  original_price: 34
+  current_asking: 10
+  recommended_list_price: 15
+  condition: Like New
+  dimensions: 15.5" L x 15.5" W x 25.9" H
+  color: Canyon Walnut Woodgrain + Black Metal
+  status: Available
+  primary_image: catalog/auxiliary-c-table/aux-table-1.jpg
+  images:
+  - catalog/auxiliary-c-table/aux-table-1.jpg
+  - catalog/auxiliary-c-table/aux-table-2.jpg
+  - catalog/auxiliary-c-table/aux-table-3.jpg
+  specs:
+  - C-frame cantilever design slides under couches, armchairs, and beds
+  - Perfect height for holding laptops, snacks, coffee, remotes, or tablets
+  - Sturdy black powder-coated metal frame with non-scratch foot pads
+  - Compact footprint ideal for small apartments and living rooms
+  - Like new condition
+  included:
+  - Fully assembled C-table
+  pickup_note: Lightweight and compact. Fits in any vehicle.
+  tags:
+  - c table
+  - couch table
+  - side table
+  - laptop table
+  - end table
+  - snack table
+  - sofa arm table
+- id: 2019-ford-escape-sel-awd
+  category: Vehicle
+  title: 2019 Ford Escape SEL AWD – Clean Colorado Title, Fully Serviced
+  short_title: 2019 Ford Escape SEL AWD
+  brand: Ford
+  model: Escape SEL AWD
+  year: 2019
+  vin: 1FMCU9HD9KUB80146
+  odometer: 103500
+  original_price: 29800
+  current_asking: 11500
+  recommended_list_price: 11500
+  condition: Excellent Exterior / Very Good Interior
+  dimensions: Compact SUV · 103.5k Miles · Clean Title
+  color: White / Black Leather-Trimmed Interior
+  status: Available
+  primary_image: catalog/2019-ford-escape-sel-awd/2019_ford_escape_interior_dashboard.jpg
+  images:
+  - catalog/2019-ford-escape-sel-awd/2019_ford_escape_interior_dashboard.jpg
+  - catalog/2019-ford-escape-sel-awd/2019_ford_escape_white_front.jpg
+  specs:
+  - 1.5L EcoBoost 4-Cylinder (179 HP) with 6-speed automatic transmission (22 city
+    / 28 hwy MPG)
+  - Ford Intelligent AWD system with high-performance all-weather tires (Colorado
+    winter-ready)
+  - Clean Colorado Title in hand with zero liens, ready for immediate transfer
+  - Valid Colorado Emissions Test passed in 2026 (certificate provided)
+  - Zero open recalls (active recall campaign completed and closed at Ford dealership
+    this week)
+  - '100k-Mile Milestone Service complete: fresh oil & filter, complete brake fluid
+    flush, 4-wheel rotation'
+  - Ford SYNC 3 with 8-inch touchscreen, Apple CarPlay, Android Auto, Bluetooth, Wi-Fi
+    hotspot
+  - 'Cold Weather Package: Heated front leather seats, heated side mirrors, factory
+    roof rails'
+  - Hands-free foot-activated power liftgate, push-button start, dual-zone automatic
+    climate control
+  - Zero accident history, garage-kept, smoke-free, pet-free, zero dash warning lights
+    or mechanical codes
+  included:
+  - 2019 Ford Escape SEL AWD
+  - Original Key Fobs
+  - Colorado Passing Emissions Certificate
+  - Standard Bill of Sale & Signed Clean Title
+  pickup_note: Inspection in Denver Tech Center (DTC). Payment via Cash or Cashier's
+    Check verified at buyer's bank branch window before title release.
+  tags:
+  - ford escape
+  - escape sel
+  - ford escape awd
+  - used suv denver
+  - colorado awd
+  - clean title suv
+  - cars by owner denver
+  - dtc cars
+bundles:
+- id: bundle-sleeper-topper
+  name: Sleeper Sofa + Cloud Comfort Memory Foam Topper
+  items:
+  - sofa-sleeper
+  - ikea-mattress-topper
+  individual_total: 255
+  bundle_price: 230
+  savings: 25
+  badge: Guest Bed Luxury
+  description: AFW Kent reversible sleeper sectional + IKEA TANANGER Full memory foam
+    topper. The 2 3/8" viscoelastic topper fits the pull-out double bed like a glove,
+    and rolls up neatly inside the sofa's storage chaise during the day!
+- id: bundle-wfh
+  name: Complete WFH / Home Office Productivity Station
+  items:
+  - convertible-desk
+  - office-chair-ergonomic
+  - dell-monitor-32
+  individual_total: 180
+  bundle_price: 150
+  savings: 30
+  badge: WFH Setup
+  description: 'Entire ergonomic workstation in one trip: Mainstays 2-way convertible
+    desk + ergonomic mesh chair w/ 90° flip arms + Dell 32" curved 75Hz monitor.'
+- id: bundle-living-room
+  name: Living Room Media & Entertainment Suite
+  items:
+  - onn-43-4k-tv
+  - tv-stand-canyon-walnut
+  - coffee-table-lift-top
+  - auxiliary-c-table
+  individual_total: 180
+  bundle_price: 145
+  savings: 35
+  badge: Living Room
+  description: 'Complete entertainment setup: onn. 43" 4K Smart Roku TV + Parsons
+    TV stand + lift-top storage coffee table + over-couch C-table.'
+- id: bundle-walnut-suite
+  name: Matching Canyon Walnut Studio Suite
+  items:
+  - convertible-desk
+  - tv-stand-canyon-walnut
+  - auxiliary-c-table
+  individual_total: 100
+  bundle_price: 80
+  savings: 20
+  badge: Matching Finish
+  description: 'Zero color mismatch: convertible desk + TV stand + C-table (all identical
+    Mainstays Canyon Walnut woodgrain with black steel frame).'
+- id: bundle-kitchen-island
+  name: Kitchen Island & Breakfast Bar Starter Kit
+  items:
+  - bar-stools-pair
+  - dinnerware-glassware-set
+  individual_total: 53
+  bundle_price: 40
+  savings: 13
+  badge: Kitchen & Bar
+  description: Pair of 28.7" VASAGLE industrial counter stools + 20-piece stoneware
+    dinnerware & glass drinkware set. Fits under standard kitchen counter/island.
+- id: bundle-guest-bed
+  name: Solo Guest Bed & Nightstand Kit
+  items:
+  - air-mattress-twin-pump
+  - nightstand-espresso
+  individual_total: 45
+  bundle_price: 35
+  savings: 10
+  badge: Spare Room
+  description: Intex Dura-Beam elevated 16.5" Twin air mattress with built-in 110V
+    electric pump + Mainstays Hillside 1-drawer espresso nightstand.
+- id: bundle-take-all
+  name: Whole Apartment Relocation Liquidation
+  items:
+  - sofa-sleeper
+  - dell-monitor-32
+  - onn-43-4k-tv
+  - convertible-desk
+  - coffee-table-lift-top
+  - ikea-mattress-topper
+  - bar-stools-pair
+  - tv-stand-canyon-walnut
+  - office-chair-ergonomic
+  - nightstand-espresso
+  - air-mattress-twin-pump
+  - dinnerware-glassware-set
+  - auxiliary-c-table
+  individual_total: 713
+  bundle_price: 540
+  savings: 173
+  badge: Whole Apartment
+  description: All 13 household furniture and tech items in one single pickup trip.
+    Save $173 flat cash.
