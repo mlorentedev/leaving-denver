@@ -27,3 +27,13 @@ Do not list a private party vehicle with unresolved or unverified manufacturer s
 ## References
 - `data/inventory.yaml` (`car_ford_escape.condition.open_recalls: 0`)
 - `research/market_and_platform_guide.md` (Colorado private car sales protocol)
+
+## Correction (2026-09-25)
+Closing recalls is only half of the paperwork story. Two claims next to it in the listing were
+wrong and have been fixed:
+- **Emissions:** Colorado requires the seller to hand over a passing test that was *not already
+  used* to register or renew the car. A test consumed by the seller's own renewal does not count,
+  even if it has not expired. The listing now promises a new certificate at sale.
+- **Coverage:** Ford's 1.5L coolant-intrusion program (CSP 21N12) ends at 84k miles; this car is at
+  103.5k. "Zero open recalls" must never be read as "the engine program was done". Prove completed
+  work with the dealer's service-history (OASIS) printout, and welcome a pre-purchase inspection.
