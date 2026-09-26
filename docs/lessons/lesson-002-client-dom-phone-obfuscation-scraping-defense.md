@@ -26,4 +26,4 @@ Do not render raw phone numbers or hardcoded `sms:`/`tel:` protocol links in sta
 
 ## References
 - `tests/test_security_isolation.py` (`test_public_html_has_no_raw_phone_plaintext`)
-- `src/site_builder.py` (DOM obfuscation renderer)
+- `src/leaving_denver/site_builder.py` (DOM obfuscation renderer)

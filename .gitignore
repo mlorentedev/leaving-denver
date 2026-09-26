@@ -4,8 +4,7 @@
 *.secret
 
 # Private Seller Distribution (Contains floor prices & PIN gate)
-dist_private/
-dist/
+build/
 data/inventory.json
 
 # Python & Tests

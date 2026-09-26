@@ -1,3 +1,7 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "leaving-denver"
 version = "0.1.0"
@@ -9,15 +13,21 @@ dependencies = [
     "pyyaml>=6.0",
 ]
 
+[project.scripts]
+leaving-denver = "leaving_denver.cli:main"
+
 [project.optional-dependencies]
 dev = [
     "pytest>=8.0.0",
     "ruff>=0.5.0",
 ]
 
+[tool.hatch.build.targets.wheel]
+packages = ["src/leaving_denver"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["."]
+pythonpath = ["src"]
 python_files = ["test_*.py"]
 
 [tool.ruff]
@@ -28,7 +38,3 @@ target-version = "py312"
 select = ["E", "F", "I", "UP", "B"]
 # The formatter owns line length; long strings and URLs are left alone.
 ignore = ["E501"]
-
-[tool.ruff.lint.per-file-ignores]
-# manage.py puts the repo root on sys.path before importing src.
-"manage.py" = ["E402"]

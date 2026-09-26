@@ -7,8 +7,8 @@ A privacy-focused inventory management, automated photo ingestion, and multi-por
 ## Key Features
 
 - **Single Source of Truth (`data/inventory.yaml`):** Human-readable YAML configuration managing all 14 items, value bundles, pricing tiers, and descriptions.
-- **Folder-Convention Media Pipeline:** Drop any photo (including iPhone HEIC) into `content/photos/<item_id>/` and run `./manage.py build` to auto-discover, strip GPS EXIF metadata, optimize (<300 KB), and compile.
-- **Data & Privacy Isolation:** Public build in `dist/` is completely stripped of internal reserve floor prices, negotiation notes, and seller admin tools.
+- **Folder-Convention Media Pipeline:** Drop any photo (including iPhone HEIC) into `content/photos/<item_id>/` and run `leaving-denver build` to auto-discover, strip GPS EXIF metadata, optimize (<300 KB), and compile.
+- **Data & Privacy Isolation:** Public build in `build/public/` is completely stripped of internal reserve floor prices, negotiation notes, and seller admin tools.
 - **Bot & Scraper Defense:** Telephone numbers are obfuscated and assembled dynamically via client JS. Static HTML attributes contain no harvestable numbers. `robots.txt` enforces `Disallow: /`.
 - **Hormozi 3-Week Staging Bar:** Toggles between Week 1 (List / $12,213), Week 2 (Drop / 12% off), and Week 3 (Liquidation floor).
 - **Multi-Portal Copy Generator:** Instant copy-paste listings tailored for Facebook Marketplace, Craigslist Denver, OfferUp, and Nextdoor.
@@ -19,34 +19,34 @@ A privacy-focused inventory management, automated photo ingestion, and multi-por
 ## Quickstart
 
 ### 1. Requirements
-- Python 3.10+
+- Python 3.12+ and [`uv`](https://github.com/astral-sh/uv)
 - `ffmpeg` (for iPhone HEIC conversion)
 - `git-lfs`, and `sops` + an age key for the private data
-- Python packages: `pip install pyyaml pillow pytest`
+- `make install` (`uv sync --extra dev`) installs the locked deps and the `leaving-denver` CLI
 
 ### 2. Common Commands
 
 ```bash
 # Compile SSOT, process new photos, build public & private sites
-./manage.py build
+uv run leaving-denver build
 
 # Auto-discover photos and update data/inventory.yaml
-./manage.py sync
+uv run leaving-denver sync
 
 # View Hormozi 3-week staged pricing drops
-./manage.py drops
+uv run leaving-denver drops
 
 # Mark an item as sold and trigger automatic site rebuild
-./manage.py sold sofa-sleeper 200
+uv run leaving-denver sold sofa-sleeper 200
 
 # Start local preview server (Port 8088)
-./manage.py serve --port 8088
+uv run leaving-denver serve --port 8088
 
 # Deploy public site to Cloudflare Pages (100% free)
-./manage.py deploy-cf --project-name leaving-denver
+uv run leaving-denver deploy-cf --project-name leaving-denver
 
 # Run test suite
-./manage.py test
+uv run leaving-denver test
 ```
 
 ---
@@ -62,14 +62,14 @@ sops data/private.sops.yaml          # edit floors / phone
 ```
 
 - The **public build** only needs the phone: from `SELLER_PHONE` (CI secret) or the sops file.
-- The **private workspace** and `./manage.py drops` need the floors, so they only work where the file decrypts.
+- The **private workspace** and `uv run leaving-denver drops` need the floors, so they only work where the file decrypts.
 - Photos under `content/photos/` are stored with Git LFS (`git lfs install --local --skip-repo`).
 
 ---
 
 ## Accessing Local Workspaces
 
-When running `./manage.py serve`:
+When running `uv run leaving-denver serve`:
 - **Public Minimalist Catalog:** `http://localhost:8088/`
 - **Private Seller Workspace (PIN-gated, local only):** `http://localhost:8088/poster_assistant.html`
 
@@ -84,16 +84,19 @@ When running `./manage.py serve`:
 ├── content/
 │   └── photos/                    # Drop photos here by item ID
 ├── src/
-│   ├── config.py                  # Core configuration & secrets
-│   ├── image_processor.py         # HEIC decoder & EXIF metadata scrubber
-│   ├── site_builder.py            # Site compiler with leak detection
-│   └── n8n_integration.py         # Kubelab webhook integration
-├── dist/                          # Public sanitized distribution (Deploy to Cloudflare)
-├── dist_private/                  # Private seller workspace with PIN lock
-├── n8n/                           # Kubelab n8n workflows (Telegram, Vikunja, Reminders)
+│   └── leaving_denver/
+│       ├── cli.py                 # Master orchestration CLI
+│       ├── config.py              # Core configuration & secrets
+│       ├── image_processor.py     # HEIC decoder & EXIF metadata scrubber
+│       ├── site_builder.py        # Site compiler with leak detection
+│       └── n8n_integration.py     # Kubelab webhook integration
+├── build/
+│   ├── public/                    # Public sanitized distribution (Deploy to Cloudflare)
+│   └── private/                   # Private seller workspace with PIN lock
+├── integrations/
+│   └── n8n/                       # Kubelab n8n workflows (Telegram, Vikunja, Reminders)
 ├── docs/                          # Architecture, Playbooks, and Kubelab guide
-├── tests/                         # Integrity & security regression tests
-└── manage.py                      # Master orchestration CLI
+└── tests/                         # Integrity & security regression tests
 ```
 
 ---
@@ -103,5 +106,5 @@ When running `./manage.py serve`:
 Run the test suite to verify SSOT integrity and security boundaries:
 
 ```bash
-pytest tests/
+uv run pytest
 ```

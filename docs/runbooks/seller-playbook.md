@@ -18,7 +18,7 @@ Operational guidelines for maximizing return ($12,213 target list; reserve floor
 
 ## 2. Hormozi 3-Week Staging Protocol
 
-Run `./manage.py drops` to view active price brackets:
+Run `leaving-denver drops` to view active price brackets:
 
 * **Week 1 (Days 1–7):** Recommended List Price ($12,213 total inventory).
 * **Week 2 (Days 8–14):** 10–12% drop on items with zero qualified inquiries.

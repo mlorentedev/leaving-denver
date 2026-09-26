@@ -28,8 +28,8 @@ format: ## Auto-fix style with ruff
 	$(UV) run ruff check --fix .
 	$(UV) run ruff format .
 
-build: ## Process photos and compile dist/ (public) + dist_private/ (local only)
-	$(UV) run python manage.py build
+build: ## Process photos and compile build/public/ (public) + build/private/ (local only)
+	$(UV) run leaving-denver build
 
 test: build ## Build, then run the test suite against the fresh build
 	$(UV) run pytest
@@ -37,21 +37,21 @@ test: build ## Build, then run the test suite against the fresh build
 check: lint test ## Lint + build + test (what CI runs)
 
 serve: build ## Serve the catalog and the private tool on localhost:$(PORT)
-	$(UV) run python manage.py serve --port $(PORT)
+	$(UV) run leaving-denver serve --port $(PORT)
 
 drops: ## Show the staged price-drop table (needs the sops key)
-	$(UV) run python manage.py drops
+	$(UV) run leaving-denver drops
 
 sold: ## Mark an item sold: make sold ID=sofa-sleeper PRICE=200
 	@test -n "$(ID)" || { echo "usage: make sold ID=<item-id> [PRICE=<usd>]"; exit 1; }
-	$(UV) run python manage.py sold $(ID) $(PRICE)
+	$(UV) run leaving-denver sold $(ID) $(PRICE)
 
-deploy: check ## Check, then deploy dist/ to Cloudflare Pages from this machine
-	npx --yes wrangler pages deploy dist --project-name=$(PROJECT) --branch=main
+deploy: check ## Check, then deploy build/public/ to Cloudflare Pages from this machine
+	npx --yes wrangler pages deploy build/public --project-name=$(PROJECT) --branch=main
 
 secrets: ## Edit the encrypted reserve floors / phone
 	sops data/private.sops.yaml
 
 clean: ## Remove build output and caches
-	rm -rf dist dist_private data/inventory.json .pytest_cache .ruff_cache
+	rm -rf build data/inventory.json .pytest_cache .ruff_cache
 	find . -name __pycache__ -type d -prune -exec rm -rf {} +

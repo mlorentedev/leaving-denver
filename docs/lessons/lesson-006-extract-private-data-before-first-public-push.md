@@ -30,5 +30,5 @@ Pushing first and cleaning up with a PR, or relying on force-push to erase data 
 > **Anything that must stay private is removed from every commit before the first public push; after that, assume the history is forever.**
 
 ## References
-- `.sops.yaml`, `data/private.sops.yaml`, `src/private_data.py`
+- `.sops.yaml`, `data/private.sops.yaml`, `src/leaving_denver/private_data.py`
 - dotfiles `docs/runbooks/guide-secrets-governance.md` (age key recovery)

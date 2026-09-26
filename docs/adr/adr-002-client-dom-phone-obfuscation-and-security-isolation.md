@@ -26,7 +26,7 @@ Publishing contact details on public websites invites aggressive automated scrap
 ## Decision
 
 1. **Client DOM Phone Obfuscation:** The public `index.html` must never contain plaintext phone numbers or raw `href="sms:..."` attributes in static markup. Instead, data attributes split the country code, prefix, and line number. Client JavaScript constructs the interactive SMS links dynamically at runtime.
-2. **Strict Output Isolation:** Build output is strictly separated into `dist/` (public artifacts only) and `dist_private/` (internal operator tools with reserve floor prices). Cloudflare Pages deployment only deploys `dist/`. `dist_private/` is gitignored and protected by a local master PIN gate.
+2. **Strict Output Isolation:** Build output is strictly separated into `build/public/` (public artifacts only) and `build/private/` (internal operator tools with reserve floor prices). Cloudflare Pages deployment only deploys `build/public/`. `build/private/` is gitignored and protected by a local master PIN gate.
 
 ## Consequences
 
@@ -39,7 +39,7 @@ Publishing contact details on public websites invites aggressive automated scrap
 - Users with JavaScript disabled cannot click-to-SMS (negligible on mobile iOS/Android browsers).
 
 ### Neutral
-- Internal tools require manual local hosting via `./manage.py serve`.
+- Internal tools require manual local hosting via `leaving-denver serve`.
 
 ## References
 - `docs/lessons/lesson-002-client-dom-phone-obfuscation-scraping-defense.md`

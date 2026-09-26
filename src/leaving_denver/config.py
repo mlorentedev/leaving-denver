@@ -4,14 +4,14 @@ Configuration and constants for Denver Tech Center Moving Sale automation.
 
 from pathlib import Path
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parents[2]
 
 # Core Directories
 DATA_DIR = BASE_DIR / "data"
 CONTENT_DIR = BASE_DIR / "content"
 PHOTOS_DIR = CONTENT_DIR / "photos"
-DIST_DIR = BASE_DIR / "dist"
-DIST_PRIVATE_DIR = BASE_DIR / "dist_private"
+DIST_DIR = BASE_DIR / "build" / "public"
+DIST_PRIVATE_DIR = BASE_DIR / "build" / "private"
 DOCS_DIR = BASE_DIR / "docs"
 
 # Files

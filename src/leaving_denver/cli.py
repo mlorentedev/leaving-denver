@@ -11,14 +11,9 @@ import os
 import socketserver
 import subprocess
 import sys
-from pathlib import Path
 
-# Add project root to sys.path
-BASE_DIR = Path(__file__).resolve().parent
-sys.path.insert(0, str(BASE_DIR))
-
-from src.config import BASE_DIR, DIST_DIR
-from src.site_builder import build_all, load_inventory_yaml, save_inventory_yaml
+from leaving_denver.config import BASE_DIR, DIST_DIR, DIST_PRIVATE_DIR
+from leaving_denver.site_builder import build_all, load_inventory_yaml, save_inventory_yaml
 
 
 def cmd_build(args):
@@ -28,7 +23,7 @@ def cmd_build(args):
 
 def cmd_sync(args):
     print("Syncing photos and updating inventory.yaml...")
-    from src.image_processor import sync_all_photos
+    from leaving_denver.image_processor import sync_all_photos
 
     photo_map = sync_all_photos()
     data = load_inventory_yaml()
@@ -38,7 +33,7 @@ def cmd_sync(args):
             item["images"] = photo_map[item_id]
             item["primary_image"] = photo_map[item_id][0]
     save_inventory_yaml(data)
-    print("Sync complete. Run 'python3 manage.py build' to recompile sites.")
+    print("Sync complete. Run 'leaving-denver build' to recompile sites.")
 
 
 def cmd_sold(args):
@@ -78,7 +73,7 @@ def cmd_sold(args):
 
 
 def cmd_drops(args):
-    from src.private_data import floors
+    from leaving_denver.private_data import floors
 
     data = load_inventory_yaml()
     items = data.get("items", [])
@@ -109,12 +104,12 @@ def cmd_serve(args):
 
     class CustomHandler(http.server.SimpleHTTPRequestHandler):
         def translate_path(self, path):
-            # Route / to dist/index.html
+            # Route / to build/public/index.html
             if path == "/" or path.startswith("/catalog/") or path == "/robots.txt":
                 return str(DIST_DIR / path.lstrip("/"))
-            elif path.startswith("/poster_assistant.html") or path.startswith("/dist_private/"):
-                clean = path.replace("/dist_private/", "").lstrip("/")
-                return str(BASE_DIR / "dist_private" / clean)
+            elif path.startswith("/poster_assistant.html") or path.startswith("/private/"):
+                clean = path.replace("/private/", "").lstrip("/")
+                return str(DIST_PRIVATE_DIR / clean)
             return super().translate_path(path)
 
     with socketserver.TCPServer(("", port), CustomHandler) as httpd:
@@ -131,7 +126,7 @@ def cmd_serve(args):
 
 def cmd_deploy_cf(args):
     project_name = args.project_name
-    print(f"Deploying dist/ to Cloudflare Pages (Project: {project_name})...")
+    print(f"Deploying build/public/ to Cloudflare Pages (Project: {project_name})...")
     cmd = [
         "npx",
         "wrangler",

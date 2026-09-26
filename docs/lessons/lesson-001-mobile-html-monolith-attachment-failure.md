@@ -26,4 +26,4 @@ Do not send offline HTML monoliths or Base64-encoded web bundles as file attachm
 
 ## References
 - `research/competitive_agent_audit.md` (Forensic comparison with DeepSeek monolith)
-- `src/site_builder.py` (Lightweight static compilation pipeline)
+- `src/leaving_denver/site_builder.py` (Lightweight static compilation pipeline)
