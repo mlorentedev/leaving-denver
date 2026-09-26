@@ -46,7 +46,7 @@ Run `./manage.py drops` to view active price brackets:
 
 1. **Title Signing:** Ensure buyer verifies VIN (`1FMCU9HD9KUB80146`) and odometer reading (103,500). Sign Colorado Title in the Seller Signature section.
 2. **Bill of Sale:** Complete standard Colorado Bill of Sale (Form DR 2173).
-3. **Emissions:** Provide a **new, unused** passing certificate. One already used for your own
+3. **Emissions:** Provide a **valid, unused** passing certificate. One already used for your own
    registration renewal does not count, even if it has not expired (CO DMV, AirCare). Check the
    dates: if the registration was renewed after the test, that test is used. An unused one can be
    handed over; otherwise test again at AirCare in the days before handover, which also closes the
