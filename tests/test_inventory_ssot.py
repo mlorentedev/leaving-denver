@@ -105,10 +105,11 @@ def test_private_floors_consistent(inventory):
 
 
 # Claims the seller cannot back: no 100k service receipt exists, remote start and
-# highway-only miles are not in the data, and the departure date is 9 November.
+# highway-only miles are not in the data, the departure date is 9 November, and
+# the CSP 21N12 coverage ended at 84k miles.
 UNBACKED_CLAIMS = re.compile(
     r"100k[- ](mile )?(milestone )?(major )?s(er)?v|highway miles|highway-commuter|"
-    r"remote start|fully serviced|great mechanical|in 3 weeks",
+    r"remote start|fully serviced|great mechanical|in 3 weeks|21N12",
     re.IGNORECASE,
 )
 CLAIM_SOURCES = [
