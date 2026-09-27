@@ -478,8 +478,8 @@ items:
   vin: 1FMCU9HD9KUB80146
   odometer: 103500
   original_price: 29800
-  current_asking: 11500
-  recommended_list_price: 11500
+  current_asking: 11875
+  recommended_list_price: 11875
   condition: Excellent Exterior / Very Good Interior
   dimensions: Compact SUV · 103.5k Miles · Clean Title
   color: White / Black Leather-Trimmed Interior
@@ -488,16 +488,18 @@ items:
   images:
   - catalog/2019-ford-escape-sel-awd/2019_ford_escape_interior_dashboard.jpg
   - catalog/2019-ford-escape-sel-awd/2019_ford_escape_white_front.jpg
+  - catalog/2019-ford-escape-sel-awd/doc_1_recall_invoice.jpg
+  - catalog/2019-ford-escape-sel-awd/doc_2_emissions_report.jpg
   specs:
   - 1.5L EcoBoost 4-Cylinder (179 HP) with 6-speed automatic transmission (22 city
     / 28 hwy MPG)
   - Ford Intelligent AWD system with high-performance all-weather tires (Colorado
     winter-ready)
   - Clean Colorado Title in hand with zero liens, ready for immediate transfer
-  - Passed Colorado emissions in 2026; a valid, unused certificate is handed over
-    at sale, as Colorado law requires
-  - Zero open recalls (closed at a Ford dealership; invoice available). Pre-purchase
-    inspection welcome
+  - Passed Colorado emissions on 12 May 2026 (report in the photos); a new, unused
+    certificate is handed over at sale, as Colorado law requires
+  - Zero open recalls (recall 22S43 closed at a Ford dealership on 25 Sep 2026; invoice
+    in the photos). Pre-purchase inspection welcome
   - '100k-Mile Milestone Service complete: fresh oil & filter, complete brake fluid
     flush, 4-wheel rotation'
   - Ford SYNC 3 with 8-inch touchscreen, Apple CarPlay, Android Auto, Bluetooth, Wi-Fi
