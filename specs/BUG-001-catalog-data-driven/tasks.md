@@ -11,7 +11,7 @@ created: "2026-09-26"
 ## Setup
 
 - [x] Spec branch `spec/catalog-data-driven` with this folder and ADR-003
-- [ ] `proposal.md` reviewed by the owner; open questions for PR 4 answered or explicitly dropped
+- [x] `proposal.md` reviewed by the owner (merged in #49); PR 4 open questions partly answered (#48)
 - [x] #6 assigned and In Progress; #21 moved to Blocked on this spec
 
 ## Implementation
@@ -61,6 +61,15 @@ created: "2026-09-26"
 
 - [ ] [AC8] Add `w-full` to the full-width sections and `shrink-0 whitespace-nowrap` to `.filter-btn`.
 - [ ] [AC8] Check on the preview at 390 px that `document.documentElement.scrollWidth === 390`, and record the output in `verification.md`.
+
+### PR 6: `feat/spanish-catalog` (closes #53)
+
+- [ ] [AC9] `test_spanish_page_is_built`: `build/public/es/index.html` exists, has `lang="es"`, and links back to `/`. Expected: FAIL.
+- [ ] [AC9] Add `locales/en.yaml` and `locales/es.yaml` for the UI strings. `render()` loops over the locales, and each page gets `hreflang` links and a language switch.
+- [ ] [AC9] Add an optional `es:` block per item and bundle in `data/inventory.yaml` (`title`, `short_title`, `specs`, `pickup_note`, `description`), falling back to English. `test_spanish_fallbacks` lists the fields still in English, so the owner can fill them.
+- [ ] [AC9] SMS intents are written in the page's language. The poster tool gets Spanish Marketplace and Craigslist variants.
+- [ ] [AC9] `test_no_unbacked_vehicle_claims` covers the Spanish page, with the Spanish forms of the same claims.
+- [ ] The owner reviews the Spanish copy: neutral Latin American Spanish, `usted`, "auto"/"carro".
 
 ## Closing
 

@@ -1,10 +1,65 @@
 [
-  {"id": "BUG-001-catalog-data-driven-f1", "behavior": "AC1: a template without the inventory marker fails the build", "verification": "uv run pytest tests/test_build_contract.py -k missing_inventory_marker", "state": "pending", "evidence": ""},
-  {"id": "BUG-001-catalog-data-driven-f2", "behavior": "AC2: unpublished items and their bundles are absent from build/public and present as DRAFT in build/private", "verification": "uv run pytest tests/test_build_contract.py -k 'unpublished or publish_flag'", "state": "pending", "evidence": ""},
-  {"id": "BUG-001-catalog-data-driven-f3", "behavior": "AC3: a template field missing from the data fails the build", "verification": "uv run pytest tests/test_build_contract.py -k undefined_field", "state": "pending", "evidence": ""},
-  {"id": "BUG-001-catalog-data-driven-f4", "behavior": "AC4: bundle, count and whole-apartment figures on the page match the data", "verification": "uv run pytest tests/test_build_contract.py -k 'bundle_figures or page_figures'", "state": "pending", "evidence": ""},
-  {"id": "BUG-001-catalog-data-driven-f5", "behavior": "AC5: every category has a filter chip", "verification": "uv run pytest tests/test_build_contract.py -k every_category_has_a_chip", "state": "pending", "evidence": ""},
-  {"id": "BUG-001-catalog-data-driven-f6", "behavior": "AC6: no stale deadline copy and no vehicle claim missing from the data", "verification": "uv run pytest tests/test_build_contract.py -k 'stale_or_unbacked or vehicle_card_claims'", "state": "pending", "evidence": ""},
-  {"id": "BUG-001-catalog-data-driven-f7", "behavior": "AC7: Venmo/Zelle only for household items, no 'no advance deposits' for the car", "verification": "uv run pytest tests/test_build_contract.py -k payment_terms_by_kind", "state": "pending", "evidence": ""},
-  {"id": "BUG-001-catalog-data-driven-f8", "behavior": "AC8: no horizontal scroll at 390px", "verification": "manual: preview at 390px, document.documentElement.scrollWidth === 390 (recorded in verification.md)", "state": "pending", "evidence": ""}
+  {
+    "id": "BUG-001-catalog-data-driven-f1",
+    "behavior": "AC1: a template without the inventory marker fails the build",
+    "verification": "uv run pytest tests/test_build_contract.py -k missing_inventory_marker",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "BUG-001-catalog-data-driven-f2",
+    "behavior": "AC2: unpublished items and their bundles are absent from build/public and present as DRAFT in build/private",
+    "verification": "uv run pytest tests/test_build_contract.py -k 'unpublished or publish_flag'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "BUG-001-catalog-data-driven-f3",
+    "behavior": "AC3: a template field missing from the data fails the build",
+    "verification": "uv run pytest tests/test_build_contract.py -k undefined_field",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "BUG-001-catalog-data-driven-f4",
+    "behavior": "AC4: bundle, count and whole-apartment figures on the page match the data",
+    "verification": "uv run pytest tests/test_build_contract.py -k 'bundle_figures or page_figures'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "BUG-001-catalog-data-driven-f5",
+    "behavior": "AC5: every category has a filter chip",
+    "verification": "uv run pytest tests/test_build_contract.py -k every_category_has_a_chip",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "BUG-001-catalog-data-driven-f6",
+    "behavior": "AC6: no stale deadline copy and no vehicle claim missing from the data",
+    "verification": "uv run pytest tests/test_build_contract.py -k 'stale_or_unbacked or vehicle_card_claims'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "BUG-001-catalog-data-driven-f7",
+    "behavior": "AC7: Venmo/Zelle only for household items, no 'no advance deposits' for the car",
+    "verification": "uv run pytest tests/test_build_contract.py -k payment_terms_by_kind",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "BUG-001-catalog-data-driven-f8",
+    "behavior": "AC8: no horizontal scroll at 390px",
+    "verification": "manual: preview at 390px, document.documentElement.scrollWidth === 390 (recorded in verification.md)",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "BUG-001-catalog-data-driven-f9",
+    "behavior": "AC9: a Spanish page is built with Spanish copy and a listed fallback",
+    "verification": "uv run pytest tests/test_build_contract.py -k 'spanish'",
+    "state": "pending",
+    "evidence": ""
+  }
 ]
