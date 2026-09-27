@@ -198,7 +198,7 @@ def build_all() -> None:
             item["images"] = photo_map[item_id]
             item["primary_image"] = photo_map[item_id][0]
 
-    save_inventory_yaml(data)
+    # The build only reads the YAML; `leaving-denver sync` persists photo paths.
 
     print("3. Building sanitized public distribution (build/public/)...")
     build_public_site(data)
