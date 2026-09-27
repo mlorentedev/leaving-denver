@@ -16,8 +16,10 @@ BRANCH  ?= preview
 SOPS_FILE := data/private.sops.yaml
 WRANGLER  := npx --yes wrangler@4.141.0
 # The deploy token goes from sops straight into wrangler's environment: never
-# onto argv, never to stdout. The account id comes from wrangler.toml.
-CF_ENV    := CLOUDFLARE_API_TOKEN="$$(sops -d --extract '["cloudflare_pages_token"]' $(SOPS_FILE))"
+# onto argv, never to stdout. The account id is not a secret; Pages' wrangler.toml
+# rejects it, so it lives here and in .github/workflows/ci.yml.
+CF_ACCOUNT_ID := 76967f5ede1ce50efce34d90b7e94958
+CF_ENV    := CLOUDFLARE_ACCOUNT_ID=$(CF_ACCOUNT_ID) CLOUDFLARE_API_TOKEN="$$(sops -d --extract '["cloudflare_pages_token"]' $(SOPS_FILE))"
 
 .DEFAULT_GOAL := help
 
