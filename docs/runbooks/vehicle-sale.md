@@ -49,14 +49,16 @@ A real buyer will do all of the following. Ask for it before the first meeting:
 
 ## 4. Agreeing the sale before handover
 
-The buyer agrees now and takes the car around Nov 6–7 **[OWNER: exact date]**. Write the agreement down, using the Appendix.
+The buyer agrees now and takes the car on **Thursday 2026-11-05** (owner, 2026-09-26). The date is negotiable, but never later than Friday Nov 6: that leaves a banking day before the Sunday Nov 9 flight. Write the agreement down, using the Appendix.
 
-### 4.1 Deposit: two options **[OWNER: pick one]**
+### 4.1 Deposit: none (owner, 2026-09-26)
+
+**Decision: option B, no deposit.** Option A is kept below as the alternative that was considered.
 
 No escrow product locks a buyer in with a non-refundable deposit.
 
 - **KeySavvy** holds the buyer's payment, but that payment is refundable until pickup, so it does not lock the buyer.
-- **KeySavvy for the whole sale** is a poor fit for this timeline too. It pays the seller only once the title has been mailed to KeySavvy and the buyer has picked up the car. With handover Nov 6–7 and departure Nov 9, the mail is the failure mode.
+- **KeySavvy for the whole sale** is a poor fit for this timeline too. It pays the seller only once the title has been mailed to KeySavvy and the buyer has picked up the car. With handover Nov 5–6 and departure Nov 9, the mail is the failure mode.
 
 | Option | How | Seller risk | Buyer risk |
 |---|---|---|---|
@@ -68,7 +70,7 @@ No escrow product locks a buyer in with a non-refundable deposit.
 - **Price** (locked, no later renegotiation) and **handover date**, with a fallback date.
 - **Condition:** as-is, the PPI already done, and the car handed over as it was at the PPI apart from normal driving. State the odometer reading at signing and an allowance for miles until handover.
 - **Risk of loss:** it stays with the seller until handover. If the car is damaged, a full refund or a price reduced by agreement. If it is totalled or stolen, a full refund. The seller's insurance stays in force until then.
-- **If either side walks away:** say what happens to the deposit (option A).
+- **If either side walks away:** with no deposit, either side may cancel by telling the other in writing. Until handover day the seller keeps a backup buyer and the CarMax fallback (§8).
 - **Payment at handover:** the method in §5, and nothing else.
 
 ## 5. Handover day, in this order
@@ -120,7 +122,7 @@ A car that fails emissions within 5 business days of sale can be returned by the
 
 ## Appendix: agreement template
 
-Print it, fill it in by hand, and never commit a filled-in copy.
+Print it, fill it in by hand, and never commit a filled-in copy. With no deposit (§4.1), write $0 as the deposit and strike the two deposit sentences in the last paragraph.
 
 ```
 VEHICLE SALE AGREEMENT (DELAYED HANDOVER)
