@@ -62,3 +62,10 @@ def test_private_assistant_has_security_gate():
     assert "checkPin()" in private_html, "Missing PIN check logic"
     assert "Default: 8011" not in private_html, "Leaked default PIN in placeholder text"
     assert "defaults to DTC zip prefix" not in private_html, "Leaked default PIN hint text"
+
+
+def test_static_image_paths_exist():
+    """Every <img src> written into the page as plain HTML points at a built file."""
+    public_html = (DIST_DIR / "index.html").read_text(encoding="utf-8")
+    for src in re.findall(r'<img[^>]+src="(catalog/[^"]+)"', public_html):
+        assert (DIST_DIR / src).is_file(), f"Broken image path in page: {src}"
