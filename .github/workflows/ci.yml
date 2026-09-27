@@ -27,7 +27,7 @@ jobs:
       # the reserve floors skip.
       SELLER_PHONE: "+15555550100"
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       # LFS objects are cached so each run does not re-download every photo.
       - name: Hash LFS object list
@@ -66,7 +66,7 @@ jobs:
           [[ "$BRANCH" =~ ^[a-z0-9][a-z0-9-]{0,27}$ ]] || { echo "invalid branch: $BRANCH"; exit 1; }
           [[ "$BRANCH" != main || "$REF" == refs/heads/main ]] || { echo "branch=main must be dispatched from main, not $REF"; exit 1; }
 
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Hash LFS object list
         run: git lfs ls-files -l | cut -d' ' -f1 | sort | sha256sum | cut -d' ' -f1 > .lfs-assets-id
