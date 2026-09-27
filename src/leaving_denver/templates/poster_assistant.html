@@ -311,7 +311,7 @@
         const opt = document.createElement('option');
         opt.value = idx;
         const p = getPriceForWeek(item, currentWeek);
-        opt.textContent = `${idx + 1}. [${item.category}] ${item.short_title} — $${p.toLocaleString()}`;
+        opt.textContent = `${idx + 1}. ${item.draft ? "[DRAFT] " : ""}[${item.category}] ${item.short_title} — $${p.toLocaleString()}`;
         select.appendChild(opt);
       });
       select.addEventListener('change', e => {
@@ -355,7 +355,7 @@
         const item = inventory[idx];
         if (item) {
           const p = getPriceForWeek(item, currentWeek);
-          opt.textContent = `${idx + 1}. [${item.category}] ${item.short_title} — $${p.toLocaleString()}`;
+          opt.textContent = `${idx + 1}. ${item.draft ? "[DRAFT] " : ""}[${item.category}] ${item.short_title} — $${p.toLocaleString()}`;
         }
       });
 

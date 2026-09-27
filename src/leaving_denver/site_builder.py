@@ -8,7 +8,6 @@ Compiles Single Source of Truth (data/inventory.yaml) into:
 """
 
 import json
-import re
 import shutil
 from pathlib import Path
 from typing import Any
@@ -28,6 +27,9 @@ from leaving_denver.config import (
 from leaving_denver.image_processor import sync_all_photos
 from leaving_denver.private_data import floors, load_private, phone_parts, seller_phone
 
+TEMPLATES_DIR = Path(__file__).parent / "templates"
+INVENTORY_MARKER = "const INVENTORY = __INVENTORY__;"
+
 
 def load_inventory_yaml() -> dict[str, Any]:
     if not INVENTORY_YAML.exists():
@@ -41,14 +43,23 @@ def save_inventory_yaml(data: dict[str, Any]) -> None:
         yaml.dump(data, f, sort_keys=False, allow_unicode=True, indent=2)
 
 
+def unpublished_ids(full_data: dict[str, Any]) -> set[str]:
+    """Items marked `published: false`. Items publish by default."""
+    return {i["id"] for i in full_data.get("items", []) if i.get("published", True) is False}
+
+
 def sanitize_public_inventory(full_data: dict[str, Any]) -> dict[str, Any]:
     """
     Strips internal seller secrets:
     - firm_floor_price
     - internal negotiation notes
+    and drops unpublished items, with every bundle that contains one.
     """
+    hidden = unpublished_ids(full_data)
     public_items = []
     for item in full_data.get("items", []):
+        if item["id"] in hidden:
+            continue
         pub = {
             "id": item.get("id"),
             "category": item.get("category"),
@@ -70,7 +81,9 @@ def sanitize_public_inventory(full_data: dict[str, Any]) -> dict[str, Any]:
 
     return {
         "items": public_items,
-        "bundles": full_data.get("bundles", []),
+        "bundles": [
+            b for b in full_data.get("bundles", []) if not hidden & set(b.get("items", []))
+        ],
     }
 
 
@@ -89,7 +102,7 @@ PAGES_HEADERS = """/*
 
 def build_public_site(full_data: dict[str, Any]) -> None:
     DIST_DIR.mkdir(parents=True, exist_ok=True)
-    template_path = Path(__file__).parent / "templates" / "index.html"
+    template_path = TEMPLATES_DIR / "index.html"
 
     if not template_path.exists():
         raise FileNotFoundError(f"Template not found at {template_path}")
@@ -100,16 +113,9 @@ def build_public_site(full_data: dict[str, Any]) -> None:
     public_data = sanitize_public_inventory(full_data)
     json_str = json.dumps(public_data, indent=2)
 
-    # Injected replacement of const INVENTORY = { ... };
-    pattern = r"const INVENTORY = \{[\s\S]*?\n    \};"
-    replacement = f"const INVENTORY = {json_str};"
-
-    if re.search(pattern, html):
-        html = re.sub(pattern, lambda m: replacement, html)
-    else:
-        # Fallback if pattern format varies
-        pattern_fallback = r"const INVENTORY = \{[\s\S]*?\};"
-        html = re.sub(pattern_fallback, lambda m: replacement, html, count=1)
+    if INVENTORY_MARKER not in html:
+        raise RuntimeError("Template is missing the __INVENTORY__ placeholder")
+    html = html.replace(INVENTORY_MARKER, f"const INVENTORY = {json_str};")
 
     phone = seller_phone()
     if not phone:
@@ -130,6 +136,11 @@ def build_public_site(full_data: dict[str, Any]) -> None:
 
     PUBLIC_HEADERS.write_text(PAGES_HEADERS, encoding="utf-8")
 
+    # Photo sync copies every content/photos/<id>/, so drop the unpublished ones,
+    # including any left from a build when the item was still published.
+    for item_id in unpublished_ids(full_data):
+        shutil.rmtree(DIST_DIR / "catalog" / item_id, ignore_errors=True)
+
 
 def build_private_workspace(full_data: dict[str, Any]) -> None:
     private = load_private()
@@ -142,7 +153,9 @@ def build_private_workspace(full_data: dict[str, Any]) -> None:
     # Merge the encrypted reserve floors and phone back in, for local use only
     full_data = json.loads(json.dumps(full_data))
     reserve = floors(private)
+    hidden = unpublished_ids(full_data)
     for item in full_data.get("items", []):
+        item["draft"] = item["id"] in hidden
         if item["id"] in reserve:
             item["firm_floor_price"] = reserve[item["id"]]
     full_data.setdefault("seller", {})["phone"] = seller_phone(private)
@@ -151,7 +164,7 @@ def build_private_workspace(full_data: dict[str, Any]) -> None:
         with open(target, "w", encoding="utf-8") as f:
             json.dump(full_data, f, indent=2)
 
-    template_path = Path(__file__).parent / "templates" / "poster_assistant.html"
+    template_path = TEMPLATES_DIR / "poster_assistant.html"
     if template_path.exists():
         shutil.copy2(template_path, PRIVATE_POSTER_HTML)
 

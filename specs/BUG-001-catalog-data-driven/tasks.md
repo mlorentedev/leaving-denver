@@ -11,21 +11,21 @@ created: "2026-09-26"
 ## Setup
 
 - [x] Spec branch `spec/catalog-data-driven` with this folder and ADR-003
-- [ ] `proposal.md` reviewed by the owner; open questions for PR 4 answered or explicitly dropped
+- [x] `proposal.md` reviewed by the owner (merged in #49); PR 4 open questions partly answered (#48)
 - [x] #6 assigned and In Progress; #21 moved to Blocked on this spec
 
 ## Implementation
 
 ### PR 1: `fix/fail-closed-inventory-and-publish-flag` (closes #41)
 
-- [ ] [AC1] `tests/test_build_contract.py::test_missing_inventory_marker_fails`: call `build_public_site` with a template lacking `__INVENTORY__`. Run `uv run pytest tests/test_build_contract.py -k marker`. Expected: FAIL, since today the build silently falls back.
-- [ ] [AC1] In `src/leaving_denver/site_builder.py`, replace the two-regex injection with a `const INVENTORY = __INVENTORY__;` marker, and raise `RuntimeError` naming the marker when it is absent, as `__SELLER_CONTACT__` already does. Replace the placeholder array in `templates/index.html` with the marker. Expected: PASS.
-- [ ] [P] [AC2] `test_unpublished_item_and_its_bundles_are_absent_from_public`: build from a fixture inventory (tmp copy via `monkeypatch` on `config` paths) with one item `published: false` and one bundle that contains it. Assert neither id occurs in any file under the public dir. Expected: FAIL.
-- [ ] [AC2] `sanitize_public_inventory` drops items with `published: false` (default `true`) and every bundle that references one.
-- [ ] [AC2] `test_unpublished_item_is_in_private_marked_draft`: the private `inventory.json` holds the item with `"draft": true`. The test skips when sops is not decryptable, like the other private tests.
-- [ ] [AC2] `build_private_workspace` sets `draft: true` on unpublished items; `poster_assistant.html` shows a DRAFT tag for them.
-- [ ] [AC2] `test_publish_flag_survives_yaml_round_trip`: `build_all` keeps `published: false` in `data/inventory.yaml` (guards BUG-006 #12).
-- [ ] The car stays `published: true` in PR 1. Its card is hand-written HTML until PR 2, so the flag cannot remove it yet.
+- [x] [AC1] `tests/test_build_contract.py::test_missing_inventory_marker_fails`: call `build_public_site` with a template lacking `__INVENTORY__`. Run `uv run pytest tests/test_build_contract.py -k marker`. Expected: FAIL, since today the build silently falls back.
+- [x] [AC1] In `src/leaving_denver/site_builder.py`, replace the two-regex injection with a `const INVENTORY = __INVENTORY__;` marker, and raise `RuntimeError` naming the marker when it is absent, as `__SELLER_CONTACT__` already does. Replace the placeholder array in `templates/index.html` with the marker. Expected: PASS.
+- [x] [P] [AC2] `test_unpublished_item_and_its_bundles_are_absent_from_public`: build from a fixture inventory (tmp copy via `monkeypatch` on `config` paths) with one item `published: false` and one bundle that contains it. Assert neither id occurs in any file under the public dir. Expected: FAIL.
+- [x] [AC2] `sanitize_public_inventory` drops items with `published: false` (default `true`) and every bundle that references one; `build_public_site` removes their `catalog/<id>/` photos, which the photo sync copies for every item.
+- [x] [AC2] `test_unpublished_item_is_in_private_marked_draft`: the private `inventory.json` holds the item with `"draft": true`. `load_private` is monkeypatched, so the test runs in CI too.
+- [x] [AC2] `build_private_workspace` sets `draft: true` on unpublished items; `poster_assistant.html` shows a DRAFT tag for them.
+- [x] [AC2] `test_publish_flag_survives_yaml_round_trip`: `build_all` keeps `published: false` in `data/inventory.yaml` (guards BUG-006 #12).
+- [x] The car stays `published: true` in PR 1. Its card is hand-written HTML until PR 2, so the flag cannot remove it yet.
 
 ### PR 2: `refactor/render-catalog-with-jinja2` (closes #21)
 
@@ -61,6 +61,15 @@ created: "2026-09-26"
 
 - [ ] [AC8] Add `w-full` to the full-width sections and `shrink-0 whitespace-nowrap` to `.filter-btn`.
 - [ ] [AC8] Check on the preview at 390 px that `document.documentElement.scrollWidth === 390`, and record the output in `verification.md`.
+
+### PR 6: `feat/spanish-catalog` (closes #53)
+
+- [ ] [AC9] `test_spanish_page_is_built`: `build/public/es/index.html` exists, has `lang="es"`, and links back to `/`. Expected: FAIL.
+- [ ] [AC9] Add `locales/en.yaml` and `locales/es.yaml` for the UI strings. `render()` loops over the locales, and each page gets `hreflang` links and a language switch.
+- [ ] [AC9] Add an optional `es:` block per item and bundle in `data/inventory.yaml` (`title`, `short_title`, `specs`, `pickup_note`, `description`), falling back to English. `test_spanish_fallbacks` lists the fields still in English, so the owner can fill them.
+- [ ] [AC9] SMS intents are written in the page's language. The poster tool gets Spanish Marketplace and Craigslist variants.
+- [ ] [AC9] `test_no_unbacked_vehicle_claims` covers the Spanish page, with the Spanish forms of the same claims.
+- [ ] The owner reviews the Spanish copy: neutral Latin American Spanish, `usted`, "auto"/"carro".
 
 ## Closing
 

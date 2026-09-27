@@ -1,7 +1,7 @@
 ---
 id: "BUG-001-catalog-data-driven"
 type: spec
-status: draft # draft | implementing | verifying | archived
+status: implementing # draft | implementing | verifying | archived
 created: "2026-09-26"
 issue: "mlorentedev/leaving-denver#6"   # repo#NNN — GitHub issue / Project item that tracks this spec
 tags: [spec, proposal]
@@ -37,7 +37,7 @@ The builder renders the public page from the YAML with Jinja2 (ADR-003). After t
 3. An item with `published: false` is absent from `build/public/`, with any bundle that contains it, and present under `build/private/` marked DRAFT (FEAT-009).
 4. The page does not scroll sideways at 390 px.
 
-The work lands as five PRs, in this order. Each stays under ~300 lines of production diff.
+The work lands as six PRs, in this order. PR 6 was added on 2026-09-27 at the owner's request; it needs the Jinja2 templates from PR 2. Each stays under ~300 lines of production diff.
 
 | PR | Scope | Closes |
 |----|-------|--------|
@@ -46,6 +46,7 @@ The work lands as five PRs, in this order. Each stays under ~300 lines of produc
 | 3 | Hero, filter chips, bundles, whole-apartment banner and `UPSELL_MAP` from data; bundle totals and savings computed from item prices; walnut bundle dropped | #6, #32 (bundle part) |
 | 4 | `departure_date` replaces `moving_deadline` (countdown, wording, `drops` computed from the date); vehicle card and pickup terms from data; payment terms per kind; BUG-007 copy fixes | #13, #9, #48 |
 | 5 | Horizontal-scroll fix at 390 px | #10 |
+| 6 | Spanish version: the page rendered per locale to `build/public/` and `build/public/es/`, a language switch, Spanish copy for the item fields, SMS intents in the page's language | #53 |
 
 ## Out of scope
 
@@ -76,9 +77,10 @@ Each item below already has its own ticket and comes after this spec. None of th
 - [ ] AC6: `rg -i "3 weeks|everything must go|highway miles|remote start|Within 2 weeks"` over `src/` and `data/` returns nothing, and a test asserts the vehicle card shows only specs present in the YAML.
 - [ ] AC7: Venmo and Zelle appear only next to household items. The vehicle shows cash or a cashier's check, and nothing on the page says "no advance deposits" for the car.
 - [ ] AC8: At 390 px the page is 390 px wide (`document.documentElement.scrollWidth`), checked against the preview deploy.
+- [ ] AC9: `build/public/es/index.html` exists with `lang="es"`, and every item title, spec and UI string is in Spanish, falling back to English only where the data has no Spanish text. A test lists the fallbacks, and the claim guard runs over the Spanish copy too.
 
 ## References
 
-- Issues: #6 (gate), #41, #21, #32, #13, #9, #48, #10
+- Issues: #6 (gate), #41, #21, #32, #13, #9, #48, #10, #53
 - ADR: `docs/adr/adr-003-render-the-catalog-from-data-with-jinja2.md`
 - Lessons: `docs/lessons/lesson-008-honest-urgency-over-invented-scarcity.md`
