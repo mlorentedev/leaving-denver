@@ -10,6 +10,8 @@
     "sops"
   ],
   "optional_binaries": [
-    "uv"
+    "uv",
+    "gh",
+    "npx"
   ]
 }

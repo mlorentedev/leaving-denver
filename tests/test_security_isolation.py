@@ -47,6 +47,13 @@ def test_robots_txt_disallow_all():
     assert "Disallow: /" in robots
 
 
+def test_pages_headers():
+    headers = (DIST_DIR / "_headers").read_text(encoding="utf-8")
+    assert "X-Content-Type-Options: nosniff" in headers
+    assert "/catalog/*" in headers
+    assert "max-age=" in headers
+
+
 def test_private_assistant_has_security_gate():
     if not (DIST_PRIVATE_DIR / "poster_assistant.html").exists():
         pytest.skip("private workspace not built (sops file not decryptable here)")

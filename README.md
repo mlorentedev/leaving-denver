@@ -42,12 +42,29 @@ uv run leaving-denver sold sofa-sleeper 200
 # Start local preview server (Port 8088)
 uv run leaving-denver serve --port 8088
 
-# Deploy public site to Cloudflare Pages (100% free)
-uv run leaving-denver deploy-cf --project-name leaving-denver
-
-# Run test suite
-uv run leaving-denver test
+# Lint, build and test (what CI runs)
+make check
 ```
+
+### 3. Deploy (Cloudflare Pages)
+
+Deploys run from GitHub Actions: *Actions → ci → Run workflow*, with a `branch`
+input. `main` publishes the live site; any other name (default `preview`) creates
+a preview at `<branch>.leaving-denver.pages.dev`. The job rebuilds with the real
+phone, runs `make check`, deploys with wrangler and smoke-tests the deployment
+(`scripts/smoke.sh`).
+
+One-time setup, all idempotent and run from a machine with the age key:
+
+```bash
+make cf-project     # create the Pages project if missing
+make ci-secrets     # push CLOUDFLARE_API_TOKEN and SELLER_PHONE from the sops file to GitHub
+make protect-main   # require the CI `test` check on main
+```
+
+The deploy token (Cloudflare Pages: Edit, this account only) lives in
+`data/private.sops.yaml` as `cloudflare_pages_token`; the account id is in
+`wrangler.toml`. `make deploy BRANCH=<name>` deploys from this machine as a fallback.
 
 ---
 
