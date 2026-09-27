@@ -63,8 +63,8 @@ make protect-main   # require the CI `test` check on main
 ```
 
 The deploy token (Cloudflare Pages: Edit, this account only) lives in
-`data/private.sops.yaml` as `cloudflare_pages_token`; the account id is in
-`wrangler.toml`. `make deploy BRANCH=<name>` deploys from this machine as a fallback.
+`data/private.sops.yaml` as `cloudflare_pages_token`; the account id is
+`CF_ACCOUNT_ID` in the Makefile (Pages' `wrangler.toml` rejects it). `make deploy BRANCH=<name>` deploys from this machine as a fallback.
 
 ---
 

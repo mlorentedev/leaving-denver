@@ -25,6 +25,11 @@ branch previews, `_headers` and a token scoped to *Cloudflare Pages: Edit*. So `
 passes `--force` to create the project on Pages. Once the project exists, later `pages deploy`
 calls stay on Pages and need no `--force`.
 
+A second trap in the same place: Pages' `wrangler.toml` does not accept `account_id`.
+`pages project list` ignores it, but `pages deploy` validates the file and fails with
+"Configuration file for Pages projects does not support account_id". The first CI deploy
+failed on that, with nothing published. The account id goes in `CLOUDFLARE_ACCOUNT_ID`.
+
 ## Anti-Pattern (What NOT to do)
 Assuming a `pages ...` command talks to Pages, or "fixing" the failure by adding an `[assets]`
 block to `wrangler.toml`. That turns the deploy target into a Worker the Pages token cannot deploy.

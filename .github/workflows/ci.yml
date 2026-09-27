@@ -85,6 +85,8 @@ jobs:
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          # Not a secret; same value as CF_ACCOUNT_ID in the Makefile.
+          accountId: "76967f5ede1ce50efce34d90b7e94958"
           wranglerVersion: "4.141.0"
           command: pages deploy --project-name=leaving-denver --branch=${{ inputs.branch }}
 
