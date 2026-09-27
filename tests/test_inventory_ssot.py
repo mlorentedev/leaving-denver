@@ -2,6 +2,7 @@
 Unit tests for Single Source of Truth (SSOT) inventory data integrity.
 """
 
+import re
 from pathlib import Path
 
 import pytest
@@ -51,6 +52,19 @@ def test_items_integrity(inventory):
         # Specs and dimensions
         assert len(item.get("specs", [])) >= 2, f"Item {item_id} needs at least 2 specs"
         assert item.get("dimensions"), f"Item {item_id} missing dimensions"
+
+
+def test_bundle_cards_read_fields_the_data_has(inventory):
+    # The bundle cards are drawn by `INVENTORY.bundles.forEach(b => ...)`; a field the
+    # data lacks renders as "undefined" on the page (#6).
+    template = (
+        INVENTORY_YAML.parents[1] / "src" / "leaving_denver" / "templates" / "index.html"
+    ).read_text()
+    fields = set(re.findall(r"\$\{b\.(\w+)", template)) | set(re.findall(r"\+ b\.(\w+)", template))
+    assert fields, "no bundle fields found in the template"
+    for bundle in inventory["bundles"]:
+        missing = fields - bundle.keys()
+        assert not missing, f"{bundle['id']} lacks {sorted(missing)}, used by the bundle card"
 
 
 def test_vehicle_specifics(inventory):
