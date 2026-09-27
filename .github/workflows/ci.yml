@@ -32,7 +32,7 @@ jobs:
       # LFS objects are cached so each run does not re-download every photo.
       - name: Hash LFS object list
         run: git lfs ls-files -l | cut -d' ' -f1 | sort | sha256sum | cut -d' ' -f1 > .lfs-assets-id
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: .git/lfs
           key: lfs-${{ hashFiles('.lfs-assets-id') }}
@@ -70,7 +70,7 @@ jobs:
 
       - name: Hash LFS object list
         run: git lfs ls-files -l | cut -d' ' -f1 | sort | sha256sum | cut -d' ' -f1 > .lfs-assets-id
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: .git/lfs
           key: lfs-${{ hashFiles('.lfs-assets-id') }}
