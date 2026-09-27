@@ -48,6 +48,22 @@ def unpublished_ids(full_data: dict[str, Any]) -> set[str]:
     return {i["id"] for i in full_data.get("items", []) if i.get("published", True) is False}
 
 
+def apply_photos(item: dict[str, Any], synced: list[str]) -> None:
+    """Set an item's synced photos, its `cover:` photo first when it names one."""
+    images = list(synced)
+    cover = item.get("cover")
+    if cover:
+        # Photo sync renames files this way (image_processor.sync_all_photos).
+        name = Path(cover).stem.lower().replace(" ", "_") + ".jpg"
+        match = [img for img in images if Path(img).name == name]
+        if not match:
+            raise RuntimeError(f"{item['id']}: cover {cover} is not among its photos")
+        images.remove(match[0])
+        images.insert(0, match[0])
+    item["images"] = images
+    item["primary_image"] = images[0]
+
+
 def sanitize_public_inventory(full_data: dict[str, Any]) -> dict[str, Any]:
     """
     Strips internal seller secrets:
@@ -194,9 +210,8 @@ def build_all() -> None:
     # Update item photos if found
     for item in data.get("items", []):
         item_id = item.get("id")
-        if item_id in photo_map and photo_map[item_id]:
-            item["images"] = photo_map[item_id]
-            item["primary_image"] = photo_map[item_id][0]
+        if photo_map.get(item_id):
+            apply_photos(item, photo_map[item_id])
 
     # The build only reads the YAML; `leaving-denver sync` persists photo paths.
 
