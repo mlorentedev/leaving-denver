@@ -18,14 +18,14 @@ created: "2026-09-26"
 
 ### PR 1: `fix/fail-closed-inventory-and-publish-flag` (closes #41)
 
-- [ ] [AC1] `tests/test_build_contract.py::test_missing_inventory_marker_fails`: call `build_public_site` with a template lacking `__INVENTORY__`. Run `uv run pytest tests/test_build_contract.py -k marker`. Expected: FAIL, since today the build silently falls back.
-- [ ] [AC1] In `src/leaving_denver/site_builder.py`, replace the two-regex injection with a `const INVENTORY = __INVENTORY__;` marker, and raise `RuntimeError` naming the marker when it is absent, as `__SELLER_CONTACT__` already does. Replace the placeholder array in `templates/index.html` with the marker. Expected: PASS.
-- [ ] [P] [AC2] `test_unpublished_item_and_its_bundles_are_absent_from_public`: build from a fixture inventory (tmp copy via `monkeypatch` on `config` paths) with one item `published: false` and one bundle that contains it. Assert neither id occurs in any file under the public dir. Expected: FAIL.
-- [ ] [AC2] `sanitize_public_inventory` drops items with `published: false` (default `true`) and every bundle that references one.
-- [ ] [AC2] `test_unpublished_item_is_in_private_marked_draft`: the private `inventory.json` holds the item with `"draft": true`. The test skips when sops is not decryptable, like the other private tests.
-- [ ] [AC2] `build_private_workspace` sets `draft: true` on unpublished items; `poster_assistant.html` shows a DRAFT tag for them.
-- [ ] [AC2] `test_publish_flag_survives_yaml_round_trip`: `build_all` keeps `published: false` in `data/inventory.yaml` (guards BUG-006 #12).
-- [ ] The car stays `published: true` in PR 1. Its card is hand-written HTML until PR 2, so the flag cannot remove it yet.
+- [x] [AC1] `tests/test_build_contract.py::test_missing_inventory_marker_fails`: call `build_public_site` with a template lacking `__INVENTORY__`. Run `uv run pytest tests/test_build_contract.py -k marker`. Expected: FAIL, since today the build silently falls back.
+- [x] [AC1] In `src/leaving_denver/site_builder.py`, replace the two-regex injection with a `const INVENTORY = __INVENTORY__;` marker, and raise `RuntimeError` naming the marker when it is absent, as `__SELLER_CONTACT__` already does. Replace the placeholder array in `templates/index.html` with the marker. Expected: PASS.
+- [x] [P] [AC2] `test_unpublished_item_and_its_bundles_are_absent_from_public`: build from a fixture inventory (tmp copy via `monkeypatch` on `config` paths) with one item `published: false` and one bundle that contains it. Assert neither id occurs in any file under the public dir. Expected: FAIL.
+- [x] [AC2] `sanitize_public_inventory` drops items with `published: false` (default `true`) and every bundle that references one; `build_public_site` removes their `catalog/<id>/` photos, which the photo sync copies for every item.
+- [x] [AC2] `test_unpublished_item_is_in_private_marked_draft`: the private `inventory.json` holds the item with `"draft": true`. `load_private` is monkeypatched, so the test runs in CI too.
+- [x] [AC2] `build_private_workspace` sets `draft: true` on unpublished items; `poster_assistant.html` shows a DRAFT tag for them.
+- [x] [AC2] `test_publish_flag_survives_yaml_round_trip`: `build_all` keeps `published: false` in `data/inventory.yaml` (guards BUG-006 #12).
+- [x] The car stays `published: true` in PR 1. Its card is hand-written HTML until PR 2, so the flag cannot remove it yet.
 
 ### PR 2: `refactor/render-catalog-with-jinja2` (closes #21)
 
