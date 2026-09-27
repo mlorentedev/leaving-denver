@@ -13,7 +13,12 @@ import urllib.parse
 from pathlib import Path
 
 from leaving_denver.config import DIST_DIR, DIST_PRIVATE_DIR
-from leaving_denver.site_builder import build_all, load_inventory_yaml, save_inventory_yaml
+from leaving_denver.site_builder import (
+    apply_photos,
+    build_all,
+    load_inventory_yaml,
+    save_inventory_yaml,
+)
 
 
 def cmd_build(args):
@@ -29,9 +34,8 @@ def cmd_sync(args):
     data = load_inventory_yaml()
     for item in data.get("items", []):
         item_id = item.get("id")
-        if item_id in photo_map and photo_map[item_id]:
-            item["images"] = photo_map[item_id]
-            item["primary_image"] = photo_map[item_id][0]
+        if photo_map.get(item_id):
+            apply_photos(item, photo_map[item_id])
     save_inventory_yaml(data)
     print("Sync complete. Run 'leaving-denver build' to recompile sites.")
 
