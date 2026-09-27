@@ -2,17 +2,17 @@
 """
 Denver Tech Center Moving Sale - Master Management CLI.
 Coordinates SSOT (data/inventory.yaml), automated photo synchronization,
-public/private builds, 3-week Hormozi drops, and Cloudflare Pages deployment.
+public/private builds, staged price drops and a loopback-only preview server.
+Deploys go through GitHub Actions or `make deploy`.
 """
 
 import argparse
 import http.server
-import os
-import socketserver
-import subprocess
 import sys
+import urllib.parse
+from pathlib import Path
 
-from leaving_denver.config import BASE_DIR, DIST_DIR, DIST_PRIVATE_DIR
+from leaving_denver.config import DIST_DIR, DIST_PRIVATE_DIR
 from leaving_denver.site_builder import build_all, load_inventory_yaml, save_inventory_yaml
 
 
@@ -98,49 +98,52 @@ def cmd_drops(args):
     print("Hormozi Protocol: If 0 inquiries within 4-7 days on an item, lower to Week 2 tier.")
 
 
+def resolve_request_path(path: str) -> Path | None:
+    """Map a request path onto a file under build/, or None when it escapes its root.
+
+    /private/ and the poster tool come from build/private/; everything else from
+    build/public/, the way Cloudflare Pages serves it. Nothing outside build/ is
+    reachable: the repo root holds data/inventory.json (with the reserve floors)
+    and, one level up, the age key.
+    """
+    path = urllib.parse.unquote(urllib.parse.urlsplit(path).path)
+    if path.startswith("/private/") or path.startswith("/poster_assistant.html"):
+        root, rel = DIST_PRIVATE_DIR, path.removeprefix("/private/")
+    else:
+        root, rel = DIST_DIR, path
+    target = (root / rel.lstrip("/")).resolve()
+    if not target.is_relative_to(root.resolve()):
+        return None
+    return root / target.relative_to(root.resolve())
+
+
+class PreviewHandler(http.server.SimpleHTTPRequestHandler):
+    def translate_path(self, path):
+        resolved = resolve_request_path(path)
+        return str(resolved) if resolved else ""
+
+    def send_head(self):
+        if resolve_request_path(self.path) is None:
+            self.send_error(404)
+            return None
+        return super().send_head()
+
+
+def make_server(port: int, host: str = "127.0.0.1") -> http.server.ThreadingHTTPServer:
+    return http.server.ThreadingHTTPServer((host, port), PreviewHandler)
+
+
 def cmd_serve(args):
-    port = args.port
-    os.chdir(str(BASE_DIR))
-
-    class CustomHandler(http.server.SimpleHTTPRequestHandler):
-        def translate_path(self, path):
-            # Route / to build/public/index.html
-            if path == "/" or path.startswith("/catalog/") or path == "/robots.txt":
-                return str(DIST_DIR / path.lstrip("/"))
-            elif path.startswith("/poster_assistant.html") or path.startswith("/private/"):
-                clean = path.replace("/private/", "").lstrip("/")
-                return str(DIST_PRIVATE_DIR / clean)
-            return super().translate_path(path)
-
-    with socketserver.TCPServer(("", port), CustomHandler) as httpd:
+    with make_server(args.port, args.host) as httpd:
+        host, port = httpd.server_address[:2]
         print("=" * 65)
-        print(f"Server active on http://localhost:{port}")
-        print(f"Public Minimalist Catalog: http://localhost:{port}/")
-        print(f"Private Seller Tool:      http://localhost:{port}/poster_assistant.html")
+        print(f"Public catalog:      http://{host}:{port}/")
+        print(f"Private seller tool: http://{host}:{port}/poster_assistant.html")
         print("=" * 65)
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:
             print("\nServer stopped.")
-
-
-def cmd_deploy_cf(args):
-    project_name = args.project_name
-    print(f"Deploying build/public/ to Cloudflare Pages (Project: {project_name})...")
-    cmd = [
-        "npx",
-        "wrangler",
-        "pages",
-        "deploy",
-        str(DIST_DIR),
-        f"--project-name={project_name}",
-    ]
-    subprocess.run(cmd)
-
-
-def cmd_test(args):
-    print("Running test suite...")
-    subprocess.run(["pytest", "tests/"])
 
 
 def main():
@@ -163,16 +166,13 @@ def main():
 
     serve_p = subparsers.add_parser("serve", help="Serve catalog and seller tool locally")
     serve_p.add_argument("--port", type=int, default=8088, help="Port (default: 8088)")
-    serve_p.set_defaults(func=cmd_serve)
-
-    deploy_p = subparsers.add_parser("deploy-cf", help="Deploy public site to Cloudflare Pages")
-    deploy_p.add_argument(
-        "--project-name", default="leaving-denver", help="Cloudflare Pages project name"
+    serve_p.add_argument(
+        "--host",
+        default="127.0.0.1",
+        help="Bind address (default: 127.0.0.1). The private tool is served too, so "
+        "binding a LAN address exposes the reserve floors to that network.",
     )
-    deploy_p.set_defaults(func=cmd_deploy_cf)
-
-    test_p = subparsers.add_parser("test", help="Run pytest integrity and security suite")
-    test_p.set_defaults(func=cmd_test)
+    serve_p.set_defaults(func=cmd_serve)
 
     args = parser.parse_args()
     if not args.command:

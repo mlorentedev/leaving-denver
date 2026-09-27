@@ -50,4 +50,4 @@ Craigslist Denver ranks listings in strict reverse-chronological order. Listings
 You can configure an n8n Telegram Bot node:
 * Send a photo of any item directly to your private Telegram bot with caption `#vehicle` or `#sofa`.
 * n8n saves the image into `/data/leaving-denver/content/photos/<item_id>/`.
-* A webhook triggers `leaving-denver build && leaving-denver deploy-cf`.
+* A webhook triggers `make deploy BRANCH=main`.

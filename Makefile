@@ -26,8 +26,20 @@ CF_ENV    := CLOUDFLARE_API_TOKEN="$$(sops -d --extract '["cloudflare_pages_toke
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
 
-install: ## Create the venv and install the locked deps (dev included)
+install: ## Install the locked deps (dev included) and the Git LFS hooks
 	$(UV) sync --extra dev
+	@# Filters only: plain `git lfs install` would write into a global core.hooksPath
+	@# dispatcher (lesson-007). The hooks go where the dispatcher chains to.
+	git lfs install --local --skip-repo >/dev/null
+	@# The repo's own hooks dir, never `git rev-parse --git-path hooks`: that follows
+	@# core.hooksPath and would write into the global dispatcher.
+	@hooks="$$(git rev-parse --path-format=absolute --git-common-dir)/hooks"; mkdir -p "$$hooks"; \
+	for h in pre-push post-checkout post-commit post-merge; do \
+		f="$$hooks/$$h"; \
+		if [ -e "$$f" ] && ! grep -q 'git lfs' "$$f"; then echo "kept existing non-LFS hook $$f" >&2; continue; fi; \
+		printf '#!/bin/sh\ncommand -v git-lfs >/dev/null 2>&1 || { echo >&2 "git-lfs not found on PATH"; exit 2; }\ngit lfs %s "$$@"\n' "$$h" > "$$f"; \
+		chmod +x "$$f"; \
+	done
 
 lint: ## Ruff lint + format check
 	$(UV) run ruff check .
@@ -45,7 +57,7 @@ test: build ## Build, then run the test suite against the fresh build
 
 check: lint test ## Lint + build + test (what CI runs)
 
-serve: build ## Serve the catalog and the private tool on localhost:$(PORT)
+serve: build ## Serve the catalog and the private tool on 127.0.0.1:$(PORT) (loopback only)
 	$(UV) run leaving-denver serve --port $(PORT)
 
 drops: ## Show the staged price-drop table (needs the sops key)

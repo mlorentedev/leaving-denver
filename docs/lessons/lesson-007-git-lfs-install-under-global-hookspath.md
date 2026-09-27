@@ -25,8 +25,18 @@ git lfs install --local --skip-repo   # filters in .git/config, no hooks
 # each as: command -v git-lfs >/dev/null && git lfs <hook> "$@"
 ```
 
+`make install` does this. It finds the hooks directory with
+`git rev-parse --path-format=absolute --git-common-dir`, plus `/hooks`. That path also
+works from a linked worktree.
+
 ## Anti-Pattern (What NOT to do)
 Running plain `git lfs install` (or `--force`) on a machine with a global `core.hooksPath`.
+
+Finding the hooks directory with `git rev-parse --git-path hooks`. It follows
+`core.hooksPath` too, so it returns the dispatcher. The first version of `make install`
+used it and created `post-commit` and `post-merge` LFS hooks in `~/.dotfiles/git-hooks/`,
+which made every repository on the machine run them. They were removed the same session
+(2026-09-26).
 
 ## Golden Rule (The Pattern)
 > **With a global hooks dispatcher, repo-specific hooks go in `.git/hooks`, never in the
