@@ -36,3 +36,4 @@ content/raw_heic/
 *.egg-info/
 .ruff_cache/
 .lfs-assets-id
+.wrangler/

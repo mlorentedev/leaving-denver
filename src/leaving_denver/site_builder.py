@@ -3,6 +3,7 @@ Site Builder for Denver Tech Center Moving Sale.
 Compiles Single Source of Truth (data/inventory.yaml) into:
 1. build/public/index.html - Sanitized, high-speed public catalog (Zero floor prices, obfuscated contacts).
 2. build/public/robots.txt - Total crawler disallow directive.
+   build/public/_headers - Cloudflare Pages response headers.
 3. build/private/ - Private local seller tool with multi-platform listing copy and PIN lock.
 """
 
@@ -20,6 +21,7 @@ from leaving_denver.config import (
     INVENTORY_JSON_PRIVATE,
     INVENTORY_YAML,
     PRIVATE_POSTER_HTML,
+    PUBLIC_HEADERS,
     PUBLIC_INDEX_HTML,
     PUBLIC_ROBOTS_TXT,
 )
@@ -72,6 +74,19 @@ def sanitize_public_inventory(full_data: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+# Cloudflare Pages reads _headers from the output root. Photos keep their names
+# when replaced, so they get a day of cache rather than `immutable`.
+PAGES_HEADERS = """/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Robots-Tag: noindex
+
+/catalog/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+"""
+
+
 def build_public_site(full_data: dict[str, Any]) -> None:
     DIST_DIR.mkdir(parents=True, exist_ok=True)
     template_path = Path(__file__).parent / "templates" / "index.html"
@@ -112,6 +127,8 @@ def build_public_site(full_data: dict[str, Any]) -> None:
     # Write robots.txt
     with open(PUBLIC_ROBOTS_TXT, "w", encoding="utf-8") as f:
         f.write("# Disallow all automated crawlers and scrapers\nUser-agent: *\nDisallow: /\n")
+
+    PUBLIC_HEADERS.write_text(PAGES_HEADERS, encoding="utf-8")
 
 
 def build_private_workspace(full_data: dict[str, Any]) -> None:

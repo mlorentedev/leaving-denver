@@ -20,6 +20,7 @@ INVENTORY_JSON_PRIVATE = DATA_DIR / "inventory.json"
 PRIVATE_SOPS_YAML = DATA_DIR / "private.sops.yaml"
 PUBLIC_INDEX_HTML = DIST_DIR / "index.html"
 PUBLIC_ROBOTS_TXT = DIST_DIR / "robots.txt"
+PUBLIC_HEADERS = DIST_DIR / "_headers"
 PRIVATE_POSTER_HTML = DIST_PRIVATE_DIR / "poster_assistant.html"
 
 # Image Processing Standards

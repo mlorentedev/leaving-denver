@@ -6,6 +6,14 @@ on:
   push:
     branches: [main]
   pull_request:
+  # Deploys are manual until the catalog is ready to list. Any branch other
+  # than main is a preview (<branch>.leaving-denver.pages.dev); main is live.
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Pages branch: 'main' publishes the live site, anything else a preview"
+        required: true
+        default: preview
 
 jobs:
   test:
@@ -30,3 +38,51 @@ jobs:
       - uses: astral-sh/setup-uv@v6
       - run: make install
       - run: make check
+
+  deploy:
+    if: github.event_name == 'workflow_dispatch'
+    needs: test
+    runs-on: ubuntu-latest
+    # One deploy per Pages branch at a time; a second dispatch waits.
+    concurrency:
+      group: pages-${{ inputs.branch }}
+      cancel-in-progress: false
+    environment:
+      name: ${{ inputs.branch == 'main' && 'production' || 'preview' }}
+      url: ${{ steps.deploy.outputs.deployment-url }}
+    env:
+      SELLER_PHONE: ${{ secrets.SELLER_PHONE }}
+    steps:
+      # The input reaches wrangler's command line, so only a plain branch name
+      # gets through.
+      - name: Validate branch input
+        env:
+          BRANCH: ${{ inputs.branch }}
+        run: '[[ "$BRANCH" =~ ^[a-z0-9][a-z0-9-]{0,27}$ ]] || { echo "invalid branch: $BRANCH"; exit 1; }'
+
+      - uses: actions/checkout@v5
+
+      - name: Hash LFS object list
+        run: git lfs ls-files -l | cut -d' ' -f1 | sort | sha256sum | cut -d' ' -f1 > .lfs-assets-id
+      - uses: actions/cache@v4
+        with:
+          path: .git/lfs
+          key: lfs-${{ hashFiles('.lfs-assets-id') }}
+      - run: git lfs pull
+
+      - uses: astral-sh/setup-uv@v6
+      - run: make install
+      # Same gate as the test job, now against the build with the real number.
+      - run: make check
+
+      - id: deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          wranglerVersion: "4.141.0"
+          command: pages deploy --project-name=leaving-denver --branch=${{ inputs.branch }}
+
+      - name: Smoke test
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: scripts/smoke.sh "$DEPLOYMENT_URL"
