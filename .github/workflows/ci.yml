@@ -15,6 +15,9 @@ on:
         required: true
         default: preview
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -54,11 +57,14 @@ jobs:
       SELLER_PHONE: ${{ secrets.SELLER_PHONE }}
     steps:
       # The input reaches wrangler's command line, so only a plain branch name
-      # gets through.
+      # gets through. Production only ever gets a build of main.
       - name: Validate branch input
         env:
           BRANCH: ${{ inputs.branch }}
-        run: '[[ "$BRANCH" =~ ^[a-z0-9][a-z0-9-]{0,27}$ ]] || { echo "invalid branch: $BRANCH"; exit 1; }'
+          REF: ${{ github.ref }}
+        run: |
+          [[ "$BRANCH" =~ ^[a-z0-9][a-z0-9-]{0,27}$ ]] || { echo "invalid branch: $BRANCH"; exit 1; }
+          [[ "$BRANCH" != main || "$REF" == refs/heads/main ]] || { echo "branch=main must be dispatched from main, not $REF"; exit 1; }
 
       - uses: actions/checkout@v5
 

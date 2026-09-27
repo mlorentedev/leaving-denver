@@ -83,7 +83,7 @@ PAGES_HEADERS = """/*
   X-Robots-Tag: noindex
 
 /catalog/*
-  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+  Cache-Control: public, max-age=86400
 """
 
 
