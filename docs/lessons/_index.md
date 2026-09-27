@@ -22,3 +22,4 @@ tags: [lessons, index, docs, leaving-denver]
 | [lesson-007](lesson-007-git-lfs-install-under-global-hookspath.md) | `git lfs install` Under a Global core.hooksPath | 2026-09-25 | [git, git-lfs, hooks] |
 | [lesson-008](lesson-008-honest-urgency-over-invented-scarcity.md) | Real Urgency, Not Invented Scarcity | 2026-09-25 | [copy, marketing, legal] |
 | [lesson-009](lesson-009-wrangler-delegates-new-pages-projects-to-workers.md) | Wrangler Hands New Pages Projects to Workers | 2026-09-26 | [cloudflare, wrangler, deploy] |
+| [lesson-010](lesson-010-redact-scanned-documents-on-pixels.md) | Redact Scanned Documents on the Pixels, Then Re-Encode | 2026-09-26 | [privacy, documents, images] |
