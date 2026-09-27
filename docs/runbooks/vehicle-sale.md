@@ -4,6 +4,31 @@ How the car is sold safely in Colorado. The seller needs the car until the last 
 
 Owner decisions are marked **[OWNER]**. Everything else is procedure. Sources are at the end. Never commit a filled-in copy of the agreement, the plate number or the buyer's details: this repo is public.
 
+## The rules
+
+**Payment.** Payment is only one of these two, and both are final once done right:
+
+| Method | How | Why it cannot be clawed back |
+|---|---|---|
+| **Cashier's check (default)** | At the buyer's bank, the teller prints it in front of you, payable to you. Deposit it in your own account the same day. | It is the bank's own obligation, so the buyer has no right to stop payment. A "lost check" claim cannot take effect until 90 days after the check's date, and it has no effect on a check that has already been paid. The only real risk is a fake check, and watching the teller print it removes that. |
+| **Wire** | Sent from the buyer's bank to your account. It counts only once it shows as posted in *your* banking app. | Once credited, a domestic wire is final (UCC 4A), and a recall is only a request your bank may refuse. It means giving the buyer your account details. |
+
+- If you both bank at the same bank, an in-branch transfer done at the counter is the simplest option.
+- **Never accept:**
+  - a check the buyer brings already printed;
+  - a personal check;
+  - Zelle, Venmo, PayPal or ACH for the car;
+  - any payment above the price.
+- **The title is signed after the money is final, never before.**
+
+**Meeting and test drive.**
+
+- Meet in daylight at a police safe trade zone or in a bank parking lot, never at the apartment:
+  - Denver PD Safe Trade Zones (marked, on camera): District 3, 1625 S University Blvd; District 4, 2100 S Clay St. They were set up in 2019, so confirm they are still in place.
+  - Arapahoe County Sheriff HQ, 13101 E Broncos Pkwy: call 303-795-4711 first to ask whether the lot may be used.
+- Before handing over the keys, photograph the buyer's driver's license and insurance card. You ride along, and there is one buyer at a time.
+- The deal closes at the buyer's bank (§5), which is also a safe place to meet.
+
 ## 1. Before listing
 
 - [ ] Listing copy states only what the documents back (`test_no_unbacked_vehicle_claims`). There is no 100k service receipt, so the listing never claims that service.
@@ -154,6 +179,10 @@ Buyer signature / date:  ____________________
 
 ## Sources
 
+- UCC 3-411 and 3-312, cashier's checks (Cornell LII): https://www.law.cornell.edu/ucc/3/3-411 , https://www.law.cornell.edu/ucc/3/3-312
+- UCC 4A, wire finality: https://www.certifid.com/article/can-a-wire-transfer-be-reversed
+- Denver PD Safe Trade Zones: https://denverite.com/2019/12/06/denver-police-are-creating-areas-for-you-to-safely-exchange-that-toaster-you-sold-on-craigslist/
+- KBB, exchanging funds in a private sale: https://www.kbb.com/car-advice/exchange-funds-private-sale/
 - CO DMV, private sale: https://dmv.colorado.gov/buying-and-selling
 - CO DMV, release of liability (C.R.S. 42-6-109(3)): https://dmv.colorado.gov/colorado-residents-now-able-to-voluntarily-report-vehicle-ownership-transfers
 - Douglas County, plates and the 36-hour rule: https://www.douglasco.gov/motorvehicle/buying-or-selling-a-vehicle/
