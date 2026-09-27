@@ -58,6 +58,7 @@ The buyer agrees now and takes the car on **Thursday 2026-11-05** (owner, 2026-0
 No escrow product locks a buyer in with a non-refundable deposit.
 
 - **KeySavvy** holds the buyer's payment, but that payment is refundable until pickup, so it does not lock the buyer.
+- **PrivateAuto** (funds held by US Alliance) and **Caramel** (Cars.com checkout) are the other escrow-style platforms in the research. Their deposit terms were not checked, because the no-deposit decision does not depend on them. If a buyer insists on one, type its address yourself and read who holds the money before agreeing.
 - **KeySavvy for the whole sale** is a poor fit for this timeline too. It pays the seller only once the title has been mailed to KeySavvy and the buyer has picked up the car. With handover Nov 5–6 and departure Nov 9, the mail is the failure mode.
 
 | Option | How | Seller risk | Buyer risk |
