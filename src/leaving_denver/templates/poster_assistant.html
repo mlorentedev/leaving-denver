@@ -492,16 +492,16 @@
       // --- PLATFORM 1: FACEBOOK MARKETPLACE ---
       if (platform === 'fb') {
         if (isVehicle) {
-          title = `2019 Ford Escape SEL AWD – Clean CO Title, 100k Svc Complete (DTC)`;
-          description = `We are moving out of the country in 3 weeks, so we're selling our 2019 Ford Escape SEL AWD.
+          title = `2019 Ford Escape SEL AWD – Clean CO Title, Dealer Inspected (DTC)`;
+          description = `We are moving out of the country in November, so we're selling our 2019 Ford Escape SEL AWD.
 
 Price: $${price.toLocaleString()} (Priced well below typical dealer listings for a fast private sale)
-Mileage: 103,500 highway miles
+Mileage: 103,500
 Title: Clean Colorado Title in hand with zero liens, ready to sign over today.
 
 Why this car has been great:
 - 1.5L EcoBoost with Ford Intelligent AWD and all-weather tires — drives effortlessly through Colorado snow.
-- 100k-mile milestone service completed recently: fresh oil, fresh brake fluid flush, and tire rotation.
+- Ford dealer inspection on 25 Sep 2026: battery good, brakes OK, tires good (invoice available).
 - Passed Colorado emissions in 2026; you get a valid, unused certificate at sale.
 - Cold weather package: heated leather front seats, heated mirrors, and factory roof rails.
 - Apple CarPlay, Android Auto, SYNC 3 8" screen, hands-free foot-activated power liftgate.
@@ -513,10 +513,10 @@ Original key fobs, unused emissions certificate, bill of sale, and the signed cl
 Pickup & Inspection:
 Located in Denver Tech Center (DTC / 80111) near I-25. You are welcome to test drive it in the area. Payment via cash or cashier's check verified directly at your bank branch window before title signing.
 
-Moving abroad in 3 weeks, so first qualified buyer takes it. Message me to arrange a time.`;
+Moving abroad in November; first qualified buyer takes it. Message me to arrange a time.`;
         } else {
           title = `${item.title}`.substring(0, 95);
-          description = `I'm relocating out of the US in 3 weeks, so I'm selling my ${item.short_title}.
+          description = `I'm relocating out of the US in November, so I'm selling my ${item.short_title}.
 
 I bought this new for $${retail} (plus tax and delivery fees). If you bought it from the store today, you'd spend around $${Math.round(retail * 1.15)} and lose half your Saturday putting it together with an Allen wrench. I'm selling it for $${price}.
 
@@ -550,14 +550,14 @@ First person who can pick it up takes it. Send me a message to arrange a time.`;
       // --- PLATFORM 2: CRAIGSLIST DENVER (Pure text, no broken markdown, uppercase headers) ---
       else if (platform === 'cl') {
         if (isVehicle) {
-          title = `2019 Ford Escape SEL AWD - Clean CO Title, 100k Svc (DTC)`;
+          title = `2019 Ford Escape SEL AWD - Clean CO Title, Dealer Inspected (DTC)`;
           description = `2019 Ford Escape SEL AWD - Clean Colorado Title in Hand
 
 Price: $${price.toLocaleString()}
 Mileage: 103,500
 Title: Clean Colorado Title (No liens, ready for transfer)
 
-We are relocating out of the USA in 3 weeks and selling our highway-commuter Ford Escape SEL AWD.
+We are relocating out of the USA in November and selling our Ford Escape SEL AWD.
 
 KEY DETAILS:
 ${specs}
@@ -583,7 +583,7 @@ PRICE: $${price} (Original retail: $${retail})
 CONDITION: ${item.condition}
 DIMENSIONS: ${item.dimensions}
 
-We are moving out of the USA in 3 weeks and selling our furniture from a clean, pet-free, non-smoking home in the Denver Tech Center.
+We are moving out of the USA in November and selling our furniture from a clean, pet-free, non-smoking home in the Denver Tech Center.
 
 WHY THIS IS A GREAT DEAL:
 - Already fully assembled and tested: skips 2-3 hours of flat-pack assembly.
@@ -618,7 +618,7 @@ ${specs}
 
 Already assembled and solid. No flat-pack headaches.
 Pick up in DTC (80111) near I-25. Elevator building, I can help you carry to your car.
-Cash or Venmo when you inspect it. Moving abroad in 3 weeks, so priced to sell fast!
+Cash or Venmo when you inspect it. Moving abroad in November, so priced to sell.
 
 Message me to pick up today.`;
       }
@@ -628,7 +628,7 @@ Message me to pick up today.`;
         title = `Moving Sale in DTC: ${item.short_title} ($${price})`;
         description = `Hi neighbors,
 
-We are relocating out of the USA in 3 weeks and selling our furniture and household goods from our apartment in the Denver Tech Center (80111).
+We are relocating out of the USA in November and selling our furniture and household goods from our apartment in the Denver Tech Center (80111).
 
 We are selling our ${item.title}:
 - Price for neighbors: $${price} (Bought new for $${retail})

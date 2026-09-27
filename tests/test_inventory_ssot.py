@@ -2,12 +2,14 @@
 Unit tests for Single Source of Truth (SSOT) inventory data integrity.
 """
 
+import re
 from pathlib import Path
 
 import pytest
 import yaml
 
-INVENTORY_YAML = Path(__file__).resolve().parent.parent / "data" / "inventory.yaml"
+BASE_DIR = Path(__file__).resolve().parent.parent
+INVENTORY_YAML = BASE_DIR / "data" / "inventory.yaml"
 
 
 @pytest.fixture
@@ -100,3 +102,26 @@ def test_private_floors_consistent(inventory):
         assert 0 < floor <= item["recommended_list_price"], (
             f"Floor exceeds list price in {item['id']}"
         )
+
+
+# Claims the seller cannot back: no 100k service receipt exists, remote start and
+# highway-only miles are not in the data, the departure date is 9 November, and
+# the CSP 21N12 coverage ended at 84k miles.
+UNBACKED_CLAIMS = re.compile(
+    r"100k[- ](mile )?(milestone )?(major )?s(er)?v|highway miles|highway-commuter|"
+    r"remote start|fully serviced|great mechanical|in 3 weeks|21N12",
+    re.IGNORECASE,
+)
+CLAIM_SOURCES = [
+    INVENTORY_YAML,
+    BASE_DIR / "src" / "leaving_denver" / "templates" / "index.html",
+    BASE_DIR / "src" / "leaving_denver" / "templates" / "poster_assistant.html",
+    BASE_DIR / "build" / "public" / "index.html",
+]
+
+
+@pytest.mark.parametrize("path", CLAIM_SOURCES, ids=lambda p: p.name)
+def test_no_unbacked_vehicle_claims(path):
+    assert path.exists(), f"missing {path}"
+    hits = UNBACKED_CLAIMS.findall(path.read_text(encoding="utf-8"))
+    assert not hits, f"{path.name} states a claim the seller cannot back: {hits}"
