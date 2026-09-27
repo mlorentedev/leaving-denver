@@ -35,7 +35,7 @@ Owner decisions are marked **[OWNER]**. Everything else is procedure. Sources ar
 ## 1. Before listing
 
 - [ ] Listing copy states only what the documents back (`test_no_unbacked_vehicle_claims`). There is no 100k service receipt, so the listing never claims that service.
-- [ ] The odometer in the listing matches the dashboard. The recall invoice already shows 102,692 mi on 2026-09-25.
+- [x] The listing says 103,500 mi on purpose (owner, 2026-09-27): it covers the miles driven until handover, so the buyer never finds more miles than advertised. The recall invoice shows 102,692 mi on 2026-09-25. The title and DR 2173 get the real dashboard reading on handover day (§5).
 - [ ] Instant offers pulled (CarMax, Carvana, KBB ICO, Peddle) to know the floor. They expire in 7 days, so pull them again around Nov 1–2 (OPS-002 #27).
 - [ ] Title in hand, no lienholder. Keep it at home; it only leaves home on handover day.
 - [ ] AirCare test booked for the days just before handover, not now (OPS-008 #33). See §6.
