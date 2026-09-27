@@ -1,0 +1,47 @@
+{
+  "$comment": [
+    "Reviewer registry for this repository, a port of dotfiles/harness/review-attestation.json",
+    "via mlorentedev/pollex, trimmed to the reviewers that act here. Without it `dotf pr",
+    "triage-queue` cannot answer in this repo (no such file), so triage was posted by hand.",
+    "",
+    "review_markers measured here on 2026-09-26 over every PR, reading CodeRabbit's issue comments:",
+    "  ## Walkthrough          -> #11 #42      (a review ran; the attesting marker)",
+    "  Review limit reached    -> #11 #36 #40 #42 (#11 and #42 were reviewed after the notice)",
+    "  (no CodeRabbit output)  -> #1",
+    "",
+    "The github-actions entry declares PR-Agent, which lands in the same PR as this file; its first",
+    "run on a PR here is what makes that entry real (see its `why`)."
+  ],
+  "reviewers": [
+    {
+      "login": "coderabbitai",
+      "declined_markers": [
+        "## Review limit reached",
+        "rate limited by coderabbit.ai",
+        "## Review skipped"
+      ],
+      "review_markers": [
+        "## Walkthrough"
+      ],
+      "advisory": true,
+      "why": "ADVISORY, same as the dotfiles, kubelab and pollex registries: its review attests, its decline does not refuse. The quota is a third party's billing state, not a property of the change, and it declined on 4 of 5 PRs here. Logins match with a trailing '[bot]' stripped and case folded, because REST and GraphQL disagree on the name."
+    },
+    {
+      "login": "github-actions",
+      "declined_markers": [],
+      "review_markers": [
+        "## PR Reviewer Guide"
+      ],
+      "why": "PR-Agent (.github/workflows/pr-agent.yml) runs under GITHUB_TOKEN and publishes through the COMMENTS api, so its reviews never enter reviews[]. The marker is the `review` command's own heading; `## PR Code Suggestions` is deliberately not a marker, since suggestions are not a review. Marker provenance: observed from github-actions[bot] in dotfiles and kubelab (hundreds of comments). Not yet observed here: the first green pr-agent run on a leaving-denver PR, after NAN_API_KEY is synced, is the verification."
+    }
+  ],
+  "triage": {
+    "marker": "## Review triage",
+    "why": "The heading the pr-review-triage skill records its dispositions under, matched at line start. Declared once here and read back by `dotf pr triage-queue`, so the writer and the reader are not a two-file agreement nobody checks. A disposition that lives only in a chat message evaporates, and the Definition of Done's Review item would then rest on a claim nobody can re-read. It is posted even when there was nothing to dispose of: 'CI green, no review findings' is a disposition, and leaving it unwritten is indistinguishable from nobody having looked."
+  },
+  "escape": {
+    "label": "merged-unreviewed",
+    "section": "## Unreviewed merge rationale",
+    "why": "Both are required, never one. Proceeding on an unreviewed PR is allowed; proceeding SILENTLY is not. The label plus the section is what forces the disclosure into the durable record instead of a chat message."
+  }
+}
