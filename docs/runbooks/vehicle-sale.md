@@ -24,7 +24,7 @@ Owner decisions are marked **[OWNER]**. Everything else is procedure. Sources ar
 **Meeting and test drive.**
 
 - Meet in daylight at a police safe trade zone or in a bank parking lot, never at the apartment. The nearest to DTC:
-  - **Denver PD District 3, 1625 S University Blvd (first choice).** Every Denver PD district station is a Safe Trade Zone: a marked parking space in view of the cameras, or the lobby (tell the clerk why you are there). District 3 was still listed as one in 2025. The non-emergency line is 720-913-2000, then press 0.
+  - **Denver PD District 3, 1625 S University Blvd (first choice).** Denver PD set up a Safe Trade Zone at each district station in 2019: a marked parking space in view of the cameras, or the lobby (tell the clerk why you are there). District 3 was still listed as one in 2025; the others have no current confirmation. Call the non-emergency line (720-913-2000, then press 0) the week of the meeting to confirm the station you will use.
   - **Douglas County Sheriff, Highlands Ranch substation, 9250 Zotos Dr:** two marked spaces under video.
   - **Denver PD District 4, 2100 S Clay St.**
   - No zone is confirmed in Greenwood Village or Centennial. Arapahoe County Sheriff HQ (13101 E Broncos Pkwy) may allow its lot: call 303-795-4711 first.
@@ -35,7 +35,7 @@ Owner decisions are marked **[OWNER]**. Everything else is procedure. Sources ar
 ## 1. Before listing
 
 - [ ] Listing copy states only what the documents back (`test_no_unbacked_vehicle_claims`). There is no 100k service receipt, so the listing never claims that service.
-- [x] The listing says 103,500 mi on purpose (owner, 2026-09-27): it covers the miles driven until handover, so the buyer never finds more miles than advertised. The recall invoice shows 102,692 mi on 2026-09-25. The title and DR 2173 get the real dashboard reading on handover day (§5).
+- [x] The listing says 103,500 mi on purpose (owner, 2026-09-27): it covers the miles driven until handover, so the buyer never finds more miles than advertised. The recall invoice shows 102,692 mi on 2026-09-25. The title and DR 2173 get the real dashboard reading on handover day (§5). That leaves about 800 miles of headroom: read the dashboard when the listing photos are taken and again a week before handover, and raise the listed figure if it is within 200 miles.
 - [ ] Instant offers pulled (CarMax, Carvana, KBB ICO, Peddle) to know the floor. They expire in 7 days, so pull them again around Nov 1–2 (OPS-002 #27).
 - [ ] Title in hand, no lienholder. Keep it at home; it only leaves home on handover day.
 - [ ] AirCare test booked for the days just before handover, not now (OPS-008 #33). See §6.
