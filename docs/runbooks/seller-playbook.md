@@ -29,7 +29,7 @@ Run `leaving-denver drops` to view active price brackets:
 ## 3. Objection Handling & Fast Response Scripts
 
 ### The "Is this still available?" Filter:
-> *"Hi! Yes, it's available, assembled, and ready for pickup in the Denver Tech Center. We're moving abroad in 3 weeks, so it's first come, first served. When would you like to come test it out?"*
+> *"Hi! Yes, it's available, assembled, and ready for pickup in the Denver Tech Center. We're moving abroad in November, so it's first come, first served. When would you like to come test it out?"*
 
 ### The Aggressive Lowballer ($120 offer on $220 Sofa):
 > *"Thanks for the offer, but at $220 it's already less than half what AFW charges for it new. The absolute lowest I could do today for a quick pickup is $200 cash. If you can pick it up today or tomorrow, it's yours."*
@@ -40,17 +40,10 @@ Run `leaving-denver drops` to view active price brackets:
 ### The Advance Zelle/Courier Scam:
 > *"I only accept cash or in-person Venmo/Zelle when the buyer is physically present in DTC to inspect the item. No advance wire transfers or third-party couriers."*
 
+A Venmo or Zelle payment counts only once it shows in **your own** app. A screenshot or an email "from Zelle" is not a payment. Stage items near the door or in the lobby, and never have a buyer in the apartment while you are alone.
+
 ---
 
-## 4. Colorado Motor Vehicle Transfer Rules (2019 Ford Escape SEL AWD)
+## 4. The Car
 
-1. **Title Signing:** Ensure buyer verifies VIN (`1FMCU9HD9KUB80146`) and odometer reading (103,500). Sign Colorado Title in the Seller Signature section.
-2. **Bill of Sale:** Complete standard Colorado Bill of Sale (Form DR 2173).
-3. **Emissions:** Provide a **valid, unused** passing certificate. One already used for your own
-   registration renewal does not count, even if it has not expired (CO DMV, AirCare). Check the
-   dates: if the registration was renewed after the test, that test is used. An unused one can be
-   handed over; otherwise test again at AirCare in the days before handover, which also closes the
-   buyer's 5-business-day return right if the car fails emissions after the sale.
-4. **Recalls:** Provide dealer paperwork proving 0 open recalls (closed at Ford dealership).
-5. **License Plates:** **SELLER KEEPS THE PLATES.** In Colorado, license plates belong to the seller, not the car. Remove them before handing over keys.
-6. **Payment:** Cash or Cashier's Check verified directly inside the buyer's bank branch window in DTC before releasing the signed title.
+The car has its own runbook: [vehicle-sale.md](vehicle-sale.md) covers screening, the test drive, the delayed-handover agreement, payment at the bank, the Colorado paperwork and the plates.
