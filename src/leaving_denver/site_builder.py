@@ -72,6 +72,10 @@ def sanitize_public_inventory(full_data: dict[str, Any]) -> dict[str, Any]:
     and drops unpublished items, with every bundle that contains one.
     """
     hidden = unpublished_ids(full_data)
+    for bundle in full_data.get("bundles", []):
+        # A string would be compared character by character and never match a hidden id.
+        if not isinstance(bundle.get("items"), list):
+            raise RuntimeError(f"Bundle {bundle.get('id')}: items must be a list of item ids")
     public_items = []
     for item in full_data.get("items", []):
         if item["id"] in hidden:

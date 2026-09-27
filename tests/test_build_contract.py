@@ -120,3 +120,10 @@ def test_publish_flag_survives_yaml_round_trip(tmp_path, monkeypatch):
 
     hidden = yaml.safe_load(path.read_text())["items"][1]
     assert hidden["published"] is False
+
+
+def test_bundle_items_must_be_a_list(public_dir):
+    data = inventory()
+    data["bundles"][0]["items"] = "shown-lamp and hidden-widget"
+    with pytest.raises(RuntimeError, match="bundle-with-hidden"):
+        site_builder.build_public_site(data)
