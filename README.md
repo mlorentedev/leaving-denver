@@ -87,8 +87,8 @@ sops data/private.sops.yaml          # edit floors / phone
 ## Accessing Local Workspaces
 
 When running `uv run leaving-denver serve`:
-- **Public Minimalist Catalog:** `http://localhost:8088/`
-- **Private Seller Workspace (PIN-gated, local only):** `http://localhost:8088/poster_assistant.html`
+- **Public Minimalist Catalog:** `http://127.0.0.1:8088/`
+- **Private Seller Workspace (local only):** `http://127.0.0.1:8088/poster_assistant.html`. `make serve` binds loopback only and refuses paths outside `build/`. The PIN screen is a UI gate against shoulder-surfing, not access control: the PIN is in the page's JavaScript and the tool is never deployed.
 
 ---
 

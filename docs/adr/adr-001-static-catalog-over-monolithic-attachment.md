@@ -37,7 +37,7 @@ Deploy a lightweight (<50 KB) static HTML/CSS/JS catalog hosted on Cloudflare Pa
 
 ### Negative
 - Requires internet access for buyers to view photos.
-- Requires Cloudflare Pages deployment pipeline (automated via `leaving-denver deploy-cf`).
+- Requires Cloudflare Pages deployment pipeline (automated from GitHub Actions; see README "Deploy").
 
 ### Neutral
 - Eliminates reliance on heavy frontend frameworks (React, Next.js); vanilla DOM manipulation is sufficient.
