@@ -23,9 +23,12 @@ Owner decisions are marked **[OWNER]**. Everything else is procedure. Sources ar
 
 **Meeting and test drive.**
 
-- Meet in daylight at a police safe trade zone or in a bank parking lot, never at the apartment:
-  - Denver PD Safe Trade Zones (marked, on camera): District 3, 1625 S University Blvd; District 4, 2100 S Clay St. They were set up in 2019, so confirm they are still in place.
-  - Arapahoe County Sheriff HQ, 13101 E Broncos Pkwy: call 303-795-4711 first to ask whether the lot may be used.
+- Meet in daylight at a police safe trade zone or in a bank parking lot, never at the apartment. The nearest to DTC:
+  - **Denver PD District 3, 1625 S University Blvd (first choice).** Every Denver PD district station is a Safe Trade Zone: a marked parking space in view of the cameras, or the lobby (tell the clerk why you are there). District 3 was still listed as one in 2025. The non-emergency line is 720-913-2000, then press 0.
+  - **Douglas County Sheriff, Highlands Ranch substation, 9250 Zotos Dr:** two marked spaces under video.
+  - **Denver PD District 4, 2100 S Clay St.**
+  - No zone is confirmed in Greenwood Village or Centennial. Arapahoe County Sheriff HQ (13101 E Broncos Pkwy) may allow its lot: call 303-795-4711 first.
+- The test drive starts and ends at the zone. Drive there yourself; the buyer takes the wheel only there.
 - Before handing over the keys, photograph the buyer's driver's license and insurance card. You ride along, and there is one buyer at a time.
 - The deal closes at the buyer's bank (§5), which is also a safe place to meet.
 
@@ -58,7 +61,7 @@ A real buyer will do all of the following. Ask for it before the first meeting:
 
 - **Where.** Start from a busy public lot, not the apartment, and meet in daylight.
   - No safe exchange zone is confirmed for Centennial or Arapahoe County. Call the Sheriff's non-emergency line (303-795-4711) to ask whether their HQ lot at 13101 E. Broncos Pkwy can be used.
-  - Denver PD has marked Safe Trade Zones at district stations. Confirm they still exist before relying on one.
+  - The zones are listed in "The rules" at the top.
 - **Who.** One buyer, plus at most one companion, and you. Tell someone where you are and when you expect to be back.
 - **Before handing over the keys:**
   - Photograph the buyer's driver's license and insurance card.
@@ -181,7 +184,8 @@ Buyer signature / date:  ____________________
 
 - UCC 3-411 and 3-312, cashier's checks (Cornell LII): https://www.law.cornell.edu/ucc/3/3-411 , https://www.law.cornell.edu/ucc/3/3-312
 - UCC 4A, wire finality: https://www.certifid.com/article/can-a-wire-transfer-be-reversed
-- Denver PD Safe Trade Zones: https://denverite.com/2019/12/06/denver-police-are-creating-areas-for-you-to-safely-exchange-that-toaster-you-sold-on-craigslist/
+- Denver PD Safe Trade Zones (2019 launch; District 3 still listed in 2025): https://www.wpena.org/neighborhood-news/denver-police-dept-district-3-news-updates , https://denverite.com/2019/12/06/denver-police-are-creating-areas-for-you-to-safely-exchange-that-toaster-you-sold-on-craigslist/
+- SafeTrade Stations, Douglas County: https://www.safetradestations.com/safetrade-station-news/category/co-safety-zones
 - KBB, exchanging funds in a private sale: https://www.kbb.com/car-advice/exchange-funds-private-sale/
 - CO DMV, private sale: https://dmv.colorado.gov/buying-and-selling
 - CO DMV, release of liability (C.R.S. 42-6-109(3)): https://dmv.colorado.gov/colorado-residents-now-able-to-voluntarily-report-vehicle-ownership-transfers
