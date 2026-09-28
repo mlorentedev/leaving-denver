@@ -29,13 +29,13 @@ created: "2026-09-26"
 
 ### PR 2: `refactor/render-catalog-with-jinja2` (closes #21)
 
-- [ ] [AC3] `test_undefined_field_fails_the_build`: render a one-line template using `{{ item.titel }}` through the builder's environment. Expected: FAIL (there is no environment yet).
-- [ ] [AC3] Add `jinja2` with `uv add jinja2`. Add `render(template, **ctx)` in `site_builder.py` using `Environment(loader=PackageLoader, undefined=StrictUndefined, autoescape=True)`. Expected: PASS.
-- [ ] [AC3] `test_render_matches_previous_output`: a golden file of today's built `index.html` with the phone placeholder normalised. Render through Jinja2 and assert equality. This proves the swap changes nothing visible.
-- [ ] [AC3] Convert `templates/index.html` to Jinja2: `{{ inventory_json | safe }}` for the marker, and `{{ contact_js | safe }}`. The template receives only the sanitized dict.
-- [ ] [AC3] `tests/test_security_isolation.py`: add a check that the template context keys are exactly the sanitized ones, with no `firm_floor_price` and no private keys.
-- [ ] [AC2] Wrap the vehicle card in `{% if vehicle %}` (`vehicle` = the published car, or `None`), then set `published: false` on the car. Test: no file under the public dir contains `2019-ford-escape`.
-- [ ] Delete the golden-file test once PR 3 starts changing output. It exists only to prove the swap.
+- [x] [AC3] `test_undefined_field_fails_the_build`: render a one-line template using `{{ item.titel }}` through the builder's environment. Expected: FAIL (there is no environment yet).
+- [x] [AC3] Add `jinja2` with `uv add jinja2`. Add `render(template, **ctx)` in `site_builder.py` using `Environment(loader=FileSystemLoader(TEMPLATES_DIR), undefined=StrictUndefined, autoescape=True)`, built per call so tests can point `TEMPLATES_DIR` elsewhere. Expected: PASS.
+- [x] [AC3] `test_render_matches_previous_output`: a golden file of today's built `index.html` with the phone placeholder normalised. Render through Jinja2 and assert equality. This proves the swap changes nothing visible.
+- [x] [AC3] Convert `templates/index.html` to Jinja2: `{{ inventory_json | safe }}` and `{{ contact_json | safe }}`. The build checks the rendered page emits both, so AC1 still fails closed (`test_missing_marker_fails`). The template receives only the sanitized dict.
+- [x] [AC3] `tests/test_security_isolation.py`: add a check that the template context keys are exactly the sanitized ones, with no `firm_floor_price` and no private keys.
+- [x] [AC2] Wrap the vehicle card in `{% if vehicle %}` (`vehicle` = the published car, or `None`), then set `published: false` on the car. Test: no file under the public dir contains `2019-ford-escape`.
+- [x] Delete the golden-file test once the output changes. Hiding the car changed it inside PR 2, so it went there, after the `{% if vehicle %}` commit still matched it.
 
 ### PR 3: `fix/catalog-figures-from-data` (closes #6, bundle part of #32)
 
