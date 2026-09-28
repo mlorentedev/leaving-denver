@@ -158,6 +158,24 @@ PAGES_HEADERS = """/*
 """
 
 
+# Filter chips, in page order: category in the data -> chip label.
+CHIPS = {
+    "Living Room": "Living room",
+    "Bedroom": "Bedroom",
+    "Home Office & Tech": "Office & tech",
+    "Dining & Kitchen": "Kitchen",
+}
+
+
+def category_chips(items: list[dict[str, Any]]) -> list[tuple[str, str]]:
+    """The chips for the categories present, failing on one with no chip (it would be unfilterable)."""
+    present = {i["category"] for i in items}
+    unknown = sorted(present - CHIPS.keys())
+    if unknown:
+        raise RuntimeError(f"No filter chip for categories {unknown}: add them to CHIPS")
+    return [(cat, label) for cat, label in CHIPS.items() if cat in present]
+
+
 def build_public_site(full_data: dict[str, Any]) -> None:
     DIST_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -172,8 +190,17 @@ def build_public_site(full_data: dict[str, Any]) -> None:
     inventory_json = json.dumps(public_data, indent=2).replace("<", "\\u003c")
     contact_json = json.dumps(phone_parts(phone))
     vehicle = next((i for i in public_data["items"] if i["category"] == "Vehicle"), None)
+    items = [i for i in public_data["items"] if i["category"] != "Vehicle"]
+    bundles = public_data["bundles"]
     html = render(
-        "index.html", inventory_json=inventory_json, contact_json=contact_json, vehicle=vehicle
+        "index.html",
+        inventory_json=inventory_json,
+        contact_json=contact_json,
+        vehicle=vehicle,
+        items=items,
+        chips=category_chips(items),
+        bundles=[b for b in bundles if not b["everything"]],
+        everything=next((b for b in bundles if b["everything"]), None),
     )
 
     # Fail closed: a template that stops emitting either one would ship a page

@@ -3,6 +3,7 @@ Build contract: the builder fails closed, and unpublished items never reach buil
 """
 
 import json
+import re
 
 import pytest
 import yaml
@@ -196,3 +197,62 @@ def test_bundle_figures_count_free_items_as_zero():
     widget = next(i for i in public["items"] if i["id"] == "hidden-widget")
     assert (widget["price"], widget["free"]) == (0, True)
     assert public["bundles"][0]["individual_total"] == 10
+
+
+def test_every_category_has_a_chip(public_dir):
+    data = inventory(hidden_published=True)
+    data["items"][1]["category"] = "Garage"
+    with pytest.raises(RuntimeError, match="Garage"):
+        site_builder.build_public_site(data)
+
+
+def real_page(public_dir):
+    data = site_builder.load_inventory_yaml()
+    site_builder.build_public_site(data)
+    return data, (public_dir / "index.html").read_text(encoding="utf-8")
+
+
+def card(html, attr, value, end="</a>"):
+    """The markup of the card whose `attr` is `value`, up to its closing tag."""
+    start = html.index(f'{attr}="{value}"')
+    return html[start : html.index(end, start)]
+
+
+def test_page_figures_match_the_data(public_dir):
+    data, html = real_page(public_dir)
+    # Figures computed here from the YAML, independently of the builder.
+    price = {
+        i["id"]: 0 if i.get("free_with_purchase") else i["recommended_list_price"]
+        for i in data["items"]
+        if i.get("published", True)
+    }
+    household = [i for i in data["items"] if i["category"] != "Vehicle" and i["id"] in price]
+    savings = set()
+    for b in data["bundles"]:
+        save = sum(price[i] for i in b["items"]) - b["bundle_price"]
+        savings.add(save)
+        attr = "data-everything" if b.get("everything") else "data-bundle"
+        text = card(html, attr, b["id"])
+        assert f"${b['bundle_price']}" in text, f"{b['id']} price"
+        assert f"Save ${save}" in text, f"{b['id']} savings"
+        assert f"{len(b['items'])} items" in text, f"{b['id']} item count"
+    assert f"All · {len(household)}" in html
+    assert html.count('class="item-card') == len(household)
+    # No figure on the page that the data does not produce (the old banner typed $173).
+    assert {int(s) for s in re.findall(r"Save \$(\d+)", html)} <= savings
+    assert "UPSELL_MAP" not in html
+
+
+def test_free_item_shows_its_note_not_a_price(public_dir):
+    data, html = real_page(public_dir)
+    for item in data["items"]:
+        if item.get("free_with_purchase"):
+            text = card(html, "data-item", item["id"], "</button>")
+            assert item["note"] in text
+            assert f"${item['recommended_list_price']}<" not in text
+
+
+def test_mobile_shell_item_grid_has_two_columns(public_dir):
+    _, html = real_page(public_dir)
+    grid = re.search(r'<div id="itemsGrid" class="([^"]+)"', html)
+    assert grid and "grid-cols-2" in grid.group(1).split()

@@ -124,58 +124,70 @@
     </div>
     {% endif %}
 
-    <!-- Category Filters & Search -->
-    <div class="mt-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-      <div class="flex items-center gap-1.5 overflow-x-auto hide-scrollbar py-1 text-xs">
-        <button class="filter-btn active px-3.5 py-1.5 rounded-full font-bold bg-neutral-900 text-white transition-colors" data-cat="all">
-          All Items (<span id="count-all">13</span>)
-        </button>
-        <button class="filter-btn px-3.5 py-1.5 rounded-full font-semibold bg-white border border-neutral-200 text-neutral-600 hover:text-neutral-900 transition-colors" data-cat="Living Room">
-          Living Room
-        </button>
-        <button class="filter-btn px-3.5 py-1.5 rounded-full font-semibold bg-white border border-neutral-200 text-neutral-600 hover:text-neutral-900 transition-colors" data-cat="Home Office & Tech">
-          Home Office & Tech
-        </button>
-        <button class="filter-btn px-3.5 py-1.5 rounded-full font-semibold bg-white border border-neutral-200 text-neutral-600 hover:text-neutral-900 transition-colors" data-cat="Bedroom">
-          Bedroom
-        </button>
-        <button class="filter-btn px-3.5 py-1.5 rounded-full font-semibold bg-white border border-neutral-200 text-neutral-600 hover:text-neutral-900 transition-colors" data-cat="Dining & Kitchen">
-          Dining & Kitchen
-        </button>
-        <button class="filter-btn px-3.5 py-1.5 rounded-full font-semibold bg-white border border-neutral-200 text-neutral-600 hover:text-neutral-900 transition-colors" data-cat="bundles">
-          Packages & Bundles
-        </button>
-      </div>
-
-      <div class="relative w-full sm:w-56">
-        <input id="searchInput" type="text" placeholder="Search items..." class="w-full px-3.5 py-1.5 text-xs bg-white border border-neutral-200 rounded-full focus:outline-none focus:border-neutral-900 transition-colors">
-      </div>
+    <!-- Category filters -->
+    <div class="mt-10 -mx-4 px-4 sm:mx-0 sm:px-0 flex gap-2 overflow-x-auto hide-scrollbar py-1">
+      <button type="button" class="filter-btn flex-none h-10 px-4 rounded-full text-sm transition-colors font-bold bg-neutral-900 text-white" data-cat="all" aria-pressed="true">All · {{ items | length }}</button>
+      {% for cat, label in chips %}
+      <button type="button" class="filter-btn flex-none h-10 px-4 rounded-full text-sm transition-colors font-semibold bg-white border border-neutral-200 text-neutral-600 hover:text-neutral-900" data-cat="{{ cat }}" aria-pressed="false">{{ label }}</button>
+      {% endfor %}
     </div>
   </section>
 
-  <!-- Items Grid -->
+  <!-- Items Grid: two columns on phones, the whole card opens the item -->
   <main class="max-w-5xl mx-auto px-4 sm:px-6 py-2 flex-1">
-    <div id="itemsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
-      <!-- Populated dynamically by JS -->
+    <div id="itemsGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-x-3 gap-y-5 sm:gap-5">
+      {% for item in items %}
+      <button type="button" class="item-card group flex flex-col gap-2 text-left" data-item="{{ item.id }}" data-cat="{{ item.category }}">
+        {% if item.images %}
+        <img src="{{ item.images[0] }}" alt="{{ item.short_title }}" loading="lazy" class="w-full aspect-square object-cover rounded-2xl bg-neutral-100 group-hover:opacity-90 transition-opacity">
+        {% else %}
+        <span class="w-full aspect-square rounded-2xl bg-neutral-100"></span>
+        {% endif %}
+        <span class="flex flex-col gap-0.5 px-0.5">
+          <span class="text-sm font-semibold leading-snug text-neutral-900">{{ item.short_title }}</span>
+          {% if item.free %}
+          <span class="text-sm font-bold text-emerald-700">{{ item.note }}</span>
+          {% else %}
+          <span class="flex items-baseline gap-1.5">
+            <span class="text-base font-extrabold text-neutral-900">${{ item.price }}</span>
+            {% if item.retail %}
+            <span class="text-xs text-neutral-400 line-through">${{ item.retail }}</span>
+            {% endif %}
+          </span>
+          {% endif %}
+        </span>
+      </button>
+      {% endfor %}
     </div>
 
-    <!-- Empty State -->
-    <div id="emptyState" class="hidden py-16 text-center">
-      <div class="text-sm font-semibold text-neutral-800">No items match that filter.</div>
-      <p class="text-xs text-neutral-500 mt-1">Try clearing your search or switching categories.</p>
-      <button onclick="resetFilters()" class="mt-3 px-3 py-1.5 rounded-full text-xs font-semibold bg-neutral-900 text-white">Clear filter</button>
-    </div>
-
-    <!-- Sleek Whole Apartment Liquidation Banner -->
-    <div class="mt-8 p-4 sm:p-5 rounded-2xl border border-neutral-200/90 bg-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs shadow-2xs">
-      <div>
-        <span class="font-bold text-neutral-900">Moving into an empty apartment or furnishing a rental?</span>
-        <span class="text-neutral-500 block sm:inline sm:ml-1">Take all 13 household furniture & tech items in one single pickup trip for $540 (Save $173 cash).</span>
+    {% if bundles %}
+    <!-- Bundles: figures computed by the builder from the item prices -->
+    <section class="mt-10">
+      <h2 class="text-lg font-extrabold text-neutral-900">Save with a bundle</h2>
+      <div class="mt-3 -mx-4 px-4 sm:mx-0 sm:px-0 flex gap-3 overflow-x-auto hide-scrollbar pb-1">
+        {% for b in bundles %}
+        <a href="#" data-bundle="{{ b.id }}" data-sms-intent="Hi! I am interested in the {{ b.short_name }} bundle (${{ b.bundle_price }}) in DTC." class="flex-none w-[216px] flex flex-col gap-2.5 p-4 rounded-2xl bg-white border border-neutral-200 hover:border-neutral-400 transition-colors">
+          <span class="text-sm font-bold text-neutral-900">{{ b.short_name }}</span>
+          <span class="text-xs text-neutral-500">{{ b['items'] | length }} items{% if b.note %} · {{ b.note }}{% endif %}</span>
+          <span class="flex items-baseline justify-between">
+            <span class="text-lg font-extrabold text-neutral-900">${{ b.bundle_price }}</span>
+            <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">Save ${{ b.savings }}</span>
+          </span>
+        </a>
+        {% endfor %}
       </div>
-      <a href="#" data-sms-intent="Hi! I am interested in the $540 Whole Apartment Liquidation Buyout in DTC." class="font-bold text-neutral-900 hover:text-neutral-600 transition-colors flex-shrink-0 underline">
-        Inquire about whole buyout ($540) →
-      </a>
-    </div>
+    </section>
+    {% endif %}
+
+    {% if everything %}
+    <a href="#" data-everything="{{ everything.id }}" data-sms-intent="Hi! I am interested in taking everything (${{ everything.bundle_price }}) in DTC." class="mt-6 flex flex-col gap-3.5 p-5 rounded-2xl bg-neutral-900 text-white">
+      <span class="flex flex-col gap-1">
+        <span class="text-lg font-extrabold">Take everything: ${{ everything.bundle_price }}</span>
+        <span class="text-sm text-neutral-400">All {{ everything['items'] | length }} items in one trip. Save ${{ everything.savings }}.</span>
+      </span>
+      <span class="h-12 rounded-xl bg-white text-neutral-900 text-[15px] font-bold flex items-center justify-center">Ask about it</span>
+    </a>
+    {% endif %}
 
     <!-- Straightforward Terms Box -->
     <section class="mt-14 p-6 sm:p-7 rounded-2xl bg-neutral-900 text-neutral-300">
@@ -227,9 +239,7 @@
             <span id="modalPrice" class="text-2xl font-black text-neutral-900">$0</span>
             <span id="modalRetail" class="text-xs text-neutral-400 line-through ml-2"></span>
           </div>
-          <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-            Available
-          </span>
+          <span id="modalStatus" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200"></span>
         </div>
 
         <div>
@@ -246,7 +256,7 @@
           <div class="flex items-center justify-between">
             <span class="font-bold text-neutral-900 flex items-center gap-1.5">
               <span>Combine & Save:</span>
-              <span id="upsellBadge" class="text-[10px] font-bold text-emerald-700 bg-emerald-100/70 px-2 py-0.5 rounded">Save $0</span>
+              <span id="upsellBadge" class="text-[10px] font-bold text-emerald-700 bg-emerald-100/70 px-2 py-0.5 rounded"></span>
             </span>
           </div>
           <div id="upsellTitle" class="font-bold text-neutral-800 text-xs sm:text-sm"></div>
@@ -262,7 +272,7 @@
           </a>
           <button onclick="closeModal()" class="py-3 px-4 rounded-xl border border-neutral-200 hover:bg-neutral-50 text-neutral-700 font-semibold text-xs transition-colors">
             Close
-          </a>
+          </button>
         </div>
       </div>
     </div>
@@ -297,194 +307,14 @@
 
     const INVENTORY = {{ inventory_json | safe }};
 
-    const UPSELL_MAP = {
-      "sofa-sleeper": {
-        title: "Sleeper Sofa + Full Memory Foam Topper ($230 — Save $25)",
-        desc: "The 2 3/8\" viscoelastic topper fits this pull-out bed like a glove and rolls up neatly inside the storage chaise during the day.",
-        badge: "Save $25",
-        sms: "Hi! I am interested in the Sofa + Memory Foam Topper combo ($230) in DTC."
-      },
-      "ikea-mattress-topper": {
-        title: "AFW Kent Sleeper Sofa + This Topper ($230 — Save $25)",
-        desc: "This topper was used with the AFW sleeper couch double bed and fits right inside its storage chaise.",
-        badge: "Save $25",
-        sms: "Hi! I am interested in the Sofa + Memory Foam Topper combo ($230) in DTC."
-      },
-      "convertible-desk": {
-        title: "Complete Home Office Workstation ($150 — Save $30)",
-        desc: "Desk + Ergonomic Mesh Chair with 90° flip arms + Dell 32\" curved monitor. Work-from-home ready in one trip.",
-        badge: "Save $30",
-        sms: "Hi! I am interested in the Complete Home Office Workstation ($150) in DTC."
-      },
-      "dell-monitor-32": {
-        title: "Complete Home Office Workstation ($150 — Save $30)",
-        desc: "Desk + Ergonomic Mesh Chair with 90° flip arms + Dell 32\" curved monitor. Instant setup.",
-        badge: "Save $30",
-        sms: "Hi! I am interested in the Complete Home Office Workstation ($150) in DTC."
-      },
-      "office-chair-ergonomic": {
-        title: "Complete Home Office Workstation ($150 — Save $30)",
-        desc: "Desk + Ergonomic Mesh Chair with 90° flip arms + Dell 32\" curved monitor. Instant setup.",
-        badge: "Save $30",
-        sms: "Hi! I am interested in the Complete Home Office Workstation ($150) in DTC."
-      },
-      "onn-43-4k-tv": {
-        title: "Living Room Entertainment Suite ($145 — Save $35)",
-        desc: "43\" 4K Smart Roku TV + Parsons TV stand + Lift-top storage table + Over-couch C-table.",
-        badge: "Save $35",
-        sms: "Hi! I am interested in the Living Room Entertainment Suite ($145) in DTC."
-      },
-      "coffee-table-lift-top": {
-        title: "Living Room Entertainment Suite ($145 — Save $35)",
-        desc: "Combine with 43\" 4K Smart Roku TV + Parsons TV stand + Over-couch C-table.",
-        badge: "Save $35",
-        sms: "Hi! I am interested in the Living Room Entertainment Suite ($145) in DTC."
-      },
-      "tv-stand-canyon-walnut": {
-        title: "Matching Canyon Walnut Set ($80 — Save $20)",
-        desc: "Matching finish suite: Convertible Desk + TV Stand + C-Table. Identical woodgrain and metal frame.",
-        badge: "Save $20",
-        sms: "Hi! I am interested in the Matching Canyon Walnut Set ($80) in DTC."
-      },
-      "auxiliary-c-table": {
-        title: "Matching Canyon Walnut Set ($80 — Save $20)",
-        desc: "Matching finish suite: Convertible Desk + TV Stand + C-Table. Zero color mismatch.",
-        badge: "Save $20",
-        sms: "Hi! I am interested in the Matching Canyon Walnut Set ($80) in DTC."
-      },
-      "bar-stools-pair": {
-        title: "Breakfast Bar Island Starter Kit ($40 — Save $13)",
-        desc: "Add the 20-piece stoneware dinnerware and glassware set for just $5 more.",
-        badge: "Save $13",
-        sms: "Hi! I am interested in the Breakfast Bar Island Starter Kit ($40) in DTC."
-      },
-      "dinnerware-glassware-set": {
-        title: "Breakfast Bar Island Starter Kit ($40 — Save $13)",
-        desc: "Pair of 28.7\" industrial counter stools + 20-piece stoneware and glassware set.",
-        badge: "Save $13",
-        sms: "Hi! I am interested in the Breakfast Bar Island Starter Kit ($40) in DTC."
-      },
-      "air-mattress-twin-pump": {
-        title: "Guest Bed & Bedside Nightstand ($35 — Save $10)",
-        desc: "Elevated twin airbed with electric pump + 1-drawer espresso nightstand.",
-        badge: "Save $10",
-        sms: "Hi! I am interested in the Guest Bed & Nightstand kit ($35) in DTC."
-      },
-      "nightstand-espresso": {
-        title: "Guest Bed & Bedside Nightstand ($35 — Save $10)",
-        desc: "Elevated twin airbed with electric pump + 1-drawer espresso nightstand.",
-        badge: "Save $10",
-        sms: "Hi! I am interested in the Guest Bed & Nightstand kit ($35) in DTC."
-      }
-    };
-
-    let currentCategory = 'all';
-    let searchQuery = '';
-
-    function renderItems() {
-      const grid = document.getElementById('itemsGrid');
-      grid.innerHTML = '';
-
-      if (currentCategory === 'bundles') {
-        const empty = document.getElementById('emptyState');
-        empty.classList.add('hidden');
-        INVENTORY.bundles.forEach(b => {
-          const card = document.createElement('div');
-          card.className = 'p-5 rounded-2xl border border-neutral-200/90 bg-white hover:border-neutral-400 transition-all flex flex-col justify-between shadow-2xs';
-          card.innerHTML = `
-            <div>
-              <div class="flex items-center justify-between gap-2 mb-2">
-                <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-700">${b.badge}</span>
-                <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60">Save $${b.savings}</span>
-              </div>
-              <h4 class="font-bold text-neutral-900 text-base leading-snug">${b.name}</h4>
-              <p class="text-xs text-neutral-600 mt-2 leading-relaxed">${b.description}</p>
-            </div>
-            <div class="pt-4 mt-4 border-t border-neutral-100 flex items-center justify-between">
-              <div>
-                <span class="text-xl font-black text-neutral-900">$${b.bundle_price}</span>
-                <span class="text-xs text-neutral-400 line-through ml-1.5">Reg. $${b.individual_total}</span>
-              </div>
-              <a href="${buildSmsUri('Hi! I want to inquire about the ' + b.name + ' for $' + b.bundle_price + ' in DTC.')}" class="text-xs font-semibold px-3.5 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white transition-colors">
-                Claim Combo
-              </a>
-            </div>
-          `;
-          grid.appendChild(card);
-        });
-        return;
-      }
-
-      const filtered = INVENTORY.items.filter(item => {
-        if (item.category === 'Vehicle') return false; // Handled in spotlight banner
-        const matchesCat = (currentCategory === 'all') || (item.category === currentCategory);
-        const q = searchQuery.toLowerCase().trim();
-        const matchesSearch = !q || 
-          item.title.toLowerCase().includes(q) || 
-          item.short_title.toLowerCase().includes(q) ||
-          item.category.toLowerCase().includes(q) ||
-          (item.specs || []).some(s => s.toLowerCase().includes(q));
-
-        return matchesCat && matchesSearch;
-      });
-
-      const empty = document.getElementById('emptyState');
-      if (filtered.length === 0) {
-        empty.classList.remove('hidden');
-      } else {
-        empty.classList.add('hidden');
-      }
-
-      filtered.forEach((item) => {
-        const card = document.createElement('div');
-        card.className = 'group bg-white rounded-2xl border border-neutral-200/90 overflow-hidden hover:border-neutral-400 transition-all flex flex-col justify-between';
-
-        const mainImg = item.images && item.images.length > 0 ? item.images[0] : '';
-
-        card.innerHTML = `
-          <div>
-            <div class="aspect-4/3 bg-neutral-100 relative overflow-hidden flex items-center justify-center cursor-pointer" onclick="openModal('${item.id}')">
-              <img src="${mainImg}" alt="${item.title}" class="max-h-full max-w-full object-contain p-4 group-hover:scale-102 transition-transform duration-200" loading="lazy">
-              <div class="absolute top-3 left-3">
-                <span class="text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-md bg-white/90 backdrop-blur-xs text-neutral-700 border border-neutral-200/60">
-                  ${item.category}
-                </span>
-              </div>
-            </div>
-
-            <div class="p-4 sm:p-5">
-              <div class="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider">${item.brand}</div>
-              <h3 class="font-bold text-neutral-900 text-sm sm:text-base mt-0.5 leading-snug cursor-pointer hover:text-neutral-600 transition-colors" onclick="openModal('${item.id}')">
-                ${item.short_title}
-              </h3>
-              <p class="text-xs text-neutral-500 mt-1 line-clamp-2 leading-relaxed">${item.dimensions}</p>
-            </div>
-          </div>
-
-          <div class="p-4 sm:p-5 pt-0">
-            <div class="pt-3 border-t border-neutral-100 flex items-center justify-between">
-              <div>
-                <span class="text-lg sm:text-xl font-extrabold text-neutral-900">$${item.price}</span>
-                ${item.retail ? `<span class="text-xs text-neutral-400 line-through ml-1.5">Orig: $${item.retail}</span>` : ''}
-              </div>
-              <button onclick="openModal('${item.id}')" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-neutral-100 hover:bg-neutral-900 hover:text-white text-neutral-800 transition-colors">
-                Details
-              </button>
-            </div>
-          </div>
-        `;
-
-        grid.appendChild(card);
-      });
-    }
-
     function openModal(itemId) {
       const item = INVENTORY.items.find(i => i.id === itemId);
       if (!item) return;
 
       document.getElementById('modalTitle').textContent = item.title;
       document.getElementById('modalCategory').textContent = item.category + ' · ' + item.brand;
-      document.getElementById('modalPrice').textContent = typeof item.price === 'number' ? '$' + item.price.toLocaleString() : item.price;
+      document.getElementById('modalPrice').textContent = item.free ? item.note : '$' + item.price.toLocaleString();
+      document.getElementById('modalStatus').textContent = item.status;
       document.getElementById('modalRetail').textContent = item.retail ? 'Original: $' + item.retail.toLocaleString() : '';
       document.getElementById('modalPickup').textContent = item.pickup || 'Pickup in Denver Tech Center (DTC). Buyer must self-load.';
 
@@ -518,20 +348,22 @@
         specsList.appendChild(li);
       });
 
-      // Contextual Upsell Box inside Modal
-      const upsell = UPSELL_MAP[itemId];
+      // The bundle this item belongs to, from the data.
+      const bundle = INVENTORY.bundles.find(b => !b.everything && b.items.includes(itemId));
       const upsellBox = document.getElementById('modalUpsell');
-      if (upsell) {
-        document.getElementById('upsellBadge').textContent = upsell.badge;
-        document.getElementById('upsellTitle').textContent = upsell.title;
-        document.getElementById('upsellDesc').textContent = upsell.desc;
-        document.getElementById('upsellLink').href = buildSmsUri(upsell.sms);
+      if (bundle) {
+        const names = bundle.items.map(id => (INVENTORY.items.find(i => i.id === id) || {}).short_title);
+        document.getElementById('upsellBadge').textContent = 'Save $' + bundle.savings;
+        document.getElementById('upsellTitle').textContent = bundle.short_name + ' · $' + bundle.bundle_price;
+        document.getElementById('upsellDesc').textContent = bundle.note || names.join(' + ');
+        document.getElementById('upsellLink').href = buildSmsUri('Hi! I am interested in the ' + bundle.short_name + ' bundle ($' + bundle.bundle_price + ') in DTC.');
         upsellBox.classList.remove('hidden');
       } else {
         upsellBox.classList.add('hidden');
       }
 
-      document.getElementById('modalSmsLink').href = buildSmsUri('Hi! I am interested in inspecting the ' + item.short_title + ' ($' + item.price + ') in DTC.');
+      const asking = item.free ? item.note.toLowerCase() : '$' + item.price;
+      document.getElementById('modalSmsLink').href = buildSmsUri('Hi! I am interested in inspecting the ' + item.short_title + ' (' + asking + ') in DTC.');
 
       document.getElementById('itemModal').classList.remove('hidden');
       document.getElementById('itemModal').classList.add('flex');
@@ -542,38 +374,25 @@
       document.getElementById('itemModal').classList.remove('flex');
     }
 
-    function resetFilters() {
-      currentCategory = 'all';
-      searchQuery = '';
-      document.getElementById('searchInput').value = '';
+    function applyFilter(cat) {
       document.querySelectorAll('.filter-btn').forEach(b => {
-        b.className = b.dataset.cat === 'all' 
-          ? 'filter-btn active px-3.5 py-1.5 rounded-full font-bold bg-neutral-900 text-white transition-colors'
-          : 'filter-btn px-3.5 py-1.5 rounded-full font-semibold bg-white border border-neutral-200 text-neutral-600 hover:text-neutral-900 transition-colors';
+        const on = b.dataset.cat === cat;
+        b.setAttribute('aria-pressed', on);
+        b.className = 'filter-btn flex-none h-10 px-4 rounded-full text-sm transition-colors ' + (on ? 'font-bold bg-neutral-900 text-white' : 'font-semibold bg-white border border-neutral-200 text-neutral-600 hover:text-neutral-900');
       });
-      renderItems();
+      document.querySelectorAll('.item-card').forEach(card => {
+        card.classList.toggle('hidden', cat !== 'all' && card.dataset.cat !== cat);
+      });
     }
 
     // Init
     document.addEventListener('DOMContentLoaded', () => {
       initDynamicContacts();
-      renderItems();
-
       document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          currentCategory = btn.dataset.cat;
-          document.querySelectorAll('.filter-btn').forEach(b => {
-            b.className = b === btn
-              ? 'filter-btn active px-3.5 py-1.5 rounded-full font-bold bg-neutral-900 text-white transition-colors'
-              : 'filter-btn px-3.5 py-1.5 rounded-full font-semibold bg-white border border-neutral-200 text-neutral-600 hover:text-neutral-900 transition-colors';
-          });
-          renderItems();
-        });
+        btn.addEventListener('click', () => applyFilter(btn.dataset.cat));
       });
-
-      document.getElementById('searchInput').addEventListener('input', e => {
-        searchQuery = e.target.value;
-        renderItems();
+      document.querySelectorAll('.item-card').forEach(card => {
+        card.addEventListener('click', () => openModal(card.dataset.item));
       });
     });
   </script>
