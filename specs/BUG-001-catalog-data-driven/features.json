@@ -2,14 +2,14 @@
   {
     "id": "BUG-001-catalog-data-driven-f1",
     "behavior": "AC1: a template without the inventory marker fails the build",
-    "verification": "uv run pytest tests/test_build_contract.py -k missing_inventory_marker",
+    "verification": "uv run pytest tests/test_build_contract.py -k missing_marker",
     "state": "pending",
     "evidence": ""
   },
   {
     "id": "BUG-001-catalog-data-driven-f2",
     "behavior": "AC2: unpublished items and their bundles are absent from build/public and present as DRAFT in build/private",
-    "verification": "uv run pytest tests/test_build_contract.py -k 'unpublished or publish_flag'",
+    "verification": "uv run pytest tests/test_build_contract.py -k 'unpublished or publish_flag or vehicle_card'",
     "state": "pending",
     "evidence": ""
   },

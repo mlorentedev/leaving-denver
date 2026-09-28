@@ -64,14 +64,19 @@ def text_under(root):
     return "\n".join(parts)
 
 
-def test_missing_inventory_marker_fails(public_dir, tmp_path, monkeypatch):
+@pytest.mark.parametrize(
+    ("script", "missing"),
+    [
+        ("const INVENTORY = {items: []};\nconst _C = {{ contact_json | safe }};", "inventory_json"),
+        ("const INVENTORY = {{ inventory_json | safe }};\nconst _C = {};", "contact_json"),
+    ],
+)
+def test_missing_marker_fails(public_dir, tmp_path, monkeypatch, script, missing):
     templates = tmp_path / "templates"
     templates.mkdir()
-    (templates / "index.html").write_text(
-        "<script>const INVENTORY = {items: []};\nconst _C = __SELLER_CONTACT__;</script>"
-    )
+    (templates / "index.html").write_text(f"<script>{script}</script>")
     monkeypatch.setattr(site_builder, "TEMPLATES_DIR", templates)
-    with pytest.raises(RuntimeError, match="__INVENTORY__"):
+    with pytest.raises(RuntimeError, match=missing):
         site_builder.build_public_site(inventory())
 
 
@@ -127,3 +132,43 @@ def test_bundle_items_must_be_a_list(public_dir):
     data["bundles"][0]["items"] = "shown-lamp and hidden-widget"
     with pytest.raises(RuntimeError, match="bundle-with-hidden"):
         site_builder.build_public_site(data)
+
+
+def test_undefined_field_fails_the_build(tmp_path, monkeypatch):
+    from jinja2 import UndefinedError
+
+    (tmp_path / "card.html").write_text("<h2>{{ item.titel }}</h2>")
+    monkeypatch.setattr(site_builder, "TEMPLATES_DIR", tmp_path)
+    with pytest.raises(UndefinedError, match="titel"):
+        site_builder.render("card.html", item={"title": "Lamp"})
+
+
+CAR = {
+    "id": "2019-ford-escape-sel-awd",
+    "category": "Vehicle",
+    "title": "2019 Ford Escape SEL AWD",
+    "recommended_list_price": 11875,
+}
+
+
+@pytest.mark.parametrize("published", [True, False])
+def test_vehicle_card_follows_the_publish_flag(public_dir, published):
+    data = inventory()
+    data["items"].append({**CAR, "published": published})
+
+    site_builder.build_public_site(data)
+
+    page = (public_dir / "index.html").read_text(encoding="utf-8")
+    assert ("2019-ford-escape" in text_under(public_dir)) is published
+    assert ("Vehicle" in page.split("<script>")[0]) is published
+
+
+def test_item_text_cannot_close_the_script(public_dir):
+    data = inventory()
+    data["items"][0]["title"] = "Lamp </script><script>alert(1)</script>"
+
+    site_builder.build_public_site(data)
+
+    page = (public_dir / "index.html").read_text(encoding="utf-8")
+    assert "</script><script>alert" not in page
+    assert "Lamp \\u003c/script>" in page

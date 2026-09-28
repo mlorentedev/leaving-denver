@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
-  <title>Denver Tech Center Relocation Sale — Furniture, Tech & Vehicle</title>
+  <title>Denver Tech Center Relocation Sale — Furniture{% if vehicle %}, Tech & Vehicle{% else %} & Tech{% endif %}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -55,7 +55,7 @@
         Relocating abroad in November
       </div>
       <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-neutral-900 leading-tight">
-        Good furniture, clean tech, and a Colorado-ready SUV.
+        Good furniture{% if vehicle %}, clean tech, and a Colorado-ready SUV{% else %} and clean tech{% endif %}.
       </h1>
       <p class="text-neutral-600 text-sm sm:text-base leading-relaxed pt-1">
         We are relocating out of the US and selling everything from our apartment in the Denver Tech Center. Everything was bought new, taken care of in a clean, non-smoking, pet-free home, and is <strong>already completely assembled</strong> so you don't have to waste your Saturday afternoon with an instruction manual.
@@ -69,6 +69,7 @@
       </div>
     </div>
 
+    {% if vehicle %}
     <!-- Featured Vehicle Card: 2019 Ford Escape SEL AWD -->
     <div class="mt-8 bg-white rounded-2xl border border-neutral-200/90 overflow-hidden shadow-2xs hover:border-neutral-300 transition-all">
       <div class="grid grid-cols-1 md:grid-cols-12 gap-0">
@@ -121,6 +122,7 @@
 
       </div>
     </div>
+    {% endif %}
 
     <!-- Category Filters & Search -->
     <div class="mt-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -180,7 +182,7 @@
       <div class="max-w-2xl space-y-2">
         <h3 class="text-base font-bold text-white">How pickup works</h3>
         <p class="text-xs text-neutral-400 leading-relaxed">
-          Everything is located in our apartment in the Denver Tech Center (DTC / 80111) near I-25 and Belleview. Elevator building with driveway access right outside. Come by, inspect and test whatever you like in person, and we'll help you carry and load it into your vehicle. Household items: cash or in-person Venmo/Zelle, no advance deposits. The car: cash or a cashier's check verified at your bank. No courier delivery codes.
+          Everything is located in our apartment in the Denver Tech Center (DTC / 80111) near I-25 and Belleview. Elevator building with driveway access right outside. Come by, inspect and test whatever you like in person, and we'll help you carry and load it into your vehicle. Household items: cash or in-person Venmo/Zelle, no advance deposits.{% if vehicle %} The car: cash or a cashier's check verified at your bank.{% endif %} No courier delivery codes.
         </p>
       </div>
       <div class="mt-4 pt-4 border-t border-neutral-800 flex flex-wrap gap-3 text-xs">
@@ -268,7 +270,7 @@
 
   <script>
     // Contact Obfuscation (Defeats automated scraping spiders & telemarketing bots)
-    const _C = __SELLER_CONTACT__;
+    const _C = {{ contact_json | safe }};
     function getSellerPhone() { return _C.cc + _C.area + _C.prefix + _C.line; }
     function getDisplayPhone() { return `(${_C.area}) ${_C.prefix}-${_C.line}`; }
     function buildSmsUri(body) {
@@ -293,7 +295,7 @@
       });
     }
 
-    const INVENTORY = __INVENTORY__;
+    const INVENTORY = {{ inventory_json | safe }};
 
     const UPSELL_MAP = {
       "sofa-sleeper": {

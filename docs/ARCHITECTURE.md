@@ -54,7 +54,7 @@ leaving-denver/
 ## 3. Threat Model & Privacy Engineering
 
 ### Threat A: Reverse Engineering Reserve Floors (`firm_floor_price`)
-* **Mitigation:** `site_builder.py` invokes `sanitize_public_inventory()`. All `firm_floor_price` attributes and negotiation notes are dropped before building `build/public/index.html`. Automated tests in `tests/test_security_isolation.py` assert zero occurrences of `firm_floor_price` in `build/public/`.
+* **Mitigation:** `site_builder.py` invokes `sanitize_public_inventory()`. All `firm_floor_price` attributes and negotiation notes are dropped before building `build/public/index.html`. Automated tests in `tests/test_security_isolation.py` assert zero occurrences of `firm_floor_price` in `build/public/`. The page is rendered with Jinja2 (ADR-003) from the sanitized dict only; `test_template_sees_only_sanitized_data` plants private fields in the data and asserts none reaches the template context.
 
 ### Threat B: Web Scraping & Robocall Harvesting
 * **Mitigation 1 (Robots):** `build/public/robots.txt` specifies `User-agent: * \n Disallow: /` and `build/public/index.html` has `<meta name="robots" content="noindex, nofollow, noarchive, nosnippet">`.
