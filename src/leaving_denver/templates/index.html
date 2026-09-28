@@ -268,7 +268,7 @@
 
   <script>
     // Contact Obfuscation (Defeats automated scraping spiders & telemarketing bots)
-    const _C = __SELLER_CONTACT__;
+    const _C = {{ contact_json | safe }};
     function getSellerPhone() { return _C.cc + _C.area + _C.prefix + _C.line; }
     function getDisplayPhone() { return `(${_C.area}) ${_C.prefix}-${_C.line}`; }
     function buildSmsUri(body) {
@@ -293,7 +293,7 @@
       });
     }
 
-    const INVENTORY = __INVENTORY__;
+    const INVENTORY = {{ inventory_json | safe }};
 
     const UPSELL_MAP = {
       "sofa-sleeper": {

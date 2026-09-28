@@ -29,7 +29,6 @@ from leaving_denver.image_processor import sync_all_photos
 from leaving_denver.private_data import floors, load_private, phone_parts, seller_phone
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
-INVENTORY_MARKER = "const INVENTORY = __INVENTORY__;"
 
 
 def load_inventory_yaml() -> dict[str, Any]:
@@ -135,30 +134,25 @@ PAGES_HEADERS = """/*
 
 def build_public_site(full_data: dict[str, Any]) -> None:
     DIST_DIR.mkdir(parents=True, exist_ok=True)
-    template_path = TEMPLATES_DIR / "index.html"
-
-    if not template_path.exists():
-        raise FileNotFoundError(f"Template not found at {template_path}")
-
-    with open(template_path, encoding="utf-8") as f:
-        html = f.read()
-
-    public_data = sanitize_public_inventory(full_data)
-    json_str = json.dumps(public_data, indent=2)
-
-    if INVENTORY_MARKER not in html:
-        raise RuntimeError("Template is missing the __INVENTORY__ placeholder")
-    html = html.replace(INVENTORY_MARKER, f"const INVENTORY = {json_str};")
 
     phone = seller_phone()
     if not phone:
         raise RuntimeError(
             "No seller phone: set SELLER_PHONE or make data/private.sops.yaml decryptable"
         )
-    contact_js = "const _C = " + json.dumps(phone_parts(phone)) + ";"
-    if "const _C = __SELLER_CONTACT__;" not in html:
-        raise RuntimeError("Template is missing the __SELLER_CONTACT__ placeholder")
-    html = html.replace("const _C = __SELLER_CONTACT__;", contact_js)
+    # The template sees the sanitized data only, never full_data.
+    inventory_json = json.dumps(sanitize_public_inventory(full_data), indent=2)
+    contact_json = json.dumps(phone_parts(phone))
+    html = render("index.html", inventory_json=inventory_json, contact_json=contact_json)
+
+    # Fail closed: a template that stops emitting either one would ship a page
+    # with no items or no way to reach the seller.
+    for emitted, marker in (
+        (f"const INVENTORY = {inventory_json};", "const INVENTORY = {{ inventory_json | safe }};"),
+        (f"const _C = {contact_json};", "const _C = {{ contact_json | safe }};"),
+    ):
+        if emitted not in html:
+            raise RuntimeError(f"Template index.html does not emit {marker}")
 
     with open(PUBLIC_INDEX_HTML, "w", encoding="utf-8") as f:
         f.write(html)

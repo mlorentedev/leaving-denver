@@ -65,14 +65,19 @@ def text_under(root):
     return "\n".join(parts)
 
 
-def test_missing_inventory_marker_fails(public_dir, tmp_path, monkeypatch):
+@pytest.mark.parametrize(
+    ("script", "missing"),
+    [
+        ("const INVENTORY = {items: []};\nconst _C = {{ contact_json | safe }};", "inventory_json"),
+        ("const INVENTORY = {{ inventory_json | safe }};\nconst _C = {};", "contact_json"),
+    ],
+)
+def test_missing_marker_fails(public_dir, tmp_path, monkeypatch, script, missing):
     templates = tmp_path / "templates"
     templates.mkdir()
-    (templates / "index.html").write_text(
-        "<script>const INVENTORY = {items: []};\nconst _C = __SELLER_CONTACT__;</script>"
-    )
+    (templates / "index.html").write_text(f"<script>{script}</script>")
     monkeypatch.setattr(site_builder, "TEMPLATES_DIR", templates)
-    with pytest.raises(RuntimeError, match="__INVENTORY__"):
+    with pytest.raises(RuntimeError, match=missing):
         site_builder.build_public_site(inventory())
 
 
