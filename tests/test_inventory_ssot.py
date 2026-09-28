@@ -55,19 +55,6 @@ def test_items_integrity(inventory):
         assert item.get("dimensions"), f"Item {item_id} missing dimensions"
 
 
-def test_bundle_cards_read_fields_the_data_has(inventory):
-    # The bundle cards are drawn by `INVENTORY.bundles.forEach(b => ...)`; a field the
-    # data lacks renders as "undefined" on the page (#6).
-    template = (
-        INVENTORY_YAML.parents[1] / "src" / "leaving_denver" / "templates" / "index.html"
-    ).read_text()
-    fields = set(re.findall(r"\$\{b\.(\w+)", template)) | set(re.findall(r"\+ b\.(\w+)", template))
-    assert fields, "no bundle fields found in the template"
-    for bundle in inventory["bundles"]:
-        missing = fields - bundle.keys()
-        assert not missing, f"{bundle['id']} lacks {sorted(missing)}, used by the bundle card"
-
-
 def test_vehicle_specifics(inventory):
     vehicle = next(
         (i for i in inventory.get("items", []) if i.get("id") == "2019-ford-escape-sel-awd"), None
@@ -82,19 +69,18 @@ def test_vehicle_specifics(inventory):
 
 
 def test_bundles_integrity(inventory):
-    bundles = inventory.get("bundles", [])
-    assert len(bundles) >= 5, "Expected at least 5 value bundles"
-
-    for b in bundles:
-        title = b.get("name") or b.get("title")
-        assert title, "Bundle missing name/title"
-        price = b.get("bundle_price", b.get("price", 0))
-        regular = b.get("individual_total", b.get("regular", 0))
-        savings = b.get("savings", b.get("save", 0))
-
-        assert price > 0
-        assert regular > price, f"Bundle {title} has no positive discount"
-        assert savings == regular - price
+    prices = {
+        i["id"]: 0 if i.get("free_with_purchase") else i["recommended_list_price"]
+        for i in inventory["items"]
+    }
+    for b in inventory.get("bundles", []):
+        assert b.get("name"), "Bundle missing name"
+        # Totals and savings are computed at build time; typed copies drift (#6).
+        typed = {"individual_total", "savings"} & b.keys()
+        assert not typed, f"{b['id']} types derived figures {sorted(typed)}"
+        assert all(i in prices for i in b["items"]), f"{b['id']} names an unknown item"
+        total = sum(prices[i] for i in b["items"])
+        assert 0 < b["bundle_price"] < total, f"{b['id']} has no positive discount"
 
 
 def test_seller_phone_not_in_public_inventory(inventory):

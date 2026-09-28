@@ -27,6 +27,8 @@ Brief log of non-obvious trade-offs or course corrections taken during the work.
 - PR 2: with Jinja2 a template that omits a variable renders fine, so the fail-closed marker became a post-render check that the page emits `const INVENTORY = <json>;` and `const _C = <json>;`.
 - PR 2: `trim_blocks` and `lstrip_blocks` keep block tags from leaving blank lines, so wrapping the vehicle card still matched the golden page byte for byte.
 - PR 2: besides the card, the `<title>`, the hero line and the car's payment sentence render only when a vehicle is published, so the page does not mention a car it does not show.
+- PR 3: a free item keeps its `recommended_list_price` in the YAML, with `free_with_purchase: true`, so the private floors still check; the builder shows its note and counts it as $0 in bundle totals. That moved "take everything" from Save $173 to Save $153.
+- PR 3: bundle cards, item cards and the take-everything card render server-side; `INVENTORY` stays in the page only for the item sheet.
 - 2026-09-28: the owner published the car again; the card stays visible for now.
 
 ## Promotion candidates

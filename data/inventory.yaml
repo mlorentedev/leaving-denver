@@ -94,7 +94,7 @@ items:
   - hdmi monitor
   - freesync
 - id: onn-43-4k-tv
-  category: Living Room & Tech
+  category: Living Room
   title: onn. 43" Class 4K UHD (2160P) Smart Roku TV w/ Remote & Stands
   short_title: onn. 43" 4K Smart Roku TV
   brand: onn.
@@ -373,6 +373,8 @@ items:
   original_price: 40
   current_asking: 15
   recommended_list_price: 20
+  free_with_purchase: true
+  note: Free with any purchase
   condition: Like New (Used Once)
   dimensions: 'Twin: 39" W x 75" L x 16.5" H'
   color: Two-tone Blue / Gray Flocked Top
@@ -531,77 +533,40 @@ items:
 bundles:
 - id: bundle-sleeper-topper
   name: Sleeper Sofa + Cloud Comfort Memory Foam Topper
+  short_name: Sleeper sofa + topper
   items:
   - sofa-sleeper
   - ikea-mattress-topper
-  individual_total: 255
-  bundle_price: 230
-  savings: 25
-  badge: Guest Bed Luxury
-  description: AFW Kent reversible sleeper sectional + IKEA TANANGER Full memory foam
-    topper. The 2 3/8" viscoelastic topper fits the pull-out double bed like a glove,
-    and rolls up neatly inside the sofa's storage chaise during the day!
+  bundle_price: 220
+  note: Topper free with the sofa
 - id: bundle-wfh
   name: Complete WFH / Home Office Productivity Station
+  short_name: Home office
   items:
   - convertible-desk
   - office-chair-ergonomic
   - dell-monitor-32
-  individual_total: 180
   bundle_price: 150
-  savings: 30
-  badge: WFH Setup
-  description: 'Entire ergonomic workstation in one trip: Mainstays 2-way convertible
-    desk + ergonomic mesh chair w/ 90° flip arms + Dell 32" curved 75Hz monitor.'
 - id: bundle-living-room
   name: Living Room Media & Entertainment Suite
+  short_name: Living room media
   items:
   - onn-43-4k-tv
   - tv-stand-canyon-walnut
   - coffee-table-lift-top
   - auxiliary-c-table
-  individual_total: 180
   bundle_price: 145
-  savings: 35
-  badge: Living Room
-  description: 'Complete entertainment setup: onn. 43" 4K Smart Roku TV + Parsons
-    TV stand + lift-top storage coffee table + over-couch C-table.'
-- id: bundle-walnut-suite
-  name: Matching Canyon Walnut Studio Suite
-  items:
-  - convertible-desk
-  - tv-stand-canyon-walnut
-  - auxiliary-c-table
-  individual_total: 100
-  bundle_price: 80
-  savings: 20
-  badge: Matching Finish
-  description: 'Zero color mismatch: convertible desk + TV stand + C-table (all identical
-    Mainstays Canyon Walnut woodgrain with black steel frame).'
 - id: bundle-kitchen-island
   name: Kitchen Island & Breakfast Bar Starter Kit
+  short_name: Kitchen bar
   items:
   - bar-stools-pair
   - dinnerware-glassware-set
-  individual_total: 53
   bundle_price: 40
-  savings: 13
-  badge: Kitchen & Bar
-  description: Pair of 28.7" VASAGLE industrial counter stools + 20-piece stoneware
-    dinnerware & glass drinkware set. Fits under standard kitchen counter/island.
-- id: bundle-guest-bed
-  name: Solo Guest Bed & Nightstand Kit
-  items:
-  - air-mattress-twin-pump
-  - nightstand-espresso
-  individual_total: 45
-  bundle_price: 35
-  savings: 10
-  badge: Spare Room
-  description: Intex Dura-Beam elevated 16.5" Twin air mattress with built-in 110V
-    electric pump + Mainstays Hillside 1-drawer espresso nightstand.
 - id: bundle-take-all
   name: Whole Apartment Relocation Liquidation
+  short_name: Take everything
+  everything: true
   items:
   - sofa-sleeper
   - dell-monitor-32
@@ -616,9 +581,4 @@ bundles:
   - air-mattress-twin-pump
   - dinnerware-glassware-set
   - auxiliary-c-table
-  individual_total: 713
   bundle_price: 540
-  savings: 173
-  badge: Whole Apartment
-  description: All 13 household furniture and tech items in one single pickup trip.
-    Save $173 flat cash.

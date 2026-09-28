@@ -39,14 +39,14 @@ created: "2026-09-26"
 
 ### PR 3: `fix/catalog-figures-from-data` (closes #6, bundle part of #32)
 
-- [ ] [P] [AC4] `test_bundle_figures_come_from_items`: every bundle's `individual_total` equals the sum of its items' prices, and `savings` equals total minus `bundle_price`. Expected: FAIL (walnut and take-all are hand-typed).
-- [ ] [AC4] Compute `individual_total` and `savings` in the builder; remove both keys from the YAML. Drop `bundle-walnut-suite`. Topper free with the sofa and airbed free with any purchase become bundle notes, owner-worded.
-- [ ] [AC4] `test_rendered_page_figures_match_data`: parse `build/public/index.html` and assert the item count, each bundle's price and savings, and the whole-apartment total and savings against the computed values.
-- [ ] [AC4] Render the bundle cards, the whole-apartment banner, the counts and the modal "Combine & save" box from `bundles` in Jinja2. Delete `UPSELL_MAP`; the client script looks up bundles by item id.
-- [ ] [P] [AC5] `test_every_category_has_a_chip`: chips render from the set of item categories, so the build fails if a category is not in the ordered chip list in `site_builder.py`. Expected: FAIL today (`Living Room & Tech`).
-- [ ] [AC5] Render the chips from data; fix the TV category.
-- [ ] Remove the stray `</a>` in the modal's Close button, and the hardcoded modal status `Available` (render from `status`).
-- [ ] [AC10] Render the chips, the item grid (two columns below 640 px, the whole card opens the item, no Details button), the bundle row and the "take everything" card in the approved mobile layout. The client script keeps only filter, search and opening an item.
+- [x] [P] [AC4] `test_bundle_figures_come_from_items`: every bundle's `individual_total` equals the sum of its items' prices, and `savings` equals total minus `bundle_price`. Expected: FAIL (walnut and take-all are hand-typed).
+- [x] [AC4] Compute `individual_total` and `savings` in the builder; remove both keys from the YAML. Drop `bundle-walnut-suite` and `bundle-guest-bed`. Per the owner on #32: the sofa + topper bundle costs the sofa's price ("Topper free with the sofa"), and the air mattress is `free_with_purchase` ("Free with any purchase"), counted as $0 in bundles.
+- [x] [AC4] `test_page_figures_match_the_data`: parse `build/public/index.html` and assert the item count, each bundle's price and savings, and the whole-apartment total and savings against the computed values.
+- [x] [AC4] Render the bundle cards, the whole-apartment banner, the counts and the modal "Combine & save" box from `bundles` in Jinja2. Delete `UPSELL_MAP`; the client script looks up bundles by item id.
+- [x] [P] [AC5] `test_every_category_has_a_chip`: chips render from the set of item categories, so the build fails if a category is not in the ordered chip list in `site_builder.py`. Expected: FAIL today (`Living Room & Tech`).
+- [x] [AC5] Render the chips from data; fix the TV category.
+- [x] Remove the stray `</a>` in the modal's Close button, and the hardcoded modal status `Available` (render from `status`).
+- [x] [AC10] Render the chips, the item grid (two columns below 640 px, the whole card opens the item, no Details button), the bundle row and the "take everything" card in the approved mobile layout. The client script keeps only filter and opening an item; the mockup has no search, so it is gone.
 
 ### PR 4: `fix/catalog-copy-from-data` (closes #13, #9, #48; needs the owner answers)
 
