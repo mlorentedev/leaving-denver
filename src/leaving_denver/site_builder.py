@@ -144,7 +144,8 @@ def build_public_site(full_data: dict[str, Any]) -> None:
         )
     # The template sees the sanitized data only, never full_data.
     public_data = sanitize_public_inventory(full_data)
-    inventory_json = json.dumps(public_data, indent=2)
+    # `<` escaped so item text cannot close the inline <script> ("</script>", "<!--").
+    inventory_json = json.dumps(public_data, indent=2).replace("<", "\\u003c")
     contact_json = json.dumps(phone_parts(phone))
     vehicle = next((i for i in public_data["items"] if i["category"] == "Vehicle"), None)
     html = render(

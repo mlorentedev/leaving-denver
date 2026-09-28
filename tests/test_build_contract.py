@@ -161,3 +161,14 @@ def test_vehicle_card_follows_the_publish_flag(public_dir, published):
     page = (public_dir / "index.html").read_text(encoding="utf-8")
     assert ("2019-ford-escape" in text_under(public_dir)) is published
     assert ("Vehicle" in page.split("<script>")[0]) is published
+
+
+def test_item_text_cannot_close_the_script(public_dir):
+    data = inventory()
+    data["items"][0]["title"] = "Lamp </script><script>alert(1)</script>"
+
+    site_builder.build_public_site(data)
+
+    page = (public_dir / "index.html").read_text(encoding="utf-8")
+    assert "</script><script>alert" not in page
+    assert "Lamp \\u003c/script>" in page
