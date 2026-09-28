@@ -100,7 +100,12 @@ def sanitize_public_inventory(full_data: dict[str, Any]) -> dict[str, Any]:
             "title": item.get("title"),
             "short_title": item.get("short_title", item.get("title")),
             "brand": item.get("brand", ""),
-            "price": item.get("recommended_list_price", item.get("current_asking", 0)),
+            # A free item keeps its list price in the data (the floors need it) but shows none.
+            "price": 0
+            if item.get("free_with_purchase")
+            else item.get("recommended_list_price", item.get("current_asking", 0)),
+            "free": bool(item.get("free_with_purchase")),
+            "note": item.get("note", ""),
             "retail": item.get("original_price", 0),
             "status": item.get("status", "Available"),
             "dimensions": item.get("dimensions", ""),
@@ -113,12 +118,31 @@ def sanitize_public_inventory(full_data: dict[str, Any]) -> dict[str, Any]:
         }
         public_items.append(pub)
 
-    return {
-        "items": public_items,
-        "bundles": [
-            b for b in full_data.get("bundles", []) if not hidden & set(b.get("items", []))
-        ],
-    }
+    prices = {item["id"]: item["price"] for item in public_items}
+    public_bundles = []
+    for bundle in full_data.get("bundles", []):
+        if hidden & set(bundle["items"]):
+            continue
+        missing = [i for i in bundle["items"] if i not in prices]
+        if missing:
+            raise RuntimeError(f"Bundle {bundle['id']} names unknown items: {missing}")
+        # Totals and savings are derived here, never typed into the data.
+        total = sum(prices[i] for i in bundle["items"])
+        public_bundles.append(
+            {
+                "id": bundle["id"],
+                "name": bundle.get("name", ""),
+                "short_name": bundle.get("short_name", bundle.get("name", "")),
+                "items": list(bundle["items"]),
+                "bundle_price": bundle["bundle_price"],
+                "individual_total": total,
+                "savings": total - bundle["bundle_price"],
+                "note": bundle.get("note", ""),
+                "everything": bool(bundle.get("everything")),
+            }
+        )
+
+    return {"items": public_items, "bundles": public_bundles}
 
 
 # Cloudflare Pages reads _headers from the output root. Photos keep their names

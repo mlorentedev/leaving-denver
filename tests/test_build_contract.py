@@ -37,8 +37,14 @@ def inventory(*, hidden_published=False):
                 "id": "bundle-with-hidden",
                 "name": "With hidden",
                 "items": ["shown-lamp", "hidden-widget"],
+                "bundle_price": 15,
             },
-            {"id": "bundle-shown-only", "name": "Shown only", "items": ["shown-lamp"]},
+            {
+                "id": "bundle-shown-only",
+                "name": "Shown only",
+                "items": ["shown-lamp"],
+                "bundle_price": 8,
+            },
         ],
     }
 
@@ -172,3 +178,21 @@ def test_item_text_cannot_close_the_script(public_dir):
     page = (public_dir / "index.html").read_text(encoding="utf-8")
     assert "</script><script>alert" not in page
     assert "Lamp \\u003c/script>" in page
+
+
+def test_bundle_figures_come_from_items():
+    data = inventory(hidden_published=True)
+    data["items"][1]["recommended_list_price"] = 30
+    data["bundles"][0]["individual_total"] = 999  # hand-typed figures are ignored
+    public = site_builder.sanitize_public_inventory(data)
+    figures = {b["id"]: (b["individual_total"], b["savings"]) for b in public["bundles"]}
+    assert figures == {"bundle-with-hidden": (40, 25), "bundle-shown-only": (10, 2)}
+
+
+def test_bundle_figures_count_free_items_as_zero():
+    data = inventory(hidden_published=True)
+    data["items"][1]["free_with_purchase"] = True
+    public = site_builder.sanitize_public_inventory(data)
+    widget = next(i for i in public["items"] if i["id"] == "hidden-widget")
+    assert (widget["price"], widget["free"]) == (0, True)
+    assert public["bundles"][0]["individual_total"] == 10
