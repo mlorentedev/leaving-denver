@@ -16,16 +16,16 @@ Map every acceptance criterion from `proposal.md` to concrete proof (commit hash
 - [x] AC5 -> `test_every_category_has_a_chip`
 - [x] AC6 -> `test_no_unbacked_vehicle_claims`, `test_sale_schedule_comes_from_departure_date`, `test_drops_prints_windows_from_departure_date`, `test_vehicle_card_claims_are_in_data`
 - [x] AC7 -> `test_payment_terms_by_kind`
-- [ ] AC8 -> PR 5 preview measurement
+- [x] AC8 -> PR 5 preview measurement: `clientWidth`, document `scrollWidth`, and body `scrollWidth` all 390 px
 - [ ] AC9 -> PR 6 localized build
-- [ ] AC10 -> PR 4 copy budget passes; PR 5 sticky contact bar and four-fact sheet remain
+- [x] AC10 -> PR 4 copy budget plus PR 5 `test_mobile_shell`; preview showed four facts and no visible tap target below 40 px
 
 ## Test status
 
-- Test suite: `uv run pytest` -> 55 passed
-- Lint: `uv run ruff check .` -> passed; `uv run ruff format --check .` -> 39 files formatted
+- Test suite: `uv run pytest` -> 56 passed
+- Lint: `uv run ruff check .` -> passed; `uv run ruff format --check .` -> 40 files formatted
 - Build: `uv run leaving-denver build` -> public and private outputs built; security verification passed
-- Manual smoke test: pending PR 5 responsive preview check
+- Manual smoke test: headless Chrome at 390 x 844 -> `clientWidth=390`, document and body `scrollWidth=390`, four sheet facts, zero visible tap targets below 40 px
 - No regressions in existing test suite: yes
 
 ## Decisions made during implementation
@@ -45,6 +45,8 @@ Brief log of non-obvious trade-offs or course corrections taken during the work.
 - PR 4: Windows tests read generated HTML explicitly as UTF-8; relying on the platform default failed on typographic punctuation.
 - PR 4 review: the countdown runs in the browser using the Denver calendar date, so a static deployment does not freeze the number of days.
 - PR 4 review: Facebook and Craigslist vehicle copy now interpolate the item specs, included items, mileage, pickup note and seller payment terms instead of maintaining a second hard-coded listing.
+- PR 5: the sticky "Text us" bar is the only generic contact CTA; item- and bundle-specific SMS links remain contextual actions.
+- PR 5: the item detail remains data-driven but presents no more than four specs, with the bundle offer collapsed to one line.
 
 ## Promotion candidates
 

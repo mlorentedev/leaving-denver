@@ -26,29 +26,23 @@
     .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body class="bg-[#fbfbfb] text-[#1c1c1c] antialiased min-h-screen flex flex-col selection:bg-neutral-900 selection:text-white">
+<body class="bg-[#fbfbfb] text-[#1c1c1c] antialiased min-h-screen flex flex-col overflow-x-hidden pb-24 selection:bg-neutral-900 selection:text-white">
 
   <!-- Minimal Header -->
-  <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-neutral-200/80">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+  <header class="sticky top-0 z-40 w-full min-w-0 bg-white/90 backdrop-blur-md border-b border-neutral-200/80">
+    <div class="max-w-5xl w-full min-w-0 mx-auto px-4 sm:px-6 h-16 flex items-center">
       <div class="flex items-center gap-3">
-        <a href="index.html" class="flex items-center gap-2.5">
+        <a href="index.html" class="flex min-h-10 items-center gap-2.5">
           <span class="w-8 h-8 rounded-lg bg-neutral-900 text-white font-bold text-xs flex items-center justify-center">DTC</span>
           <span class="font-bold tracking-tight text-neutral-900 text-sm sm:text-base">Moving Sale</span>
           <span class="text-xs text-neutral-400 font-medium hidden sm:inline">· Denver Tech Center, CO 80111</span>
-        </a>
-      </div>
-
-      <div class="flex items-center gap-3">
-        <a href="#" data-sms-role="header-btn" class="text-xs font-semibold px-4 py-2 rounded-full bg-neutral-900 hover:bg-neutral-800 text-white transition-colors shadow-2xs">
-          Text Seller
         </a>
       </div>
     </div>
   </header>
 
   <!-- Editorial Hero Section (Isra Bravo / Hormozi Natural Voice) -->
-  <section class="max-w-5xl mx-auto px-4 sm:px-6 pt-10 pb-8">
+  <section class="max-w-5xl w-full min-w-0 mx-auto px-4 sm:px-6 pt-10 pb-8">
     <div class="max-w-2xl space-y-3">
       <div class="inline-flex items-center gap-2 text-xs font-semibold text-neutral-500 uppercase tracking-wider">
         <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
@@ -106,7 +100,7 @@
             <button onclick="openModal('2019-ford-escape-sel-awd')" class="flex-1 py-2.5 px-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-semibold text-xs transition-colors">
               View Full Specs & Photos
             </button>
-            <a href="#" data-sms-intent="Hi! I am interested in inspecting the {{ vehicle.short_title }} (${{ vehicle.price }}) in DTC." class="py-2.5 px-3 rounded-xl border border-neutral-200 hover:bg-neutral-50 text-neutral-800 font-semibold text-xs transition-colors">
+            <a href="#" data-sms-intent="Hi! I am interested in inspecting the {{ vehicle.short_title }} (${{ vehicle.price }}) in DTC." class="min-h-10 py-2.5 px-3 rounded-xl border border-neutral-200 hover:bg-neutral-50 text-neutral-800 font-semibold text-xs transition-colors">
               Schedule Test Drive
             </a>
           </div>
@@ -119,15 +113,15 @@
 
     <!-- Category filters -->
     <div class="mt-10 -mx-4 px-4 sm:mx-0 sm:px-0 flex gap-2 overflow-x-auto hide-scrollbar py-1">
-      <button type="button" class="filter-btn flex-none h-10 px-4 rounded-full text-sm transition-colors font-bold bg-neutral-900 text-white" data-cat="all" aria-pressed="true">All · {{ items | length }}</button>
+      <button type="button" class="filter-btn shrink-0 whitespace-nowrap h-10 px-4 rounded-full text-sm transition-colors font-bold bg-neutral-900 text-white" data-cat="all" aria-pressed="true">All · {{ items | length }}</button>
       {% for cat, label in chips %}
-      <button type="button" class="filter-btn flex-none h-10 px-4 rounded-full text-sm transition-colors font-semibold bg-white border border-neutral-200 text-neutral-600 hover:text-neutral-900" data-cat="{{ cat }}" aria-pressed="false">{{ label }}</button>
+      <button type="button" class="filter-btn shrink-0 whitespace-nowrap h-10 px-4 rounded-full text-sm transition-colors font-semibold bg-white border border-neutral-200 text-neutral-600 hover:text-neutral-900" data-cat="{{ cat }}" aria-pressed="false">{{ label }}</button>
       {% endfor %}
     </div>
   </section>
 
   <!-- Items Grid: two columns on phones, the whole card opens the item -->
-  <main class="max-w-5xl mx-auto px-4 sm:px-6 py-2 flex-1">
+  <main class="max-w-5xl w-full min-w-0 mx-auto px-4 sm:px-6 py-2 flex-1">
     <div id="itemsGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-x-3 gap-y-5 sm:gap-5">
       {% for item in items %}
       <button type="button" class="item-card group flex flex-col gap-2 text-left" data-item="{{ item.id }}" data-cat="{{ item.category }}">
@@ -190,28 +184,24 @@
           Pickup is in {{ seller.location }} near I-25 and Belleview; bring help and suitable transport. Household items: {{ seller.payment_methods.household | join(', ') }} in person{% if vehicle %}; vehicle: {{ seller.payment_methods.vehicle | join(' or ') }}{% endif %}.
         </p>
       </div>
-      <div class="mt-4 pt-4 border-t border-neutral-800 flex flex-wrap gap-3 text-xs">
-        <a href="#" data-sms-role="terms-phone" class="font-semibold text-white hover:text-neutral-200">Text Seller</a>
-        <span class="text-neutral-600">·</span>
-        <a href="mailto:mlorente@duck.com" class="font-semibold text-neutral-400 hover:text-white">Email: mlorente@duck.com</a>
-      </div>
     </section>
   </main>
 
   <!-- Footer -->
-  <footer class="mt-16 py-8 border-t border-neutral-200/80 bg-white text-xs text-neutral-400">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row justify-between items-center gap-3">
+  <footer class="mt-16 w-full min-w-0 py-8 border-t border-neutral-200/80 bg-white text-xs text-neutral-400">
+    <div class="max-w-5xl w-full min-w-0 mx-auto px-4 sm:px-6 flex justify-center">
       <div>Denver Tech Center Relocation Sale · CO 80111</div>
-      <div class="flex items-center gap-4">
-        <a href="#" data-sms-role="phone-display" class="hover:text-neutral-700">Contact Seller</a>
-      </div>
     </div>
   </footer>
 
-  <!-- Item Detail Modal -->
-  <div id="itemModal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs hidden items-center justify-center p-4 overflow-y-auto">
-    <div class="bg-white rounded-2xl max-w-2xl w-full p-6 sm:p-7 relative shadow-xl max-h-[90vh] overflow-y-auto">
-      <button onclick="closeModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center text-neutral-600 text-sm">
+  <a href="#" data-sms-role="sticky-text" class="fixed inset-x-4 bottom-4 z-40 max-w-sm mx-auto h-12 rounded-xl bg-neutral-900 text-white text-sm font-bold flex items-center justify-center shadow-xl">
+    Text us
+  </a>
+
+  <!-- Item Detail Bottom Sheet -->
+  <div id="itemSheet" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs hidden items-end justify-center overflow-y-auto">
+    <div class="bg-white rounded-t-3xl max-w-2xl w-full min-w-0 p-6 sm:p-7 relative shadow-xl max-h-[90vh] overflow-y-auto">
+      <button onclick="closeModal()" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center text-neutral-600 text-sm">
         ✕
       </button>
 
@@ -237,31 +227,22 @@
 
         <div>
           <h4 class="text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1.5">Details & Specifications</h4>
-          <ul id="modalSpecs" class="space-y-1 text-xs text-neutral-700"></ul>
+          <ul id="itemFacts" data-max-facts="4" class="space-y-1 text-xs text-neutral-700"></ul>
         </div>
 
         <div class="p-3 bg-neutral-50 rounded-xl border border-neutral-100 text-xs text-neutral-600">
           <span class="font-bold text-neutral-800">Pickup note:</span> <span id="modalPickup"></span>
         </div>
 
-        <!-- Contextual Upsell Box -->
-        <div id="modalUpsell" class="hidden p-3.5 bg-neutral-50 rounded-xl border border-neutral-200/90 text-xs space-y-1.5">
-          <div class="flex items-center justify-between">
-            <span class="font-bold text-neutral-900 flex items-center gap-1.5">
-              <span>Combine & Save:</span>
-              <span id="upsellBadge" class="text-[10px] font-bold text-emerald-700 bg-emerald-100/70 px-2 py-0.5 rounded"></span>
-            </span>
-          </div>
-          <div id="upsellTitle" class="font-bold text-neutral-800 text-xs sm:text-sm"></div>
-          <p id="upsellDesc" class="text-[11px] text-neutral-600 leading-relaxed"></p>
-          <a id="upsellLink" href="#" class="inline-block text-xs font-bold text-neutral-900 underline pt-0.5 hover:text-neutral-600">
-            Inquire about this package deal →
+        <div id="modalUpsell" class="hidden">
+          <a id="upsellLink" href="#" class="block p-3.5 bg-neutral-50 rounded-xl border border-neutral-200/90 text-xs font-bold text-neutral-900">
+            <span id="upsellText"></span>
           </a>
         </div>
 
         <div class="pt-2 flex items-center gap-3">
           <a id="modalSmsLink" href="#" class="flex-1 py-3 px-4 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-semibold text-xs text-center transition-colors">
-            Text to Inquire or Reserve
+            Text about this
           </a>
           <button onclick="closeModal()" class="py-3 px-4 rounded-xl border border-neutral-200 hover:bg-neutral-50 text-neutral-700 font-semibold text-xs transition-colors">
             Close
@@ -275,7 +256,6 @@
     // Contact Obfuscation (Defeats automated scraping spiders & telemarketing bots)
     const _C = {{ contact_json | safe }};
     function getSellerPhone() { return _C.cc + _C.area + _C.prefix + _C.line; }
-    function getDisplayPhone() { return `(${_C.area}) ${_C.prefix}-${_C.line}`; }
     function buildSmsUri(body) {
       return `sms:${getSellerPhone()}${body ? '?body=' + encodeURIComponent(body) : ''}`;
     }
@@ -298,17 +278,8 @@
     }
 
     function initDynamicContacts() {
-      document.querySelectorAll('[data-sms-role="header-btn"]').forEach(el => {
+      document.querySelectorAll('[data-sms-role="sticky-text"]').forEach(el => {
         el.href = buildSmsUri('Hi! I saw your DTC Moving Sale catalog and had a question.');
-        el.textContent = `Text ${getDisplayPhone()}`;
-      });
-      document.querySelectorAll('[data-sms-role="phone-display"]').forEach(el => {
-        el.href = buildSmsUri();
-        el.textContent = getDisplayPhone();
-      });
-      document.querySelectorAll('[data-sms-role="terms-phone"]').forEach(el => {
-        el.href = buildSmsUri();
-        el.textContent = `Text: ${getDisplayPhone()}`;
       });
       document.querySelectorAll('[data-sms-intent]').forEach(el => {
         el.href = buildSmsUri(el.getAttribute('data-sms-intent'));
@@ -349,9 +320,9 @@
         strip.appendChild(thumb);
       });
 
-      const specsList = document.getElementById('modalSpecs');
+      const specsList = document.getElementById('itemFacts');
       specsList.innerHTML = '';
-      (item.specs || []).forEach(spec => {
+      (item.specs || []).slice(0, 4).forEach(spec => {
         const li = document.createElement('li');
         li.className = 'flex items-start gap-1.5';
         li.innerHTML = `<span class="text-neutral-400 font-bold">•</span> <span>${spec}</span>`;
@@ -362,10 +333,7 @@
       const bundle = INVENTORY.bundles.find(b => !b.everything && b.items.includes(itemId));
       const upsellBox = document.getElementById('modalUpsell');
       if (bundle) {
-        const names = bundle.items.map(id => (INVENTORY.items.find(i => i.id === id) || {}).short_title);
-        document.getElementById('upsellBadge').textContent = 'Save $' + bundle.savings;
-        document.getElementById('upsellTitle').textContent = bundle.short_name + ' · $' + bundle.bundle_price;
-        document.getElementById('upsellDesc').textContent = bundle.note || names.join(' + ');
+        document.getElementById('upsellText').textContent = bundle.short_name + ' · $' + bundle.bundle_price + ' · Save $' + bundle.savings;
         document.getElementById('upsellLink').href = buildSmsUri('Hi! I am interested in the ' + bundle.short_name + ' bundle ($' + bundle.bundle_price + ') in DTC.');
         upsellBox.classList.remove('hidden');
       } else {
@@ -375,20 +343,20 @@
       const asking = item.free ? item.note.toLowerCase() : '$' + item.price;
       document.getElementById('modalSmsLink').href = buildSmsUri('Hi! I am interested in inspecting the ' + item.short_title + ' (' + asking + ') in DTC.');
 
-      document.getElementById('itemModal').classList.remove('hidden');
-      document.getElementById('itemModal').classList.add('flex');
+      document.getElementById('itemSheet').classList.remove('hidden');
+      document.getElementById('itemSheet').classList.add('flex');
     }
 
     function closeModal() {
-      document.getElementById('itemModal').classList.add('hidden');
-      document.getElementById('itemModal').classList.remove('flex');
+      document.getElementById('itemSheet').classList.add('hidden');
+      document.getElementById('itemSheet').classList.remove('flex');
     }
 
     function applyFilter(cat) {
       document.querySelectorAll('.filter-btn').forEach(b => {
         const on = b.dataset.cat === cat;
         b.setAttribute('aria-pressed', on);
-        b.className = 'filter-btn flex-none h-10 px-4 rounded-full text-sm transition-colors ' + (on ? 'font-bold bg-neutral-900 text-white' : 'font-semibold bg-white border border-neutral-200 text-neutral-600 hover:text-neutral-900');
+        b.className = 'filter-btn shrink-0 whitespace-nowrap h-10 px-4 rounded-full text-sm transition-colors ' + (on ? 'font-bold bg-neutral-900 text-white' : 'font-semibold bg-white border border-neutral-200 text-neutral-600 hover:text-neutral-900');
       });
       document.querySelectorAll('.item-card').forEach(card => {
         card.classList.toggle('hidden', cat !== 'all' && card.dataset.cat !== cat);

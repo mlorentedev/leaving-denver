@@ -284,6 +284,55 @@ def test_mobile_shell_item_grid_has_two_columns(public_dir):
     assert grid and "grid-cols-2" in grid.group(1).split()
 
 
+def test_mobile_shell(public_dir):
+    _, html = real_page(public_dir)
+    failures = []
+
+    header = html[html.index("<header") : html.index("</header>")]
+    if "data-sms-role" in header or "data-sms-intent" in header:
+        failures.append("the header still contains a contact button")
+
+    sticky_text_bars = re.findall(
+        r'<a[^>]+data-sms-role="sticky-text"[^>]*>\s*Text us\s*</a>',
+        html,
+        flags=re.DOTALL,
+    )
+    if len(sticky_text_bars) != 1:
+        failures.append(f"expected one sticky Text us bar, found {len(sticky_text_bars)}")
+
+    sheet = re.search(r'<div id="itemSheet" class="([^"]+)"', html)
+    if not sheet or "items-end" not in sheet.group(1).split():
+        failures.append("item detail is not a bottom sheet")
+    if 'id="itemFacts" data-max-facts="4"' not in html or ".slice(0, 4)" not in html:
+        failures.append("item sheet is not capped at four facts")
+
+    body = re.search(r'<body class="([^"]+)"', html)
+    main = re.search(r'<main class="([^"]+)"', html)
+    filter_classes = re.findall(r'class="(filter-btn[^"]*)"', html)
+    if (
+        not body
+        or "overflow-x-hidden" not in body.group(1).split()
+        or not main
+        or not {"w-full", "min-w-0"} <= set(main.group(1).split())
+        or not filter_classes
+        or any(
+            not {"shrink-0", "whitespace-nowrap"} <= set(classes.split())
+            for classes in filter_classes
+        )
+    ):
+        failures.append("the 390px horizontal-overflow guards are incomplete")
+
+    for marker in (
+        'href="index.html" class="flex min-h-10',
+        'in DTC." class="min-h-10',
+        'onclick="closeModal()" class="absolute top-4 right-4 w-10 h-10',
+    ):
+        if marker not in html:
+            failures.append(f"missing 40px tap-target guard: {marker}")
+
+    assert not failures, "\n".join(failures)
+
+
 def test_sale_schedule_comes_from_departure_date():
     schedule = site_builder.sale_schedule("2026-11-09")
     assert schedule == {
