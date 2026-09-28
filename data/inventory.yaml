@@ -2,12 +2,16 @@ seller:
   location: Denver Tech Center (DTC), CO 80111
   email: mlorente@duck.com
   payment_methods:
-  - Cash (Preferred)
-  - Venmo (In-person)
-  - Zelle (In-person)
+    household:
+    - Cash
+    - Venmo
+    - Zelle
+    vehicle:
+    - Cash
+    - Cashier's check verified at the buyer's bank
   pickup_policy: Buyer must self-load and bring appropriate transportation. Fully
     assembled, sold AS-IS.
-  moving_deadline: Within 2 weeks
+  departure_date: '2026-11-09'
 items:
 - id: sofa-sleeper
   cover: sofa-1.jpg
@@ -481,6 +485,7 @@ items:
   year: 2019
   vin: 1FMCU9HD9KUB80146
   odometer: 103500
+  title_status: Clean Colorado title
   original_price: 29800
   current_asking: 11875
   recommended_list_price: 11875
@@ -499,9 +504,9 @@ items:
     / 28 hwy MPG)
   - Ford Intelligent AWD system with high-performance all-weather tires (Colorado
     winter-ready)
-  - Clean Colorado Title in hand with zero liens, ready for immediate transfer
-  - Passed Colorado emissions on 12 May 2026 (report in the photos); a new, unused
-    certificate is handed over at sale, as Colorado law requires
+  - Clean Colorado Title in hand with zero liens
+  - Colorado emissions report dated 12 May 2026 is in the photos; a fresh certificate
+    is required before handover
   - Zero open recalls (recall 22S43 closed at a Ford dealership on 25 Sep 2026; invoice
     in the photos). Pre-purchase inspection welcome
   - 'Ford dealer inspection on 25 Sep 2026: battery good, brakes OK, tires good (on
@@ -512,8 +517,8 @@ items:
     roof rails'
   - Hands-free foot-activated power liftgate, push-button start, dual-zone automatic
     climate control
-  - No accidents during my ownership, garage-kept, smoke-free, pet-free, zero dash
-    warning lights or mechanical codes
+  - No accidents during my ownership, smoke-free, pet-free, zero dash warning lights
+    or mechanical codes
   included:
   - 2019 Ford Escape SEL AWD
   - Original Key Fobs

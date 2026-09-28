@@ -9,6 +9,7 @@ Compiles Single Source of Truth (data/inventory.yaml) into:
 
 import json
 import shutil
+from datetime import date, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -100,6 +101,11 @@ def sanitize_public_inventory(full_data: dict[str, Any]) -> dict[str, Any]:
             "title": item.get("title"),
             "short_title": item.get("short_title", item.get("title")),
             "brand": item.get("brand", ""),
+            "model": item.get("model", ""),
+            "year": item.get("year"),
+            "odometer": item.get("odometer"),
+            "title_status": item.get("title_status", ""),
+            "condition": item.get("condition", ""),
             # A free item keeps its list price in the data (the floors need it) but shows none.
             "price": 0
             if item.get("free_with_purchase")
@@ -145,6 +151,27 @@ def sanitize_public_inventory(full_data: dict[str, Any]) -> dict[str, Any]:
     return {"items": public_items, "bundles": public_bundles}
 
 
+def sanitize_public_seller(full_data: dict[str, Any]) -> dict[str, Any]:
+    """Return only seller fields the public template is allowed to render."""
+    seller = full_data["seller"]
+    return {
+        "location": seller["location"],
+        "departure_date": seller["departure_date"],
+        "payment_methods": seller["payment_methods"],
+    }
+
+
+def sale_schedule(departure_date: str) -> dict[str, tuple[date, date]]:
+    """Return the sale windows as offsets from the departure date."""
+    departure = date.fromisoformat(departure_date)
+    return {
+        "first_drop": (departure - timedelta(days=37), departure - timedelta(days=34)),
+        "second_drop": (departure - timedelta(days=25), departure - timedelta(days=23)),
+        "clear_floors": (departure - timedelta(days=20), departure - timedelta(days=15)),
+        "giveaway": (departure - timedelta(days=6), departure - timedelta(days=4)),
+    }
+
+
 # Cloudflare Pages reads _headers from the output root. Photos keep their names
 # when replaced, so they get a day of cache rather than `immutable`.
 PAGES_HEADERS = """/*
@@ -186,6 +213,8 @@ def build_public_site(full_data: dict[str, Any]) -> None:
         )
     # The template sees the sanitized data only, never full_data.
     public_data = sanitize_public_inventory(full_data)
+    seller = sanitize_public_seller(full_data)
+    departure = date.fromisoformat(seller["departure_date"])
     # `<` escaped so item text cannot close the inline <script> ("</script>", "<!--").
     inventory_json = json.dumps(public_data, indent=2).replace("<", "\\u003c")
     contact_json = json.dumps(phone_parts(phone))
@@ -196,6 +225,9 @@ def build_public_site(full_data: dict[str, Any]) -> None:
         "index.html",
         inventory_json=inventory_json,
         contact_json=contact_json,
+        seller=seller,
+        departure_month=departure.strftime("%B"),
+        days_remaining=max((departure - date.today()).days, 0),
         vehicle=vehicle,
         items=items,
         chips=category_chips(items),

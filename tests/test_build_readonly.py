@@ -7,7 +7,14 @@ import yaml
 from leaving_denver import site_builder
 
 INVENTORY = {
-    "seller": {"location": "DTC, CO 80111"},
+    "seller": {
+        "location": "DTC, CO 80111",
+        "departure_date": "2026-11-09",
+        "payment_methods": {
+            "household": ["Cash", "Venmo", "Zelle"],
+            "vehicle": ["Cash", "Cashier's check verified at the buyer's bank"],
+        },
+    },
     "items": [
         {
             "id": "shown-lamp",
@@ -43,4 +50,4 @@ def test_build_does_not_rewrite_the_inventory_yaml(tmp_path, monkeypatch):
 
     assert source.read_bytes() == before
     # The synced photos still reach the page, from memory.
-    assert "catalog/shown-lamp/new.jpg" in (dist / "index.html").read_text()
+    assert "catalog/shown-lamp/new.jpg" in (dist / "index.html").read_text(encoding="utf-8")

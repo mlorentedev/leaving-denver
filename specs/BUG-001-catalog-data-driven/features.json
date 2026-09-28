@@ -37,16 +37,16 @@
   {
     "id": "BUG-001-catalog-data-driven-f6",
     "behavior": "AC6: no stale deadline copy and no vehicle claim missing from the data",
-    "verification": "uv run pytest tests/test_build_contract.py -k 'stale_or_unbacked or vehicle_card_claims'",
+    "verification": "uv run pytest tests/test_inventory_ssot.py tests/test_build_contract.py -k 'unbacked or vehicle_card_claims'",
     "state": "pending",
-    "evidence": ""
+    "evidence": "PR 4: test_no_unbacked_vehicle_claims and test_vehicle_card_claims_are_in_data pass"
   },
   {
     "id": "BUG-001-catalog-data-driven-f7",
     "behavior": "AC7: Venmo/Zelle only for household items, no 'no advance deposits' for the car",
     "verification": "uv run pytest tests/test_build_contract.py -k payment_terms_by_kind",
     "state": "pending",
-    "evidence": ""
+    "evidence": "PR 4: test_payment_terms_by_kind passes"
   },
   {
     "id": "BUG-001-catalog-data-driven-f8",
@@ -67,6 +67,6 @@
     "behavior": "AC10: the page follows the approved mobile layout (sticky contact bar, two-column grid, hero word budget, four-fact item sheet)",
     "verification": "uv run pytest tests/test_build_contract.py -k 'mobile_copy_budget or mobile_shell'",
     "state": "pending",
-    "evidence": ""
+    "evidence": "PR 4: hero and pickup copy budgets pass; sticky bar and four-fact sheet remain for PR 5"
   }
 ]

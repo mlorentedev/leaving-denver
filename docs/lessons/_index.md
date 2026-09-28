@@ -24,3 +24,4 @@ tags: [lessons, index, docs, leaving-denver]
 | [lesson-009](lesson-009-wrangler-delegates-new-pages-projects-to-workers.md) | Wrangler Hands New Pages Projects to Workers | 2026-09-26 | [cloudflare, wrangler, deploy] |
 | [lesson-010](lesson-010-redact-scanned-documents-on-pixels.md) | Redact Scanned Documents on the Pixels, Then Re-Encode | 2026-09-26 | [privacy, documents, images] |
 | [lesson-011](lesson-011-derive-figures-never-type-them.md) | Derive Figures at Build Time, Never Type Them | 2026-09-27 | [data, templates, testing] |
+| [lesson-012](lesson-012-template-contexts-are-public-data-contracts.md) | Template Contexts Are Public Data Contracts | 2026-09-28 | [security, templates, privacy, testing] |

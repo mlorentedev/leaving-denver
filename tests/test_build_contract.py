@@ -4,6 +4,8 @@ Build contract: the builder fails closed, and unpublished items never reach buil
 
 import json
 import re
+from datetime import date
+from html import unescape
 
 import pytest
 import yaml
@@ -23,7 +25,14 @@ def inventory(*, hidden_published=False):
         "specs": ["a", "b"],
     }
     return {
-        "seller": {"location": "DTC, CO 80111"},
+        "seller": {
+            "location": "DTC, CO 80111",
+            "departure_date": "2026-11-09",
+            "payment_methods": {
+                "household": ["Cash", "Venmo", "Zelle"],
+                "vehicle": ["Cash", "Cashier's check verified at the buyer's bank"],
+            },
+        },
         "items": [
             {**item, "id": "shown-lamp", "title": "Shown lamp"},
             {
@@ -120,7 +129,7 @@ def test_unpublished_item_is_in_private_marked_draft(tmp_path, monkeypatch):
     data = json.loads((private_dir / "inventory.json").read_text())
     drafts = {i["id"]: i.get("draft", False) for i in data["items"]}
     assert drafts == {"shown-lamp": False, "hidden-widget": True}
-    assert "item.draft" in (private_dir / "poster_assistant.html").read_text()
+    assert "item.draft" in (private_dir / "poster_assistant.html").read_text(encoding="utf-8")
 
 
 def test_publish_flag_survives_yaml_round_trip(tmp_path, monkeypatch):
@@ -154,6 +163,13 @@ CAR = {
     "id": "2019-ford-escape-sel-awd",
     "category": "Vehicle",
     "title": "2019 Ford Escape SEL AWD",
+    "short_title": "Ford Escape",
+    "brand": "Ford",
+    "model": "Escape SEL AWD",
+    "year": 2019,
+    "odometer": 103500,
+    "title_status": "Clean Colorado title",
+    "color": "White",
     "recommended_list_price": 11875,
 }
 
@@ -218,6 +234,16 @@ def card(html, attr, value, end="</a>"):
     return html[start : html.index(end, start)]
 
 
+def text_for_role(html, role):
+    match = re.search(
+        rf'<[^>]+data-role="{role}"[^>]*>(.*?)</[^>]+>',
+        html,
+        flags=re.DOTALL,
+    )
+    assert match, f"missing data-role={role}"
+    return re.sub(r"<[^>]+>", " ", unescape(match.group(1)))
+
+
 def test_page_figures_match_the_data(public_dir):
     data, html = real_page(public_dir)
     # Figures computed here from the YAML, independently of the builder.
@@ -256,3 +282,51 @@ def test_mobile_shell_item_grid_has_two_columns(public_dir):
     _, html = real_page(public_dir)
     grid = re.search(r'<div id="itemsGrid" class="([^"]+)"', html)
     assert grid and "grid-cols-2" in grid.group(1).split()
+
+
+def test_sale_schedule_comes_from_departure_date():
+    schedule = site_builder.sale_schedule("2026-11-09")
+    assert schedule == {
+        "first_drop": (date(2026, 10, 3), date(2026, 10, 6)),
+        "second_drop": (date(2026, 10, 15), date(2026, 10, 17)),
+        "clear_floors": (date(2026, 10, 20), date(2026, 10, 25)),
+        "giveaway": (date(2026, 11, 3), date(2026, 11, 5)),
+    }
+    shifted = site_builder.sale_schedule("2026-11-10")
+    assert shifted["first_drop"] == (date(2026, 10, 4), date(2026, 10, 7))
+
+
+def test_vehicle_card_claims_are_in_data(public_dir):
+    data, html = real_page(public_dir)
+    vehicle = next(item for item in data["items"] if item["category"] == "Vehicle")
+    claims = [
+        unescape(re.sub(r"<[^>]+>", "", claim)).strip()
+        for claim in re.findall(
+            r"<[^>]+data-vehicle-claim[^>]*>(.*?)</[^>]+>",
+            html,
+            flags=re.DOTALL,
+        )
+    ]
+    assert len(claims) == 4
+    assert set(claims) <= set(vehicle["specs"])
+
+
+def test_payment_terms_by_kind(public_dir):
+    data, html = real_page(public_dir)
+    terms = text_for_role(html, "pickup-terms")
+    seller = data["seller"]
+    for method in seller["payment_methods"]["household"]:
+        assert method in terms
+    for method in seller["payment_methods"]["vehicle"]:
+        assert method in terms
+    assert "Venmo" not in text_for_role(html, "vehicle-payment")
+    assert "Zelle" not in text_for_role(html, "vehicle-payment")
+    assert "no advance deposit" not in html.lower()
+
+
+def test_mobile_copy_budget(public_dir):
+    _, html = real_page(public_dir)
+    hero = text_for_role(html, "hero-copy")
+    pickup = text_for_role(html, "pickup-terms")
+    assert len(hero.split()) <= 20
+    assert len([part for part in re.split(r"[.!?]+", pickup) if part.strip()]) <= 2
