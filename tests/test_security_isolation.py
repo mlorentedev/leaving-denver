@@ -98,7 +98,7 @@ def test_template_sees_only_sanitized_data(tmp_path, monkeypatch):
     data["seller"]["phone"] = "+15555550199"
     site_builder.build_public_site(data)
 
-    assert set(seen) == {"inventory_json", "contact_json"}
+    assert set(seen) == {"inventory_json", "contact_json", "vehicle"}
     context = json.dumps(seen)
     for private in ("firm_floor_price", "internal_notes", "private note", "5555550199"):
         assert private not in context, f"{private} reached the page template"

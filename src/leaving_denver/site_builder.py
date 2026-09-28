@@ -51,6 +51,8 @@ def render(template: str, **ctx: Any) -> str:
         undefined=StrictUndefined,
         autoescape=True,
         keep_trailing_newline=True,
+        trim_blocks=True,
+        lstrip_blocks=True,
     )
     return env.get_template(template).render(**ctx)
 
@@ -141,9 +143,13 @@ def build_public_site(full_data: dict[str, Any]) -> None:
             "No seller phone: set SELLER_PHONE or make data/private.sops.yaml decryptable"
         )
     # The template sees the sanitized data only, never full_data.
-    inventory_json = json.dumps(sanitize_public_inventory(full_data), indent=2)
+    public_data = sanitize_public_inventory(full_data)
+    inventory_json = json.dumps(public_data, indent=2)
     contact_json = json.dumps(phone_parts(phone))
-    html = render("index.html", inventory_json=inventory_json, contact_json=contact_json)
+    vehicle = next((i for i in public_data["items"] if i["category"] == "Vehicle"), None)
+    html = render(
+        "index.html", inventory_json=inventory_json, contact_json=contact_json, vehicle=vehicle
+    )
 
     # Fail closed: a template that stops emitting either one would ship a page
     # with no items or no way to reach the seller.

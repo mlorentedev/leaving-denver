@@ -154,3 +154,23 @@ def test_render_matches_previous_output(public_dir):
     assert (public_dir / "index.html").read_text(encoding="utf-8") == golden.read_text(
         encoding="utf-8"
     )
+
+
+CAR = {
+    "id": "2019-ford-escape-sel-awd",
+    "category": "Vehicle",
+    "title": "2019 Ford Escape SEL AWD",
+    "recommended_list_price": 11875,
+}
+
+
+@pytest.mark.parametrize("published", [True, False])
+def test_vehicle_card_follows_the_publish_flag(public_dir, published):
+    data = inventory()
+    data["items"].append({**CAR, "published": published})
+
+    site_builder.build_public_site(data)
+
+    page = (public_dir / "index.html").read_text(encoding="utf-8")
+    assert ("2019-ford-escape" in text_under(public_dir)) is published
+    assert ("Vehicle" in page.split("<script>")[0]) is published
