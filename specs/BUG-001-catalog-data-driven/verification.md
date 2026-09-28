@@ -22,7 +22,7 @@ Map every acceptance criterion from `proposal.md` to concrete proof (commit hash
 
 ## Test status
 
-- Test suite: `uv run pytest` -> 53 passed
+- Test suite: `uv run pytest` -> 55 passed
 - Lint: `uv run ruff check .` -> passed; `uv run ruff format --check .` -> 39 files formatted
 - Build: `uv run leaving-denver build` -> public and private outputs built; security verification passed
 - Manual smoke test: pending PR 5 responsive preview check
@@ -43,6 +43,8 @@ Brief log of non-obvious trade-offs or course corrections taken during the work.
 - PR 4: `departure_date` is the time SSOT. Both the public countdown and CLI drop windows derive from 2026-11-09.
 - PR 4: seller data passed to Jinja is an explicit allowlist. A regression test proved that passing the full seller mapping would expose a newly added phone field to the template context.
 - PR 4: Windows tests read generated HTML explicitly as UTF-8; relying on the platform default failed on typographic punctuation.
+- PR 4 review: the countdown runs in the browser using the Denver calendar date, so a static deployment does not freeze the number of days.
+- PR 4 review: Facebook and Craigslist vehicle copy now interpolate the item specs, included items, mileage, pickup note and seller payment terms instead of maintaining a second hard-coded listing.
 
 ## Promotion candidates
 

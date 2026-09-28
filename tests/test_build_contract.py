@@ -319,8 +319,8 @@ def test_payment_terms_by_kind(public_dir):
         assert method in terms
     for method in seller["payment_methods"]["vehicle"]:
         assert method in terms
-    assert "Venmo" not in text_for_role(html, "vehicle-payment")
-    assert "Zelle" not in text_for_role(html, "vehicle-payment")
+    vehicle_payment = " ".join(text_for_role(html, "vehicle-payment").split())
+    assert vehicle_payment == " or ".join(seller["payment_methods"]["vehicle"])
     assert "no advance deposit" not in html.lower()
 
 
@@ -330,3 +330,27 @@ def test_mobile_copy_budget(public_dir):
     pickup = text_for_role(html, "pickup-terms")
     assert len(hero.split()) <= 20
     assert len([part for part in re.split(r"[.!?]+", pickup) if part.strip()]) <= 2
+
+
+def test_countdown_updates_in_browser_from_departure_date(public_dir):
+    _, html = real_page(public_dir)
+    assert 'data-departure-date="2026-11-09"' in html
+    assert "function updateDepartureCountdown()" in html
+    assert "America/Denver" in html
+    assert "{{ days_remaining }}" not in html
+
+
+def test_vehicle_poster_copy_uses_inventory_fields():
+    template = (site_builder.TEMPLATES_DIR / "poster_assistant.html").read_text(encoding="utf-8")
+    assert "Mileage: ${item.odometer.toLocaleString()}" in template
+    assert template.count("${specs}") >= 2
+    assert template.count("${inc}") >= 2
+    assert template.count("${item.pickup_note}") >= 2
+    assert template.count("${vehiclePayment}") >= 2
+    for stale in (
+        "Mileage: 103,500",
+        "ready to sign over today",
+        "valid, unused certificate",
+        "Clean title ready in hand",
+    ):
+        assert stale not in template

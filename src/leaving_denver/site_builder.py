@@ -227,7 +227,6 @@ def build_public_site(full_data: dict[str, Any]) -> None:
         contact_json=contact_json,
         seller=seller,
         departure_month=departure.strftime("%B"),
-        days_remaining=max((departure - date.today()).days, 0),
         vehicle=vehicle,
         items=items,
         chips=category_chips(items),
