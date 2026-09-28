@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
 from leaving_denver.config import (
     DIST_DIR,
@@ -41,6 +42,18 @@ def load_inventory_yaml() -> dict[str, Any]:
 def save_inventory_yaml(data: dict[str, Any]) -> None:
     with open(INVENTORY_YAML, "w", encoding="utf-8") as f:
         yaml.dump(data, f, sort_keys=False, allow_unicode=True, indent=2)
+
+
+def render(template: str, **ctx: Any) -> str:
+    """Render a template from TEMPLATES_DIR. A field the template uses but ctx lacks fails."""
+    # Built per call, not at import, so tests can point TEMPLATES_DIR elsewhere.
+    env = Environment(
+        loader=FileSystemLoader(TEMPLATES_DIR),
+        undefined=StrictUndefined,
+        autoescape=True,
+        keep_trailing_newline=True,
+    )
+    return env.get_template(template).render(**ctx)
 
 
 def unpublished_ids(full_data: dict[str, Any]) -> set[str]:

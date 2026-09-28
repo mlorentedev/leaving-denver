@@ -127,3 +127,12 @@ def test_bundle_items_must_be_a_list(public_dir):
     data["bundles"][0]["items"] = "shown-lamp and hidden-widget"
     with pytest.raises(RuntimeError, match="bundle-with-hidden"):
         site_builder.build_public_site(data)
+
+
+def test_undefined_field_fails_the_build(tmp_path, monkeypatch):
+    from jinja2 import UndefinedError
+
+    (tmp_path / "card.html").write_text("<h2>{{ item.titel }}</h2>")
+    monkeypatch.setattr(site_builder, "TEMPLATES_DIR", tmp_path)
+    with pytest.raises(UndefinedError, match="titel"):
+        site_builder.render("card.html", item={"title": "Lamp"})
