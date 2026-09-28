@@ -470,6 +470,8 @@ items:
   - snack table
   - sofa arm table
 - id: 2019-ford-escape-sel-awd
+  # Held back until the owner publishes the car (BUG-001 spec).
+  published: false
   cover: 2019_ford_escape_white_front.jpg
   category: Vehicle
   title: 2019 Ford Escape SEL AWD – Clean Colorado Title, Dealer Inspected

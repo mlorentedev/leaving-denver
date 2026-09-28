@@ -102,3 +102,17 @@ def test_template_sees_only_sanitized_data(tmp_path, monkeypatch):
     context = json.dumps(seen)
     for private in ("firm_floor_price", "internal_notes", "private note", "5555550199"):
         assert private not in context, f"{private} reached the page template"
+
+
+def test_unpublished_items_absent_from_public_build():
+    """Nothing held back with `published: false` is in the built public site."""
+    import yaml
+
+    data = yaml.safe_load((BASE_DIR / "data" / "inventory.yaml").read_text(encoding="utf-8"))
+    hidden = {i["id"] for i in data["items"] if i.get("published", True) is False}
+    for p in DIST_DIR.rglob("*"):
+        text = str(p.relative_to(DIST_DIR))
+        if p.is_file() and p.suffix in {".html", ".txt", ""}:
+            text += p.read_text(encoding="utf-8")
+        for item_id in hidden:
+            assert item_id not in text, f"Unpublished {item_id} found in {p}"
