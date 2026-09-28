@@ -307,11 +307,14 @@ def test_mobile_shell(public_dir):
         failures.append("item sheet is not capped at four facts")
 
     body = re.search(r'<body class="([^"]+)"', html)
+    hero = re.search(r'<section class="([^"]+)"', html)
     main = re.search(r'<main class="([^"]+)"', html)
     filter_classes = re.findall(r'class="(filter-btn[^"]*)"', html)
     if (
         not body
-        or "overflow-x-hidden" not in body.group(1).split()
+        or "overflow-x-clip" not in body.group(1).split()
+        or not hero
+        or not {"w-full", "min-w-0"} <= set(hero.group(1).split())
         or not main
         or not {"w-full", "min-w-0"} <= set(main.group(1).split())
         or not filter_classes

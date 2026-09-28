@@ -25,7 +25,7 @@ Map every acceptance criterion from `proposal.md` to concrete proof (commit hash
 - Test suite: `uv run pytest` -> 56 passed
 - Lint: `uv run ruff check .` -> passed; `uv run ruff format --check .` -> 40 files formatted
 - Build: `uv run leaving-denver build` -> public and private outputs built; security verification passed
-- Manual smoke test: headless Chrome at 390 x 844 -> `clientWidth=390`, document and body `scrollWidth=390`, four sheet facts, zero visible tap targets below 40 px, and every bundle offer `clientWidth=scrollWidth=340`
+- Manual smoke test: headless Chrome at 390 x 844 -> `clientWidth=390`, document and body `scrollWidth=390`, sticky header top remained 0 after a 600 px scroll, four sheet facts, zero visible tap targets below 40 px, and every bundle offer `clientWidth=scrollWidth=340`
 - No regressions in existing test suite: yes
 
 ## Decisions made during implementation
