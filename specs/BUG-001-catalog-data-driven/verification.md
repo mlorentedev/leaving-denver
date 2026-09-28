@@ -27,6 +27,7 @@ Brief log of non-obvious trade-offs or course corrections taken during the work.
 - PR 2: with Jinja2 a template that omits a variable renders fine, so the fail-closed marker became a post-render check that the page emits `const INVENTORY = <json>;` and `const _C = <json>;`.
 - PR 2: `trim_blocks` and `lstrip_blocks` keep block tags from leaving blank lines, so wrapping the vehicle card still matched the golden page byte for byte.
 - PR 2: besides the card, the `<title>`, the hero line and the car's payment sentence render only when a vehicle is published, so the page does not mention a car it does not show.
+- 2026-09-28: the owner published the car again; the card stays visible for now.
 
 ## Promotion candidates
 
