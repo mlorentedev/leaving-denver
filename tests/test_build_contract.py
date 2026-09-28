@@ -3,7 +3,6 @@ Build contract: the builder fails closed, and unpublished items never reach buil
 """
 
 import json
-from pathlib import Path
 
 import pytest
 import yaml
@@ -142,18 +141,6 @@ def test_undefined_field_fails_the_build(tmp_path, monkeypatch):
     monkeypatch.setattr(site_builder, "TEMPLATES_DIR", tmp_path)
     with pytest.raises(UndefinedError, match="titel"):
         site_builder.render("card.html", item={"title": "Lamp"})
-
-
-def test_render_matches_previous_output(public_dir):
-    """The Jinja2 swap changes nothing visible: the page equals the pre-swap build.
-
-    Temporary: it pins today's output, so it goes once the page starts changing.
-    """
-    golden = Path(__file__).parent / "golden" / "index.html"
-    site_builder.build_public_site(site_builder.load_inventory_yaml())
-    assert (public_dir / "index.html").read_text(encoding="utf-8") == golden.read_text(
-        encoding="utf-8"
-    )
 
 
 CAR = {
