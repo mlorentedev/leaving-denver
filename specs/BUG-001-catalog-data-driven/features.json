@@ -61,5 +61,12 @@
     "verification": "uv run pytest tests/test_build_contract.py -k 'spanish'",
     "state": "pending",
     "evidence": ""
+  },
+  {
+    "id": "BUG-001-catalog-data-driven-f10",
+    "behavior": "AC10: the page follows the approved mobile layout (sticky contact bar, two-column grid, hero word budget, four-fact item sheet)",
+    "verification": "uv run pytest tests/test_build_contract.py -k 'mobile_copy_budget or mobile_shell'",
+    "state": "pending",
+    "evidence": ""
   }
 ]

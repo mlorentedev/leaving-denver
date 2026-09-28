@@ -46,6 +46,7 @@ created: "2026-09-26"
 - [ ] [P] [AC5] `test_every_category_has_a_chip`: chips render from the set of item categories, so the build fails if a category is not in the ordered chip list in `site_builder.py`. Expected: FAIL today (`Living Room & Tech`).
 - [ ] [AC5] Render the chips from data; fix the TV category.
 - [ ] Remove the stray `</a>` in the modal's Close button, and the hardcoded modal status `Available` (render from `status`).
+- [ ] [AC10] Render the chips, the item grid (two columns below 640 px, the whole card opens the item, no Details button), the bundle row and the "take everything" card in the approved mobile layout. The client script keeps only filter, search and opening an item.
 
 ### PR 4: `fix/catalog-copy-from-data` (closes #13, #9, #48; needs the owner answers)
 
@@ -56,11 +57,15 @@ created: "2026-09-26"
 - [ ] [P] [AC7] `test_payment_terms_by_kind`: the vehicle's rendered terms contain neither Venmo nor Zelle, and the page has no "no advance deposits" in the vehicle's context.
 - [ ] [AC7] `seller.payment_methods` split into `household` and `vehicle`; the header and pickup copy render per kind; the deposit wording follows the owner's escrow decision.
 - [ ] Apply the owner's voice choice and the style fixes from #48 ("one single" and the mixed voice).
+- [ ] [P] [AC10] `test_mobile_copy_budget`: the hero is at most 20 words and the pickup block at most two sentences. Expected: FAIL on today's hero.
+- [ ] [AC10] Render the hero, the car card (price, mileage, title status, test drive and details) and the pickup block in the approved layout, with the minimal copy.
 
-### PR 5: `fix/mobile-horizontal-scroll` (closes #10)
+### PR 5: `fix/mobile-shell` (closes #10)
 
+- [ ] [P] [AC10] `test_mobile_shell`: the header holds no contact button, a sticky "Text us" bar exists, and the item sheet lists at most four facts. Expected: FAIL.
+- [ ] [AC10] Replace the header button with the sticky "Text us" bar, and the item dialog with a bottom sheet. The sheet shows at most four key facts, the bundle offer as one line, and "Text about this".
 - [ ] [AC8] Add `w-full` to the full-width sections and `shrink-0 whitespace-nowrap` to `.filter-btn`.
-- [ ] [AC8] Check on the preview at 390 px that `document.documentElement.scrollWidth === 390`, and record the output in `verification.md`.
+- [ ] [AC8] [AC10] Check on the preview at 390 px that `document.documentElement.scrollWidth === 390` and that every tap target is at least 40 px tall. Record the output in `verification.md`.
 
 ### PR 6: `feat/spanish-catalog` (closes #53)
 

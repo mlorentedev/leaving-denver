@@ -36,16 +36,27 @@ The builder renders the public page from the YAML with Jinja2 (ADR-003). After t
    - the vehicle card's specs.
 3. An item with `published: false` is absent from `build/public/`, with any bundle that contains it, and present under `build/private/` marked DRAFT (FEAT-009).
 4. The page does not scroll sideways at 390 px.
+5. The page is built for a phone first, with minimal copy. Almost every buyer opens it on a phone. The owner approved the layout on 2026-09-28 (mockup: https://claude.ai/code/artifact/30405956-d62d-4e8a-b7b3-9902e49acfd5, private to the owner). It has:
+   - a two-line hero;
+   - the car as one wide card;
+   - scrollable category chips;
+   - a two-column item grid where the whole card opens the item;
+   - a scrollable row of bundle cards and one "take everything" card;
+   - a two-sentence pickup block;
+   - one sticky "Text us" bar as the only contact button;
+   - the item detail as a bottom sheet with at most four key facts.
 
-The work lands as six PRs, in this order. PR 6 was added on 2026-09-27 at the owner's request; it needs the Jinja2 templates from PR 2. Each stays under ~300 lines of production diff.
+   PRs 3 to 5 build this structure as they move each section to the templates, so no section is rendered from data twice.
+
+The work lands as six PRs, in this order. PR 6 was added on 2026-09-27 at the owner's request; it needs the Jinja2 templates from PR 2. The mobile-first layout was added to PRs 3 to 5 on 2026-09-28. Each stays under ~300 lines of production diff.
 
 | PR | Scope | Closes |
 |----|-------|--------|
 | 1 | Fail-closed inventory marker; `published` filter for items and bundles, DRAFT in private | #41 |
 | 2 | Jinja2 swap with no visible change: `StrictUndefined`, the page rendered from the same data, contract tests | #21 |
-| 3 | Hero, filter chips, bundles, whole-apartment banner and `UPSELL_MAP` from data; bundle totals and savings computed from item prices; walnut bundle dropped | #6, #32 (bundle part) |
-| 4 | `departure_date` replaces `moving_deadline` (countdown, wording, `drops` computed from the date); vehicle card and pickup terms from data; payment terms per kind; BUG-007 copy fixes | #13, #9, #48 |
-| 5 | Horizontal-scroll fix at 390 px | #10 |
+| 3 | Filter chips, item grid, bundle row, "take everything" card and `UPSELL_MAP` from data, in the mobile layout; bundle totals and savings computed from item prices; walnut bundle dropped | #6, #32 (bundle part) |
+| 4 | `departure_date` replaces `moving_deadline` (countdown, wording, `drops` computed from the date); hero, vehicle card and pickup block from data in the mobile layout, with the minimal copy; payment terms per kind; BUG-007 copy fixes | #13, #9, #48 |
+| 5 | Mobile shell: sticky "Text us" bar, item bottom sheet, horizontal-scroll fix at 390 px | #10 |
 | 6 | Spanish version: the page rendered per locale to `build/public/` and `build/public/es/`, a language switch, Spanish copy for the item fields, SMS intents in the page's language | #53 |
 
 ## Out of scope
@@ -78,6 +89,13 @@ Each item below already has its own ticket and comes after this spec. None of th
 - [ ] AC7: Venmo and Zelle appear only next to household items. The vehicle shows cash or a cashier's check, and nothing on the page says "no advance deposits" for the car.
 - [ ] AC8: At 390 px the page is 390 px wide (`document.documentElement.scrollWidth`), checked against the preview deploy.
 - [ ] AC9: `build/public/es/index.html` exists with `lang="es"`, and every item title, spec and UI string is in Spanish, falling back to English only where the data has no Spanish text. A test lists the fallbacks, and the claim guard runs over the Spanish copy too.
+- [ ] AC10: The page follows the approved mobile layout, and a test checks it on the rendered HTML:
+  - the header has no contact button, and one sticky "Text us" bar is always on screen;
+  - the item grid has two columns below 640 px;
+  - the hero is at most 20 words;
+  - the item sheet shows at most four facts.
+
+  On the preview at 390 px, every tap target is at least 40 px tall (checked manually, like AC8).
 
 ## References
 
