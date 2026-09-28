@@ -329,6 +329,8 @@ def test_mobile_shell(public_dir):
     ):
         if marker not in html:
             failures.append(f"missing 40px tap-target guard: {marker}")
+    if 'id="upsellLink" href="#" class="block whitespace-nowrap' not in html:
+        failures.append("the bundle offer can wrap in the item sheet")
 
     assert not failures, "\n".join(failures)
 
