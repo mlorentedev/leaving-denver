@@ -282,6 +282,7 @@
 
   <script>
     let inventory = [];
+    let seller = {};
     let sellerPhone = '';
     let currentIndex = 0;
     let currentWeek = 1;
@@ -289,7 +290,8 @@
 
     function loadInventory(data) {
       inventory = data.items || [];
-      sellerPhone = (data.seller && data.seller.phone) || '';
+      seller = data.seller || {};
+      sellerPhone = seller.phone || '';
       populateSelect();
       renderActiveItem();
     }
@@ -485,6 +487,13 @@
       const retail = item.original_price;
       const specs = (item.specs || []).map(s => `- ${s}`).join('\n');
       const inc = (item.included || []).join(', ');
+      const vehiclePayment = (seller.payment_methods?.vehicle || []).join(' or ');
+      const departureMonth = seller.departure_date
+        ? new Date(`${seller.departure_date}T00:00:00Z`).toLocaleString('en-US', {
+            month: 'long',
+            timeZone: 'UTC',
+          })
+        : 'November';
 
       let title = '';
       let description = '';
@@ -492,28 +501,24 @@
       // --- PLATFORM 1: FACEBOOK MARKETPLACE ---
       if (platform === 'fb') {
         if (isVehicle) {
-          title = `2019 Ford Escape SEL AWD – Clean CO Title, Dealer Inspected (DTC)`;
-          description = `We are moving out of the country in November, so we're selling our 2019 Ford Escape SEL AWD.
+          title = `${item.year} ${item.brand} ${item.model} – ${item.title_status} (DTC)`;
+          description = `I am relocating in ${departureMonth}, so I am selling my ${item.short_title}.
 
-Price: $${price.toLocaleString()} (Priced well below typical dealer listings for a fast private sale)
-Mileage: 103,500
-Title: Clean Colorado Title in hand with zero liens, ready to sign over today.
+Price: $${price.toLocaleString()}
+Mileage: ${item.odometer.toLocaleString()}
+Title: ${item.title_status}
 
-Why this car has been great:
-- 1.5L EcoBoost with Ford Intelligent AWD and all-weather tires — drives effortlessly through Colorado snow.
-- Ford dealer inspection on 25 Sep 2026: battery good, brakes OK, tires good (invoice available).
-- Passed Colorado emissions in 2026; you get a valid, unused certificate at sale.
-- Cold weather package: heated leather front seats, heated mirrors, and factory roof rails.
-- Apple CarPlay, Android Auto, SYNC 3 8" screen, hands-free foot-activated power liftgate.
-- Driven by non-smokers, pet-free, no accidents during my ownership, and zero dash warning lights or mechanical codes.
+Key details:
+${specs}
 
-Everything included:
-Original key fobs, unused emissions certificate, bill of sale, and the signed clean title.
+Included:
+${inc}
 
 Pickup & Inspection:
-Located in Denver Tech Center (DTC / 80111) near I-25. You are welcome to test drive it in the area. Payment via cash or cashier's check verified directly at your bank branch window before title signing.
+${item.pickup_note}
+Payment: ${vehiclePayment}
 
-Moving abroad in November; first qualified buyer takes it. Message me to arrange a time.`;
+Message me to arrange an inspection and test drive.`;
         } else {
           title = `${item.title}`.substring(0, 95);
           description = `I'm relocating out of the US in November, so I'm selling my ${item.short_title}.
@@ -550,29 +555,24 @@ First person who can pick it up takes it. Send me a message to arrange a time.`;
       // --- PLATFORM 2: CRAIGSLIST DENVER (Pure text, no broken markdown, uppercase headers) ---
       else if (platform === 'cl') {
         if (isVehicle) {
-          title = `2019 Ford Escape SEL AWD - Clean CO Title, Dealer Inspected (DTC)`;
-          description = `2019 Ford Escape SEL AWD - Clean Colorado Title in Hand
+          title = `${item.year} ${item.brand} ${item.model} - ${item.title_status} (DTC)`;
+          description = `${item.title}
 
 Price: $${price.toLocaleString()}
-Mileage: 103,500
-Title: Clean Colorado Title (No liens, ready for transfer)
+Mileage: ${item.odometer.toLocaleString()}
+Title: ${item.title_status}
 
-We are relocating out of the USA in November and selling our Ford Escape SEL AWD.
+I am relocating in ${departureMonth} and selling my ${item.short_title}.
 
 KEY DETAILS:
 ${specs}
 
 WHAT IS INCLUDED:
-- 2019 Ford Escape SEL AWD
-- Original key fobs
-- Valid, unused Colorado emissions certificate
-- Clean Colorado Title with zero liens + Bill of Sale
+${inc}
 
 INSPECTION & TRANSACTION:
-- Location: Denver Tech Center (DTC), CO 80111 (near I-25 & Belleview).
-- Inspection: Available daily in DTC by appointment.
-- Payment: Cash or cashier's check verified directly at buyer's bank branch window before title signing.
-- Safe private transaction: Clean title ready in hand.
+${item.pickup_note}
+Payment: ${vehiclePayment}
 
 Contact: Text/SMS ${sellerPhone} or reply via Craigslist email relay.`;
         } else {

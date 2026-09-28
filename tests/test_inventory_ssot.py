@@ -26,6 +26,10 @@ def test_seller_metadata(inventory):
     assert "location" in seller
     assert "email" in seller
     assert "CO 80111" in seller["location"]
+    assert seller["departure_date"] == "2026-11-09"
+    assert set(seller["payment_methods"]) == {"household", "vehicle"}
+    assert "Venmo" in " ".join(seller["payment_methods"]["household"])
+    assert "Venmo" not in " ".join(seller["payment_methods"]["vehicle"])
 
 
 def test_items_integrity(inventory):
@@ -108,7 +112,9 @@ def test_private_floors_consistent(inventory):
 # the CSP 21N12 coverage ended at 84k miles.
 UNBACKED_CLAIMS = re.compile(
     r"100k[- ](mile )?(milestone )?(major )?s(er)?v|highway miles|highway-commuter|"
-    r"remote start|fully serviced|great mechanical|in 3 weeks|21N12",
+    r"remote start|fully serviced|great mechanical|in 3 weeks|within 2 weeks|"
+    r"everything must go|everything was bought new|garage-kept|one single|21N12|"
+    r"ready for immediate transfer|new, unused certificate is handed over",
     re.IGNORECASE,
 )
 CLAIM_SOURCES = [

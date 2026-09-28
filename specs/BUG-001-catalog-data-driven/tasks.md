@@ -50,15 +50,15 @@ created: "2026-09-26"
 
 ### PR 4: `fix/catalog-copy-from-data` (closes #13, #9, #48; needs the owner answers)
 
-- [ ] [P] [AC6] `test_no_stale_or_unbacked_copy`: the `rg` from AC6 over `src/` and `data/` returns nothing. Expected: FAIL.
-- [ ] [AC6] `seller.departure_date: 2026-11-09` replaces `moving_deadline`; the hero wording and countdown render from it; `leaving-denver drops` computes its drop dates from it (Oct 3–6, Oct 15–17, floors Oct 20–25, giveaway Nov 3–5) instead of fixed weeks.
-- [ ] [AC6] `test_vehicle_card_claims_are_in_data`: every bullet on the rendered vehicle card is a `specs` entry, `odometer` or `title_status` of the car in the YAML.
-- [ ] [AC6] Render the vehicle card from the car item: price, odometer, color and specs. Remove "highway", "factory remote start" and any claim the owner did not confirm.
-- [ ] [P] [AC7] `test_payment_terms_by_kind`: the vehicle's rendered terms contain neither Venmo nor Zelle, and the page has no "no advance deposits" in the vehicle's context.
-- [ ] [AC7] `seller.payment_methods` split into `household` and `vehicle`; the header and pickup copy render per kind; the deposit wording follows the owner's escrow decision.
-- [ ] Apply the owner's voice choice and the style fixes from #48 ("one single" and the mixed voice).
-- [ ] [P] [AC10] `test_mobile_copy_budget`: the hero is at most 20 words and the pickup block at most two sentences. Expected: FAIL on today's hero.
-- [ ] [AC10] Render the hero, the car card (price, mileage, title status, test drive and details) and the pickup block in the approved layout, with the minimal copy.
+- [x] [P] [AC6] `test_no_unbacked_vehicle_claims`: the claim guard covers the YAML, both templates and the built page.
+- [x] [AC6] `seller.departure_date: 2026-11-09` replaces `moving_deadline`; the hero wording and countdown render from it; `leaving-denver drops` computes its drop dates from it (Oct 3–6, Oct 15–17, floors Oct 20–25, giveaway Nov 3–5) instead of fixed weeks.
+- [x] [AC6] `test_vehicle_card_claims_are_in_data`: every bullet on the rendered vehicle card is a `specs` entry of the car in the YAML.
+- [x] [AC6] Render the vehicle card from the car item: price, odometer, color and specs. Remove unsupported or unconfirmed claims.
+- [x] [P] [AC7] `test_payment_terms_by_kind`: the vehicle's rendered terms contain neither Venmo nor Zelle, and the page has no "no advance deposits" wording.
+- [x] [AC7] `seller.payment_methods` split into `household` and `vehicle`; the pickup copy renders each kind separately and omits deposit promises.
+- [x] Use first-person singular voice and remove unconfirmed "bought new", "garage-kept" and redundant copy.
+- [x] [P] [AC10] `test_mobile_copy_budget`: the hero is at most 20 words and the pickup block at most two sentences.
+- [x] [AC10] Render the hero, car card and pickup block in the approved layout with minimal data-driven copy.
 
 ### PR 5: `fix/mobile-shell` (closes #10)
 

@@ -17,6 +17,7 @@ from leaving_denver.site_builder import (
     apply_photos,
     build_all,
     load_inventory_yaml,
+    sale_schedule,
     save_inventory_yaml,
 )
 
@@ -85,6 +86,18 @@ def cmd_drops(args):
     if not reserve:
         print("Error: data/private.sops.yaml is not decryptable (sops + age key required).")
         sys.exit(1)
+
+    schedule = sale_schedule(data["seller"]["departure_date"])
+    print("SALE TIMELINE")
+    for label, key in (
+        ("First drop", "first_drop"),
+        ("Second drop", "second_drop"),
+        ("Clear floors", "clear_floors"),
+        ("Giveaway", "giveaway"),
+    ):
+        start, end = schedule[key]
+        print(f"{label}: {start:%b} {start.day}-{end.day}")
+    print()
 
     print("=" * 80)
     print(f"{'ITEM ID':<24} {'WEEK 1 (LIST)':<15} {'WEEK 2 (DROP)':<15} {'WEEK 3 (FLOOR)':<15}")
