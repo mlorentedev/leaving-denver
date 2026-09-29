@@ -142,22 +142,36 @@ def test_no_unbacked_vehicle_claims(path):
 
 # Owner correction, 2026-09-28: first floor, one flight of stairs, no elevator; the car was
 # bought used, so "everything was bought new" is false (#48).
-# Known positive elevator claims fail; natural English and Spanish denials pass.
+# Strip natural English and Spanish denials, then reject any remaining elevator claim.
+ELEVATOR_DENIALS = re.compile(
+    r"\b(?:no elevators?(?: in the building)?|"
+    r"(?:do not|don't|does not|doesn't) have (?:an? )?elevators?|"
+    r"sin (?:ascensor|elevador)(?:es)?|"
+    r"no hay (?:ascensor|elevador)(?:es)?(?: disponible(?:s)?)?|"
+    r"no cuenta con (?:un |una )?(?:ascensor|elevador)(?:es)?)\b",
+    re.I,
+)
 WRONG_PICKUP_FACTS = re.compile(
-    r"elevator (?:access|available|building)|with (?:an )?elevators?|"
-    r"(?:building|unit) (?:has|with) (?:an )?elevators?|"
-    r"(?:ascensor|elevador)(?:es)? disponible(?:s)?|con (?:ascensor|elevador)(?:es)?|"
-    r"ground floor|second floor|segundo piso|"
+    r"elevators?|(?:ascensor|elevador)(?:es)?|ground floor|second floor|segundo piso|"
     r"everything was bought new",
     re.I,
 )
 
 
 def wrong_pickup_facts(text):
-    return WRONG_PICKUP_FACTS.findall(text)
+    return WRONG_PICKUP_FACTS.findall(ELEVATOR_DENIALS.sub("", text))
 
 
-@pytest.mark.parametrize("claim", ["con ascensor", "ascensor disponible", "con elevador"])
+@pytest.mark.parametrize(
+    "claim",
+    [
+        "con ascensor",
+        "con un ascensor",
+        "ascensor disponible",
+        "con elevador",
+        "There is an elevator in the building",
+    ],
+)
 def test_pickup_guard_rejects_spanish_elevator_claims(claim):
     assert wrong_pickup_facts(claim)
 
@@ -169,6 +183,8 @@ def test_pickup_guard_rejects_spanish_elevator_claims(claim):
         "sin elevador",
         "sin ascensores",
         "no hay ascensor",
+        "no hay ascensor disponible",
+        "no cuenta con ascensor",
         "We do not have an elevator",
         "We don't have an elevator",
         "No elevators in the building",
