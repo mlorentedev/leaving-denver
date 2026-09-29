@@ -434,7 +434,7 @@ def test_spanish_ui_and_sms_are_localized(public_dir):
 
     for text in (
         "Me mudo en noviembre",
-        "Segundo piso, un tramo de escaleras, sin elevador.",
+        "Primer piso, un tramo de escaleras, sin ascensor.",
         "Ahorre con un paquete",
         "Ver qué incluye",
         "Por separado",

@@ -140,10 +140,32 @@ def test_no_unbacked_vehicle_claims(path):
     assert not hits, f"{path.name} states a claim the seller cannot back: {hits}"
 
 
-# Owner, 2026-09-28: second floor, one flight of stairs, no elevator; the car was
+# Owner correction, 2026-09-28: first floor, one flight of stairs, no elevator; the car was
 # bought used, so "everything was bought new" is false (#48).
 # Any elevator the text does not deny, so "no elevator" passes and "elevator access" fails.
-WRONG_PICKUP_FACTS = re.compile(r"(?<!no )elevator|ground floor|everything was bought new", re.I)
+WRONG_PICKUP_FACTS = re.compile(
+    r"(?<!no )elevator|(?<!sin )ascensor|(?<!sin )elevador|"
+    r"ground floor|second floor|segundo piso|everything was bought new",
+    re.I,
+)
+
+
+@pytest.mark.parametrize("claim", ["con ascensor", "ascensor disponible", "con elevador"])
+def test_pickup_guard_rejects_spanish_elevator_claims(claim):
+    assert WRONG_PICKUP_FACTS.search(claim)
+
+
+@pytest.mark.parametrize("fact", ["sin ascensor", "sin elevador"])
+def test_pickup_guard_allows_spanish_elevator_denials(fact):
+    assert not WRONG_PICKUP_FACTS.search(fact)
+
+
+def test_pickup_floor_matches_owner(inventory):
+    seller = inventory["seller"]
+    assert seller["pickup_summary"] == "One flight of stairs, no elevator"
+    assert "One flight up, no elevator." in seller["pickup"]
+    assert seller["es"]["pickup_summary"] == "Primer piso, un tramo de escaleras, sin ascensor"
+    assert "Primer piso, un tramo de escaleras, sin ascensor." in seller["es"]["pickup"]
 
 
 @pytest.mark.parametrize("path", CLAIM_SOURCES, ids=lambda p: p.name)
