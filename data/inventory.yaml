@@ -13,11 +13,11 @@ seller:
     assembled, sold AS-IS.
   departure_date: '2026-11-09'
   # Hero strip; the full facts follow in `pickup` (owner, 2026-09-28).
-  pickup_summary: One flight of stairs, no elevator
+  pickup_summary: First floor, one flight of stairs, no elevator
   # Shown one per line under "How pickup works".
   pickup:
   - Denver Tech Center (DTC), near I-25 and Belleview.
-  - One flight up, no elevator.
+  - First floor, one flight of stairs, no elevator.
   - Park right by the door. I help you carry and load.
   - See and test anything in person before you pay.
   es:
