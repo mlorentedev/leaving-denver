@@ -45,7 +45,7 @@ Brief log of non-obvious trade-offs or course corrections taken during the work.
 - PR 4: Windows tests read generated HTML explicitly as UTF-8; relying on the platform default failed on typographic punctuation.
 - PR 4 review: the countdown runs in the browser using the Denver calendar date, so a static deployment does not freeze the number of days.
 - PR 4 review: Facebook and Craigslist vehicle copy now interpolate the item specs, included items, mileage, pickup note and seller payment terms instead of maintaining a second hard-coded listing.
-- PR 5: the sticky "Text us" bar is the only generic contact CTA; item- and bundle-specific SMS links remain contextual actions.
+- PR 5: the sticky "Text me" bar is the only generic contact CTA; item- and bundle-specific SMS links remain contextual actions.
 - PR 5: the item detail remains data-driven but presents no more than four specs, with the bundle offer collapsed to one line.
 
 ## Promotion candidates

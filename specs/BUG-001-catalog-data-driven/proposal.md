@@ -43,7 +43,7 @@ The builder renders the public page from the YAML with Jinja2 (ADR-003). After t
    - a two-column item grid where the whole card opens the item;
    - a scrollable row of bundle cards and one "take everything" card;
    - a two-sentence pickup block;
-   - one sticky "Text us" bar as the only contact button;
+   - one sticky "Text me" bar as the only contact button;
    - the item detail as a bottom sheet with at most four key facts.
 
    PRs 3 to 5 build this structure as they move each section to the templates, so no section is rendered from data twice.
@@ -56,7 +56,7 @@ The work lands as six PRs, in this order. PR 6 was added on 2026-09-27 at the ow
 | 2 | Jinja2 swap with no visible change: `StrictUndefined`, the page rendered from the same data, contract tests | #21 |
 | 3 | Filter chips, item grid, bundle row, "take everything" card and `UPSELL_MAP` from data, in the mobile layout; bundle totals and savings computed from item prices; walnut bundle dropped | #6, #32 (bundle part) |
 | 4 | `departure_date` replaces `moving_deadline` (countdown, wording, `drops` computed from the date); hero, vehicle card and pickup block from data in the mobile layout, with the minimal copy; payment terms per kind; BUG-007 copy fixes | #13, #9, #48 |
-| 5 | Mobile shell: sticky "Text us" bar, item bottom sheet, horizontal-scroll fix at 390 px | #10 |
+| 5 | Mobile shell: sticky "Text me" bar, item bottom sheet, horizontal-scroll fix at 390 px | #10 |
 | 6 | Spanish version: the page rendered per locale to `build/public/` and `build/public/es/`, a language switch, Spanish copy for the item fields, SMS intents in the page's language | #53 |
 
 ## Out of scope
@@ -70,7 +70,7 @@ Each item below already has its own ticket and comes after this spec. None of th
 ## Risks / open questions
 
 - **Owner input blocks PR 4, not PRs 1–3.** From BUG-007 #48: is "Everything was bought new" true for every item; is there a receipt for the 100k service; and does the dealer inspection replace "great mechanical shape"? Any claim not confirmed by the time PR 4 is written is dropped.
-- **The voice is the owner's call:** the page uses "we", the vehicle specs "my ownership". PR 4 needs one voice.
+- **The voice is the owner's call:** resolved: first person singular (#70); the sticky bar says "Text me" (owner, 2026-09-28: direct and personal).
 - **The car's publish date is the owner's call.** PR 1 adds the flag. PR 2, once the vehicle card is a template, sets it to `false` for the car until the owner says otherwise, so the preview shows the car only in `build/private/`.
 - **The injected sanitized JSON must still hold nothing private.** Moving to Jinja2 must not start passing the full inventory to templates. PR 2 renders from the sanitized dict only, and `verify_security_guarantees` keeps running.
 - **`save_inventory_yaml` rewrites the YAML on every build (BUG-006 #12).** New fields added here must survive that round trip. Not fixed here, but PR 1 tests it.
@@ -90,7 +90,7 @@ Each item below already has its own ticket and comes after this spec. None of th
 - [ ] AC8: At 390 px the page is 390 px wide (`document.documentElement.scrollWidth`), checked against the preview deploy.
 - [ ] AC9: `build/public/es/index.html` exists with `lang="es"`, and every item title, spec and UI string is in Spanish, falling back to English only where the data has no Spanish text. A test lists the fallbacks, and the claim guard runs over the Spanish copy too.
 - [ ] AC10: The page follows the approved mobile layout, and a test checks it on the rendered HTML:
-  - the header has no contact button, and one sticky "Text us" bar is always on screen;
+  - the header has no contact button, and one sticky "Text me" bar is always on screen;
   - the item grid has two columns below 640 px;
   - the hero is at most 20 words;
   - the item sheet shows at most four facts.
