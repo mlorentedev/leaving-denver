@@ -9,6 +9,7 @@ from html import unescape
 
 import pytest
 import yaml
+from markupsafe import escape
 
 from leaving_denver import site_builder
 
@@ -258,7 +259,7 @@ def test_page_figures_match_the_data(public_dir):
         save = sum(price[i] for i in b["items"]) - b["bundle_price"]
         savings.add(save)
         attr = "data-everything" if b.get("everything") else "data-bundle"
-        text = card(html, attr, b["id"])
+        text = card(html, attr, b["id"], "</button>")
         assert f"${b['bundle_price']}" in text, f"{b['id']} price"
         assert f"Save ${save}" in text, f"{b['id']} savings"
         assert f"{len(b['items'])} items" in text, f"{b['id']} item count"
@@ -408,3 +409,20 @@ def test_vehicle_poster_copy_uses_inventory_fields():
         "Clean title ready in hand",
     ):
         assert stale not in template
+
+
+def test_bundle_sheet_lists_what_is_in_it(public_dir):
+    data, html = real_page(public_dir)
+    items = {i["id"]: i for i in data["items"]}
+    for b in data["bundles"]:
+        # The card opens the sheet; it no longer texts the seller straight away.
+        attr = "data-everything" if b.get("everything") else "data-bundle"
+        assert re.search(rf'<button type="button" {attr}="{b["id"]}"', html), b["id"]
+        start = html.index(f'data-bundle-sheet="{b["id"]}"')
+        sheet = html[start : html.index("</section>", start)]
+        listed = re.findall(r'data-sheet-item="([^"]+)"', sheet)
+        assert listed == b["items"], f"{b['id']} sheet lists {listed}"
+        for item_id in b["items"]:
+            assert escape(items[item_id]["short_title"]) in sheet
+        assert f"${b['bundle_price']}" in sheet
+        assert "data-sms-intent" in sheet
