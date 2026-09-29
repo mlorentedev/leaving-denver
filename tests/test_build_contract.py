@@ -339,6 +339,162 @@ def test_mobile_shell(public_dir):
     assert not failures, "\n".join(failures)
 
 
+def test_spanish_page_is_built(public_dir):
+    site_builder.build_public_site(site_builder.load_inventory_yaml())
+
+    spanish = public_dir / "es" / "index.html"
+    assert spanish.exists()
+    html = spanish.read_text(encoding="utf-8")
+    assert '<html lang="es">' in html
+    assert 'hreflang="en"' in html
+    assert 'hreflang="es"' in html
+    assert "Venta por mudanza" in html
+    assert "Escríbeme" in html
+    for language in ("en", "es"):
+        link = re.search(
+            rf'<a href="[^"]+" hreflang="{language}" lang="{language}" class="([^"]+)"',
+            html,
+        )
+        assert link
+        assert {"min-w-10", "min-h-10"} <= set(link.group(1).split())
+
+
+def test_locales_cover_every_departure_month(public_dir):
+    data = inventory()
+    data["seller"]["departure_date"] = "2026-03-09"
+    site_builder.build_public_site(data)
+
+    english = (public_dir / "index.html").read_text(encoding="utf-8")
+    spanish = (public_dir / "es" / "index.html").read_text(encoding="utf-8")
+    assert "Relocating in March" in english
+    assert "Me mudo en marzo" in spanish
+
+
+def test_spanish_fallbacks_and_asset_paths(public_dir):
+    data = site_builder.load_inventory_yaml()
+    site_builder.build_public_site(data)
+    html = (public_dir / "es" / "index.html").read_text(encoding="utf-8")
+    match = re.search(r"const INVENTORY = (\{.*?\});\n", html, flags=re.DOTALL)
+    assert match
+    rendered_items = {item["id"]: item for item in json.loads(match.group(1))["items"]}
+
+    fallbacks = []
+    for item in data["items"]:
+        if item.get("published", True) is False:
+            continue
+        translated = item.get("es", {})
+        for field in (
+            "title",
+            "short_title",
+            "specs",
+            "included",
+            "pickup_note",
+            "condition",
+            "dimensions",
+        ):
+            if field not in translated:
+                fallbacks.append(f"{item['id']}.{field}")
+        rendered = rendered_items[item["id"]]
+        assert rendered["title"] == translated["title"]
+        assert rendered["short_title"] == translated["short_title"]
+        assert rendered["specs"] == translated["specs"]
+        assert rendered["pickup"] == translated["pickup_note"]
+        assert rendered["condition"] == translated["condition"]
+        assert rendered["dimensions"] == translated["dimensions"]
+        assert rendered["images"] == [f"../{image}" for image in item["images"]]
+
+    assert not fallbacks, f"Spanish fallbacks: {fallbacks}"
+    assert 'src="../catalog/' in html
+    assert '"../catalog/' in html
+
+
+def test_spanish_item_copy_falls_back_field_by_field():
+    data = inventory(hidden_published=True)
+    data["items"][0]["es"] = {"title": "Lámpara"}
+    public = site_builder.sanitize_public_inventory(data)
+
+    localized = site_builder.localize_public_inventory(
+        public,
+        data,
+        "es",
+        site_builder.load_locale("es"),
+        "../",
+    )
+    item = next(item for item in localized["items"] if item["id"] == "shown-lamp")
+
+    assert item["title"] == "Lámpara"
+    assert item["short_title"] == "Shown lamp"
+    assert item["specs"] == ["a", "b"]
+    assert item["pickup"] == "Pickup in Denver Tech Center (DTC). Buyer must self-load."
+
+
+def test_spanish_ui_and_sms_are_localized(public_dir):
+    site_builder.build_public_site(site_builder.load_inventory_yaml())
+    html = (public_dir / "es" / "index.html").read_text(encoding="utf-8")
+
+    for text in (
+        "Me mudo en noviembre",
+        "Segundo piso, un tramo de escaleras, sin elevador.",
+        "Ahorre con un paquete",
+        "Ver qué incluye",
+        "Por separado",
+        "Escribir sobre este paquete",
+        "Cómo funciona la recogida",
+        "Detalles y especificaciones",
+        "Escribir sobre este artículo",
+        "Cerrar",
+        "días",
+        "¡Hola! Vi su catálogo de venta por mudanza",
+    ):
+        assert text in html
+    for stale in (
+        "Relocating in",
+        "Save with a bundle",
+        "How pickup works",
+        "Details & Specifications",
+        "Text about this",
+    ):
+        assert stale not in html
+
+
+def test_spanish_bundle_copy_and_payment_terms(public_dir):
+    data = site_builder.load_inventory_yaml()
+    site_builder.build_public_site(data)
+    html = (public_dir / "es" / "index.html").read_text(encoding="utf-8")
+    match = re.search(r"const INVENTORY = (\{.*?\});\n", html, flags=re.DOTALL)
+    assert match
+    rendered_bundles = {bundle["id"]: bundle for bundle in json.loads(match.group(1))["bundles"]}
+
+    fallbacks = []
+    for bundle in data["bundles"]:
+        translated = bundle.get("es", {})
+        for field in ("name", "short_name"):
+            if field not in translated:
+                fallbacks.append(f"{bundle['id']}.{field}")
+        if "name" in translated:
+            assert rendered_bundles[bundle["id"]]["name"] == translated["name"]
+        if "short_name" in translated:
+            assert rendered_bundles[bundle["id"]]["short_name"] == translated["short_name"]
+
+    assert not fallbacks, f"Spanish fallbacks: {fallbacks}"
+    terms = text_for_role(html, "pickup-terms")
+    assert "Efectivo, Venmo, Zelle en persona" in " ".join(terms.split())
+    assert "Cheque de caja verificado en el banco del comprador" in terms
+
+
+def test_poster_assistant_has_spanish_marketplace_variants():
+    template = (site_builder.TEMPLATES_DIR / "poster_assistant.html").read_text(encoding="utf-8")
+    assert "setPlatform('fb-es')" in template
+    assert "setPlatform('cl-es')" in template
+    assert "platform === 'fb-es'" in template
+    assert "platform === 'cl-es'" in template
+    assert "const copy = { ...item, ...(item.es || {}) };" in template
+    assert "Detalles clave:" in template
+    assert "RECOGIDA Y PAGO:" in template
+    assert "Estado: ${copy.condition}" in template
+    assert "DIMENSIONES: ${copy.dimensions}" in template
+
+
 def test_sale_schedule_comes_from_departure_date():
     schedule = site_builder.sale_schedule("2026-11-09")
     assert schedule == {

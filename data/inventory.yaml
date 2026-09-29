@@ -20,6 +20,13 @@ seller:
   - Second floor, one flight of stairs, no elevator.
   - Park right by the door. I help you carry and load.
   - See and test anything in person before you pay.
+  es:
+    pickup_summary: Segundo piso, estacionamiento junto a la puerta
+    pickup:
+    - Denver Tech Center (DTC), cerca de I-25 y Belleview.
+    - Segundo piso, un tramo de escaleras, sin elevador.
+    - Puede estacionar junto a la puerta. Yo ayudo a cargar.
+    - Puede ver y probar cualquier artículo antes de pagar.
 items:
 - id: sofa-sleeper
   cover: sofa-1.jpg
@@ -56,6 +63,22 @@ items:
   pickup_note: Currently assembled for in-person testing. Easily separates into 2
     main modules in under 10 minutes for transport. Requires 2 people to carry. Fits
     in pickup truck, cargo van, or large SUV.
+  es:
+    title: Sofá seccional reversible AFW Kent con cama extraíble y chaise con almacenamiento
+    short_title: Sofá seccional cama Kent
+    condition: Buen estado
+    dimensions: 92" ancho x 60" fondo x 37" alto
+    specs:
+    - Chaise reversible, configurable a la izquierda o derecha
+    - Mecanismo suave que convierte el sofá en cama doble
+    - Chaise con amplio almacenamiento oculto y mecanismo elevable
+    - Tapicería resistente de poliéster gris carbón
+    - Se desmonta en 2 piezas principales en menos de 10 minutos
+    included:
+    - Sofá seccional AFW Kent en 2 módulos
+    - Mecanismo de cama extraíble integrado
+    - Todos los cojines de respaldo
+    pickup_note: Está armado para probarlo. Se separa en 2 módulos en menos de 10 minutos; se necesitan 2 personas y una camioneta, van o SUV grande.
   tags:
   - american furniture warehouse
   - afw sofa
@@ -96,6 +119,22 @@ items:
   - Original power cable
   pickup_note: No original box. Bring a clean towel or blanket to protect screen during
     transport.
+  es:
+    title: Monitor curvo Dell de 32 pulgadas, 75 Hz FHD (S3222HN), sin píxeles muertos
+    short_title: Monitor curvo Dell de 32 pulgadas
+    condition: Como nuevo
+    dimensions: Pantalla diagonal de 31.5 pulgadas, curva 1800R
+    specs:
+    - Panel VA curvo 1800R de 31.5 pulgadas con ángulos de visión 178/178
+    - Resolución Full HD 1920 x 1080 a 75 Hz
+    - Tecnología AMD FreeSync para video y juegos sin cortes
+    - Dos puertos HDMI 1.4 y salida de audio
+    - Probado al 100 %, sin píxeles muertos y en estado impecable
+    included:
+    - Monitor Dell S3222HN
+    - Base original
+    - Cable de alimentación original
+    pickup_note: No incluye caja. Traiga una toalla o cobija limpia para proteger la pantalla.
   tags:
   - dell monitor
   - curved monitor
@@ -134,6 +173,23 @@ items:
   - Original remote control
   - Power cable
   pickup_note: No box. Bring a blanket to wrap the screen for pickup.
+  es:
+    title: Smart TV onn. de 43 pulgadas 4K UHD Roku con control y bases
+    short_title: Smart TV Roku onn. de 43 pulgadas
+    condition: Buen estado
+    dimensions: 38.2" ancho x 22.4" alto x 3.2" fondo, sin base
+    specs:
+    - Resolución 4K UHD 2160p nítida con HDR10
+    - Plataforma Roku integrada para Netflix, Disney+, Prime, Max y YouTube
+    - Tres HDMI, AV compuesto, USB, audio óptico y salida para audífonos
+    - Frecuencia de 60 Hz y Wi-Fi 802.11ac de doble banda
+    - Probada al 100 %, imagen brillante y restablecida de fábrica
+    included:
+    - TV Roku 4K de 43 pulgadas
+    - Patas originales para mesa
+    - Control remoto original
+    - Cable de alimentación
+    pickup_note: No incluye caja. Traiga una cobija para envolver la pantalla.
   tags:
   - 4k tv
   - smart tv
@@ -171,6 +227,21 @@ items:
   - Lower storage shelf
   pickup_note: Already assembled. Fits in midsize SUV with seats folded or truck bed.
     Tools available on site if you wish to disassemble.
+  es:
+    title: Escritorio Mainstays convertible en L o recto
+    short_title: Escritorio convertible en L
+    condition: Buen estado
+    dimensions: En L, 58.6" ancho x 50.4" fondo x 29.8" alto; recto, más de 80" de ancho
+    specs:
+    - Diseño modular 2 en 1 para esquina en L o escritorio recto largo
+    - Estante inferior para torre, impresora o cajas
+    - Estructura firme de acero negro con patas niveladoras
+    - Superficie de melamina Canyon Walnut resistente a rayones
+    - Está armado y se separa fácilmente en 2 secciones
+    included:
+    - Estructura del escritorio convertible
+    - Estante inferior
+    pickup_note: Está armado. Cabe en un SUV mediano con los asientos abatidos o en una pickup; hay herramientas para desmontarlo.
   tags:
   - computer desk
   - l-shaped desk
@@ -206,6 +277,20 @@ items:
   included:
   - Fully assembled lift-top coffee table
   pickup_note: Sturdy and relatively heavy. One flight of stairs down; I help you carry it.
+  es:
+    title: Mesa de centro Mainstays con tapa elevable, almacenamiento y estante
+    short_title: Mesa de centro con tapa elevable
+    condition: Como nueva
+    dimensions: 40.9" ancho x 18" fondo x 18.5" alto; elevada, 24" alto
+    specs:
+    - Tapa con resorte que se eleva suavemente a altura de comedor o trabajo
+    - Amplio compartimento oculto para controles, laptops y juegos
+    - Estante inferior abierto para libros, cobijas o canastas
+    - Superficie de melamina resistente y fácil de limpiar
+    - Construcción sólida, estable y en estado impecable
+    included:
+    - Mesa de centro con tapa elevable completamente armada
+    pickup_note: Es firme y algo pesada. Hay que bajarla un tramo de escaleras; yo ayudo a cargarla.
   tags:
   - lift top table
   - coffee table
@@ -240,6 +325,20 @@ items:
   - IKEA Tananger Full memory foam topper w/ zippered cover
   pickup_note: Can be rolled up and secured with ties/tape to fit in any sedan trunk
     or back seat.
+  es:
+    title: Sobrecolchón IKEA TANANGER matrimonial de espuma viscoelástica con funda lavable
+    short_title: Sobrecolchón IKEA de espuma viscoelástica
+    condition: Muy buen estado
+    dimensions: Matrimonial, 53 1/8" x 74 3/8", grosor de 2 3/8"
+    specs:
+    - Núcleo de espuma viscoelástica de alta densidad que alivia la presión
+    - Funda elástica con cierre, removible y lavable a máquina
+    - Flexible y enrollable para transportarlo en cualquier auto
+    - Siempre se usó con protector en un hogar sin humo ni mascotas
+    - Añade una capa suave y firme a un colchón duro
+    included:
+    - Sobrecolchón IKEA Tananger matrimonial con funda
+    pickup_note: Se puede enrollar y asegurar para llevarlo en la cajuela o asiento trasero de cualquier sedán.
   tags:
   - mattress topper
   - full mattress topper
@@ -272,6 +371,20 @@ items:
   included:
   - Pair of 2 assembled VASAGLE stools
   pickup_note: Compact and lightweight. Easily fits in the back seat of any car.
+  es:
+    title: Bancos industriales VASAGLE, juego de 2, altura de barra de 28.7 pulgadas
+    short_title: Bancos VASAGLE, par
+    condition: Como nuevos
+    dimensions: Cada uno, 15.7" largo x 11.8" ancho x 28.7" alto
+    specs:
+    - Juego de 2 bancos industriales a juego
+    - Estructura firme de acero con reposapiés alrededor
+    - Tamaño compacto que cabe bajo islas y barras estándar
+    - Asiento de madera rústica resistente, hasta 264 lb cada uno
+    - Como nuevos, sin rayones ni movimiento
+    included:
+    - Dos bancos VASAGLE armados
+    pickup_note: Son compactos y ligeros; caben fácilmente en el asiento trasero de cualquier auto.
   tags:
   - bar stools
   - counter stools
@@ -304,6 +417,20 @@ items:
   included:
   - Assembled TV stand (Electronics and cables pictured not included)
   pickup_note: Fully assembled. Bring an SUV or fit across the back seat of a sedan.
+  es:
+    title: Mueble para TV Mainstays Parsons, hasta 50 pulgadas, Canyon Walnut
+    short_title: Mueble para TV Mainstays Parsons
+    condition: Buen estado
+    dimensions: 45.5" ancho x 15.8" fondo x 18.9" alto
+    specs:
+    - Compatible con TVs de pantalla plana de hasta 50 pulgadas y 55 lb
+    - Tres espacios abiertos para consolas, barra de sonido, libros y reproductores
+    - Diseño Parsons limpio y minimalista
+    - Aberturas traseras para cables y ventilación
+    - Construcción firme de madera compuesta con acabado Canyon Walnut
+    included:
+    - Mueble para TV armado; no incluye electrónicos ni cables de la foto
+    pickup_note: Está completamente armado. Traiga un SUV o colóquelo atravesado en el asiento trasero de un sedán.
   tags:
   - tv stand
   - entertainment center
@@ -338,6 +465,21 @@ items:
   included:
   - Fully assembled ergonomic desk chair
   pickup_note: Fits easily in any car back seat or trunk.
+  es:
+    title: Silla ergonómica Mainstays de malla con brazos abatibles
+    short_title: Silla ergonómica de malla
+    condition: Buen estado
+    dimensions: 24.5" ancho x 25.5" fondo x 37.5"-41.25" alto
+    specs:
+    - Respaldo de malla transpirable para sesiones largas
+    - Brazos acolchados abatibles para guardarla bajo el escritorio
+    - Ajuste neumático suave de altura con una palanca
+    - Bloqueo e intensidad de inclinación ajustables
+    - Base reforzada de 5 puntas con giro de 360 grados
+    - Capacidad de 275 lb
+    included:
+    - Silla de escritorio ergonómica completamente armada
+    pickup_note: Cabe fácilmente en el asiento trasero o la cajuela de cualquier auto.
   tags:
   - office chair
   - desk chair
@@ -369,6 +511,19 @@ items:
   included:
   - Fully assembled nightstand
   pickup_note: Compact and easily fits in any vehicle.
+  es:
+    title: Mesa de noche Mainstays Hillside con cajón y espacio inferior, color espresso
+    short_title: Mesa de noche Mainstays con cajón
+    condition: Como nueva
+    dimensions: 19.8" largo x 17.6" ancho x 23.9" alto
+    specs:
+    - Cajón de deslizamiento suave con rieles metálicos y topes de seguridad
+    - Espacio inferior abierto para canastas, libros o cargar el teléfono
+    - Diseño contemporáneo que combina con dormitorios modernos
+    - Como nueva, sin astillas ni laminado desprendido
+    included:
+    - Mesa de noche completamente armada
+    pickup_note: Es compacta y cabe fácilmente en cualquier vehículo.
   tags:
   - nightstand
   - bedside table
@@ -406,6 +561,24 @@ items:
   - Built-in electric pump
   - Original box and travel carry bag
   pickup_note: Folded inside compact carry bag. Easy to carry by hand.
+  es:
+    title: Colchón inflable individual Intex Dura-Beam Plus con bomba eléctrica integrada
+    short_title: Colchón inflable Intex con bomba
+    condition: Como nuevo, usado una vez
+    dimensions: Individual, 39" ancho x 75" largo x 16.5" alto
+    specs:
+    - Construcción interior Fiber-Tech de alta resistencia
+    - Bomba eléctrica integrada de 110-120 V; infla y desinfla en menos de 3 minutos
+    - Altura elevada de 16.5 pulgadas para entrar y salir con facilidad
+    - Superficie aterciopelada impermeable que mantiene las sábanas en su lugar
+    - Probado y hermético; se usó una sola vez
+    - Capacidad de 300 lb
+    included:
+    - Colchón inflable individual
+    - Bomba eléctrica integrada
+    - Caja original y bolsa de transporte
+    pickup_note: Está doblado dentro de su bolsa compacta y se puede llevar a mano.
+    note: Gratis con cualquier compra
   tags:
   - air mattress
   - intex airbed
@@ -441,6 +614,21 @@ items:
   - 11 glassware pieces
   pickup_note: No original box. Please bring your own box/tote and packing paper/towels
     for safe transport.
+  es:
+    title: Juego de cocina de 20 piezas, vajilla de gres y vasos
+    short_title: Vajilla y vasos, 20 piezas
+    condition: Buen estado
+    dimensions: Servicio variado de comedor de 20 piezas
+    specs:
+    - Nueve piezas de vajilla de gres, con platos y tazones
+    - Once vasos transparentes de varios tamaños
+    - Aptos para microondas y lavavajillas
+    - Sin grietas ni astillas; limpios y desinfectados
+    - Juego inicial ideal para departamentos nuevos o residencias estudiantiles
+    included:
+    - Nueve piezas de cerámica
+    - Once vasos de vidrio
+    pickup_note: No incluye caja. Traiga una caja o contenedor y papel o toallas para proteger las piezas.
   tags:
   - dinnerware set
   - glassware
@@ -475,6 +663,20 @@ items:
   included:
   - Fully assembled C-table
   pickup_note: Lightweight and compact. Fits in any vehicle.
+  es:
+    title: Mesa auxiliar Mainstays en C para sofá o laptop, Canyon Walnut
+    short_title: Mesa auxiliar en C
+    condition: Como nueva
+    dimensions: 15.5" largo x 15.5" ancho x 25.9" alto
+    specs:
+    - Diseño en C que se desliza bajo sofás, sillones y camas
+    - Altura ideal para laptop, comida, café, controles o tablet
+    - Estructura firme de metal negro con protectores antirayones
+    - Tamaño compacto para departamentos y salas pequeñas
+    - Como nueva
+    included:
+    - Mesa auxiliar en C completamente armada
+    pickup_note: Es ligera y compacta; cabe en cualquier vehículo.
   tags:
   - c table
   - couch table
@@ -534,6 +736,30 @@ items:
   - Standard Bill of Sale & Signed Clean Title
   pickup_note: Inspection in Denver Tech Center (DTC). Payment via Cash or Cashier's
     Check verified at buyer's bank branch window before title release.
+  es:
+    title: Ford Escape SEL AWD 2019, título limpio de Colorado e inspección de concesionario
+    short_title: Ford Escape SEL AWD 2019
+    condition: Exterior excelente e interior en muy buen estado
+    dimensions: SUV compacto · 103.5k millas · título limpio
+    title_status: Título limpio de Colorado
+    color: Blanco con interior negro tapizado en cuero
+    specs:
+    - Motor EcoBoost de 1.5 L y 4 cilindros, 179 HP, transmisión automática de 6 velocidades
+    - Tracción integral inteligente Ford y llantas para todo clima
+    - Título limpio de Colorado en mano y sin gravámenes
+    - El reporte de emisiones de Colorado del 12 de mayo de 2026 aparece en las fotos; se requiere un certificado nuevo antes de la entrega
+    - Sin recalls abiertos; el recall 22S43 se cerró en concesionario Ford el 25 de septiembre de 2026
+    - Inspección Ford del 25 de septiembre de 2026 con batería, frenos y llantas en buen estado
+    - Ford SYNC 3, pantalla de 8 pulgadas, Apple CarPlay, Android Auto, Bluetooth y Wi-Fi
+    - Paquete para clima frío con asientos delanteros y espejos calefactados
+    - Portón eléctrico manos libres, encendido por botón y climatización de dos zonas
+    - Sin accidentes durante mi propiedad, sin humo ni mascotas y sin alertas en el tablero
+    included:
+    - Ford Escape SEL AWD 2019
+    - Controles originales
+    - Certificado vigente de emisiones de Colorado
+    - Contrato de compraventa y título limpio firmado
+    pickup_note: Inspección en Denver Tech Center. Pago en efectivo o cheque de caja verificado en la sucursal bancaria antes de entregar el título.
   tags:
   - ford escape
   - escape sel
@@ -552,6 +778,10 @@ bundles:
   - ikea-mattress-topper
   bundle_price: 220
   note: Topper free with the sofa
+  es:
+    name: Sofá cama y sobrecolchón de espuma viscoelástica
+    short_name: Sofá cama + sobrecolchón
+    note: Sobrecolchón gratis con el sofá
 - id: bundle-wfh
   name: Complete WFH / Home Office Productivity Station
   short_name: Home office
@@ -560,6 +790,9 @@ bundles:
   - office-chair-ergonomic
   - dell-monitor-32
   bundle_price: 150
+  es:
+    name: Estación completa para oficina en casa
+    short_name: Oficina en casa
 - id: bundle-living-room
   name: Living Room Media & Entertainment Suite
   short_name: Living room media
@@ -569,6 +802,9 @@ bundles:
   - coffee-table-lift-top
   - auxiliary-c-table
   bundle_price: 145
+  es:
+    name: Conjunto multimedia para la sala
+    short_name: Sala multimedia
 - id: bundle-kitchen-island
   name: Kitchen Island & Breakfast Bar Starter Kit
   short_name: Kitchen bar
@@ -576,6 +812,9 @@ bundles:
   - bar-stools-pair
   - dinnerware-glassware-set
   bundle_price: 40
+  es:
+    name: Juego inicial para barra de cocina
+    short_name: Barra de cocina
 - id: bundle-take-all
   name: Whole Apartment Relocation Liquidation
   short_name: Take everything
@@ -595,3 +834,6 @@ bundles:
   - dinnerware-glassware-set
   - auxiliary-c-table
   bundle_price: 540
+  es:
+    name: Liquidación completa del departamento
+    short_name: Llévese todo

@@ -10,6 +10,7 @@ BASE_DIR = Path(__file__).resolve().parents[2]
 DATA_DIR = BASE_DIR / "data"
 CONTENT_DIR = BASE_DIR / "content"
 PHOTOS_DIR = CONTENT_DIR / "photos"
+LOCALES_DIR = BASE_DIR / "locales"
 DIST_DIR = BASE_DIR / "build" / "public"
 DIST_PRIVATE_DIR = BASE_DIR / "build" / "private"
 DOCS_DIR = BASE_DIR / "docs"
