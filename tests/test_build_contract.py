@@ -294,12 +294,12 @@ def test_mobile_shell(public_dir):
         failures.append("the header still contains a contact button")
 
     sticky_text_bars = re.findall(
-        r'<a[^>]+data-sms-role="sticky-text"[^>]*>\s*Text us\s*</a>',
+        r'<a[^>]+data-sms-role="sticky-text"[^>]*>\s*Text me\s*</a>',
         html,
         flags=re.DOTALL,
     )
     if len(sticky_text_bars) != 1:
-        failures.append(f"expected one sticky Text us bar, found {len(sticky_text_bars)}")
+        failures.append(f"expected one sticky Text me bar, found {len(sticky_text_bars)}")
 
     sheet = re.search(r'<div id="itemSheet" class="([^"]+)"', html)
     if not sheet or "items-end" not in sheet.group(1).split():
