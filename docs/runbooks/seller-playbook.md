@@ -18,14 +18,14 @@ Operational guidelines for maximizing return before the 2026-11-09 departure. Pu
 
 ## 2. Departure-Date Pricing Schedule
 
-Run `leaving-denver drops` to derive the current windows and price tiers from `seller.departure_date`:
+Run `leaving-denver drops` immediately before repricing. It derives the active windows and price tiers from `seller.departure_date`:
 
-* **First drop:** October 3–6.
-* **Second drop:** October 15–17.
-* **Clear reserve floors:** October 20–25.
-* **Giveaway window:** November 3–5, before the November 9 departure.
+* **First drop:** reduce items with no qualified inquiries.
+* **Second drop:** make the next controlled reduction.
+* **Clear reserve floors:** use the encrypted per-item minimums.
+* **Giveaway window:** dispose of remaining low-value items before departure.
 
-Do not copy a total into this runbook. The command calculates current prices from the inventory and encrypted reserve data.
+The command output is seller-only. Do not publish its dates, reserve timing, or totals; those values change with the inventory and reveal negotiation strategy.
 
 ---
 
