@@ -22,7 +22,7 @@ Map every acceptance criterion from `proposal.md` to concrete proof (commit hash
 
 ## Test status
 
-- Test suite: `uv run pytest` -> 65 passed
+- Test suite: `uv run pytest` -> 72 passed
 - Lint: `uv run ruff check .` -> passed; `uv run ruff format --check .` -> 40 files formatted
 - Build: `uv run leaving-denver build` -> public and private outputs built; security verification passed
 - Manual smoke test: headless Chrome at 390 x 844 -> `clientWidth=390`, document and body `scrollWidth=390`, sticky header top remained 0 after a 600 px scroll, four sheet facts, zero visible tap targets below 40 px, and every bundle offer `clientWidth=scrollWidth=340`
@@ -45,7 +45,7 @@ Brief log of non-obvious trade-offs or course corrections taken during the work.
 - PR 4: Windows tests read generated HTML explicitly as UTF-8; relying on the platform default failed on typographic punctuation.
 - PR 4 review: the countdown runs in the browser using the Denver calendar date, so a static deployment does not freeze the number of days.
 - PR 4 review: Facebook and Craigslist vehicle copy now interpolate the item specs, included items, mileage, pickup note and seller payment terms instead of maintaining a second hard-coded listing.
-- PR 5: the sticky "Text us" bar is the only generic contact CTA; item- and bundle-specific SMS links remain contextual actions.
+- PR 5: the sticky "Text me" bar is the only generic contact CTA; item- and bundle-specific SMS links remain contextual actions.
 - PR 5: the item detail remains data-driven but presents no more than four specs, with the bundle offer collapsed to one line.
 - PR 6: the builder renders the same sanitized inventory twice; locale overlays can only replace explicitly public fields and fall back field by field.
 - PR 6: Spanish pages reference the shared root catalog with `../catalog/...`; photos are not duplicated under `es/`.

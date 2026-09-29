@@ -167,6 +167,8 @@ def sanitize_public_seller(full_data: dict[str, Any]) -> dict[str, Any]:
         "location": seller["location"],
         "departure_date": seller["departure_date"],
         "payment_methods": seller["payment_methods"],
+        "pickup": seller.get("pickup", []),
+        "pickup_summary": seller.get("pickup_summary", ""),
     }
 
 
@@ -273,6 +275,10 @@ def build_public_site(full_data: dict[str, Any]) -> None:
             public_data, full_data, locale, translations, asset_prefix
         )
         localized_seller = json.loads(json.dumps(seller))
+        seller_copy = full_data["seller"].get(locale, {}) if locale != "en" else {}
+        for field in ("pickup", "pickup_summary"):
+            if field in seller_copy:
+                localized_seller[field] = seller_copy[field]
         localized_seller["payment_methods"] = {
             kind: [translations["payment_methods"].get(method, method) for method in methods]
             for kind, methods in seller["payment_methods"].items()

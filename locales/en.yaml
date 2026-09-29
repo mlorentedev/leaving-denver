@@ -6,7 +6,6 @@ hero_prefix: I am relocating in
 hero_vehicle_suffix: and selling furniture, tech, and an AWD SUV in Denver Tech Center.
 hero_household_suffix: and selling furniture and tech in Denver Tech Center.
 pickup_near: Pickup in DTC near I-25 & Belleview
-elevator_loading: Elevator building with driveway loading
 household_payment_summary: Cash, Venmo or Zelle for household items
 vehicle: Vehicle
 winter_ready: AWD Winter Ready
@@ -20,15 +19,11 @@ items: items
 save: Save
 take_everything: Take everything
 all_items_one_trip: items in one trip.
-ask_about_it: Ask about it
 pickup_heading: How pickup works
-pickup_prefix: Pickup is in
-pickup_suffix: near I-25 and Belleview; bring help and suitable transport.
 household_items: Household items
 in_person: in person
-vehicle_lower: vehicle
 footer: Denver Tech Center Relocation Sale · CO 80111
-text_us: Text us
+text_us: Text me
 category: Category
 item_title: Item Title
 main_photo: Main photo
@@ -37,6 +32,10 @@ details: Details & Specifications
 pickup_note: Pickup note
 text_about_this: Text about this
 close: Close
+see_included: See what's included
+free: Free
+separately: Separately
+text_about_bundle: Text about this bundle
 days: days
 default_pickup: Pickup in Denver Tech Center (DTC). Buyer must self-load.
 sms_generic: Hi! I saw your DTC Moving Sale catalog and had a question.

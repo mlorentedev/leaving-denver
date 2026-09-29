@@ -6,7 +6,6 @@ hero_prefix: Me mudo en
 hero_vehicle_suffix: y vendo muebles, tecnología y un SUV AWD en Denver Tech Center.
 hero_household_suffix: y vendo muebles y tecnología en Denver Tech Center.
 pickup_near: Recogida en DTC cerca de I-25 y Belleview
-elevator_loading: Edificio con elevador y acceso para cargar
 household_payment_summary: Efectivo, Venmo o Zelle para artículos del hogar
 vehicle: Auto
 winter_ready: AWD listo para invierno
@@ -20,15 +19,11 @@ items: artículos
 save: Ahorre
 take_everything: Llévese todo
 all_items_one_trip: artículos en un solo viaje.
-ask_about_it: Pregunte por el paquete
 pickup_heading: Cómo funciona la recogida
-pickup_prefix: La recogida es en
-pickup_suffix: cerca de I-25 y Belleview; traiga ayuda y transporte adecuado.
 household_items: Artículos del hogar
 in_person: en persona
-vehicle_lower: auto
 footer: Venta por mudanza en Denver Tech Center · CO 80111
-text_us: Escríbanos
+text_us: Escríbeme
 category: Categoría
 item_title: Artículo
 main_photo: Foto principal
@@ -37,6 +32,10 @@ details: Detalles y especificaciones
 pickup_note: Nota para la recogida
 text_about_this: Escribir sobre este artículo
 close: Cerrar
+see_included: Ver qué incluye
+free: Gratis
+separately: Por separado
+text_about_bundle: Escribir sobre este paquete
 days: días
 default_pickup: Recogida en Denver Tech Center (DTC). El comprador debe cargar el artículo.
 sms_generic: ¡Hola! Vi su catálogo de venta por mudanza en DTC y tengo una pregunta.

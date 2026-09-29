@@ -9,6 +9,7 @@ from html import unescape
 
 import pytest
 import yaml
+from markupsafe import escape
 
 from leaving_denver import site_builder
 
@@ -258,7 +259,7 @@ def test_page_figures_match_the_data(public_dir):
         save = sum(price[i] for i in b["items"]) - b["bundle_price"]
         savings.add(save)
         attr = "data-everything" if b.get("everything") else "data-bundle"
-        text = card(html, attr, b["id"])
+        text = card(html, attr, b["id"], "</button>")
         assert f"${b['bundle_price']}" in text, f"{b['id']} price"
         assert f"Save ${save}" in text, f"{b['id']} savings"
         assert f"{len(b['items'])} items" in text, f"{b['id']} item count"
@@ -293,12 +294,12 @@ def test_mobile_shell(public_dir):
         failures.append("the header still contains a contact button")
 
     sticky_text_bars = re.findall(
-        r'<a[^>]+data-sms-role="sticky-text"[^>]*>\s*Text us\s*</a>',
+        r'<a[^>]+data-sms-role="sticky-text"[^>]*>\s*Text me\s*</a>',
         html,
         flags=re.DOTALL,
     )
     if len(sticky_text_bars) != 1:
-        failures.append(f"expected one sticky Text us bar, found {len(sticky_text_bars)}")
+        failures.append(f"expected one sticky Text me bar, found {len(sticky_text_bars)}")
 
     sheet = re.search(r'<div id="itemSheet" class="([^"]+)"', html)
     if not sheet or "items-end" not in sheet.group(1).split():
@@ -348,7 +349,7 @@ def test_spanish_page_is_built(public_dir):
     assert 'hreflang="en"' in html
     assert 'hreflang="es"' in html
     assert "Venta por mudanza" in html
-    assert "Escríbanos" in html
+    assert "Escríbeme" in html
     for language in ("en", "es"):
         link = re.search(
             rf'<a href="[^"]+" hreflang="{language}" lang="{language}" class="([^"]+)"',
@@ -433,8 +434,11 @@ def test_spanish_ui_and_sms_are_localized(public_dir):
 
     for text in (
         "Me mudo en noviembre",
-        "Recogida en DTC",
+        "Segundo piso, un tramo de escaleras, sin elevador.",
         "Ahorre con un paquete",
+        "Ver qué incluye",
+        "Por separado",
+        "Escribir sobre este paquete",
         "Cómo funciona la recogida",
         "Detalles y especificaciones",
         "Escribir sobre este artículo",
@@ -537,6 +541,16 @@ def test_mobile_copy_budget(public_dir):
     pickup = text_for_role(html, "pickup-terms")
     assert len(hero.split()) <= 20
     assert len([part for part in re.split(r"[.!?]+", pickup) if part.strip()]) <= 2
+    facts = re.findall(r'data-role="pickup-fact"[^>]*>(.*?)<', html)
+    assert 1 <= len(facts) <= 4
+    assert all(len(fact.split()) <= 12 for fact in facts)
+
+
+def test_pickup_facts_come_from_data_one_per_line(public_dir):
+    data, html = real_page(public_dir)
+    facts = [unescape(f) for f in re.findall(r'data-role="pickup-fact"[^>]*>(.*?)<', html)]
+    assert facts == data["seller"]["pickup"]
+    assert text_for_role(html, "pickup-summary").strip() == data["seller"]["pickup_summary"]
 
 
 def test_countdown_updates_in_browser_from_departure_date(public_dir):
@@ -561,3 +575,20 @@ def test_vehicle_poster_copy_uses_inventory_fields():
         "Clean title ready in hand",
     ):
         assert stale not in template
+
+
+def test_bundle_sheet_lists_what_is_in_it(public_dir):
+    data, html = real_page(public_dir)
+    items = {i["id"]: i for i in data["items"]}
+    for b in data["bundles"]:
+        # The card opens the sheet; it no longer texts the seller straight away.
+        attr = "data-everything" if b.get("everything") else "data-bundle"
+        assert re.search(rf'<button type="button" {attr}="{b["id"]}"', html), b["id"]
+        start = html.index(f'data-bundle-sheet="{b["id"]}"')
+        sheet = html[start : html.index("</section>", start)]
+        listed = re.findall(r'data-sheet-item="([^"]+)"', sheet)
+        assert listed == b["items"], f"{b['id']} sheet lists {listed}"
+        for item_id in b["items"]:
+            assert escape(items[item_id]["short_title"]) in sheet
+        assert f"${b['bundle_price']}" in sheet
+        assert "data-sms-intent" in sheet

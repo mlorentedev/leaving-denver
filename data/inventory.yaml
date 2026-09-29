@@ -12,6 +12,21 @@ seller:
   pickup_policy: Buyer must self-load and bring appropriate transportation. Fully
     assembled, sold AS-IS.
   departure_date: '2026-11-09'
+  # Hero strip; the full facts follow in `pickup` (owner, 2026-09-28).
+  pickup_summary: Second floor, parking by the door
+  # Shown one per line under "How pickup works".
+  pickup:
+  - Denver Tech Center (DTC), near I-25 and Belleview.
+  - Second floor, one flight of stairs, no elevator.
+  - Park right by the door. I help you carry and load.
+  - See and test anything in person before you pay.
+  es:
+    pickup_summary: Segundo piso, estacionamiento junto a la puerta
+    pickup:
+    - Denver Tech Center (DTC), cerca de I-25 y Belleview.
+    - Segundo piso, un tramo de escaleras, sin elevador.
+    - Puede estacionar junto a la puerta. Yo ayudo a cargar.
+    - Puede ver y probar cualquier artículo antes de pagar.
 items:
 - id: sofa-sleeper
   cover: sofa-1.jpg
@@ -261,7 +276,7 @@ items:
   - Solid, wobble-free construction in pristine condition
   included:
   - Fully assembled lift-top coffee table
-  pickup_note: Sturdy and relatively heavy. Ground floor/elevator access in DTC.
+  pickup_note: Sturdy and relatively heavy. One flight of stairs down; I help you carry it.
   es:
     title: Mesa de centro Mainstays con tapa elevable, almacenamiento y estante
     short_title: Mesa de centro con tapa elevable
@@ -275,7 +290,7 @@ items:
     - Construcción sólida, estable y en estado impecable
     included:
     - Mesa de centro con tapa elevable completamente armada
-    pickup_note: Es firme y algo pesada. Hay acceso por planta baja y elevador en DTC.
+    pickup_note: Es firme y algo pesada. Hay que bajarla un tramo de escaleras; yo ayudo a cargarla.
   tags:
   - lift top table
   - coffee table
