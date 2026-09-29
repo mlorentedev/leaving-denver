@@ -26,7 +26,7 @@ Do not list a private party vehicle with unresolved or unverified manufacturer s
 
 ## References
 - `data/inventory.yaml` (`2019-ford-escape-sel-awd` specifications and inspection evidence)
-- Vault: `10_projects/leaving-denver/research/market-and-platform-guide.md` (Colorado private car sales protocol)
+- [Vault research: market and platform guide](https://github.com/mlorentedev/knowledge/blob/main/10_projects/leaving-denver/research/market-and-platform-guide.md)
 
 ## Correction (2026-09-25)
 Closing recalls is only half of the paperwork story. Two claims next to it in the listing were

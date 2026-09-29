@@ -25,6 +25,6 @@ Do not clutter catalog footers with generic package cards that compete with sing
 > **Whenever merchandising product bundles, present them as contextual upsells within the specific item detail views of their constituent parts.**
 
 ## References
-- Vault: `10_projects/leaving-denver/research/bundle-strategy.md` (bundle architecture)
+- [Vault research: bundle strategy](https://github.com/mlorentedev/knowledge/blob/main/10_projects/leaving-denver/research/bundle-strategy.md)
 - `src/leaving_denver/site_builder.py` (`sanitize_public_inventory` bundle calculations)
 - `src/leaving_denver/templates/index.html` (item and bundle sheets)

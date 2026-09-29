@@ -34,7 +34,7 @@ uv run leaving-denver build
 # Auto-discover photos and update data/inventory.yaml
 uv run leaving-denver sync
 
-# View date-derived pricing windows and tiers
+# View date-derived schedule windows and inventory/reserve-based price tiers
 uv run leaving-denver drops
 
 # Mark an item as sold and trigger automatic site rebuild

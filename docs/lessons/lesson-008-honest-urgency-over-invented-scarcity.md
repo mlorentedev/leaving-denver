@@ -4,7 +4,7 @@ type: lesson
 scope: local
 tags: [copy, marketing, sales, marketplace, legal]
 created: "2026-09-25"
-source: "Vault: 10_projects/leaving-denver/research/2026-09-25-listing-copy-and-campaign.md"
+source: "Listing copy research for the moving sale"
 ---
 
 # Lesson: Use Real Urgency, Not Invented Scarcity, in a Moving Sale
@@ -31,3 +31,6 @@ Invented demand ("3 people asking"), fake deadlines, or "prices go up tomorrow".
 
 ## Golden Rule (The Pattern)
 > **Every urgency signal on the page must be a fact the buyer could verify.**
+
+## References
+- [Vault research: listing copy and campaign](https://github.com/mlorentedev/knowledge/blob/main/10_projects/leaving-denver/research/2026-09-25-listing-copy-and-campaign.md)

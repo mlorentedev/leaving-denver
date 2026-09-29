@@ -25,5 +25,5 @@ Do not use press renders, manufacturer stock photos, or cropped dealer catalog i
 > **Whenever listing high-value vehicles in private classifieds, only use authentic, timestamped in-situ photos including the odometer and clean physical title in hand.**
 
 ## References
-- Vault: `10_projects/leaving-denver/research/photo-forensic-audit.md` (inspection of visual trust signals)
+- [Vault research: photo forensic audit](https://github.com/mlorentedev/knowledge/blob/main/10_projects/leaving-denver/research/photo-forensic-audit.md)
 - `data/inventory.yaml` (Asset specification and photographic requirements)

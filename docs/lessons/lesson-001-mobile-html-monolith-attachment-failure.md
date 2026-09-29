@@ -25,5 +25,5 @@ Do not send offline HTML monoliths or Base64-encoded web bundles as file attachm
 > **Whenever distributing second-hand catalogs to mobile marketplace leads, deploy a lightweight CDN-hosted web page with progressive image loading rather than sending local document attachments.**
 
 ## References
-- Vault: `10_projects/leaving-denver/research/competitive-agent-audit.md` (forensic comparison with the DeepSeek monolith)
+- [Vault research: competitive agent audit](https://github.com/mlorentedev/knowledge/blob/main/10_projects/leaving-denver/research/competitive-agent-audit.md)
 - `src/leaving_denver/site_builder.py` (Lightweight static compilation pipeline)
