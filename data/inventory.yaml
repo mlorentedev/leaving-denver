@@ -12,6 +12,14 @@ seller:
   pickup_policy: Buyer must self-load and bring appropriate transportation. Fully
     assembled, sold AS-IS.
   departure_date: '2026-11-09'
+  # Hero strip; the full facts follow in `pickup` (owner, 2026-09-28).
+  pickup_summary: Second floor, parking by the door
+  # Shown one per line under "How pickup works".
+  pickup:
+  - Denver Tech Center (DTC), near I-25 and Belleview.
+  - Second floor, one flight of stairs, no elevator.
+  - Park right by the door. I help you carry and load.
+  - See and test anything in person before you pay.
 items:
 - id: sofa-sleeper
   cover: sofa-1.jpg
@@ -197,7 +205,7 @@ items:
   - Solid, wobble-free construction in pristine condition
   included:
   - Fully assembled lift-top coffee table
-  pickup_note: Sturdy and relatively heavy. Ground floor/elevator access in DTC.
+  pickup_note: Sturdy and relatively heavy. One flight of stairs down; I help you carry it.
   tags:
   - lift top table
   - coffee table

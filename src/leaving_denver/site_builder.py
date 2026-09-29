@@ -158,6 +158,8 @@ def sanitize_public_seller(full_data: dict[str, Any]) -> dict[str, Any]:
         "location": seller["location"],
         "departure_date": seller["departure_date"],
         "payment_methods": seller["payment_methods"],
+        "pickup": seller.get("pickup", []),
+        "pickup_summary": seller.get("pickup_summary", ""),
     }
 
 
