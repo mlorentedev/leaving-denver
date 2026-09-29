@@ -493,6 +493,10 @@ def test_poster_assistant_has_spanish_marketplace_variants():
     assert "RECOGIDA Y PAGO:" in template
     assert "Estado: ${copy.condition}" in template
     assert "DIMENSIONES: ${copy.dimensions}" in template
+    assert (
+        "First floor, one flight of stairs, no elevator, with parking right by the door. "
+        "I help you carry it down.${item.pickup_note ? ` ${item.pickup_note}` : ''}" in template
+    )
 
 
 def test_sale_schedule_comes_from_departure_date():

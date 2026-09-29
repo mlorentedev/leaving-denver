@@ -142,33 +142,51 @@ def test_no_unbacked_vehicle_claims(path):
 
 # Owner correction, 2026-09-28: first floor, one flight of stairs, no elevator; the car was
 # bought used, so "everything was bought new" is false (#48).
-# Any elevator the text does not deny, so "no elevator" passes and "elevator access" fails.
+# Known positive elevator claims fail; natural English and Spanish denials pass.
 WRONG_PICKUP_FACTS = re.compile(
-    r"(?<!no )elevator|(?<!sin )ascensor|(?<!sin )elevador|"
-    r"ground floor|second floor|segundo piso|everything was bought new",
+    r"elevator (?:access|available|building)|with (?:an )?elevators?|"
+    r"(?:building|unit) (?:has|with) (?:an )?elevators?|"
+    r"(?:ascensor|elevador)(?:es)? disponible(?:s)?|con (?:ascensor|elevador)(?:es)?|"
+    r"ground floor|second floor|segundo piso|"
+    r"everything was bought new",
     re.I,
 )
 
 
+def wrong_pickup_facts(text):
+    return WRONG_PICKUP_FACTS.findall(text)
+
+
 @pytest.mark.parametrize("claim", ["con ascensor", "ascensor disponible", "con elevador"])
 def test_pickup_guard_rejects_spanish_elevator_claims(claim):
-    assert WRONG_PICKUP_FACTS.search(claim)
+    assert wrong_pickup_facts(claim)
 
 
-@pytest.mark.parametrize("fact", ["sin ascensor", "sin elevador"])
+@pytest.mark.parametrize(
+    "fact",
+    [
+        "sin ascensor",
+        "sin elevador",
+        "sin ascensores",
+        "no hay ascensor",
+        "We do not have an elevator",
+        "We don't have an elevator",
+        "No elevators in the building",
+    ],
+)
 def test_pickup_guard_allows_spanish_elevator_denials(fact):
-    assert not WRONG_PICKUP_FACTS.search(fact)
+    assert not wrong_pickup_facts(fact)
 
 
 def test_pickup_floor_matches_owner(inventory):
     seller = inventory["seller"]
-    assert seller["pickup_summary"] == "One flight of stairs, no elevator"
-    assert "One flight up, no elevator." in seller["pickup"]
+    assert seller["pickup_summary"] == "First floor, one flight of stairs, no elevator"
+    assert "First floor, one flight of stairs, no elevator." in seller["pickup"]
     assert seller["es"]["pickup_summary"] == "Primer piso, un tramo de escaleras, sin ascensor"
     assert "Primer piso, un tramo de escaleras, sin ascensor." in seller["es"]["pickup"]
 
 
 @pytest.mark.parametrize("path", CLAIM_SOURCES, ids=lambda p: p.name)
 def test_no_stale_or_unbacked_pickup_facts(path):
-    hits = WRONG_PICKUP_FACTS.findall(path.read_text(encoding="utf-8"))
+    hits = wrong_pickup_facts(path.read_text(encoding="utf-8"))
     assert not hits, f"{path.name} states a wrong pickup fact: {hits}"
