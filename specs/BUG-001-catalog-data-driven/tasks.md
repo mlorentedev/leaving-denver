@@ -69,11 +69,11 @@ created: "2026-09-26"
 
 ### PR 6: `feat/spanish-catalog` (closes #53)
 
-- [ ] [AC9] `test_spanish_page_is_built`: `build/public/es/index.html` exists, has `lang="es"`, and links back to `/`. Expected: FAIL.
-- [ ] [AC9] Add `locales/en.yaml` and `locales/es.yaml` for the UI strings. `render()` loops over the locales, and each page gets `hreflang` links and a language switch.
-- [ ] [AC9] Add an optional `es:` block per item and bundle in `data/inventory.yaml` (`title`, `short_title`, `specs`, `pickup_note`, `description`), falling back to English. `test_spanish_fallbacks` lists the fields still in English, so the owner can fill them.
-- [ ] [AC9] SMS intents are written in the page's language. The poster tool gets Spanish Marketplace and Craigslist variants.
-- [ ] [AC9] `test_no_unbacked_vehicle_claims` covers the Spanish page, with the Spanish forms of the same claims.
+- [x] [AC9] `test_spanish_page_is_built`: `build/public/es/index.html` exists, has `lang="es"`, and links back to `/`. Expected: FAIL.
+- [x] [AC9] Add `locales/en.yaml` and `locales/es.yaml` for the UI strings. `render()` loops over the locales, and each page gets `hreflang` links and a language switch.
+- [x] [AC9] Add an optional `es:` block per item and bundle in `data/inventory.yaml` (`title`, `short_title`, `specs`, `pickup_note`, `included`), falling back field by field to English. `test_spanish_fallbacks_and_asset_paths` lists missing required translations.
+- [x] [AC9] SMS intents are written in the page's language. The poster tool gets Spanish Marketplace and Craigslist variants.
+- [x] [AC9] `test_no_unbacked_vehicle_claims` covers the Spanish page, with the Spanish forms of the same claims.
 - [ ] The owner reviews the Spanish copy: neutral Latin American Spanish, `usted`, "auto"/"carro".
 
 ## Closing

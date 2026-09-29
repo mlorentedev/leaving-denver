@@ -1,10 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ locale }}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
-  <title>Denver Tech Center Relocation Sale — Furniture{% if vehicle %}, Tech & Vehicle{% else %} & Tech{% endif %}</title>
+  <title>{{ t.page_title_vehicle if vehicle else t.page_title_household }}</title>
+  <link rel="alternate" hreflang="en" href="{{ language_links.en }}">
+  <link rel="alternate" hreflang="es" href="{{ language_links.es }}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -32,12 +34,17 @@
   <header class="sticky top-0 z-40 w-full min-w-0 bg-white/90 backdrop-blur-md border-b border-neutral-200/80">
     <div class="max-w-5xl w-full min-w-0 mx-auto px-4 sm:px-6 h-16 flex items-center">
       <div class="flex items-center gap-3">
-        <a href="index.html" class="flex min-h-10 items-center gap-2.5">
+        <a href="{{ language_links.en }}" class="flex min-h-10 items-center gap-2.5">
           <span class="w-8 h-8 rounded-lg bg-neutral-900 text-white font-bold text-xs flex items-center justify-center">DTC</span>
-          <span class="font-bold tracking-tight text-neutral-900 text-sm sm:text-base">Moving Sale</span>
+          <span class="font-bold tracking-tight text-neutral-900 text-sm sm:text-base">{{ t.site_name }}</span>
           <span class="text-xs text-neutral-400 font-medium hidden sm:inline">· Denver Tech Center, CO 80111</span>
         </a>
       </div>
+      <nav class="ml-auto flex items-center gap-2 text-xs font-bold">
+        <a href="{{ language_links.en }}" hreflang="en" lang="en" class="min-w-10 min-h-10 flex items-center justify-center {{ 'text-neutral-900' if locale == 'en' else 'text-neutral-400' }}">EN</a>
+        <span class="text-neutral-300">/</span>
+        <a href="{{ language_links.es }}" hreflang="es" lang="es" class="min-w-10 min-h-10 flex items-center justify-center {{ 'text-neutral-900' if locale == 'es' else 'text-neutral-400' }}">ES</a>
+      </nav>
     </div>
   </header>
 
@@ -46,17 +53,17 @@
     <div class="max-w-2xl space-y-3">
       <div class="inline-flex items-center gap-2 text-xs font-semibold text-neutral-500 uppercase tracking-wider">
         <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-        <span id="departureCountdown" data-departure-date="{{ seller.departure_date }}">Relocating in {{ departure_month }}</span>
+        <span id="departureCountdown" data-departure-date="{{ seller.departure_date }}">{{ t.relocating_in }} {{ departure_month }}</span>
       </div>
       <h1 data-role="hero-copy" class="text-3xl sm:text-4xl font-extrabold tracking-tight text-neutral-900 leading-tight">
-        I am relocating in {{ departure_month }} and selling furniture{% if vehicle %}, tech, and an AWD SUV{% else %} and tech{% endif %} in Denver Tech Center.
+        {{ t.hero_prefix }} {{ departure_month }} {{ t.hero_vehicle_suffix if vehicle else t.hero_household_suffix }}
       </h1>
       <div class="flex flex-wrap items-center gap-y-2 gap-x-4 pt-2 text-xs text-neutral-500">
-        <span>Pickup in DTC near I-25 & Belleview</span>
+        <span>{{ t.pickup_near }}</span>
         <span>·</span>
-        <span>Elevator building with driveway loading</span>
+        <span>{{ t.elevator_loading }}</span>
         <span>·</span>
-        <span>Cash, Venmo or Zelle for household items</span>
+        <span>{{ t.household_payment_summary }}</span>
       </div>
     </div>
 
@@ -67,10 +74,10 @@
         
         <!-- Image -->
         <div class="md:col-span-7 bg-neutral-100 relative min-h-[240px] sm:min-h-[300px] flex items-center justify-center cursor-pointer group" onclick="openModal('2019-ford-escape-sel-awd')">
-          <img src="catalog/2019-ford-escape-sel-awd/2019_ford_escape_white_front.jpg" alt="2019 Ford Escape SEL AWD" class="w-full h-full object-cover group-hover:scale-101 transition-transform duration-300">
+          <img src="{{ vehicle.images[0] if vehicle.images else asset_prefix ~ 'catalog/2019-ford-escape-sel-awd/2019_ford_escape_white_front.jpg' }}" alt="{{ vehicle.short_title }}" class="w-full h-full object-cover group-hover:scale-101 transition-transform duration-300">
           <div class="absolute top-3 left-3 flex gap-2">
-            <span class="px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider bg-neutral-900 text-white">Vehicle</span>
-            <span class="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-white/95 backdrop-blur-xs text-neutral-800 border border-neutral-200/60">AWD Winter Ready</span>
+            <span class="px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider bg-neutral-900 text-white">{{ t.vehicle }}</span>
+            <span class="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-white/95 backdrop-blur-xs text-neutral-800 border border-neutral-200/60">{{ t.winter_ready }}</span>
           </div>
         </div>
 
@@ -81,7 +88,7 @@
               <div>
                 <span class="text-[11px] font-bold uppercase tracking-wider text-neutral-400">{{ vehicle.year }} {{ vehicle.brand }} · {{ vehicle.title_status }}</span>
                 <h2 class="text-xl font-bold text-neutral-900 mt-0.5">{{ vehicle.model }}</h2>
-                <div class="text-xs text-neutral-500">{{ "{:,}".format(vehicle.odometer) }} miles · {{ vehicle.color }}</div>
+                <div class="text-xs text-neutral-500">{{ "{:,}".format(vehicle.odometer) }} {{ t.miles }} · {{ vehicle.color }}</div>
               </div>
               <div class="text-right">
                 <div class="text-2xl font-black text-neutral-900">${{ "{:,}".format(vehicle.price) }}</div>
@@ -98,13 +105,13 @@
 
           <div class="pt-3 border-t border-neutral-100 flex items-center gap-2">
             <button onclick="openModal('2019-ford-escape-sel-awd')" class="flex-1 py-2.5 px-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-semibold text-xs transition-colors">
-              View Full Specs & Photos
+              {{ t.view_specs }}
             </button>
-            <a href="#" data-sms-intent="Hi! I am interested in inspecting the {{ vehicle.short_title }} (${{ vehicle.price }}) in DTC." class="min-h-10 py-2.5 px-3 rounded-xl border border-neutral-200 hover:bg-neutral-50 text-neutral-800 font-semibold text-xs transition-colors">
-              Schedule Test Drive
+            <a href="#" data-sms-intent="{{ t.sms_item_prefix }} {{ vehicle.short_title }} (${{ vehicle.price }}) {{ t.sms_in_dtc }}" class="min-h-10 py-2.5 px-3 rounded-xl border border-neutral-200 hover:bg-neutral-50 text-neutral-800 font-semibold text-xs transition-colors">
+              {{ t.schedule_test_drive }}
             </a>
           </div>
-          <p data-role="vehicle-payment" class="text-[10px] text-neutral-500">{{ seller.payment_methods.vehicle | join(' or ') }}</p>
+          <p data-role="vehicle-payment" class="text-[10px] text-neutral-500">{{ seller.payment_methods.vehicle | join(' ' ~ t.or ~ ' ') }}</p>
         </div>
 
       </div>
@@ -113,7 +120,7 @@
 
     <!-- Category filters -->
     <div class="mt-10 -mx-4 px-4 sm:mx-0 sm:px-0 flex gap-2 overflow-x-auto hide-scrollbar py-1">
-      <button type="button" class="filter-btn shrink-0 whitespace-nowrap h-10 px-4 rounded-full text-sm transition-colors font-bold bg-neutral-900 text-white" data-cat="all" aria-pressed="true">All · {{ items | length }}</button>
+      <button type="button" class="filter-btn shrink-0 whitespace-nowrap h-10 px-4 rounded-full text-sm transition-colors font-bold bg-neutral-900 text-white" data-cat="all" aria-pressed="true">{{ t.all }} · {{ items | length }}</button>
       {% for cat, label in chips %}
       <button type="button" class="filter-btn shrink-0 whitespace-nowrap h-10 px-4 rounded-full text-sm transition-colors font-semibold bg-white border border-neutral-200 text-neutral-600 hover:text-neutral-900" data-cat="{{ cat }}" aria-pressed="false">{{ label }}</button>
       {% endfor %}
@@ -150,15 +157,15 @@
     {% if bundles %}
     <!-- Bundles: figures computed by the builder from the item prices -->
     <section class="mt-10">
-      <h2 class="text-lg font-extrabold text-neutral-900">Save with a bundle</h2>
+      <h2 class="text-lg font-extrabold text-neutral-900">{{ t.save_with_bundle }}</h2>
       <div class="mt-3 -mx-4 px-4 sm:mx-0 sm:px-0 flex gap-3 overflow-x-auto hide-scrollbar pb-1">
         {% for b in bundles %}
-        <a href="#" data-bundle="{{ b.id }}" data-sms-intent="Hi! I am interested in the {{ b.short_name }} bundle (${{ b.bundle_price }}) in DTC." class="flex-none w-[216px] flex flex-col gap-2.5 p-4 rounded-2xl bg-white border border-neutral-200 hover:border-neutral-400 transition-colors">
+        <a href="#" data-bundle="{{ b.id }}" data-sms-intent="{{ t.sms_bundle_prefix }} {{ b.short_name }} {{ t.sms_bundle_word }} (${{ b.bundle_price }}) {{ t.sms_in_dtc }}" class="flex-none w-[216px] flex flex-col gap-2.5 p-4 rounded-2xl bg-white border border-neutral-200 hover:border-neutral-400 transition-colors">
           <span class="text-sm font-bold text-neutral-900">{{ b.short_name }}</span>
-          <span class="text-xs text-neutral-500">{{ b['items'] | length }} items{% if b.note %} · {{ b.note }}{% endif %}</span>
+          <span class="text-xs text-neutral-500">{{ b['items'] | length }} {{ t['items'] }}{% if b.note %} · {{ b.note }}{% endif %}</span>
           <span class="flex items-baseline justify-between">
             <span class="text-lg font-extrabold text-neutral-900">${{ b.bundle_price }}</span>
-            <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">Save ${{ b.savings }}</span>
+            <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">{{ t.save }} ${{ b.savings }}</span>
           </span>
         </a>
         {% endfor %}
@@ -167,21 +174,21 @@
     {% endif %}
 
     {% if everything %}
-    <a href="#" data-everything="{{ everything.id }}" data-sms-intent="Hi! I am interested in taking everything (${{ everything.bundle_price }}) in DTC." class="mt-6 flex flex-col gap-3.5 p-5 rounded-2xl bg-neutral-900 text-white">
+    <a href="#" data-everything="{{ everything.id }}" data-sms-intent="{{ t.sms_bundle_prefix }} {{ everything.short_name }} (${{ everything.bundle_price }}) {{ t.sms_in_dtc }}" class="mt-6 flex flex-col gap-3.5 p-5 rounded-2xl bg-neutral-900 text-white">
       <span class="flex flex-col gap-1">
-        <span class="text-lg font-extrabold">Take everything: ${{ everything.bundle_price }}</span>
-        <span class="text-sm text-neutral-400">All {{ everything['items'] | length }} items in one trip. Save ${{ everything.savings }}.</span>
+        <span class="text-lg font-extrabold">{{ t.take_everything }}: ${{ everything.bundle_price }}</span>
+        <span class="text-sm text-neutral-400">{{ t.all }} {{ everything['items'] | length }} {{ t.all_items_one_trip }} {{ t.save }} ${{ everything.savings }}.</span>
       </span>
-      <span class="h-12 rounded-xl bg-white text-neutral-900 text-[15px] font-bold flex items-center justify-center">Ask about it</span>
+      <span class="h-12 rounded-xl bg-white text-neutral-900 text-[15px] font-bold flex items-center justify-center">{{ t.ask_about_it }}</span>
     </a>
     {% endif %}
 
     <!-- Straightforward Terms Box -->
     <section class="mt-14 p-6 sm:p-7 rounded-2xl bg-neutral-900 text-neutral-300">
       <div class="max-w-2xl space-y-2">
-        <h3 class="text-base font-bold text-white">How pickup works</h3>
+        <h3 class="text-base font-bold text-white">{{ t.pickup_heading }}</h3>
         <p data-role="pickup-terms" class="text-xs text-neutral-400 leading-relaxed">
-          Pickup is in {{ seller.location }} near I-25 and Belleview; bring help and suitable transport. Household items: {{ seller.payment_methods.household | join(', ') }} in person{% if vehicle %}; vehicle: {{ seller.payment_methods.vehicle | join(' or ') }}{% endif %}.
+          {{ t.pickup_prefix }} {{ seller.location }} {{ t.pickup_suffix }} {{ t.household_items }}: {{ seller.payment_methods.household | join(', ') }} {{ t.in_person }}{% if vehicle %}; {{ t.vehicle_lower }}: {{ seller.payment_methods.vehicle | join(' ' ~ t.or ~ ' ') }}{% endif %}.
         </p>
       </div>
     </section>
@@ -190,12 +197,12 @@
   <!-- Footer -->
   <footer class="mt-16 w-full min-w-0 py-8 border-t border-neutral-200/80 bg-white text-xs text-neutral-400">
     <div class="max-w-5xl w-full min-w-0 mx-auto px-4 sm:px-6 flex justify-center">
-      <div>Denver Tech Center Relocation Sale · CO 80111</div>
+      <div>{{ t.footer }}</div>
     </div>
   </footer>
 
   <a href="#" data-sms-role="sticky-text" class="fixed inset-x-4 bottom-4 z-40 max-w-sm mx-auto h-12 rounded-xl bg-neutral-900 text-white text-sm font-bold flex items-center justify-center shadow-xl">
-    Text us
+    {{ t.text_us }}
   </a>
 
   <!-- Item Detail Bottom Sheet -->
@@ -207,12 +214,12 @@
 
       <div class="space-y-4">
         <div>
-          <span id="modalCategory" class="text-[11px] font-bold uppercase tracking-wider text-neutral-400">Category</span>
-          <h3 id="modalTitle" class="text-xl font-bold text-neutral-900 mt-0.5">Item Title</h3>
+          <span id="modalCategory" class="text-[11px] font-bold uppercase tracking-wider text-neutral-400">{{ t.category }}</span>
+          <h3 id="modalTitle" class="text-xl font-bold text-neutral-900 mt-0.5">{{ t.item_title }}</h3>
         </div>
 
         <div class="aspect-4/3 bg-neutral-100 rounded-xl overflow-hidden flex items-center justify-center p-2">
-          <img id="modalMainImg" src="" alt="Main photo" class="max-h-full max-w-full object-contain">
+          <img id="modalMainImg" src="" alt="{{ t.main_photo }}" class="max-h-full max-w-full object-contain">
         </div>
 
         <div id="modalThumbStrip" class="flex gap-2 overflow-x-auto hide-scrollbar py-1"></div>
@@ -226,12 +233,12 @@
         </div>
 
         <div>
-          <h4 class="text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1.5">Details & Specifications</h4>
+          <h4 class="text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1.5">{{ t.details }}</h4>
           <ul id="itemFacts" data-max-facts="4" class="space-y-1 text-xs text-neutral-700"></ul>
         </div>
 
         <div class="p-3 bg-neutral-50 rounded-xl border border-neutral-100 text-xs text-neutral-600">
-          <span class="font-bold text-neutral-800">Pickup note:</span> <span id="modalPickup"></span>
+          <span class="font-bold text-neutral-800">{{ t.pickup_note }}:</span> <span id="modalPickup"></span>
         </div>
 
         <div id="modalUpsell" class="hidden">
@@ -242,10 +249,10 @@
 
         <div class="pt-2 flex items-center gap-3">
           <a id="modalSmsLink" href="#" class="flex-1 py-3 px-4 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-semibold text-xs text-center transition-colors">
-            Text about this
+            {{ t.text_about_this }}
           </a>
           <button onclick="closeModal()" class="py-3 px-4 rounded-xl border border-neutral-200 hover:bg-neutral-50 text-neutral-700 font-semibold text-xs transition-colors">
-            Close
+            {{ t.close }}
           </button>
         </div>
       </div>
@@ -255,6 +262,7 @@
   <script>
     // Contact Obfuscation (Defeats automated scraping spiders & telemarketing bots)
     const _C = {{ contact_json | safe }};
+    const UI = {{ ui_json | safe }};
     function getSellerPhone() { return _C.cc + _C.area + _C.prefix + _C.line; }
     function buildSmsUri(body) {
       return `sms:${getSellerPhone()}${body ? '?body=' + encodeURIComponent(body) : ''}`;
@@ -274,12 +282,12 @@
       const today = Date.UTC(Number(values.year), Number(values.month) - 1, Number(values.day));
       const departure = Date.parse(`${element.dataset.departureDate}T00:00:00Z`);
       const days = Math.max(Math.ceil((departure - today) / 86400000), 0);
-      if (days > 0) element.textContent += ` · ${days} days`;
+      if (days > 0) element.textContent += ` · ${days} ${UI.days}`;
     }
 
     function initDynamicContacts() {
       document.querySelectorAll('[data-sms-role="sticky-text"]').forEach(el => {
-        el.href = buildSmsUri('Hi! I saw your DTC Moving Sale catalog and had a question.');
+        el.href = buildSmsUri(UI.sms_generic);
       });
       document.querySelectorAll('[data-sms-intent]').forEach(el => {
         el.href = buildSmsUri(el.getAttribute('data-sms-intent'));
@@ -293,11 +301,11 @@
       if (!item) return;
 
       document.getElementById('modalTitle').textContent = item.title;
-      document.getElementById('modalCategory').textContent = item.category + ' · ' + item.brand;
+      document.getElementById('modalCategory').textContent = item.category_label + ' · ' + item.brand;
       document.getElementById('modalPrice').textContent = item.free ? item.note : '$' + item.price.toLocaleString();
       document.getElementById('modalStatus').textContent = item.status;
-      document.getElementById('modalRetail').textContent = item.retail ? 'Original: $' + item.retail.toLocaleString() : '';
-      document.getElementById('modalPickup').textContent = item.pickup || 'Pickup in Denver Tech Center (DTC). Buyer must self-load.';
+      document.getElementById('modalRetail').textContent = item.retail ? UI.original + ': $' + item.retail.toLocaleString() : '';
+      document.getElementById('modalPickup').textContent = item.pickup || UI.default_pickup;
 
       const mainImg = item.images && item.images.length > 0 ? item.images[0] : '';
       document.getElementById('modalMainImg').src = mainImg;
@@ -333,15 +341,15 @@
       const bundle = INVENTORY.bundles.find(b => !b.everything && b.items.includes(itemId));
       const upsellBox = document.getElementById('modalUpsell');
       if (bundle) {
-        document.getElementById('upsellText').textContent = bundle.short_name + ' · $' + bundle.bundle_price + ' · Save $' + bundle.savings;
-        document.getElementById('upsellLink').href = buildSmsUri('Hi! I am interested in the ' + bundle.short_name + ' bundle ($' + bundle.bundle_price + ') in DTC.');
+        document.getElementById('upsellText').textContent = bundle.short_name + ' · $' + bundle.bundle_price + ' · ' + UI.save + ' $' + bundle.savings;
+        document.getElementById('upsellLink').href = buildSmsUri(UI.sms_bundle_prefix + ' ' + bundle.short_name + ' ' + UI.sms_bundle_word + ' ($' + bundle.bundle_price + ') ' + UI.sms_in_dtc);
         upsellBox.classList.remove('hidden');
       } else {
         upsellBox.classList.add('hidden');
       }
 
       const asking = item.free ? item.note.toLowerCase() : '$' + item.price;
-      document.getElementById('modalSmsLink').href = buildSmsUri('Hi! I am interested in inspecting the ' + item.short_title + ' (' + asking + ') in DTC.');
+      document.getElementById('modalSmsLink').href = buildSmsUri(UI.sms_item_prefix + ' ' + item.short_title + ' (' + asking + ') ' + UI.sms_in_dtc);
 
       document.getElementById('itemSheet').classList.remove('hidden');
       document.getElementById('itemSheet').classList.add('flex');

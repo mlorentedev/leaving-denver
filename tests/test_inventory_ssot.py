@@ -114,7 +114,10 @@ UNBACKED_CLAIMS = re.compile(
     r"100k[- ](mile )?(milestone )?(major )?s(er)?v|highway miles|highway-commuter|"
     r"remote start|fully serviced|great mechanical|in 3 weeks|within 2 weeks|"
     r"everything must go|everything was bought new|garage-kept|one single|21N12|"
-    r"ready for immediate transfer|new, unused certificate is handed over",
+    r"ready for immediate transfer|new, unused certificate is handed over|"
+    r"servicio (de )?100k|millas de autopista|arranque remoto|mecánicamente perfecto|"
+    r"en 3 semanas|dentro de 2 semanas|todo debe irse|todo se compró nuevo|"
+    r"guardado en garaje|listo para transferencia inmediata",
     re.IGNORECASE,
 )
 CLAIM_SOURCES = [
@@ -122,7 +125,12 @@ CLAIM_SOURCES = [
     BASE_DIR / "src" / "leaving_denver" / "templates" / "index.html",
     BASE_DIR / "src" / "leaving_denver" / "templates" / "poster_assistant.html",
     BASE_DIR / "build" / "public" / "index.html",
+    BASE_DIR / "build" / "public" / "es" / "index.html",
 ]
+
+
+def test_claim_guard_recognizes_spanish():
+    assert UNBACKED_CLAIMS.search("Incluye arranque remoto")
 
 
 @pytest.mark.parametrize("path", CLAIM_SOURCES, ids=lambda p: p.name)

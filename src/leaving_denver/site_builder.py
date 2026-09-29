@@ -21,6 +21,7 @@ from leaving_denver.config import (
     DIST_PRIVATE_DIR,
     INVENTORY_JSON_PRIVATE,
     INVENTORY_YAML,
+    LOCALES_DIR,
     PRIVATE_POSTER_HTML,
     PUBLIC_HEADERS,
     PUBLIC_INDEX_HTML,
@@ -42,6 +43,14 @@ def load_inventory_yaml() -> dict[str, Any]:
 def save_inventory_yaml(data: dict[str, Any]) -> None:
     with open(INVENTORY_YAML, "w", encoding="utf-8") as f:
         yaml.dump(data, f, sort_keys=False, allow_unicode=True, indent=2)
+
+
+def load_locale(locale: str) -> dict[str, Any]:
+    path = LOCALES_DIR / f"{locale}.yaml"
+    if not path.exists():
+        raise FileNotFoundError(f"Locale not found at {path}")
+    with open(path, encoding="utf-8") as f:
+        return yaml.safe_load(f)
 
 
 def render(template: str, **ctx: Any) -> str:
@@ -194,13 +203,54 @@ CHIPS = {
 }
 
 
-def category_chips(items: list[dict[str, Any]]) -> list[tuple[str, str]]:
+def category_chips(
+    items: list[dict[str, Any]], labels: dict[str, str] = CHIPS
+) -> list[tuple[str, str]]:
     """The chips for the categories present, failing on one with no chip (it would be unfilterable)."""
     present = {i["category"] for i in items}
-    unknown = sorted(present - CHIPS.keys())
+    unknown = sorted(present - labels.keys())
     if unknown:
         raise RuntimeError(f"No filter chip for categories {unknown}: add them to CHIPS")
-    return [(cat, label) for cat, label in CHIPS.items() if cat in present]
+    return [(cat, label) for cat, label in labels.items() if cat in present]
+
+
+def localize_public_inventory(
+    public_data: dict[str, Any],
+    full_data: dict[str, Any],
+    locale: str,
+    translations: dict[str, Any],
+    asset_prefix: str,
+) -> dict[str, Any]:
+    """Overlay locale-specific public copy while preserving sanitized fields."""
+    localized = json.loads(json.dumps(public_data))
+    source_items = {item["id"]: item for item in full_data.get("items", [])}
+    for item in localized["items"]:
+        source = source_items[item["id"]]
+        copy = source.get(locale, {}) if locale != "en" else {}
+        for source_field, public_field in (
+            ("title", "title"),
+            ("short_title", "short_title"),
+            ("specs", "specs"),
+            ("pickup_note", "pickup"),
+            ("condition", "condition"),
+            ("dimensions", "dimensions"),
+            ("note", "note"),
+            ("title_status", "title_status"),
+            ("color", "color"),
+        ):
+            if source_field in copy:
+                item[public_field] = copy[source_field]
+        item["category_label"] = translations["categories"].get(item["category"], item["category"])
+        item["status"] = translations["statuses"].get(item["status"], item["status"])
+        item["images"] = [asset_prefix + image for image in item["images"]]
+
+    source_bundles = {bundle["id"]: bundle for bundle in full_data.get("bundles", [])}
+    for bundle in localized["bundles"]:
+        copy = source_bundles[bundle["id"]].get(locale, {}) if locale != "en" else {}
+        for field in ("name", "short_name", "note"):
+            if field in copy:
+                bundle[field] = copy[field]
+    return localized
 
 
 def build_public_site(full_data: dict[str, Any]) -> None:
@@ -215,36 +265,58 @@ def build_public_site(full_data: dict[str, Any]) -> None:
     public_data = sanitize_public_inventory(full_data)
     seller = sanitize_public_seller(full_data)
     departure = date.fromisoformat(seller["departure_date"])
-    # `<` escaped so item text cannot close the inline <script> ("</script>", "<!--").
-    inventory_json = json.dumps(public_data, indent=2).replace("<", "\\u003c")
     contact_json = json.dumps(phone_parts(phone))
-    vehicle = next((i for i in public_data["items"] if i["category"] == "Vehicle"), None)
-    items = [i for i in public_data["items"] if i["category"] != "Vehicle"]
-    bundles = public_data["bundles"]
-    html = render(
-        "index.html",
-        inventory_json=inventory_json,
-        contact_json=contact_json,
-        seller=seller,
-        departure_month=departure.strftime("%B"),
-        vehicle=vehicle,
-        items=items,
-        chips=category_chips(items),
-        bundles=[b for b in bundles if not b["everything"]],
-        everything=next((b for b in bundles if b["everything"]), None),
-    )
+    for locale in ("en", "es"):
+        translations = load_locale(locale)
+        asset_prefix = "" if locale == "en" else "../"
+        localized_data = localize_public_inventory(
+            public_data, full_data, locale, translations, asset_prefix
+        )
+        localized_seller = json.loads(json.dumps(seller))
+        localized_seller["payment_methods"] = {
+            kind: [translations["payment_methods"].get(method, method) for method in methods]
+            for kind, methods in seller["payment_methods"].items()
+        }
+        vehicle = next((i for i in localized_data["items"] if i["category"] == "Vehicle"), None)
+        items = [i for i in localized_data["items"] if i["category"] != "Vehicle"]
+        bundles = localized_data["bundles"]
+        # `<` escaped so item text cannot close the inline <script> ("</script>", "<!--").
+        inventory_json = json.dumps(localized_data, indent=2).replace("<", "\\u003c")
+        html = render(
+            "index.html",
+            locale=locale,
+            t=translations,
+            ui_json=json.dumps(translations, ensure_ascii=False).replace("<", "\\u003c"),
+            asset_prefix=asset_prefix,
+            inventory_json=inventory_json,
+            contact_json=contact_json,
+            seller=localized_seller,
+            departure_month=translations["months"][departure.month],
+            vehicle=vehicle,
+            items=items,
+            chips=category_chips(items, translations["categories"]),
+            bundles=[b for b in bundles if not b["everything"]],
+            everything=next((b for b in bundles if b["everything"]), None),
+            language_links=(
+                {"en": "index.html", "es": "es/"} if locale == "en" else {"en": "../", "es": "./"}
+            ),
+        )
 
-    # Fail closed: a template that stops emitting either one would ship a page
-    # with no items or no way to reach the seller.
-    for emitted, marker in (
-        (f"const INVENTORY = {inventory_json};", "const INVENTORY = {{ inventory_json | safe }};"),
-        (f"const _C = {contact_json};", "const _C = {{ contact_json | safe }};"),
-    ):
-        if emitted not in html:
-            raise RuntimeError(f"Template index.html does not emit {marker}")
+        # Fail closed: a template that stops emitting either one would ship a page
+        # with no items or no way to reach the seller.
+        for emitted, marker in (
+            (
+                f"const INVENTORY = {inventory_json};",
+                "const INVENTORY = {{ inventory_json | safe }};",
+            ),
+            (f"const _C = {contact_json};", "const _C = {{ contact_json | safe }};"),
+        ):
+            if emitted not in html:
+                raise RuntimeError(f"Template index.html does not emit {marker}")
 
-    with open(PUBLIC_INDEX_HTML, "w", encoding="utf-8") as f:
-        f.write(html)
+        target = PUBLIC_INDEX_HTML if locale == "en" else DIST_DIR / locale / "index.html"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(html, encoding="utf-8")
 
     # Write robots.txt
     with open(PUBLIC_ROBOTS_TXT, "w", encoding="utf-8") as f:
@@ -292,11 +364,11 @@ def verify_security_guarantees() -> None:
         if "poster" in fname.lower() or fname.lower() == "inventory.json":
             raise RuntimeError(f"SECURITY LEAK: {fname} found in public dist directory!")
 
-    # Check contents of public index.html for floor price leaks
-    with open(PUBLIC_INDEX_HTML, encoding="utf-8") as f:
-        content = f.read()
+    # Check every localized public page for floor price leaks.
+    for path in DIST_DIR.rglob("*.html"):
+        content = path.read_text(encoding="utf-8")
         if "firm_floor_price" in content:
-            raise RuntimeError("SECURITY LEAK: firm_floor_price found in public index.html!")
+            raise RuntimeError(f"SECURITY LEAK: firm_floor_price found in {path}!")
 
 
 def build_all() -> None:

@@ -12,6 +12,7 @@ A privacy-focused inventory management, automated photo ingestion, and multi-por
 - **Bot & Scraper Defense:** Telephone numbers are obfuscated and assembled dynamically via client JS. Static HTML attributes contain no harvestable numbers. `robots.txt` enforces `Disallow: /`.
 - **Hormozi 3-Week Staging Bar:** Toggles between Week 1 (List / $12,213), Week 2 (Drop / 12% off), and Week 3 (Liquidation floor).
 - **Multi-Portal Copy Generator:** Instant copy-paste listings tailored for Facebook Marketplace, Craigslist Denver, OfferUp, and Nextdoor.
+- **Bilingual Catalog:** The same sanitized inventory renders in English at `/` and neutral Latin American Spanish at `/es/`, with localized SMS intents.
 - **Kubelab Integration:** Ready-to-import n8n workflows for Telegram push alerts, Vikunja task creation, and 48-hour Craigslist bump reminders.
 
 ---
@@ -88,6 +89,7 @@ sops data/private.sops.yaml          # edit floors / phone
 
 When running `uv run leaving-denver serve`:
 - **Public Minimalist Catalog:** `http://127.0.0.1:8088/`
+- **Spanish Public Catalog:** `http://127.0.0.1:8088/es/`
 - **Private Seller Workspace (local only):** `http://127.0.0.1:8088/poster_assistant.html`. `make serve` binds loopback only and refuses paths outside `build/`. The PIN screen is a UI gate against shoulder-surfing, not access control: the PIN is in the page's JavaScript and the tool is never deployed.
 
 ---
@@ -100,6 +102,7 @@ When running `uv run leaving-denver serve`:
 │   └── inventory.json             # Internal compiled inventory with floor prices
 ├── content/
 │   └── photos/                    # Drop photos here by item ID
+├── locales/                       # English and Spanish public UI strings
 ├── src/
 │   └── leaving_denver/
 │       ├── cli.py                 # Master orchestration CLI
