@@ -59,8 +59,8 @@
     "id": "BUG-001-catalog-data-driven-f9",
     "behavior": "AC9: a Spanish page is built with Spanish copy and a listed fallback",
     "verification": "uv run pytest tests/test_build_contract.py -k 'spanish'",
-    "state": "pending",
-    "evidence": ""
+    "state": "pass",
+    "evidence": "PR 6: Spanish page, field fallback, localized bundle/payment/SMS copy, poster variants, asset paths, and claim guard tests pass"
   },
   {
     "id": "BUG-001-catalog-data-driven-f10",

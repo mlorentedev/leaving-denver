@@ -29,9 +29,10 @@ def test_no_private_files_in_dist():
 
 
 def test_no_floor_prices_in_public_html():
-    public_html = (DIST_DIR / "index.html").read_text(encoding="utf-8")
-    assert "firm_floor_price" not in public_html, "Leaked firm_floor_price in public HTML!"
-    assert "floor_price" not in public_html, "Leaked floor_price in public HTML!"
+    for path in DIST_DIR.rglob("*.html"):
+        public_html = path.read_text(encoding="utf-8")
+        assert "firm_floor_price" not in public_html, f"Leaked firm_floor_price in {path}!"
+        assert "floor_price" not in public_html, f"Leaked floor_price in {path}!"
 
 
 def test_no_plain_phone_in_attributes():
@@ -101,6 +102,11 @@ def test_template_sees_only_sanitized_data(tmp_path, monkeypatch):
     assert set(seen) == {
         "inventory_json",
         "contact_json",
+        "ui_json",
+        "locale",
+        "t",
+        "asset_prefix",
+        "language_links",
         "seller",
         "departure_month",
         "vehicle",

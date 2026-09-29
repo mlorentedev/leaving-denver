@@ -185,7 +185,7 @@
           <div>
             <div class="text-xs font-bold uppercase tracking-wider text-neutral-400 mb-2">Select platform for tailored copy:</div>
             
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
               <button onclick="setPlatform('fb')" id="tab-fb" class="platform-tab p-2.5 rounded-xl border-2 font-bold text-xs flex flex-col items-center gap-1 transition-all bg-neutral-900 border-neutral-900 text-white shadow-2xs">
                 <span>Facebook</span>
                 <span class="text-[10px] font-normal opacity-80">&lt;100 chars</span>
@@ -194,6 +194,16 @@
               <button onclick="setPlatform('cl')" id="tab-cl" class="platform-tab p-2.5 rounded-xl border-2 font-bold text-xs flex flex-col items-center gap-1 transition-all bg-white border-neutral-200 text-neutral-700 hover:border-neutral-300">
                 <span>Craigslist</span>
                 <span class="text-[10px] font-normal text-neutral-400">Plain text</span>
+              </button>
+
+              <button onclick="setPlatform('fb-es')" id="tab-fb-es" class="platform-tab p-2.5 rounded-xl border-2 font-bold text-xs flex flex-col items-center gap-1 transition-all bg-white border-neutral-200 text-neutral-700 hover:border-neutral-300">
+                <span>Facebook ES</span>
+                <span class="text-[10px] font-normal text-neutral-400">Español</span>
+              </button>
+
+              <button onclick="setPlatform('cl-es')" id="tab-cl-es" class="platform-tab p-2.5 rounded-xl border-2 font-bold text-xs flex flex-col items-center gap-1 transition-all bg-white border-neutral-200 text-neutral-700 hover:border-neutral-300">
+                <span>Craigslist ES</span>
+                <span class="text-[10px] font-normal text-neutral-400">Texto simple</span>
               </button>
 
               <button onclick="setPlatform('offerup')" id="tab-offerup" class="platform-tab p-2.5 rounded-xl border-2 font-bold text-xs flex flex-col items-center gap-1 transition-all bg-white border-neutral-200 text-neutral-700 hover:border-neutral-300">
@@ -367,7 +377,7 @@
 
     function setPlatform(plat) {
       currentPlatform = plat;
-      const tabs = ['fb', 'cl', 'offerup', 'nextdoor'];
+      const tabs = ['fb', 'cl', 'fb-es', 'cl-es', 'offerup', 'nextdoor'];
       tabs.forEach(t => {
         const el = document.getElementById('tab-' + t);
         if (t === plat) {
@@ -401,7 +411,7 @@
 
       document.getElementById('inputTitle').value = copyData.title;
       const titleLen = copyData.title.length;
-      const limit = currentPlatform === 'cl' ? 70 : 100;
+      const limit = currentPlatform === 'cl' || currentPlatform === 'cl-es' ? 70 : 100;
       document.getElementById('titleCharBadge').textContent = `${titleLen}/${limit}`;
       document.getElementById('titleCharBadge').className = titleLen > limit 
         ? 'font-bold text-rose-600 ml-1' 
@@ -419,13 +429,15 @@
       const text = document.getElementById('platformDirectText');
       const link = document.getElementById('platformDirectLink');
 
-      if (platform === 'fb') {
+      if (platform === 'fb' || platform === 'fb-es') {
         text.textContent = isVehicle ? 'Facebook Marketplace (Vehicles)' : 'Facebook Marketplace';
+        if (platform === 'fb-es') text.textContent += ' · Español';
         link.href = isVehicle 
           ? 'https://www.facebook.com/marketplace/create/vehicle' 
           : 'https://www.facebook.com/marketplace/create/item';
-      } else if (platform === 'cl') {
+      } else if (platform === 'cl' || platform === 'cl-es') {
         text.textContent = isVehicle ? 'Craigslist Denver (Cars & Trucks by Owner)' : 'Craigslist Denver (Garage / Furniture)';
+        if (platform === 'cl-es') text.textContent += ' · Español';
         link.href = isVehicle
           ? 'https://post.craigslist.org/c/den/cto'
           : 'https://post.craigslist.org/c/den';
@@ -484,6 +496,7 @@
     // =========================================================================
     function generateHumanCopy(item, platform, price, week) {
       const isVehicle = item.category === 'Vehicle';
+      const copy = { ...item, ...(item.es || {}) };
       const retail = item.original_price;
       const specs = (item.specs || []).map(s => `- ${s}`).join('\n');
       const inc = (item.included || []).join(', ');
@@ -498,8 +511,78 @@
       let title = '';
       let description = '';
 
+      if (platform === 'fb-es') {
+        const spanishSpecs = (copy.specs || item.specs || []).map(s => `- ${s}`).join('\n');
+        const spanishIncluded = (copy.included || item.included || []).join(', ');
+        const month = seller.departure_date
+          ? new Date(`${seller.departure_date}T00:00:00Z`).toLocaleString('es-US', {
+              month: 'long',
+              timeZone: 'UTC',
+            })
+          : 'noviembre';
+        title = `${copy.title}`.substring(0, 95);
+        description = isVehicle
+          ? `Me mudo en ${month} y vendo mi ${copy.short_title}.
+
+Precio: $${price.toLocaleString()}
+Millaje: ${item.odometer.toLocaleString()}
+Título: ${copy.title_status || item.title_status}
+
+Detalles clave:
+${spanishSpecs}
+
+Incluye:
+${spanishIncluded}
+
+Recogida e inspección:
+${copy.pickup_note}
+Pago: Efectivo o cheque de caja verificado en el banco del comprador.
+
+Escríbame para programar una inspección y prueba de manejo.`
+          : `Me mudo fuera de Estados Unidos en noviembre y vendo ${copy.short_title}.
+
+Precio: $${price} (precio original: $${retail})
+Estado: ${copy.condition}
+Dimensiones: ${copy.dimensions}
+
+Detalles clave:
+${spanishSpecs}
+
+Incluye:
+${spanishIncluded}
+
+Recogida en Denver Tech Center, cerca de I-25 y Belleview. ${copy.pickup_note}
+Pago en persona con efectivo, Venmo o Zelle.
+
+Escríbame para coordinar la recogida.`;
+      }
+
+      else if (platform === 'cl-es') {
+        const spanishSpecs = (copy.specs || item.specs || []).map(s => `- ${s}`).join('\n');
+        const spanishIncluded = (copy.included || item.included || []).join(', ');
+        title = `${copy.short_title} - $${price} (DTC)`.substring(0, 68);
+        description = `${copy.title}
+
+PRECIO: $${price}${isVehicle ? '' : ` (precio original: $${retail})`}
+${isVehicle ? `MILLAJE: ${item.odometer.toLocaleString()}\nTÍTULO: ${copy.title_status || item.title_status}` : `ESTADO: ${copy.condition}\nDIMENSIONES: ${copy.dimensions}`}
+
+Me mudo fuera de Estados Unidos en noviembre y vendo ${copy.short_title}.
+
+DETALLES CLAVE:
+${spanishSpecs}
+
+INCLUYE:
+${spanishIncluded}
+
+RECOGIDA Y PAGO:
+${copy.pickup_note}
+${isVehicle ? 'Pago en efectivo o con cheque de caja verificado en el banco del comprador.' : 'Pago en persona con efectivo, Venmo o Zelle.'}
+
+Contacto: mensaje de texto al ${sellerPhone} o respuesta por el correo anónimo de Craigslist.`;
+      }
+
       // --- PLATFORM 1: FACEBOOK MARKETPLACE ---
-      if (platform === 'fb') {
+      else if (platform === 'fb') {
         if (isVehicle) {
           title = `${item.year} ${item.brand} ${item.model} – ${item.title_status} (DTC)`;
           description = `I am relocating in ${departureMonth}, so I am selling my ${item.short_title}.

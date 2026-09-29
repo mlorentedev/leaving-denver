@@ -1,0 +1,72 @@
+page_title_vehicle: Venta por mudanza en Denver Tech Center — Muebles, tecnología y auto
+page_title_household: Venta por mudanza en Denver Tech Center — Muebles y tecnología
+site_name: Venta por mudanza
+relocating_in: Me mudo en
+hero_prefix: Me mudo en
+hero_vehicle_suffix: y vendo muebles, tecnología y un SUV AWD en Denver Tech Center.
+hero_household_suffix: y vendo muebles y tecnología en Denver Tech Center.
+pickup_near: Recogida en DTC cerca de I-25 y Belleview
+household_payment_summary: Efectivo, Venmo o Zelle para artículos del hogar
+vehicle: Auto
+winter_ready: AWD listo para invierno
+miles: millas
+view_specs: Ver especificaciones y fotos
+schedule_test_drive: Programar prueba de manejo
+or: o
+all: Todos
+save_with_bundle: Ahorre con un paquete
+items: artículos
+save: Ahorre
+take_everything: Llévese todo
+all_items_one_trip: artículos en un solo viaje.
+pickup_heading: Cómo funciona la recogida
+household_items: Artículos del hogar
+in_person: en persona
+footer: Venta por mudanza en Denver Tech Center · CO 80111
+text_us: Escríbeme
+category: Categoría
+item_title: Artículo
+main_photo: Foto principal
+original: Original
+details: Detalles y especificaciones
+pickup_note: Nota para la recogida
+text_about_this: Escribir sobre este artículo
+close: Cerrar
+see_included: Ver qué incluye
+free: Gratis
+separately: Por separado
+text_about_bundle: Escribir sobre este paquete
+days: días
+default_pickup: Recogida en Denver Tech Center (DTC). El comprador debe cargar el artículo.
+sms_generic: ¡Hola! Vi su catálogo de venta por mudanza en DTC y tengo una pregunta.
+sms_bundle_prefix: ¡Hola! Me interesa el paquete
+sms_bundle_word: ""
+sms_item_prefix: ¡Hola! Me interesa ver
+sms_in_dtc: en DTC.
+months:
+  1: enero
+  2: febrero
+  3: marzo
+  4: abril
+  5: mayo
+  6: junio
+  7: julio
+  8: agosto
+  9: septiembre
+  10: octubre
+  11: noviembre
+  12: diciembre
+categories:
+  Living Room: Sala
+  Bedroom: Dormitorio
+  Home Office & Tech: Oficina y tecnología
+  Dining & Kitchen: Cocina
+  Vehicle: Auto
+statuses:
+  Available: Disponible
+  Sold: Vendido
+payment_methods:
+  Cash: Efectivo
+  Venmo: Venmo
+  Zelle: Zelle
+  Cashier's check verified at the buyer's bank: Cheque de caja verificado en el banco del comprador
