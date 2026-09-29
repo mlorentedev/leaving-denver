@@ -13,18 +13,18 @@ seller:
     assembled, sold AS-IS.
   departure_date: '2026-11-09'
   # Hero strip; the full facts follow in `pickup` (owner, 2026-09-28).
-  pickup_summary: Second floor, parking by the door
+  pickup_summary: One flight of stairs, no elevator
   # Shown one per line under "How pickup works".
   pickup:
   - Denver Tech Center (DTC), near I-25 and Belleview.
-  - Second floor, one flight of stairs, no elevator.
+  - One flight up, no elevator.
   - Park right by the door. I help you carry and load.
   - See and test anything in person before you pay.
   es:
-    pickup_summary: Segundo piso, estacionamiento junto a la puerta
+    pickup_summary: Primer piso, un tramo de escaleras, sin ascensor
     pickup:
     - Denver Tech Center (DTC), cerca de I-25 y Belleview.
-    - Segundo piso, un tramo de escaleras, sin elevador.
+    - Primer piso, un tramo de escaleras, sin ascensor.
     - Puede estacionar junto a la puerta. Yo ayudo a cargar.
     - Puede ver y probar cualquier artículo antes de pagar.
 items:
