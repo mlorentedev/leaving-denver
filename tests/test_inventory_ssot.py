@@ -130,3 +130,14 @@ def test_no_unbacked_vehicle_claims(path):
     assert path.exists(), f"missing {path}"
     hits = UNBACKED_CLAIMS.findall(path.read_text(encoding="utf-8"))
     assert not hits, f"{path.name} states a claim the seller cannot back: {hits}"
+
+
+# Owner, 2026-09-28: second floor, one flight of stairs, no elevator; the car was
+# bought used, so "everything was bought new" is false (#48).
+WRONG_PICKUP_FACTS = re.compile(r"elevator building|ground floor|everything was bought new", re.I)
+
+
+@pytest.mark.parametrize("path", CLAIM_SOURCES, ids=lambda p: p.name)
+def test_no_stale_or_unbacked_pickup_facts(path):
+    hits = WRONG_PICKUP_FACTS.findall(path.read_text(encoding="utf-8"))
+    assert not hits, f"{path.name} states a wrong pickup fact: {hits}"
