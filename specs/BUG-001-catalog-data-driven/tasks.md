@@ -62,10 +62,10 @@ created: "2026-09-26"
 
 ### PR 5: `fix/mobile-shell` (closes #10)
 
-- [ ] [P] [AC10] `test_mobile_shell`: the header holds no contact button, a sticky "Text us" bar exists, and the item sheet lists at most four facts. Expected: FAIL.
-- [ ] [AC10] Replace the header button with the sticky "Text us" bar, and the item dialog with a bottom sheet. The sheet shows at most four key facts, the bundle offer as one line, and "Text about this".
-- [ ] [AC8] Add `w-full` to the full-width sections and `shrink-0 whitespace-nowrap` to `.filter-btn`.
-- [ ] [AC8] [AC10] Check on the preview at 390 px that `document.documentElement.scrollWidth === 390` and that every tap target is at least 40 px tall. Record the output in `verification.md`.
+- [x] [P] [AC10] `test_mobile_shell`: the header holds no contact button, a sticky "Text us" bar exists, and the item sheet lists at most four facts. Expected: FAIL.
+- [x] [AC10] Replace the header button with the sticky "Text us" bar, and the item dialog with a bottom sheet. The sheet shows at most four key facts, the bundle offer as one line, and "Text about this".
+- [x] [AC8] Add `w-full` to the full-width sections and `shrink-0 whitespace-nowrap` to `.filter-btn`.
+- [x] [AC8] [AC10] Check on the preview at 390 px that `document.documentElement.scrollWidth === 390` and that every tap target is at least 40 px tall. Record the output in `verification.md`.
 
 ### PR 6: `feat/spanish-catalog` (closes #53)
 

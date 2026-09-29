@@ -52,8 +52,8 @@
     "id": "BUG-001-catalog-data-driven-f8",
     "behavior": "AC8: no horizontal scroll at 390px",
     "verification": "manual: preview at 390px, document.documentElement.scrollWidth === 390 (recorded in verification.md)",
-    "state": "pending",
-    "evidence": ""
+    "state": "pass",
+    "evidence": "PR 5: Chrome measured clientWidth, document scrollWidth, and body scrollWidth at 390px"
   },
   {
     "id": "BUG-001-catalog-data-driven-f9",
@@ -66,7 +66,7 @@
     "id": "BUG-001-catalog-data-driven-f10",
     "behavior": "AC10: the page follows the approved mobile layout (sticky contact bar, two-column grid, hero word budget, four-fact item sheet)",
     "verification": "uv run pytest tests/test_build_contract.py -k 'mobile_copy_budget or mobile_shell'",
-    "state": "pending",
-    "evidence": "PR 4: hero and pickup copy budgets pass; sticky bar and four-fact sheet remain for PR 5"
+    "state": "pass",
+    "evidence": "PR 4 copy budgets and PR 5 sticky bar, bottom sheet, four-fact cap, and 40px tap-target preview checks pass"
   }
 ]
