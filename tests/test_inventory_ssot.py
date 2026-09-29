@@ -142,21 +142,19 @@ def test_no_unbacked_vehicle_claims(path):
 
 # Owner correction, 2026-09-28: first floor, one flight of stairs, no elevator; the car was
 # bought used, so "everything was bought new" is false (#48).
-# Any elevator the text does not deny, so "no elevator" passes and "elevator access" fails.
-ELEVATOR_DENIALS = re.compile(
-    r"\b(?:no elevator|do not have an elevator|sin (?:ascensor|elevador)|"
-    r"no hay (?:ascensor|elevador))\b",
-    re.I,
-)
+# Known positive elevator claims fail; natural English and Spanish denials pass.
 WRONG_PICKUP_FACTS = re.compile(
-    r"elevator|ascensor|elevador|ground floor|second floor|segundo piso|"
+    r"elevator (?:access|available|building)|with (?:an )?elevators?|"
+    r"(?:building|unit) (?:has|with) (?:an )?elevators?|"
+    r"(?:ascensor|elevador)(?:es)? disponible(?:s)?|con (?:ascensor|elevador)(?:es)?|"
+    r"ground floor|second floor|segundo piso|"
     r"everything was bought new",
     re.I,
 )
 
 
 def wrong_pickup_facts(text):
-    return WRONG_PICKUP_FACTS.findall(ELEVATOR_DENIALS.sub("", text))
+    return WRONG_PICKUP_FACTS.findall(text)
 
 
 @pytest.mark.parametrize("claim", ["con ascensor", "ascensor disponible", "con elevador"])
@@ -166,7 +164,15 @@ def test_pickup_guard_rejects_spanish_elevator_claims(claim):
 
 @pytest.mark.parametrize(
     "fact",
-    ["sin ascensor", "sin elevador", "no hay ascensor", "We do not have an elevator"],
+    [
+        "sin ascensor",
+        "sin elevador",
+        "sin ascensores",
+        "no hay ascensor",
+        "We do not have an elevator",
+        "We don't have an elevator",
+        "No elevators in the building",
+    ],
 )
 def test_pickup_guard_allows_spanish_elevator_denials(fact):
     assert not wrong_pickup_facts(fact)
