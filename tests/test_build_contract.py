@@ -393,6 +393,7 @@ def test_pickup_facts_come_from_data_one_per_line(public_dir):
     data, html = real_page(public_dir)
     facts = [unescape(f) for f in re.findall(r'data-role="pickup-fact"[^>]*>(.*?)<', html)]
     assert facts == data["seller"]["pickup"]
+    assert text_for_role(html, "pickup-summary").strip() == data["seller"]["pickup_summary"]
 
 
 def test_countdown_updates_in_browser_from_departure_date(public_dir):

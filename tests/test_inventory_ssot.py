@@ -134,7 +134,8 @@ def test_no_unbacked_vehicle_claims(path):
 
 # Owner, 2026-09-28: second floor, one flight of stairs, no elevator; the car was
 # bought used, so "everything was bought new" is false (#48).
-WRONG_PICKUP_FACTS = re.compile(r"elevator building|ground floor|everything was bought new", re.I)
+# Any elevator the text does not deny, so "no elevator" passes and "elevator access" fails.
+WRONG_PICKUP_FACTS = re.compile(r"(?<!no )elevator|ground floor|everything was bought new", re.I)
 
 
 @pytest.mark.parametrize("path", CLAIM_SOURCES, ids=lambda p: p.name)
