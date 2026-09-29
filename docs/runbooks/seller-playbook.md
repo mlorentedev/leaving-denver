@@ -1,6 +1,6 @@
 # Denver Tech Center Moving Sale — Seller Playbook
 
-Operational guidelines for maximizing return ($12,213 target list; reserve floors live encrypted in `data/private.sops.yaml`) within a 3-week timeline.
+Operational guidelines for maximizing return before the 2026-11-09 departure. Public prices come from `data/inventory.yaml`; reserve floors live encrypted in `data/private.sops.yaml`.
 
 ---
 
@@ -12,17 +12,20 @@ Operational guidelines for maximizing return ($12,213 target list; reserve floor
 | **Craigslist Denver** | Cash-ready buyers & tech items | **Include full catalog link** in master ad | Renew/bump every 48 hours sharp |
 | **OfferUp** | Mobile impulse same-day pickups | **NO external links** | Require same-day pickup for discounts |
 | **Nextdoor (DTC)** | High-trust affluent neighbors | **Include full catalog link** | Emphasize neighborly relocation story |
-| **Complex Portal (ActiveBuilding)** | Elevator-only pickups | **Include full catalog link** | Fastest sales; no truck required by buyer |
+| **Complex Portal (ActiveBuilding)** | High-trust local buyers | **Include full catalog link** | State the one-flight walk-up and no-elevator pickup facts before scheduling |
 
 ---
 
-## 2. Hormozi 3-Week Staging Protocol
+## 2. Departure-Date Pricing Schedule
 
-Run `leaving-denver drops` to view active price brackets:
+Run `leaving-denver drops` to derive the current windows and price tiers from `seller.departure_date`:
 
-* **Week 1 (Days 1–7):** Recommended List Price ($12,213 total inventory).
-* **Week 2 (Days 8–14):** 10–12% drop on items with zero qualified inquiries.
-* **Week 3 (Days 15–21):** Firm floor liquidation tier (per-item reserve floors).
+* **First drop:** October 3–6.
+* **Second drop:** October 15–17.
+* **Clear reserve floors:** October 20–25.
+* **Giveaway window:** November 3–5, before the November 9 departure.
+
+Do not copy a total into this runbook. The command calculates current prices from the inventory and encrypted reserve data.
 
 ---
 
@@ -31,8 +34,8 @@ Run `leaving-denver drops` to view active price brackets:
 ### The "Is this still available?" Filter:
 > *"Hi! Yes, it's available, assembled, and ready for pickup in the Denver Tech Center. We're moving abroad in November, so it's first come, first served. When would you like to come test it out?"*
 
-### The Aggressive Lowballer ($120 offer on $220 Sofa):
-> *"Thanks for the offer, but at $220 it's already less than half what AFW charges for it new. The absolute lowest I could do today for a quick pickup is $200 cash. If you can pick it up today or tomorrow, it's yours."*
+### The Aggressive Lowballer:
+> *"Thanks for the offer, but that is below today's price. The lowest I can do for pickup today is $[current tier]. If you can pick it up today or tomorrow, it's yours."*
 
 ### The "Hold It Until Next Week" Request:
 > *"Since we are leaving the country on a firm deadline, I cannot hold items on verbal promises. If you want to come by sooner you're welcome to, or if it's still here on Saturday morning send me a message and we'll arrange the pickup."*
@@ -40,7 +43,7 @@ Run `leaving-denver drops` to view active price brackets:
 ### The Advance Zelle/Courier Scam:
 > *"I only accept cash or in-person Venmo/Zelle when the buyer is physically present in DTC to inspect the item. No advance wire transfers or third-party couriers."*
 
-A Venmo or Zelle payment counts only once it shows in **your own** app. A screenshot or an email "from Zelle" is not a payment. Stage items near the door or in the lobby, and never have a buyer in the apartment while you are alone.
+A Venmo or Zelle payment counts only once it shows in **your own** app. A screenshot or an email "from Zelle" is not a payment. Stage items near the apartment door, disclose the one flight of stairs before scheduling, and never have a buyer in the apartment while you are alone.
 
 ---
 

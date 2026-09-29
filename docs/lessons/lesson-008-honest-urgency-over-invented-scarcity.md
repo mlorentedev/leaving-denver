@@ -4,7 +4,7 @@ type: lesson
 scope: local
 tags: [copy, marketing, sales, marketplace, legal]
 created: "2026-09-25"
-source: "Listing copy research for the moving sale (vault research/2026-09-25-listing-copy-and-campaign.md)"
+source: "Vault: 10_projects/leaving-denver/research/2026-09-25-listing-copy-and-campaign.md"
 ---
 
 # Lesson: Use Real Urgency, Not Invented Scarcity, in a Moving Sale

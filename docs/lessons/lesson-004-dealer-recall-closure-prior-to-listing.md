@@ -25,8 +25,8 @@ Do not list a private party vehicle with unresolved or unverified manufacturer s
 > **Whenever preparing a vehicle for private liquidation, verify NHTSA recall status and have the franchised dealer officially close all open campaigns before publishing the VIN.**
 
 ## References
-- `data/inventory.yaml` (`car_ford_escape.condition.open_recalls: 0`)
-- `research/market_and_platform_guide.md` (Colorado private car sales protocol)
+- `data/inventory.yaml` (`2019-ford-escape-sel-awd` specifications and inspection evidence)
+- Vault: `10_projects/leaving-denver/research/market-and-platform-guide.md` (Colorado private car sales protocol)
 
 ## Correction (2026-09-25)
 Closing recalls is only half of the paperwork story. Two claims next to it in the listing were

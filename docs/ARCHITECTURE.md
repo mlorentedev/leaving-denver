@@ -1,13 +1,13 @@
 # Leaving Denver Platform — System Architecture & Data Flow
 
-This project implements an automated, privacy-first inventory management and sales platform for a 3-week international relocation moving sale in Denver Tech Center (DTC / 80111), Colorado.
+This project implements an automated, privacy-first inventory management and sales platform for an international relocation moving sale in Denver Tech Center (DTC / 80111), Colorado. The sale schedule is derived from the seller's `departure_date`.
 
 ---
 
 ## 1. Architectural Philosophy
 
 1. **Single Source of Truth (SSOT):**  
-   The file `data/inventory.yaml` is the sole authoritative definition of all 14 items, bundled packages, retail pricing, recommended list prices, and internal firm floor prices.
+   The file `data/inventory.yaml` is the authoritative definition of all 14 items, bundled packages, public copy, retail pricing, and recommended list prices. Internal firm floor prices live only in encrypted `data/private.sops.yaml`.
 2. **Folder-Convention Media Ingestion:**  
    Dropping an image (JPEG, PNG, WebP, or iPhone HEIC) into `content/photos/<item_id>/` auto-triggers discovery, format conversion, EXIF scrubbing, and registration into the SSOT.
 3. **Strict Security Isolation:**  
@@ -36,7 +36,7 @@ leaving-denver/
 │       └── n8n_integration.py     <-- Webhook dispatcher for kubelab stack
 ├── build/
 │   ├── public/                    <-- 100% Sanitized Public Build (Cloudflare Pages)
-│   │   ├── index.html             <-- 46KB high-speed catalog
+│   │   ├── index.html             <-- Generated public catalog
 │   │   ├── robots.txt             <-- Disallow: / crawler blocker
 │   │   └── catalog/               <-- Optimized, EXIF-scrubbed images (<300KB each)
 │   └── private/                   <-- Private Local Seller Workspace (gitignored)
