@@ -10,7 +10,7 @@ source: "Denver moving sale platform development"
 # Lesson: Stock Photos on High-Value Vehicles Trigger Fraud Signals in Private Party Sales
 
 ## Context (The Problem/Error)
-> "The vehicle (2019 Ford Escape SEL AWD) represents $11,500 (94.1% of liquidation value), but initial posting drafts used manufacturer stock photos."
+> "The vehicle (2019 Ford Escape SEL AWD) represents nearly all of the liquidation value, but initial posting drafts used manufacturer stock photos."
 
 In private US classifieds (Facebook Marketplace, Craigslist, OfferUp), listings of vehicles that use marketing renders or dealer stock photography are universally treated by prospective buyers as out-of-town wire transfer scams, resulting in automated user reports and platform shadowbans.
 
@@ -25,5 +25,5 @@ Do not use press renders, manufacturer stock photos, or cropped dealer catalog i
 > **Whenever listing high-value vehicles in private classifieds, only use authentic, timestamped in-situ photos including the odometer and clean physical title in hand.**
 
 ## References
-- `research/photo_forensic_audit.md` (Inspection of visual trust signals)
+- [Vault research: photo forensic audit](https://github.com/mlorentedev/knowledge/blob/main/10_projects/leaving-denver/research/photo-forensic-audit.md)
 - `data/inventory.yaml` (Asset specification and photographic requirements)

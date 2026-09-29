@@ -10,7 +10,7 @@ A privacy-focused inventory management, automated photo ingestion, and multi-por
 - **Folder-Convention Media Pipeline:** Drop any photo (including iPhone HEIC) into `content/photos/<item_id>/` and run `leaving-denver build` to auto-discover, strip GPS EXIF metadata, optimize (<300 KB), and compile.
 - **Data & Privacy Isolation:** Public build in `build/public/` is completely stripped of internal reserve floor prices, negotiation notes, and seller admin tools.
 - **Bot & Scraper Defense:** Telephone numbers are obfuscated and assembled dynamically via client JS. Static HTML attributes contain no harvestable numbers. `robots.txt` enforces `Disallow: /`.
-- **Hormozi 3-Week Staging Bar:** Toggles between Week 1 (List / $12,213), Week 2 (Drop / 12% off), and Week 3 (Liquidation floor).
+- **Departure-Date Pricing Schedule:** `leaving-denver drops` derives the active drop, floor, and giveaway windows from `seller.departure_date`; prices come from the inventory and encrypted reserve data.
 - **Multi-Portal Copy Generator:** Instant copy-paste listings tailored for Facebook Marketplace, Craigslist Denver, OfferUp, and Nextdoor.
 - **Bilingual Catalog:** The same sanitized inventory renders in English at `/` and neutral Latin American Spanish at `/es/`, with localized SMS intents.
 - **Kubelab Integration:** Ready-to-import n8n workflows for Telegram push alerts, Vikunja task creation, and 48-hour Craigslist bump reminders.
@@ -34,7 +34,7 @@ uv run leaving-denver build
 # Auto-discover photos and update data/inventory.yaml
 uv run leaving-denver sync
 
-# View Hormozi 3-week staged pricing drops
+# View date-derived schedule windows and inventory/reserve-based price tiers
 uv run leaving-denver drops
 
 # Mark an item as sold and trigger automatic site rebuild

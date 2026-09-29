@@ -20,7 +20,7 @@ Secret extraction and history rewrite must happen **locally, before the first pu
 For this repo:
 1. Floors and phone moved to `data/private.sops.yaml` (sops + age, canonical dotfiles key); public build reads the phone from `SELLER_PHONE` (CI secret) or the sops file.
 2. A fresh orphan commit replaced the three local commits (cheaper and safer than regex-scrubbing small integers with `git filter-repo`).
-3. Photos moved to Git LFS and `dist/` stopped being tracked in the same rewrite.
+3. Photos moved to Git LFS and generated `build/public/` and `build/private/` output stopped being tracked in the same rewrite.
 4. The old history is kept only as the local ref `refs/backup/pre-public-main` — never push with `--all`/`--mirror`; drop it with `git update-ref -d refs/backup/pre-public-main` once the sale is over.
 
 ## Anti-Pattern (What NOT to do)

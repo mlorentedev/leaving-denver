@@ -39,7 +39,7 @@ Also, if the regex injection does not match, the build ships the stale placehold
 The builder renders the public page, and later the per-item pages, from `data/inventory.yaml` with Jinja2:
 
 - It uses `StrictUndefined`, so a field renamed in the data but not in a template fails the build instead of rendering empty.
-- Client JavaScript keeps only behaviour: filtering, search, the item dialog and the SMS links. It reads the same sanitized JSON, which is emitted through a fail-closed marker rather than a regex.
+- Client JavaScript keeps only behaviour: filtering, the item and bundle sheets, and SMS links. It reads the same sanitized JSON, which is emitted through a fail-closed marker rather than a regex.
 - `jinja2` becomes a runtime dependency. It is the only one added.
 
 ## Consequences
