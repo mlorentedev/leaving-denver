@@ -153,27 +153,28 @@
       <h2 class="text-lg font-extrabold text-neutral-900">Save with a bundle</h2>
       <div class="mt-3 -mx-4 px-4 sm:mx-0 sm:px-0 flex gap-3 overflow-x-auto hide-scrollbar pb-1">
         {% for b in bundles %}
-        <a href="#" data-bundle="{{ b.id }}" data-sms-intent="Hi! I am interested in the {{ b.short_name }} bundle (${{ b.bundle_price }}) in DTC." class="flex-none w-[216px] flex flex-col gap-2.5 p-4 rounded-2xl bg-white border border-neutral-200 hover:border-neutral-400 transition-colors">
+        <button type="button" data-bundle="{{ b.id }}" class="bundle-card flex-none w-[216px] flex flex-col gap-2.5 p-4 rounded-2xl bg-white border border-neutral-200 hover:border-neutral-400 transition-colors text-left">
           <span class="text-sm font-bold text-neutral-900">{{ b.short_name }}</span>
           <span class="text-xs text-neutral-500">{{ b['items'] | length }} items{% if b.note %} · {{ b.note }}{% endif %}</span>
           <span class="flex items-baseline justify-between">
             <span class="text-lg font-extrabold text-neutral-900">${{ b.bundle_price }}</span>
             <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">Save ${{ b.savings }}</span>
           </span>
-        </a>
+          <span class="text-xs font-semibold text-neutral-900 underline underline-offset-2">See what's included</span>
+        </button>
         {% endfor %}
       </div>
     </section>
     {% endif %}
 
     {% if everything %}
-    <a href="#" data-everything="{{ everything.id }}" data-sms-intent="Hi! I am interested in taking everything (${{ everything.bundle_price }}) in DTC." class="mt-6 flex flex-col gap-3.5 p-5 rounded-2xl bg-neutral-900 text-white">
+    <button type="button" data-everything="{{ everything.id }}" class="bundle-card mt-6 w-full flex flex-col gap-3.5 p-5 rounded-2xl bg-neutral-900 text-white text-left">
       <span class="flex flex-col gap-1">
         <span class="text-lg font-extrabold">Take everything: ${{ everything.bundle_price }}</span>
         <span class="text-sm text-neutral-400">All {{ everything['items'] | length }} items in one trip. Save ${{ everything.savings }}.</span>
       </span>
-      <span class="h-12 rounded-xl bg-white text-neutral-900 text-[15px] font-bold flex items-center justify-center">Ask about it</span>
-    </a>
+      <span class="h-12 rounded-xl bg-white text-neutral-900 text-[15px] font-bold flex items-center justify-center">See what's included</span>
+    </button>
     {% endif %}
 
     <!-- Straightforward Terms Box -->
@@ -204,6 +205,39 @@
   </a>
 
   <!-- Item Detail Bottom Sheet -->
+  {% for b in bundles + ([everything] if everything else []) %}
+  <!-- Bundle sheet: what the bundle holds, each item's price, and the bundle price -->
+  <div id="sheet-{{ b.id }}" class="bundle-sheet fixed inset-0 z-50 bg-black/50 backdrop-blur-xs hidden items-end justify-center overflow-y-auto">
+    <section data-bundle-sheet="{{ b.id }}" class="bg-white rounded-t-3xl max-w-2xl w-full min-w-0 p-6 sm:p-7 relative shadow-xl max-h-[90vh] overflow-y-auto">
+      <button type="button" data-close-sheet class="absolute top-4 right-4 w-10 h-10 rounded-full bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center text-neutral-600 text-sm" aria-label="Close">✕</button>
+      <h3 class="pr-12 text-xl font-extrabold text-neutral-900">{{ b.short_name }}</h3>
+      {% if b.note %}
+      <p class="mt-1 text-sm font-semibold text-emerald-700">{{ b.note }}</p>
+      {% endif %}
+      <ul class="mt-4 divide-y divide-neutral-100">
+        {% for item_id in b['items'] %}
+        {% set item = items | selectattr('id', 'equalto', item_id) | first %}
+        <li data-sheet-item="{{ item_id }}" class="flex items-center gap-3 py-2.5">
+          {% if item.images %}
+          <img src="{{ item.images[0] }}" alt="" loading="lazy" class="w-12 h-12 flex-none rounded-lg object-cover bg-neutral-100">
+          {% else %}
+          <span class="w-12 h-12 flex-none rounded-lg bg-neutral-100"></span>
+          {% endif %}
+          <span class="flex-1 min-w-0 text-sm font-semibold text-neutral-900">{{ item.short_title }}</span>
+          <span class="text-sm text-neutral-600">{% if item.free %}Free{% else %}${{ item.price }}{% endif %}</span>
+        </li>
+        {% endfor %}
+      </ul>
+      <div class="mt-3 pt-4 border-t border-neutral-200 flex items-baseline justify-between">
+        <span class="text-sm text-neutral-500">Separately <span class="line-through">${{ b.individual_total }}</span></span>
+        <span class="text-2xl font-black text-neutral-900">${{ b.bundle_price }}</span>
+      </div>
+      <p class="mt-1 text-right text-xs font-bold text-emerald-700">Save ${{ b.savings }}</p>
+      <a href="#" data-sms-intent="Hi! I am interested in the {{ b.short_name }} bundle (${{ b.bundle_price }}) in DTC." class="mt-5 h-12 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white text-sm font-bold flex items-center justify-center">Text about this bundle</a>
+    </section>
+  </div>
+  {% endfor %}
+
   <div id="itemSheet" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs hidden items-end justify-center overflow-y-auto">
     <div class="bg-white rounded-t-3xl max-w-2xl w-full min-w-0 p-6 sm:p-7 relative shadow-xl max-h-[90vh] overflow-y-auto">
       <button onclick="closeModal()" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center text-neutral-600 text-sm">
@@ -352,6 +386,11 @@
       document.getElementById('itemSheet').classList.add('flex');
     }
 
+    function toggleSheet(sheet, open) {
+      sheet.classList.toggle('hidden', !open);
+      sheet.classList.toggle('flex', open);
+    }
+
     function closeModal() {
       document.getElementById('itemSheet').classList.add('hidden');
       document.getElementById('itemSheet').classList.remove('flex');
@@ -377,6 +416,16 @@
       });
       document.querySelectorAll('.item-card').forEach(card => {
         card.addEventListener('click', () => openModal(card.dataset.item));
+      });
+      document.querySelectorAll('.bundle-card').forEach(card => {
+        const id = card.dataset.bundle || card.dataset.everything;
+        card.addEventListener('click', () => toggleSheet(document.getElementById('sheet-' + id), true));
+      });
+      document.querySelectorAll('.bundle-sheet').forEach(sheet => {
+        // Closes on the backdrop or the close button, not on a tap inside the sheet.
+        sheet.addEventListener('click', e => {
+          if (e.target === sheet || e.target.closest('[data-close-sheet]')) toggleSheet(sheet, false);
+        });
       });
     });
   </script>
