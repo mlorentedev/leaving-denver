@@ -26,7 +26,28 @@ grep -q 'cdn.tailwindcss.com' <<<"$es_page" && fail "ES loads the Tailwind play 
 css=$(curl -fsS "$url/styles.css") || fail "compiled stylesheet missing"
 grep -Fq '.aspect-4\/3{' <<<"$css" || fail "Tailwind v4 utility missing"
 
-curl -fsS "$url/robots.txt" | grep -q 'Disallow: /' || fail "robots.txt missing or permissive"
+robots=$(curl -fsS "$url/robots.txt") || fail "robots.txt missing"
+# The catch-all group itself must disallow; a stray "Disallow: /" elsewhere proves nothing.
+grep -A1 -x 'User-agent: \*' <<<"$robots" | grep -qx 'Disallow: /' || fail "robots.txt is permissive"
+grep -q '^User-agent: facebookexternalhit' <<<"$robots" || fail "robots.txt shuts out link previews"
+
+# Link previews (FEAT-002). og:image is absolute on the production origin; fetch its path
+# here, so a preview deployment is checked against its own files.
+og() { sed -nE "s/.*<meta property=\"og:$1\" content=\"([^\"]+)\".*/\\1/p" | head -1; }
+check_image() {
+  [[ "$1" == https://* ]] || fail "$2 has no absolute og:image"
+  curl -fsSI "$url/${1#https://*/}" | grep -qi '^content-type: image/jpeg' \
+    || fail "$2 og:image ${1#https://*/} does not answer as a JPEG"
+}
+check_image "$(og image <<<"$page")" "catalog"
+item=$(grep -oE 'data-item="[^"]+"' <<<"$page" | head -1 | cut -d'"' -f2)
+[ -n "$item" ] || fail "no item cards on the page"
+for share_path in "i/$item/" "es/i/$item/"; do
+  share=$(curl -fsS "$url/$share_path") || fail "/$share_path unreachable"
+  # Unknown paths answer with index.html, so match the page's own og:url, not the status.
+  [[ "$(og url <<<"$share")" == */$share_path ]] || fail "share page /$share_path missing"
+  check_image "$(og image <<<"$share")" "/$share_path"
+done
 curl -fsSI "$url/" | grep -qi '^x-content-type-options: nosniff' || fail "_headers not applied"
 
 # Pages answers unknown paths with index.html, so check content, not status.

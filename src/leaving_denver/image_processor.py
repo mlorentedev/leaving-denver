@@ -9,6 +9,7 @@ import json
 import os
 import subprocess
 import tempfile
+from io import BytesIO
 from pathlib import Path
 
 import PIL
@@ -21,6 +22,8 @@ from leaving_denver.config import (
     MAX_IMAGE_WIDTH,
     PHOTO_CACHE,
     PHOTOS_DIR,
+    SHARE_BACKGROUND,
+    SHARE_IMAGE_SIZE,
     SUPPORTED_IMAGE_EXTS,
     VARIANT_WIDTHS,
     WEBP_QUALITY,
@@ -231,6 +234,40 @@ def write_outputs(src_path: Path, read_path: Path, target_jpg: Path) -> bool:
     finally:
         for tmp in staged.values():
             tmp.unlink(missing_ok=True)
+
+
+def write_share_image(cover_jpg: Path) -> Path:
+    """The link-preview image for an item: its built cover letterboxed onto the page
+    background at SHARE_IMAGE_SIZE, in `og/` beside it. The cards show whole photos, so a
+    crop would cut the furniture. Written only when the bytes differ, so a rebuild with
+    nothing new leaves it alone; any older preview JPEG in `og/` (a previous cover) is removed."""
+    target = cover_jpg.parent / "og" / cover_jpg.name
+    with Image.open(cover_jpg) as img:
+        photo = img.convert("RGB")
+        photo.thumbnail(SHARE_IMAGE_SIZE, Image.Resampling.LANCZOS)
+    canvas = Image.new("RGB", SHARE_IMAGE_SIZE, SHARE_BACKGROUND)
+    left = (SHARE_IMAGE_SIZE[0] - photo.width) // 2
+    top = (SHARE_IMAGE_SIZE[1] - photo.height) // 2
+    canvas.paste(photo, (left, top))
+    encoded = BytesIO()
+    canvas.save(encoded, "JPEG", quality=JPEG_QUALITY, optimize=True)
+
+    target.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        unchanged = target.read_bytes() == encoded.getvalue()
+    except OSError:
+        unchanged = False
+    if not unchanged:
+        staged = target.with_name(target.name + ".tmp")
+        try:
+            staged.write_bytes(encoded.getvalue())
+            os.replace(staged, target)
+        finally:
+            staged.unlink(missing_ok=True)
+    for other in target.parent.glob("*.jpg"):
+        if other != target:
+            other.unlink(missing_ok=True)
+    return target
 
 
 def sync_all_photos() -> dict[str, list[str]]:

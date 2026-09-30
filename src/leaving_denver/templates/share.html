@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="{{ locale }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <title>{{ og.title }} · {{ t.site_name }}</title>
+{% include "_og.html" %}
+  {# JavaScript only: a crawler following a meta refresh or an HTTP redirect would land on
+     the catalog, where the hash is lost, and preview the catalog instead of this item. #}
+  <script>location.replace({{ target | tojson }});</script>
+</head>
+<body>
+  <p><a href="{{ target }}">{{ og.title }}</a></p>
+</body>
+</html>

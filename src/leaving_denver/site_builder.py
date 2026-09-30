@@ -2,7 +2,8 @@
 Site Builder for Denver Tech Center Moving Sale.
 Compiles Single Source of Truth (data/inventory.yaml) into:
 1. build/public/index.html - Sanitized, high-speed public catalog (Zero floor prices, obfuscated contacts).
-2. build/public/robots.txt - Total crawler disallow directive.
+   build/public/i/<id>/index.html (and es/i/<id>/) - Per-item share pages with Open Graph tags.
+2. build/public/robots.txt - Link-preview fetchers allowed, every other crawler disallowed.
    build/public/_headers - Cloudflare Pages response headers.
 3. build/private/ - Private local seller tool with multi-platform listing copy and PIN lock.
 """
@@ -31,10 +32,12 @@ from leaving_denver.config import (
     PUBLIC_HEADERS,
     PUBLIC_INDEX_HTML,
     PUBLIC_ROBOTS_TXT,
+    SHARE_IMAGE_SIZE,
+    SITE_URL,
     STATUSES,
     VARIANT_WIDTHS,
 )
-from leaving_denver.image_processor import sync_all_photos, variant_path
+from leaving_denver.image_processor import sync_all_photos, variant_path, write_share_image
 from leaving_denver.private_data import floors, load_private, phone_parts, seller_phone
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
@@ -184,6 +187,9 @@ def sanitize_public_inventory(full_data: dict[str, Any]) -> dict[str, Any]:
     for item in full_data.get("items", []):
         if item["id"] in hidden:
             continue
+        # Ids become paths (i/<id>/, catalog/<id>/) and URL fragments: slugs only.
+        if not re.fullmatch(r"[a-z0-9]+(-[a-z0-9]+)*", item["id"]):
+            raise RuntimeError(f"Item id {item['id']!r} must be a lower-case slug")
         status = item.get("status", "Available")
         if status not in STATUSES:
             raise RuntimeError(f"Item {item['id']}: status {status!r} is not one of {STATUSES}")
@@ -284,6 +290,107 @@ PAGES_HEADERS = """/*
 """
 
 
+# Link-preview fetchers (ADR-004). They build the card a shared link shows and index
+# nothing; every other crawler stays out, and X-Robots-Tag keeps pages out of search.
+PREVIEW_CRAWLERS = ("facebookexternalhit", "Facebot", "Twitterbot", "TelegramBot", "WhatsApp")
+ROBOTS_TXT = (
+    "# Link-preview fetchers may read the pages; every other crawler is disallowed.\n\n"
+    + "".join(f"User-agent: {bot}\nAllow: /\n\n" for bot in PREVIEW_CRAWLERS)
+    + "User-agent: *\nDisallow: /\n"
+)
+OG_LOCALES = {"en": "en_US", "es": "es_ES"}
+
+
+def site_url() -> str:
+    """The origin Open Graph URLs are built on: `SITE_URL` from the environment, or the
+    production default. A path or a trailing slash would double up in every URL."""
+    url = os.environ.get("SITE_URL") or SITE_URL
+    if not re.fullmatch(r"https://[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+(:\d+)?", url):
+        raise ValueError(f"SITE_URL must be a bare https:// origin, got {url!r}")
+    return url
+
+
+def share_images(items: list[dict[str, Any]]) -> dict[str, str]:
+    """Each item's link-preview image, by id, as a path under build/public. Items with no
+    built cover get none."""
+    previews = {}
+    for item in items:
+        if item["images"] and (DIST_DIR / item["images"][0]).is_file():
+            preview = write_share_image(DIST_DIR / item["images"][0])
+            previews[item["id"]] = preview.relative_to(DIST_DIR).as_posix()
+    return previews
+
+
+def item_description(item: dict[str, Any], t: dict[str, Any]) -> str:
+    asking = item["note"] if item["free"] else f"${item['price']:,}"
+    return f"{asking} · {item['status_label']} · {t['pickup_near']}"
+
+
+def locale_path(locale: str) -> str:
+    """A locale's path under the site root: "" for English, "es/" for Spanish."""
+    return "" if locale == "en" else f"{locale}/"
+
+
+def og_common(locale: str) -> dict[str, Any]:
+    width, height = SHARE_IMAGE_SIZE
+    return {
+        "locale": OG_LOCALES[locale],
+        "locale_alternate": OG_LOCALES["es" if locale == "en" else "en"],
+        "image_width": width,
+        "image_height": height,
+    }
+
+
+def catalog_og(
+    locale: str,
+    t: dict[str, Any],
+    vehicle: dict[str, Any] | None,
+    items: list[dict[str, Any]],
+    previews: dict[str, str],
+    origin: str,
+    departure: date,
+) -> dict[str, Any]:
+    """The catalog page's own preview: the hero line, and the vehicle's image (or the
+    first item's with one)."""
+    showcase = next((i for i in [vehicle, *items] if i and i["id"] in previews), None)
+    suffix = t["hero_vehicle_suffix" if vehicle else "hero_household_suffix"]
+    return {
+        **og_common(locale),
+        "title": t["page_title_vehicle" if vehicle else "page_title_household"],
+        "description": f"{t['hero_prefix']} {t['months'][departure.month]} {suffix}",
+        "url": f"{origin}/{locale_path(locale)}",
+        "image": f"{origin}/{previews[showcase['id']]}" if showcase else None,
+        "image_alt": showcase["title"] if showcase else "",
+    }
+
+
+def write_share_pages(
+    locale: str,
+    t: dict[str, Any],
+    items: list[dict[str, Any]],
+    previews: dict[str, str],
+    origin: str,
+) -> None:
+    """One share page per published item, at i/<id>/ under the locale's path. Rebuilt
+    whole, so an item unpublished since the last build loses its page."""
+    share_root = DIST_DIR / locale_path(locale) / "i"
+    shutil.rmtree(share_root, ignore_errors=True)
+    for item in items:
+        page = share_root / item["id"] / "index.html"
+        page.parent.mkdir(parents=True)
+        preview = previews.get(item["id"])
+        og = {
+            **og_common(locale),
+            "title": item["title"],
+            "description": item_description(item, t),
+            "url": f"{origin}/{locale_path(locale)}i/{item['id']}/",
+            "image": f"{origin}/{preview}" if preview else None,
+            "image_alt": item["title"],
+        }
+        html = render("share.html", locale=locale, t=t, og=og, target=f"../../#{item['id']}")
+        page.write_text(html, encoding="utf-8")
+
+
 # Filter chips, in page order: category in the data -> chip label.
 CHIPS = {
     "Living Room": "Living room",
@@ -361,6 +468,8 @@ def build_public_site(full_data: dict[str, Any]) -> None:
     seller = sanitize_public_seller(full_data)
     departure = date.fromisoformat(seller["departure_date"])
     contact_json = json.dumps(phone_parts(phone))
+    origin = site_url()
+    previews = share_images(public_data["items"])
     for locale in ("en", "es"):
         translations = load_locale(locale)
         asset_prefix = "" if locale == "en" else "../"
@@ -379,6 +488,7 @@ def build_public_site(full_data: dict[str, Any]) -> None:
         vehicle = next((i for i in localized_data["items"] if i["category"] == "Vehicle"), None)
         items = [i for i in localized_data["items"] if i["category"] != "Vehicle"]
         bundles = localized_data["bundles"]
+        og = catalog_og(locale, translations, vehicle, items, previews, origin, departure)
         # `<` escaped so item text cannot close the inline <script> ("</script>", "<!--").
         inventory_json = json.dumps(localized_data, indent=2).replace("<", "\\u003c")
         html = render(
@@ -391,6 +501,7 @@ def build_public_site(full_data: dict[str, Any]) -> None:
             inventory_json=inventory_json,
             contact_json=contact_json,
             seller=localized_seller,
+            og=og,
             departure_month=translations["months"][departure.month],
             vehicle=vehicle,
             items=items,
@@ -418,9 +529,9 @@ def build_public_site(full_data: dict[str, Any]) -> None:
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(html, encoding="utf-8")
 
-    # Write robots.txt
-    with open(PUBLIC_ROBOTS_TXT, "w", encoding="utf-8") as f:
-        f.write("# Disallow all automated crawlers and scrapers\nUser-agent: *\nDisallow: /\n")
+        write_share_pages(locale, translations, localized_data["items"], previews, origin)
+
+    PUBLIC_ROBOTS_TXT.write_text(ROBOTS_TXT, encoding="utf-8")
 
     PUBLIC_HEADERS.write_text(PAGES_HEADERS, encoding="utf-8")
 
