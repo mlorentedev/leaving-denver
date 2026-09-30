@@ -3,6 +3,12 @@
 The catalog is deployed manually from `main`. The public inventory lives in
 `data/inventory.yaml`; encrypted phone, reserve floors, and deployment token
 live in `data/private.sops.yaml`. Only `build/public/` is published.
+On a fresh checkout, install Node.js 24+, npm, and `uv`, then run `make install`
+before `make check` or direct `uv run leaving-denver build`. Builds compile
+Tailwind CSS locally from pinned npm dependencies; if the CLI is missing, stop
+and run `npm ci` rather than publishing old assets. Verify `/styles.css` loads
+for both `/` and `/es/`; the private assistant's stylesheet remains under
+`build/private/` and is never uploaded to Pages.
 
 ## Deploy and roll back
 

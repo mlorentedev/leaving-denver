@@ -28,8 +28,9 @@ CF_ENV    := CLOUDFLARE_ACCOUNT_ID=$(CF_ACCOUNT_ID) CLOUDFLARE_API_TOKEN="$$(sop
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
 
-install: ## Install the locked deps (dev included) and the Git LFS hooks
+install: ## Install locked Python and Tailwind dependencies and the Git LFS hooks
 	$(UV) sync --extra dev
+	npm ci
 	@# Filters only: plain `git lfs install` would write into a global core.hooksPath
 	@# dispatcher (lesson-007). The hooks go where the dispatcher chains to.
 	git lfs install --local --skip-repo >/dev/null

@@ -21,9 +21,10 @@ A privacy-focused inventory management, automated photo ingestion, and multi-por
 
 ### 1. Requirements
 - Python 3.12+ and [`uv`](https://github.com/astral-sh/uv)
+- Node.js 24+ and npm (locked Tailwind v4 CLI; CSS is built locally, not loaded from a runtime CDN)
 - `ffmpeg` (for iPhone HEIC conversion)
 - `git-lfs`, and `sops` + an age key for the private data
-- `make install` (`uv sync --extra dev`) installs the locked deps and the `leaving-denver` CLI
+- `make install` (`uv sync --extra dev` and `npm ci`) installs locked deps and the `leaving-denver` CLI
 
 ### 2. Common Commands
 
@@ -46,6 +47,12 @@ uv run leaving-denver serve --port 8088
 # Lint, build and test (what CI runs)
 make check
 ```
+
+`make build` and direct `leaving-denver build` compile separate Tailwind CSS
+stylesheets into `build/public/styles.css` (shared by EN/ES) and
+`build/private/styles.css` (local only). Run `make install` first: a missing
+Tailwind CLI fails the build instead of silently shipping stale or unstyled HTML.
+Only `build/public/` is uploaded to Pages.
 
 ### 3. Deploy (Cloudflare Pages)
 

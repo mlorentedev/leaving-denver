@@ -8,7 +8,9 @@ Compiles Single Source of Truth (data/inventory.yaml) into:
 """
 
 import json
+import os
 import shutil
+import subprocess
 from datetime import date, timedelta
 from pathlib import Path
 from typing import Any
@@ -17,6 +19,7 @@ import yaml
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
 from leaving_denver.config import (
+    BASE_DIR,
     DIST_DIR,
     DIST_PRIVATE_DIR,
     INVENTORY_JSON_PRIVATE,
@@ -31,6 +34,41 @@ from leaving_denver.image_processor import sync_all_photos
 from leaving_denver.private_data import floors, load_private, phone_parts, seller_phone
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
+CSS_CLI = (
+    BASE_DIR / "node_modules" / ".bin" / ("tailwindcss.cmd" if os.name == "nt" else "tailwindcss")
+)
+
+
+def build_stylesheets() -> None:
+    """Compile separate explicit template sources; never publish private template styles."""
+    if not CSS_CLI.is_file():
+        raise RuntimeError("Tailwind CLI missing; run npm ci before leaving-denver build")
+    for source, output in (
+        ("public", DIST_DIR / "styles.css"),
+        ("private", DIST_PRIVATE_DIR / "styles.css"),
+    ):
+        output.parent.mkdir(parents=True, exist_ok=True)
+        staged = output.with_suffix(".css.new")
+        try:
+            subprocess.run(
+                [
+                    str(CSS_CLI),
+                    "-i",
+                    str(BASE_DIR / "src" / "leaving_denver" / f"{source}.css"),
+                    "-o",
+                    str(staged),
+                    "--minify",
+                ],
+                cwd=BASE_DIR,
+                check=True,
+            )
+            if not staged.is_file() or not staged.stat().st_size:
+                raise RuntimeError(f"Tailwind CLI produced no CSS for {source}")
+            staged.replace(output)
+        except (OSError, subprocess.CalledProcessError) as exc:
+            raise RuntimeError(f"Tailwind CSS build failed for {source}: {exc}") from exc
+        finally:
+            staged.unlink(missing_ok=True)
 
 
 def load_inventory_yaml() -> dict[str, Any]:
@@ -379,6 +417,7 @@ def verify_security_guarantees() -> None:
 
 def build_all() -> None:
     """Full compilation pipeline."""
+    build_stylesheets()
     print("1. Syncing and optimizing photos from content/photos/...")
     photo_map = sync_all_photos()
 
