@@ -62,12 +62,14 @@ def test_record_sale_sets_one_key_with_sops(monkeypatch):
     monkeypatch.setattr(
         private_data.subprocess,
         "run",
-        lambda args, **kw: calls.append(args) or SimpleNamespace(returncode=0, stderr=""),
+        lambda args, **kw: (
+            calls.append((args, kw["input"])) or SimpleNamespace(returncode=0, stderr="")
+        ),
     )
     private_data.record_sale("lamp", 120)
-    assert calls == [
-        ["sops", "set", str(private_data.PRIVATE_SOPS_YAML), '["sales"]["lamp"]', "120"]
-    ]
+    path = str(private_data.PRIVATE_SOPS_YAML)
+    # The price travels on stdin: nothing in argv reveals it.
+    assert calls == [(["sops", "set", "--value-stdin", path, '["sales"]["lamp"]'], "120")]
 
 
 def test_record_sale_raises_when_sops_fails(monkeypatch):

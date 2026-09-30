@@ -60,8 +60,10 @@ def record_sale(item_id: str, price: int) -> None:
     """Keep what an item actually sold for in the encrypted file, never in the public repo."""
     if not shutil.which("sops"):
         raise RuntimeError("sops is not installed")
+    # The price goes on stdin, not argv, so it never shows in the process table.
     res = subprocess.run(
-        ["sops", "set", str(PRIVATE_SOPS_YAML), f'["sales"]["{item_id}"]', str(int(price))],
+        ["sops", "set", "--value-stdin", str(PRIVATE_SOPS_YAML), f'["sales"]["{item_id}"]'],
+        input=str(int(price)),
         capture_output=True,
         text=True,
     )
