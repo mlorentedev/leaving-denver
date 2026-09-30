@@ -23,7 +23,7 @@ CF_ENV    := CLOUDFLARE_ACCOUNT_ID=$(CF_ACCOUNT_ID) CLOUDFLARE_API_TOKEN="$$(sop
 
 .DEFAULT_GOAL := help
 
-.PHONY: help install lint format build test check serve drops sold deploy cf-project ci-secrets protect-main secrets clean
+.PHONY: help install lint format build test check serve drops sold deploy cf-project ci-secrets protect-deploy protect-main secrets clean
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
@@ -80,12 +80,27 @@ cf-project: ## Create the Cloudflare Pages project if it does not exist (idempot
 		$(CF_ENV) $(WRANGLER) pages project create $(PROJECT) --production-branch=main --force; \
 	fi
 
-ci-secrets: ## Push the CI secrets from the sops file to GitHub (values never printed)
-	@set -e; for pair in 'CLOUDFLARE_API_TOKEN=["cloudflare_pages_token"]' 'SELLER_PHONE=["seller"]["phone"]'; do \
-		name=$${pair%%=*}; value="$$(sops -d --extract "$${pair#*=}" $(SOPS_FILE))"; \
-		test -n "$$value" || { echo "empty value for $$name" >&2; exit 1; }; \
-		printf '%s' "$$value" | gh secret set "$$name"; \
+protect-deploy: ## Allow deploy secrets only from main, including manual previews
+	@set -e; for environment in production preview; do \
+		gh api -X PUT "repos/{owner}/{repo}/environments/$$environment" --input .github/deployment-environment.json >/dev/null; \
+		if ! gh api "repos/{owner}/{repo}/environments/$$environment/deployment-branch-policies" --jq '.branch_policies[].name' | grep -Fxq main; then \
+			gh api -X POST "repos/{owner}/{repo}/environments/$$environment/deployment-branch-policies" -f name=main -f type=branch >/dev/null; \
+		fi; \
 	done
+
+ci-secrets: protect-deploy ## Scope deploy token to protected environments; push contact from sops
+	@set -e; token="$$(sops -d --extract '["cloudflare_pages_token"]' $(SOPS_FILE))"; \
+	test -n "$$token" || { echo "empty Cloudflare token" >&2; exit 1; }; \
+	for environment in production preview; do \
+		printf '%s' "$$token" | gh secret set CLOUDFLARE_API_TOKEN --env "$$environment"; \
+	done; \
+	unset token; \
+	if gh secret list | grep -q '^CLOUDFLARE_API_TOKEN[[:space:]]'; then \
+		gh secret delete CLOUDFLARE_API_TOKEN; \
+	fi; \
+	phone="$$(sops -d --extract '["seller"]["phone"]' $(SOPS_FILE))"; \
+	test -n "$$phone" || { echo "empty seller phone" >&2; exit 1; }; \
+	printf '%s' "$$phone" | gh secret set SELLER_PHONE
 
 protect-main: ## Require the CI test check on main (idempotent; admins can still bypass)
 	gh api -X PUT repos/{owner}/{repo}/branches/main/protection --input .github/branch-protection.json >/dev/null
