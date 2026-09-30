@@ -54,3 +54,16 @@ def floors(private: dict[str, Any] | None = None) -> dict[str, int]:
     if private is None:
         private = load_private()
     return private.get("floors", {})
+
+
+def record_sale(item_id: str, price: int) -> None:
+    """Keep what an item actually sold for in the encrypted file, never in the public repo."""
+    if not shutil.which("sops"):
+        raise RuntimeError("sops is not installed")
+    res = subprocess.run(
+        ["sops", "set", str(PRIVATE_SOPS_YAML), f'["sales"]["{item_id}"]', str(int(price))],
+        capture_output=True,
+        text=True,
+    )
+    if res.returncode != 0:
+        raise RuntimeError(f"sops set failed: {res.stderr.strip()}")
