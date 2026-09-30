@@ -328,8 +328,9 @@ def test_mobile_shell(public_dir):
     if len(sticky_text_bars) != 1:
         failures.append(f"expected one sticky Text me bar, found {len(sticky_text_bars)}")
 
-    sheet = re.search(r'<div id="itemSheet" class="([^"]+)"', html)
-    if not sheet or "items-end" not in sheet.group(1).split():
+    # Docked to the bottom by `dialog.sheet` in public.css.
+    sheet = re.search(r'<dialog id="itemSheet"[^>]* class="([^"]+)"', html)
+    if not sheet or "sheet" not in sheet.group(1).split():
         failures.append("item detail is not a bottom sheet")
     if 'id="itemFacts" data-max-facts="4"' not in html or ".slice(0, 4)" not in html:
         failures.append("item sheet is not capped at four facts")
