@@ -63,7 +63,8 @@ def test_body_and_sheets_clear_the_safe_areas():
     css = re.sub(
         r"\s+", " ", (ROOT / "build" / "public" / "styles.css").read_text(encoding="utf-8")
     )
-    # Every body padding rule clears each side on its own side: top right bottom left.
+    # Every body padding rule (top right bottom left) clears each inset on its own side.
+    # The top stays 0: outside a standalone app, the browser bar sits above the viewport.
     bodies = re.findall(r"(?<![\w-])body ?\{padding:([^}]*)\}", css)
     assert bodies, "no body padding rule"
     for body in bodies:
