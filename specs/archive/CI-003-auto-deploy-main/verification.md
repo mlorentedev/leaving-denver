@@ -21,7 +21,7 @@ Map every acceptance criterion from `proposal.md` to concrete proof (commit hash
 ## Test status
 
 - Test suite: `make check` -> 92 passed, Ruff lint and format clean.
-- Manual smoke test: pending the first post-merge push to production.
+- Manual smoke test: done, push run `36699028361` (see Evidence).
 - No regressions in existing test suite: yes.
 
 ## Decisions made during implementation
@@ -60,13 +60,13 @@ Verdict: **PASS-WITH-GAPS on substance.** Archive after the contract-set houseke
 
 Answer each line `yes: <path>`, naming the file you promoted, or `no: <reason>`. `dotf spec archive` refuses a line left unanswered, a `no` without a reason, and a `yes` whose file does not exist; a `00_meta/` path is looked up in the vault.
 
-- [ ] Lesson for the repo's `docs/lessons/`? <yes: path / no: reason>
-- [ ] ADR-worthy decision for the repo's `docs/adr/adr-XXX.md`? <yes: path / no: reason>
-- [ ] New pattern candidate for `00_meta/patterns/`? Only if this recurs in >1 project. <yes: path / no: reason>
+- [x] Lesson for the repo's `docs/lessons/`? no: the token-scoping finding (a ref check cannot protect a repo-wide secret; scope it to a main-only environment) is recorded in docs/runbooks/ops.md and in this spec's decisions
+- [x] ADR-worthy decision for the repo's `docs/adr/adr-XXX.md`? no: deploying tested pushes to Pages keeps ADR-001's static hosting; the trust model is stated in the proposal
+- [x] New pattern candidate for `00_meta/patterns/`? Only if this recurs in >1 project. no: single project
 
 ## Archive checklist
 
-- [ ] `proposal.md` frontmatter set to `status: archived`
-- [ ] Folder moved: `specs/CI-003-auto-deploy-main/` -> `specs/archive/CI-003-auto-deploy-main/`
-- [ ] Bitácora board ticket for this spec moved to Done / closed with PR link (ADR-018)
-- [ ] Promotions above executed (if any)
+- [x] `proposal.md` frontmatter set to `status: archived`
+- [x] Folder moved: `specs/CI-003-auto-deploy-main/` -> `specs/archive/CI-003-auto-deploy-main/`
+- [x] Bitácora board ticket for this spec moved to Done / closed with PR link (ADR-018)
+- [x] Promotions above executed (if any)

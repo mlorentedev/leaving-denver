@@ -1,9 +1,11 @@
 ---
 id: "PERF-002-photo-freshness"
 type: spec
-status: implementing # draft | implementing | verifying | archived
+status: archived # draft | implementing | verifying | archived
 created: "2026-09-30"
 issue: "mlorentedev/leaving-denver#101"
+review: waived
+review_waived_reason: "Owner waived the launcher review on 2026-09-30: the repo has no harness/reviewer-pool.json, so dotf spec review cannot run. Reviews on record: independent reviewer subagent on #110 (6033b61) and #111 (60af84f); CodeRabbit on #110 (0ca3616) and #111 (8d9102b)."
 tags: [spec, proposal]
 template_version: "1.0"
 ---
@@ -54,5 +56,7 @@ CI builds from scratch, so 1 and 2 hit local previews and `make deploy` only. It
 ## References
 
 - Bitácora board: issue #101 (from the PERF-001 review, #20)
-- Spec: `specs/PERF-001-responsive-images/verification.md`
+- Spec: `specs/archive/PERF-001-responsive-images/verification.md`
 - Lessons: `docs/lessons/lesson-013-budget-page-weight-by-what-the-browser-picks.md`, `docs/lessons/lesson-016-key-build-freshness-on-content-and-settings.md`
+
+<!-- archived 2026-09-30 — PRs: https://github.com/mlorentedev/leaving-denver/pull/110 https://github.com/mlorentedev/leaving-denver/pull/111 -->

@@ -33,4 +33,4 @@ created: "2026-09-30"
 - [x] Lint passes (`make check`)
 - [x] `verification.md` filled in for PR B
 - [x] Review findings dispositioned (#110: reviewer subagent + CodeRabbit; #111: reviewer subagent)
-- [ ] Independent adversarial review before archive
+- [x] Independent adversarial review before archive: launcher review waived by the owner on 2026-09-30, see `review_waived_reason` in proposal.md

@@ -48,7 +48,7 @@ Reviewer: the `reviewer` subagent, not the implementer. It ran read-only on main
 
 ## Archive checklist
 
-- [ ] `proposal.md` frontmatter set to `status: archived`
-- [ ] Folder moved: `specs/PERF-001-responsive-images/` -> `specs/archive/PERF-001-responsive-images/`
-- [ ] Bitácora board ticket for this spec moved to Done / closed with PR link (ADR-018)
-- [ ] Promotions above executed (if any)
+- [x] `proposal.md` frontmatter set to `status: archived`
+- [x] Folder moved: `specs/PERF-001-responsive-images/` -> `specs/archive/PERF-001-responsive-images/`
+- [x] Bitácora board ticket for this spec moved to Done / closed with PR link (ADR-018)
+- [x] Promotions above executed (if any)

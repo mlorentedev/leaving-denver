@@ -1,9 +1,11 @@
 ---
 id: "TEST-002-computed-contrast"
 type: spec
-status: implementing # draft | implementing | verifying | archived
+status: archived # draft | implementing | verifying | archived
 created: "2026-09-30"
 issue: "mlorentedev/leaving-denver#106"   # repo#NNN — GitHub issue / Project item that tracks this spec
+review: waived
+review_waived_reason: "Owner waived the launcher review on 2026-09-30: the repo has no harness/reviewer-pool.json, so dotf spec review cannot run. Reviews on record: CodeRabbit on #109 (28b4456, three findings applied); no independent reviewer-subagent pass."
 tags: [spec, proposal]
 template_version: "1.0"
 ---
@@ -46,3 +48,5 @@ The 12 px rule is a denylist of three arbitrary sizes, so `text-[9.5px]` and `te
 - AC3: the checker passes readable text, `sr-only` and `aria-hidden` text, hover-only colours, and faded images.
 - AC4: the colour conversion matches Tailwind v4's hex values within 1.5/255, and the ratio matches WCAG's reference.
 - AC5: no arbitrary font size under 12 px in the template or the rendered pages.
+
+<!-- archived 2026-09-30 — PR: https://github.com/mlorentedev/leaving-denver/pull/109 -->

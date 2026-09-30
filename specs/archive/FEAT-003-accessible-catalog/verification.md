@@ -73,7 +73,7 @@ Answer each line `yes: <path>`, naming the file you promoted, or `no: <reason>`.
 
 ## Archive checklist
 
-- [ ] `proposal.md` frontmatter set to `status: archived`
-- [ ] Folder moved: `specs/FEAT-003-accessible-catalog/` -> `specs/archive/FEAT-003-accessible-catalog/`
-- [ ] Bitácora board ticket for this spec moved to Done / closed with PR link (ADR-018)
-- [ ] Promotions above executed (if any)
+- [x] `proposal.md` frontmatter set to `status: archived`
+- [x] Folder moved: `specs/FEAT-003-accessible-catalog/` -> `specs/archive/FEAT-003-accessible-catalog/`
+- [x] Bitácora board ticket for this spec moved to Done / closed with PR link (ADR-018)
+- [x] Promotions above executed (if any)

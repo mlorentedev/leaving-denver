@@ -1,9 +1,11 @@
 ---
 id: "CI-003-auto-deploy-main"
 type: spec
-status: implementing # draft | implementing | verifying | archived
+status: archived # draft | implementing | verifying | archived
 created: "2026-09-29"
 issue: "mlorentedev/leaving-denver#82"   # repo#NNN — GitHub issue / Project item that tracks this spec
+review: waived
+review_waived_reason: "Owner waived the launcher review on 2026-09-30: the repo has no harness/reviewer-pool.json, so dotf spec review cannot run. Reviews on record: independent reviewer subagent at 908b1e3, live settings confirmed (findings ticketed as #102)."
 tags: [spec, proposal]
 template_version: "1.0"
 ---
@@ -42,14 +44,14 @@ manual production redeploys from `main` and named preview branches.
 
 ## Acceptance criteria
 
-- [ ] AC1: A `push` to `main` deploys to the `production` environment on Pages branch
+- [x] AC1: A `push` to `main` deploys to the `production` environment on Pages branch
   `main` only after `test` succeeds; a `pull_request` never deploys.
-- [ ] AC2: Manual `workflow_dispatch` still deploys a validated preview branch and
+- [x] AC2: Manual `workflow_dispatch` still deploys a validated preview branch and
   permits `branch=main` only from `refs/heads/main`.
-- [ ] AC3: Deploy builds with the nonempty real `SELLER_PHONE`, runs the same test gate,
+- [x] AC3: Deploy builds with the nonempty real `SELLER_PHONE`, runs the same test gate,
   and smoke-tests the deployed URL; no private workspace is uploaded.
-- [ ] AC4: README and site operations document automatic production CD and manual previews.
-- [ ] AC5: A workflow on a non-main ref cannot access the Pages token or deploy
+- [x] AC4: README and site operations document automatic production CD and manual previews.
+- [x] AC5: A workflow on a non-main ref cannot access the Pages token or deploy
   to either deployment environment; setup remains idempotent.
 
 ## References
@@ -57,3 +59,5 @@ manual production redeploys from `main` and named preview branches.
 - Bitácora: #82, prior manual deploy #4
 - `docs/adr/adr-001-static-catalog-over-monolithic-attachment.md`
 - `.github/workflows/ci.yml`, `docs/runbooks/ops.md`
+
+<!-- archived 2026-09-30 — PR: https://github.com/mlorentedev/leaving-denver/pull/84 -->

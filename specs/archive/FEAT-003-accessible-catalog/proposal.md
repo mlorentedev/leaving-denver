@@ -1,9 +1,11 @@
 ---
 id: "FEAT-003-accessible-catalog"
 type: spec
-status: verifying # draft | implementing | verifying | archived
+status: archived # draft | implementing | verifying | archived
 created: "2026-09-30"
 issue: "mlorentedev/leaving-denver#15"   # repo#NNN — GitHub issue / Project item that tracks this spec
+review: waived
+review_waived_reason: "Owner waived the launcher review on 2026-09-30: the repo has no harness/reviewer-pool.json, so dotf spec review cannot run. Reviews on record: independent reviewer subagent, second pass recorded in verification.md; CodeRabbit on #94-#96 and #108."
 tags: [spec, proposal]
 template_version: "1.0"
 ---
@@ -49,3 +51,5 @@ Buyers read the catalog on phones in bright light and inside Facebook's in-app b
 
 - Bitácora board: issue #15
 - Related spec: `specs/BUG-001-catalog-data-driven/` (AC10, one-line bundle offer)
+
+<!-- archived 2026-09-30 — PRs: https://github.com/mlorentedev/leaving-denver/pull/94 https://github.com/mlorentedev/leaving-denver/pull/95 https://github.com/mlorentedev/leaving-denver/pull/96 https://github.com/mlorentedev/leaving-denver/pull/108 -->

@@ -28,11 +28,11 @@ created: "2026-09-30"
 
 ## Promotion candidates
 
-- [x] Lesson: no: the calibration surprise is Tailwind v3 vs v4 palette values, recorded above; the method is in the test docstring
-- [x] ADR: no: no decision changed
-- [x] Pattern: no
+- [x] Lesson for the repo's `docs/lessons/`? no: the calibration surprise is Tailwind v3 vs v4 palette values, recorded above; the method is in the test docstring
+- [x] ADR-worthy decision for the repo's `docs/adr/adr-XXX.md`? no: no decision changed
+- [x] Cross-project pattern for `00_meta/patterns/`? no: the contrast check is specific to this site's palette
 
 ## Archive checklist
 
-- [ ] Independent review
-- [ ] Status `archived`, folder moved, #106 closed with the PR link
+- [x] Independent review: the launcher review (`dotf spec review`) was waived by the owner on 2026-09-30, see `review_waived_reason` in proposal.md. The only review on record is CodeRabbit on #109; no independent reviewer-subagent pass ran.
+- [x] Status `archived`, folder moved, #106 closed with the PR link

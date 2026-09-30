@@ -11,4 +11,4 @@ created: "2026-09-30"
 - [x] [AC1] Rendered pages measured: 180 text runs each, lowest 4.57:1
 - [x] [AC5] Arbitrary-size allowlist over the template and the pages
 - [x] Mutation: `text-neutral-500/70` on a real line fails EN and ES
-- [ ] Independent adversarial review before archive
+- [x] Independent adversarial review before archive: launcher review waived by the owner on 2026-09-30, see `review_waived_reason` in proposal.md

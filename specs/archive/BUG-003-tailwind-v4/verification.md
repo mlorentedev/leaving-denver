@@ -41,10 +41,10 @@ Reviewer: the `reviewer` subagent, not the implementer, at main `908b1e3`. It ra
 
 ## Promotion candidates
 
-- [ ] Lesson? Decide at archive time.
-- [ ] ADR? Decide at archive time.
-- [ ] Pattern? Decide at archive time.
+- [x] Lesson? yes: docs/lessons/lesson-015-check-classes-against-the-compiled-css.md (from this spec's review, shipped under BUG-009)
+- [x] ADR? no: compiling Tailwind with its pinned CLI is a build detail inside ADR-003, no new component
+- [x] Pattern? no: single project
 
 ## Archive checklist
 
-- [ ] Independent review and archive after PR acceptance; do not close issue merely for opening a PR.
+- [x] Independent review and archive after PR acceptance; do not close issue merely for opening a PR. Launcher review waived by the owner on 2026-09-30, see `review_waived_reason` in proposal.md.
