@@ -3,6 +3,7 @@ Responsive photos (PERF-001): each photo ships as width variants and every catal
 <img> lets the browser pick the smallest adequate one.
 """
 
+import json
 import os
 import re
 from html import unescape
@@ -11,7 +12,7 @@ from pathlib import Path
 import pytest
 from PIL import Image
 
-from leaving_denver import site_builder
+from leaving_denver import image_processor, site_builder
 from leaving_denver.image_processor import VARIANT_WIDTHS, process_image, variant_path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -29,16 +30,22 @@ def make_photo(path, size, orientation=None):
     Image.new("RGB", size, (200, 120, 40)).save(path, "JPEG", exif=exif)
 
 
+@pytest.fixture
+def cache():
+    """One build's manifest: calls within a test share it, as one `sync_all_photos` does."""
+    return {}
+
+
 def outputs(target):
-    return [target] + [variant_path(target, w) for w in VARIANT_WIDTHS]
+    return [target] + [v for w in VARIANT_WIDTHS if (v := variant_path(target, w)).is_file()]
 
 
-def test_wide_photo_gets_every_variant_upright_and_without_exif(tmp_path):
+def test_wide_photo_gets_every_variant_upright_and_without_exif(tmp_path, cache):
     src, target = tmp_path / "sofa.jpg", tmp_path / "out" / "sofa.jpg"
     # 2000x2400 stored sideways (orientation 6 = rotate 90° to display): upright and
     # capped at 1600 px tall it is 1333 px wide, so every variant applies.
     make_photo(src, (2400, 2000), orientation=6)
-    assert process_image(src, target)
+    assert process_image(src, target, cache)
 
     with Image.open(target) as img:
         assert img.height > img.width, "EXIF rotation was not applied"
@@ -52,37 +59,37 @@ def test_wide_photo_gets_every_variant_upright_and_without_exif(tmp_path):
             assert "exif" not in img.info, f"{path.name} keeps an EXIF chunk"
 
 
-def test_narrow_photo_is_never_upscaled(tmp_path):
+def test_narrow_photo_is_never_upscaled(tmp_path, cache):
     src, target = tmp_path / "topper.jpg", tmp_path / "out" / "topper.jpg"
     make_photo(src, (300, 300))
-    assert process_image(src, target)
+    assert process_image(src, target, cache)
     assert target.is_file()
     assert not any(variant_path(target, w).exists() for w in VARIANT_WIDTHS)
 
 
-def test_up_to_date_outputs_are_not_rewritten(tmp_path):
+def test_up_to_date_outputs_are_not_rewritten(tmp_path, cache):
     src, target = tmp_path / "desk.jpg", tmp_path / "out" / "desk.jpg"
     make_photo(src, (1300, 900))
-    assert process_image(src, target)
+    assert process_image(src, target, cache)
     before = {p: p.stat().st_mtime_ns for p in outputs(target) if p.exists()}
-    assert process_image(src, target)
+    assert process_image(src, target, cache)
     assert {p: p.stat().st_mtime_ns for p in before} == before
 
 
-def test_a_missing_variant_is_rebuilt(tmp_path):
+def test_a_missing_variant_is_rebuilt(tmp_path, cache):
     src, target = tmp_path / "desk.jpg", tmp_path / "out" / "desk.jpg"
     make_photo(src, (1300, 900))
-    assert process_image(src, target)
+    assert process_image(src, target, cache)
     variant_path(target, 800).unlink()
-    assert process_image(src, target)
+    assert process_image(src, target, cache)
     assert variant_path(target, 800).is_file()
 
 
-def test_photo_set_lists_variants_then_the_jpeg(tmp_path, monkeypatch):
+def test_photo_set_lists_variants_then_the_jpeg(tmp_path, monkeypatch, cache):
     monkeypatch.setattr(site_builder, "DIST_DIR", tmp_path)
     src, target = tmp_path / "raw.jpg", tmp_path / "catalog" / "tv" / "tv-1.jpg"
     make_photo(src, (1000, 500))
-    assert process_image(src, target)
+    assert process_image(src, target, cache)
 
     photo = site_builder.photo_set("catalog/tv/tv-1.jpg", "../")
     assert photo == {
@@ -155,26 +162,190 @@ def test_phone_downloads_a_third_of_the_full_covers():
     assert picked * 3 < full, f"phone covers weigh {picked} B against {full} B of full JPEGs"
 
 
-def test_variants_older_than_the_source_are_rebuilt(tmp_path):
-    src, target = tmp_path / "desk.jpg", tmp_path / "out" / "desk.jpg"
-    make_photo(src, (1300, 900))
-    assert process_image(src, target)
-    # A build that died after the JPEG write: JPEG current, one variant still old.
-    old = variant_path(target, 800)
-    stamp = src.stat().st_mtime_ns - 10**9
-    os.utime(old, ns=(stamp, stamp))
-    assert process_image(src, target)
-    assert old.stat().st_mtime_ns >= src.stat().st_mtime_ns
+def widths(target):
+    with Image.open(target) as img:
+        return img.width, [w for w in VARIANT_WIDTHS if variant_path(target, w).is_file()]
 
 
-def test_variants_outside_the_current_widths_are_removed(tmp_path):
+def test_a_replaced_source_with_an_older_mtime_is_rebuilt(tmp_path, cache):
     src, target = tmp_path / "desk.jpg", tmp_path / "out" / "desk.jpg"
     make_photo(src, (1300, 900))
-    assert process_image(src, target)
+    assert process_image(src, target, cache)
+    # `mv`, `cp -p` and `rsync -t` keep the new photo's own, older, timestamp.
+    stamp = target.stat().st_mtime_ns - 10**10
+    make_photo(src, (700, 500))
+    os.utime(src, ns=(stamp, stamp))
+    assert process_image(src, target, cache)
+    assert widths(target) == (700, [480])
+
+
+def inodes(target):
+    return {p.name: p.stat().st_ino for p in outputs(target)}
+
+
+@pytest.mark.parametrize(
+    ("setting", "value"),
+    [
+        ("MAX_IMAGE_WIDTH", 1000),
+        ("MAX_IMAGE_HEIGHT", 600),
+        ("JPEG_QUALITY", 50),
+        ("WEBP_QUALITY", 40),
+        ("VARIANT_WIDTHS", (480, 800)),
+    ],
+)
+def test_a_settings_change_rebuilds_the_outputs(tmp_path, cache, monkeypatch, setting, value):
+    src, target = tmp_path / "desk.jpg", tmp_path / "out" / "desk.jpg"
+    make_photo(src, (1300, 900))
+    assert process_image(src, target, cache)
+    before = inodes(target)
+    monkeypatch.setattr(image_processor, setting, value)
+    assert process_image(src, target, cache)
+    # A rewrite renames a fresh file into place, so every surviving output has a new inode.
+    after = inodes(target)
+    assert after and all(after[name] != before.get(name) for name in after), setting
+
+
+def test_a_killed_rebuild_never_leaves_a_fresh_entry(tmp_path, cache, monkeypatch):
+    src, target = tmp_path / "desk.jpg", tmp_path / "out" / "desk.jpg"
+    make_photo(src, (1300, 900))
+    assert process_image(src, target, cache)
+    on_disk = json.loads(json.dumps(cache))  # the manifest the last finished build saved
+    # The photo is swapped and the next build dies after installing its JPEG ...
+    make_photo(src, (700, 500))
+    real_replace = os.replace
+    calls = []
+
+    def dies_on_second_install(staged, path):
+        calls.append(path)
+        if len(calls) == 2:
+            raise KeyboardInterrupt
+        return real_replace(staged, path)
+
+    monkeypatch.setattr(image_processor.os, "replace", dies_on_second_install)
+    with pytest.raises(KeyboardInterrupt):
+        process_image(src, target, cache)
+    monkeypatch.setattr(image_processor.os, "replace", real_replace)
+    # ... then the old photo comes back (`git checkout`): its entry must not vouch for B's JPEG.
+    make_photo(src, (1300, 900))
+    assert process_image(src, target, on_disk)
+    assert widths(target) == (1300, [480, 800, 1200])
+
+
+def test_a_failed_write_keeps_the_previous_outputs(tmp_path, cache, monkeypatch):
+    src, target = tmp_path / "desk.jpg", tmp_path / "out" / "desk.jpg"
+    make_photo(src, (1300, 900))
+    assert process_image(src, target, cache)
+    before = {p.name: (p.stat().st_ino, p.read_bytes()) for p in outputs(target)}
+    real_save = Image.Image.save
+
+    def fails_on_webp(img, fp, fmt=None, **kwargs):
+        if fmt == "WEBP":
+            Path(fp).write_bytes(b"half a")
+            raise OSError("disk full")
+        return real_save(img, fp, fmt, **kwargs)
+
+    monkeypatch.setattr(Image.Image, "save", fails_on_webp)
+    make_photo(src, (700, 500))
+    assert not process_image(src, target, cache)
+    # Nothing is installed until every output is encoded: the old set stays whole.
+    assert not list(target.parent.glob("*.tmp"))
+    assert {p.name: (p.stat().st_ino, p.read_bytes()) for p in outputs(target)} == before
+    assert image_processor.cache_key(target) not in cache
+
+
+def test_a_null_stamp_never_vouches_for_a_missing_output(tmp_path, cache):
+    src, target = tmp_path / "desk.jpg", tmp_path / "out" / "desk.jpg"
+    make_photo(src, (1300, 900))
+    assert process_image(src, target, cache)
+    target.unlink()
+    cache[image_processor.cache_key(target)]["outputs"] = {"desk.jpg": None}
+    assert process_image(src, target, cache)
+    assert target.is_file()
+
+
+def test_an_unreadable_source_fails_that_photo_only(tmp_path, cache):
+    src, target = tmp_path / "desk.jpg", tmp_path / "out" / "desk.jpg"
+    src.mkdir()  # reading it raises IsADirectoryError, an OSError
+    assert not process_image(src, target, cache)
+    assert image_processor.cache_key(target) not in cache
+
+
+def test_a_failed_heic_conversion_leaves_nothing_in_the_output_dir(tmp_path, cache, monkeypatch):
+    src, target = tmp_path / "car.heic", tmp_path / "out" / "car.jpg"
+    src.write_bytes(b"heic bytes")
+    staged = []
+
+    def half_converted(heic, dest):
+        staged.append(dest)
+        dest.write_bytes(b"partial")
+        return False
+
+    monkeypatch.setattr(image_processor, "convert_heic_to_jpg", half_converted)
+    assert not process_image(src, target, cache)
+    assert not staged[0].is_relative_to(target.parent), "HEIC staged inside the deployed tree"
+    assert not staged[0].exists()
+    assert not list(target.parent.iterdir())
+
+
+@pytest.mark.parametrize("damage", ["empty jpeg", "empty variant", "garbage jpeg"])
+def test_a_damaged_output_is_rebuilt_not_raised(tmp_path, cache, damage):
+    src, target = tmp_path / "desk.jpg", tmp_path / "out" / "desk.jpg"
+    make_photo(src, (1300, 900))
+    assert process_image(src, target, cache)
+    # What a build killed mid-write leaves behind.
+    broken = variant_path(target, 800) if damage == "empty variant" else target
+    broken.write_bytes(b"" if damage.startswith("empty") else b"not a jpeg")
+    assert process_image(src, target, cache)
+    assert widths(target) == (1300, [480, 800, 1200])
+    with Image.open(variant_path(target, 800)) as img:
+        img.verify()
+
+
+def test_outputs_are_written_through_a_temporary_name(tmp_path, cache, monkeypatch):
+    src, target = tmp_path / "desk.jpg", tmp_path / "out" / "desk.jpg"
+    make_photo(src, (1300, 900))
+    renamed = []
+    real_replace = os.replace
+    monkeypatch.setattr(
+        image_processor.os, "replace", lambda a, b: renamed.append(Path(b)) or real_replace(a, b)
+    )
+    assert process_image(src, target, cache)
+    assert sorted(renamed) == sorted(outputs(target))
+    assert not list(target.parent.glob("*.tmp"))
+
+
+def test_the_manifest_survives_a_rebuild_and_stays_out_of_public(tmp_path, monkeypatch):
+    photos, dist = tmp_path / "photos", tmp_path / "public"
+    manifest = tmp_path / ".photo-cache.json"
+    (photos / "desk").mkdir(parents=True)
+    make_photo(photos / "desk" / "desk-1.jpg", (1300, 900))
+    monkeypatch.setattr(image_processor, "PHOTOS_DIR", photos)
+    monkeypatch.setattr(image_processor, "DIST_DIR", dist)
+    monkeypatch.setattr(image_processor, "PHOTO_CACHE", manifest)
+    assert image_processor.sync_all_photos() == {"desk": ["catalog/desk/desk-1.jpg"]}
+    assert list(json.loads(manifest.read_text())) == ["catalog/desk/desk-1.jpg"]
+    before = {p: p.stat().st_mtime_ns for p in dist.rglob("*") if p.is_file()}
+    # A write a killed build staged in the deployed tree is swept, never published.
+    stray = dist / "catalog" / "desk" / "desk-1-800w.webp.tmp"
+    stray.write_bytes(b"half")
+    assert image_processor.sync_all_photos()
+    assert not stray.exists()
+    assert {p: p.stat().st_mtime_ns for p in dist.rglob("*") if p.is_file()} == before
+    assert not [p for p in dist.rglob("*") if "cache" in p.name]
+    # A corrupt manifest means a full rebuild, never a crash.
+    manifest.write_text("{not json")
+    assert image_processor.sync_all_photos()
+    assert json.loads(manifest.read_text())
+
+
+def test_variants_outside_the_current_widths_are_removed(tmp_path, cache):
+    src, target = tmp_path / "desk.jpg", tmp_path / "out" / "desk.jpg"
+    make_photo(src, (1300, 900))
+    assert process_image(src, target, cache)
     # Left by a build whose VARIANT_WIDTHS had 640, or by a wider earlier source.
     stale = [target.with_name("desk-640w.webp"), target.with_name("desk-1600w.webp")]
     for path in stale:
         path.write_bytes(b"old")
-    assert process_image(src, target)
+    assert process_image(src, target, cache)
     assert not any(path.exists() for path in stale)
     assert all(variant_path(target, w).is_file() for w in VARIANT_WIDTHS)

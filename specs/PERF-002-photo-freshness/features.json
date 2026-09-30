@@ -1,0 +1,51 @@
+[
+  {
+    "id": "PERF-002-photo-freshness-f1",
+    "behavior": "AC1: a replaced source with an older mtime is rebuilt",
+    "verification": "uv run pytest -q tests/test_responsive_images.py -k older_mtime",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "PERF-002-photo-freshness-f2",
+    "behavior": "AC2: a settings change rebuilds the outputs",
+    "verification": "uv run pytest -q tests/test_responsive_images.py -k settings_change",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "PERF-002-photo-freshness-f3",
+    "behavior": "AC3: a damaged output is rebuilt, not raised",
+    "verification": "uv run pytest -q tests/test_responsive_images.py -k damaged_output",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "PERF-002-photo-freshness-f4",
+    "behavior": "AC4: outputs are written through a temporary name",
+    "verification": "uv run pytest -q tests/test_responsive_images.py -k temporary_name",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "PERF-002-photo-freshness-f5",
+    "behavior": "AC5: the manifest survives a rebuild, stays out of build/public, and a corrupt one means a full rebuild",
+    "verification": "uv run pytest -q tests/test_responsive_images.py -k manifest",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "PERF-002-photo-freshness-f6",
+    "behavior": "AC6: the page-weight test resolves sizes at 390/430 px, DPR 2 and 3",
+    "verification": "make build && uv run pytest -q tests/test_responsive_images.py -k phone_downloads",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "PERF-002-photo-freshness-f7",
+    "behavior": "AC7: at 430 px DPR 3 the hero picks a candidate lighter than the full JPEG",
+    "verification": "make build && uv run pytest -q tests/test_responsive_images.py -k hero",
+    "state": "pending",
+    "evidence": ""
+  }
+]

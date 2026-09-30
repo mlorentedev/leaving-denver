@@ -28,3 +28,4 @@ tags: [lessons, index, docs, leaving-denver]
 | [lesson-013](lesson-013-budget-page-weight-by-what-the-browser-picks.md) | Budget Page Weight by What the Browser Picks | 2026-09-30 | [performance, images, testing] |
 | [lesson-014](lesson-014-headless-chrome-has-no-pointer.md) | Headless Chrome Has No Pointer | 2026-09-30 | [testing, browser, accessibility] |
 | [lesson-015](lesson-015-check-classes-against-the-compiled-css.md) | Check Classes Against the Compiled CSS | 2026-09-30 | [testing, css, tailwind] |
+| [lesson-016](lesson-016-key-build-freshness-on-content-and-settings.md) | Key Build Freshness on Content and Settings | 2026-09-30 | [build, images, testing] |
