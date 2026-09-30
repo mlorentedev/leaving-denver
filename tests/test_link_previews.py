@@ -248,17 +248,11 @@ def test_the_shared_url_is_the_items_share_page(public_dir, page):
     assert meta(share_page.read_text(encoding="utf-8"), "og:url") == shared
 
 
-def test_share_falls_back_to_copying_the_link():
-    js = script_of((site_builder.TEMPLATES_DIR / "index.html").read_text(encoding="utf-8"))
-    share = js.split("function shareItem")[1].split("\n    }\n")[0]
-    assert "navigator.share({" in share
-    # A cancelled share sheet is not a failure; anything else falls back to copying.
-    assert "AbortError" in share
-    assert "navigator.clipboard.writeText(url)" in share
-    assert "UI.link_copied" in share
-    assert "selectAllChildren" in share, "no clipboard: the link must be shown selected"
-    # A sheet reopened for another item starts from a clean button.
-    assert "UI.share" in js.split("function openModal")[1].split("openSheet(")[0]
+def test_share_button_keeps_its_width():
+    html = (site_builder.TEMPLATES_DIR / "index.html").read_text(encoding="utf-8")
+    button = re.search(r'<button type="button" id="modalShare"[^>]*class="([^"]*)"', html)
+    # "Link copied" must not reflow the row and squeeze the text-me button.
+    assert {"shrink-0", "whitespace-nowrap"} <= set(button.group(1).split())
 
 
 @pytest.mark.parametrize("locale", ["en", "es"])

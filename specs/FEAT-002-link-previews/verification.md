@@ -16,11 +16,11 @@ Map every acceptance criterion from `proposal.md` to concrete proof (commit hash
 - [x] AC5 -> `test_catalog_pages_carry_their_own_preview[en/es]`
 - [x] AC6 -> `test_deep_link_opens_the_item_after_load` (static) and headless Chrome (below)
 - [x] AC7 -> `test_a_site_url_that_is_not_a_bare_https_origin_fails` (4 cases), `test_site_url_comes_from_the_environment`, `test_an_item_id_that_is_not_a_slug_fails` (5 cases)
-- [x] AC8 -> `test_item_sheet_has_a_share_button[en/es]`, `test_the_shared_url_is_the_items_share_page[en/es]` (the URL the button builds is the share page's own `og:url`), `test_share_falls_back_to_copying_the_link`, `test_share_strings_exist[en/es]`. A 390 px headless screenshot of `/es/#sofa-sleeper` shows Share between "Escribir sobre este artículo" and Close, on one row.
+- [x] AC8 -> `test_item_sheet_has_a_share_button[en/es]`, `test_the_shared_url_is_the_items_share_page[en/es]` (the URL the button builds is the share page's own `og:url`), `test_share_strings_exist[en/es]`, `test_share_button_keeps_its_width`, and `tests/test_share_button_browser.py`. That file runs the built pages in headless Chrome with stubbed share and clipboard, and checks five things: a cancel does nothing; a failed share copies; a refused clipboard shows the link selected; with no clipboard the link is shown; reopening resets the button. It also checks that ES shares `/es/i/<id>/`. Three mutations turn it red: an inverted `AbortError` test (2 failed), no `sheetItem` (5 failed) and a missing reject handler (1 failed). A 390 px headless screenshot of `/es/#sofa-sleeper` shows Share between "Escribir sobre este artículo" and Close, on one row.
 
 ## Test status
 
-- Test suite: `make check` -> ruff clean, 260 passed (PR 1), 267 passed (PR 2)
+- Test suite: `make check` -> ruff clean, 260 passed (PR 1), 273 passed (PR 2)
 - Headless Chrome (`--dump-dom`) over the real build:
   - `es/index.html#sofa-sleeper` -> `<dialog id="itemSheet" ... open>`, with the sofa's Spanish title;
   - `#nope` -> sheet closed;
@@ -52,11 +52,23 @@ No blocker. Dispositions, applied in the next commit unless noted:
 | 4 | `../../#id` depends on the trailing slash | **Declined.** Pages redirects `/i/x` to `/i/x/`, it is the only host, and the share URLs are generated with the slash. |
 | 5 | The spec named `<cover>-og.jpg`, but the code writes `og/<cover>.jpg` | **Applied** to the proposal. |
 | 6 | Smoke did not check the share page's own `og:image`, nor the ES page | **Applied.** Both locales' pages and their images are checked. |
-| 7 | The deep-link test is static, and the browser proof is prose | **Declined.** The repo has no browser test harness (lesson-014), and adding one is larger than this feature. The headless runs above are the record. |
+| 7 | The deep-link test is static, and the browser proof is prose | **Declined** in PR 1: the repo had no browser test harness (lesson-014). PR 2 then added one for the Share button (`tests/test_share_button_browser.py`), which a deep-link case can reuse. |
 | 8 | No test for markup in a title, and robots is read by string split | **Applied.** `test_markup_in_a_title_stays_text`; robots is read with `urllib.robotparser`. |
 | 9 | Pruning `og/` would fail on a subdirectory | **Applied.** Only files are pruned. |
 | 10 | A cover under 630 px tall sits small on the canvas | **Declined.** Covers are phone photos capped at 1600 px, and upscaling would only blur them. |
 | 11 | `es_ES` vs `es_US`; Slackbot, Discordbot and LinkedInBot not allowed | **Declined.** `og:locale` only labels the language of the tags, and the card renders the same either way. The sale is not shared on Slack, Discord or LinkedIn. |
+
+## PR 2 reviews: reviewer subagent (932db7d) PASS-WITH-GAPS, PR-Agent (932db7d)
+
+| # | Finding | Disposition |
+|---|---|---|
+| 1 | The behaviour tests only grep source, so an inverted `AbortError` check, a dropped reject handler or a lost `sheetItem` stays green (reviewer and PR-Agent) | **Applied.** `tests/test_share_button_browser.py` runs the real handler in headless Chrome, and all three mutations fail it. The grep-only fallback test is removed. |
+| 2 | A slow clipboard answer can relabel the sheet of the next item | **Applied.** Answers for an item the sheet no longer shows are dropped. |
+| 3 | The select fallback's "press Ctrl+C" label is wrong on phones and squeezes the text-me button | **Applied.** The label stays "Share", because the selected link is the cue and phones offer Copy on a selection. |
+| 4 | A missing `og:url` tag would throw | **Declined.** Both pages include `_og.html`, and `test_the_shared_url_is_the_items_share_page` fails without the tag. |
+| 5 | A synchronous throw from `navigator.share` has no fallback | **Declined.** The API rejects asynchronously. |
+| 6 | `aria-live` on the button is unreliable; "Link copied" never reverts | **Declined** for now. It is the pattern the contact sheet's Copy button already uses, and reopening the sheet resets it. |
+| 7 | No `whitespace-nowrap`/`shrink-0` on the button | **Applied**, pinned by `test_share_button_keeps_its_width`. |
 
 ## Promotion candidates
 

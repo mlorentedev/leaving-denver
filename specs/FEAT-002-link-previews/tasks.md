@@ -26,6 +26,7 @@ created: "2026-09-30"
 
 - [x] [AC8] Tests first (RED: 7 failed): button in the item sheet, shared URL equals the share page's own `og:url`, share/copy/select fallbacks, locale strings
 - [x] [AC8] Share button in the item sheet: `navigator.share`, clipboard fallback, select fallback; `share` / `link_copied` strings; classes compile (class coverage green)
+- [x] PR 2 reviews dispositioned in `verification.md`; headless Chrome behaviour tests added
 
 ## Closing
 
