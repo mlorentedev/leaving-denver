@@ -1,0 +1,9 @@
+[
+  {
+    "id": "FEAT-003-accessible-catalog-f1",
+    "behavior": "AC1: no sub-AA text utility or text under 12 px in the catalog template",
+    "verification": "uv run pytest -q tests/test_readable_text.py",
+    "state": "pending",
+    "evidence": ""
+  }
+]
