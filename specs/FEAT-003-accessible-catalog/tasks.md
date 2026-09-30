@@ -38,8 +38,8 @@ created: "2026-09-30"
 
 ## Closing
 
-- [ ] Every acceptance criterion covered by a test and a `features.json` entry
-- [ ] `verification.md` filled in
+- [x] Every acceptance criterion covered by a test and a `features.json` entry
+- [x] `verification.md` filled in
 - [ ] Independent adversarial review before archive
 
 ## Machine-readable features
