@@ -29,12 +29,13 @@ unverified vehicle service, condition or retail value.
 
 | When | Seller action |
 | :--- | :--- |
-| Now–early October | Photograph and list the car and highest-value items first; list smaller items after the main listings. Post an umbrella message only where group rules allow it and put a QR flyer on the building board if permitted. |
-| Weekly through October | Reply promptly, check unanswered inquiries and renew only when the platform offers it. Review items with no qualified messages before changing their **public** prices. Never publish private floors or claim a price increase. |
-| By October 22 | If the sectional is unsold, contact The Good Couch with real photos as a backup; see [OPS-010](https://github.com/mlorentedev/leaving-denver/issues/35). |
-| Late October–November 1 | Reassess remaining items and arrange donation/pickup alternatives early; do not assume any charity accepts bedding, electronics or sleeper sofas. Refresh car instant offers around November 1–2; see [vehicle-sale.md](vehicle-sale.md). |
-| November 3–6 | Give away or donate remaining low-value items if needed; arrange vehicle handover by November 5, with November 6 as the latest fallback. Do not promise a later bank transaction. |
-| Before November 9 | Remove sold listings and close the sale; follow the [decommission ticket](https://github.com/mlorentedev/leaving-denver/issues/38) to remove public contact details. |
+| September 29–October 4 | Photograph and list the car and highest-value items first; list smaller items after the main listings. Post an umbrella message only where group rules allow it and put a QR flyer on the building board if permitted. |
+| October 5–11 | Reply promptly, follow up on qualified inquiries and renew listings only when the platform offers it. Review items with no messages before changing their public asking prices. |
+| October 12–18 | Refresh eligible listings and photos; follow up with interested buyers. Recheck public asking prices on items still getting no qualified inquiries. |
+| October 19–25 | Promote remaining bundles without claiming items already sold. If the sectional is unsold, contact The Good Couch with real photos by October 22 as a backup; see [OPS-010](https://github.com/mlorentedev/leaving-denver/issues/35). |
+| October 26–November 1 | Reassess unsold items and book donation/pickup alternatives by November 1; confirm acceptance first, especially for bedding, electronics and sleeper sofas. Refresh car instant offers around November 1–2; see [vehicle-sale.md](vehicle-sale.md). |
+| November 2–8 | Give away or donate remaining low-value items if needed. Arrange vehicle handover for November 5, with November 6 as the latest fallback; do not promise a later bank transaction. Take down sold listings and follow the [decommission ticket](https://github.com/mlorentedev/leaving-denver/issues/38) to remove public contact details. |
+| November 9 | Departure: verify the sale has ended and the catalog no longer exposes a contact number. |
 
 Run `leaving-denver drops` immediately before repricing. It derives schedule windows from `seller.departure_date` and displays all price tiers:
 
@@ -84,8 +85,9 @@ or marking an item sold, follow [site operations](ops.md) to publish.
 - **Vehicle-report link:** "You can run a report through a service you
   choose; I do not buy reports from links sent by buyers."
 
-For household items, cash or in-person Venmo/Zelle counts only once receipt
-shows in **your own** app. Do not request deposits. Give the precise address
+For household items, count cash when you receive it. Count in-person
+Venmo/Zelle only after the payment appears in **your own** app. Do not request
+deposits. Give the precise address
 only after confirming a time; disclose first-floor pickup, one flight of
 stairs and no elevator before scheduling. Meet in daylight when possible,
 stage small items at the door, have another adult present for furniture, and
