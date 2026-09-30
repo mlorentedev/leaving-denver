@@ -133,9 +133,24 @@ def test_every_catalog_img_is_responsive(page):
     for tag in catalog:
         for name in ("srcset", "sizes", "width", "height"):
             assert attr(tag, name), f"{name} missing on {tag}"
-        for candidate in attr(tag, "srcset").split(","):
-            url = candidate.split()[0]
-            assert (page.parent / url).resolve().is_file(), f"srcset names a missing file: {url}"
+        check_srcset(page, attr(tag, "srcset"))
+
+
+def served(page, url):
+    return (page.parent / url).resolve()
+
+
+def check_srcset(page, srcset):
+    """Each candidate is a built file exactly as wide as its descriptor says, and the
+    descriptors are distinct and ascending (a duplicate width is invalid srcset)."""
+    stated = []
+    for candidate in srcset.split(", "):
+        url, descriptor = candidate.split()
+        assert served(page, url).is_file(), f"srcset names a missing file: {url}"
+        with Image.open(served(page, url)) as img:
+            assert f"{img.width}w" == descriptor, candidate
+        stated.append(int(descriptor[:-1]))
+    assert stated == sorted(set(stated)), f"duplicate or unordered widths: {srcset}"
 
 
 @pytest.mark.parametrize("page", PAGES, ids=["en", "es"])
@@ -176,16 +191,14 @@ def inventory(html):
     return json.JSONDecoder().raw_decode(html, start)[0]
 
 
-def test_item_dialog_uses_srcset():
-    _, html = catalog_imgs(PAGES[0])
-    # Each photo the dialog shows carries a srcset whose files exist at their stated width.
+@pytest.mark.parametrize("page", PAGES, ids=["en", "es"])
+def test_item_dialog_uses_srcset(page):
+    _, html = catalog_imgs(page)
+    # Each photo the dialog shows carries a valid srcset of built files.
     photos = [p for item in inventory(html)["items"] for p in item.get("photos", [])]
     assert photos, "no dialog photos found in INVENTORY"
     for photo in photos:
-        for candidate in photo["srcset"].split(", "):
-            url, descriptor = candidate.split()
-            with Image.open(DIST_DIR / url) as img:
-                assert f"{img.width}w" == descriptor, candidate
+        check_srcset(page, photo["srcset"])
     # The script hands those srcsets over as they are, with a sizes it can resolve.
     assignments = dict(re.findall(r"(\w+)\.srcset = ([^;]+);", html))
     assert assignments == {"mainImg": "p ? p.srcset : ''", "thumb": "p.srcset"}, assignments
@@ -203,17 +216,22 @@ def pick(srcset, needed):
     return next((url for w, url in candidates if w >= needed), candidates[-1][1])
 
 
-def cover_weights(tags, viewport, dpr):
-    """Bytes the covers (vehicle hero and cards) cost as the browser picks them from
-    `sizes` at this viewport and DPR, against the bytes of their full JPEGs."""
-    covers = [t for t in tags if attr(t, "srcset") and "w-full" in (attr(t, "class") or "").split()]
-    assert any(attr(t, "fetchpriority") == "high" for t in covers), "hero not measured"
-    full = sum((DIST_DIR / attr(t, "src")).stat().st_size for t in covers)
+def covers(tags):
+    """The vehicle hero and the item cards: the full-width photos a phone scrolls past."""
+    found = [t for t in tags if attr(t, "srcset") and "w-full" in (attr(t, "class") or "").split()]
+    assert any(attr(t, "fetchpriority") == "high" for t in found), "hero not measured"
+    return found
+
+
+def cover_weights(page, tags, viewport, dpr):
+    """Bytes the covers cost as the browser picks them from `sizes` at this viewport and
+    DPR, against the bytes of their full JPEGs."""
+    full = sum(served(page, attr(t, "src")).stat().st_size for t in covers(tags))
     picked = sum(
-        (DIST_DIR / pick(attr(t, "srcset"), resolve_sizes(attr(t, "sizes"), viewport) * dpr))
+        served(page, pick(attr(t, "srcset"), resolve_sizes(attr(t, "sizes"), viewport) * dpr))
         .stat()
         .st_size
-        for t in covers
+        for t in covers(tags)
     )
     return picked, full
 
@@ -223,32 +241,46 @@ def cover_weights(tags, viewport, dpr):
 PHONES = {(390, 2): 1 / 3, (390, 3): 1 / 3, (430, 3): 1 / 3}
 
 
+@pytest.mark.parametrize("page", PAGES, ids=["en", "es"])
 @pytest.mark.parametrize(("viewport", "dpr"), PHONES, ids=lambda v: str(v))
-def test_phone_downloads_a_third_of_the_full_covers(viewport, dpr):
-    tags, _ = catalog_imgs(PAGES[0])
-    picked, full = cover_weights(tags, viewport, dpr)
+def test_phone_downloads_a_third_of_the_full_covers(page, viewport, dpr):
+    tags, _ = catalog_imgs(page)
+    picked, full = cover_weights(page, tags, viewport, dpr)
     assert picked < full * PHONES[viewport, dpr], (
         f"{viewport} px at DPR {dpr}: covers weigh {picked} B against {full} B of full JPEGs"
     )
 
 
-def test_the_budget_catches_a_card_sized_to_the_viewport():
+@pytest.mark.parametrize("page", PAGES, ids=["en", "es"])
+def test_cards_ask_for_half_a_phone_screen(page):
+    # Two cards per row on a phone. A card whose `sizes` grows to 100vw passes the DPR 2
+    # budget (780 px still picks the 800w variant), so it is pinned here at any DPR.
+    tags, _ = catalog_imgs(page)
+    cards = [t for t in covers(tags) if attr(t, "loading") == "lazy"]
+    assert cards
+    for card in cards:
+        assert resolve_sizes(attr(card, "sizes"), 390) <= 390 / 2, attr(card, "sizes")
+
+
+@pytest.mark.parametrize(("viewport", "dpr"), [(390, 3), (430, 3)])
+def test_the_budget_catches_a_card_sized_to_the_viewport(viewport, dpr):
     tags, _ = catalog_imgs(PAGES[0])
     wide = [
         re.sub(r'sizes="[^"]*"', 'sizes="100vw"', t) if 'loading="lazy"' in t else t for t in tags
     ]
-    picked, full = cover_weights(wide, 390, 3)
-    assert picked >= full * PHONES[390, 3]
+    picked, full = cover_weights(PAGES[0], wide, viewport, dpr)
+    assert picked >= full * PHONES[viewport, dpr]
 
 
-def test_a_dpr3_phone_never_falls_back_to_the_hero_jpeg():
-    tags, _ = catalog_imgs(PAGES[0])
+@pytest.mark.parametrize("page", PAGES, ids=["en", "es"])
+def test_a_dpr3_phone_never_falls_back_to_the_hero_jpeg(page):
+    tags, _ = catalog_imgs(page)
     [hero] = [t for t in tags if attr(t, "fetchpriority") == "high"]
     for viewport in (390, 430):
         needed = resolve_sizes(attr(hero, "sizes"), viewport) * 3
         chosen = pick(attr(hero, "srcset"), needed)
         assert chosen.endswith(".webp"), f"{viewport} px at DPR 3 picks {chosen}"
-        assert (DIST_DIR / chosen).stat().st_size < (DIST_DIR / attr(hero, "src")).stat().st_size
+        assert served(page, chosen).stat().st_size < served(page, attr(hero, "src")).stat().st_size
 
 
 def widths(target):

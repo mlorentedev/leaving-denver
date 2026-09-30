@@ -32,5 +32,5 @@ created: "2026-09-30"
 - [x] Every acceptance criterion has a matching entry in `features.json`
 - [x] Lint passes (`make check`)
 - [x] `verification.md` filled in for PR B
-- [ ] Review findings dispositioned
+- [x] Review findings dispositioned (#110: reviewer subagent + CodeRabbit; #111: reviewer subagent)
 - [ ] Independent adversarial review before archive

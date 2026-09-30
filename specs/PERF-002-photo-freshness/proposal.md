@@ -48,7 +48,7 @@ CI builds from scratch, so 1 and 2 hit local previews and `make deploy` only. It
 - [x] AC3: an empty or corrupt JPEG, or an empty variant, is rebuilt instead of crashing the build.
 - [x] AC4: every output is written under a temporary name and renamed into place. A failed write leaves the previous outputs intact and no `.tmp` behind. A killed rebuild never leaves an entry vouching for outputs it did not write.
 - [x] AC5: the manifest lives outside `build/public`, a second sync rewrites nothing, and a corrupt manifest means a full rebuild.
-- [x] AC6 (PR B): the page-weight test reads `sizes` at 390 and 430 px, DPR 2 and 3, and fails if a card regresses to `100vw`.
+- [x] AC6 (PR B): the page-weight test reads `sizes` at 390 and 430 px, DPR 2 and 3, on both pages. A card regressing to `100vw` fails (the DPR 3 budget and the half-screen `sizes` check).
 - [x] AC7 (PR B): at 430 px and DPR 3 the hero picks a candidate lighter than the full JPEG.
 
 ## References
