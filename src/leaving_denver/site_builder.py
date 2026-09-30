@@ -301,6 +301,7 @@ def build_public_site(full_data: dict[str, Any]) -> None:
         raise RuntimeError(
             "No seller phone: set SELLER_PHONE or make data/private.sops.yaml decryptable"
         )
+    shutil.copy2(Path(__file__).parent / "assets" / "favicon.svg", DIST_DIR / "favicon.svg")
     # The template sees the sanitized data only, never full_data.
     public_data = sanitize_public_inventory(full_data)
     seller = sanitize_public_seller(full_data)
