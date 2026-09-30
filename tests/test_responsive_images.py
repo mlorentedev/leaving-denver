@@ -210,21 +210,21 @@ def test_a_killed_rebuild_never_leaves_a_fresh_entry(tmp_path, cache, monkeypatc
     make_photo(src, (1300, 900))
     assert process_image(src, target, cache)
     on_disk = json.loads(json.dumps(cache))  # the manifest the last finished build saved
-    # The photo is swapped and the next build dies after writing its JPEG ...
+    # The photo is swapped and the next build dies after installing its JPEG ...
     make_photo(src, (700, 500))
-    real_save = image_processor.save_atomically
+    real_replace = os.replace
     calls = []
 
-    def dies_on_second_write(*args, **kwargs):
-        calls.append(args[1])
+    def dies_on_second_install(staged, path):
+        calls.append(path)
         if len(calls) == 2:
             raise KeyboardInterrupt
-        return real_save(*args, **kwargs)
+        return real_replace(staged, path)
 
-    monkeypatch.setattr(image_processor, "save_atomically", dies_on_second_write)
+    monkeypatch.setattr(image_processor.os, "replace", dies_on_second_install)
     with pytest.raises(KeyboardInterrupt):
         process_image(src, target, cache)
-    monkeypatch.setattr(image_processor, "save_atomically", real_save)
+    monkeypatch.setattr(image_processor.os, "replace", real_replace)
     # ... then the old photo comes back (`git checkout`): its entry must not vouch for B's JPEG.
     make_photo(src, (1300, 900))
     assert process_image(src, target, on_disk)
@@ -235,6 +235,7 @@ def test_a_failed_write_keeps_the_previous_outputs(tmp_path, cache, monkeypatch)
     src, target = tmp_path / "desk.jpg", tmp_path / "out" / "desk.jpg"
     make_photo(src, (1300, 900))
     assert process_image(src, target, cache)
+    before = {p.name: (p.stat().st_ino, p.read_bytes()) for p in outputs(target)}
     real_save = Image.Image.save
 
     def fails_on_webp(img, fp, fmt=None, **kwargs):
@@ -244,11 +245,28 @@ def test_a_failed_write_keeps_the_previous_outputs(tmp_path, cache, monkeypatch)
         return real_save(img, fp, fmt, **kwargs)
 
     monkeypatch.setattr(Image.Image, "save", fails_on_webp)
-    monkeypatch.setattr(image_processor, "WEBP_QUALITY", 40)
+    make_photo(src, (700, 500))
     assert not process_image(src, target, cache)
+    # Nothing is installed until every output is encoded: the old set stays whole.
     assert not list(target.parent.glob("*.tmp"))
-    with Image.open(variant_path(target, 800)) as img:
-        img.verify()
+    assert {p.name: (p.stat().st_ino, p.read_bytes()) for p in outputs(target)} == before
+    assert image_processor.cache_key(target) not in cache
+
+
+def test_a_null_stamp_never_vouches_for_a_missing_output(tmp_path, cache):
+    src, target = tmp_path / "desk.jpg", tmp_path / "out" / "desk.jpg"
+    make_photo(src, (1300, 900))
+    assert process_image(src, target, cache)
+    target.unlink()
+    cache[image_processor.cache_key(target)]["outputs"] = {"desk.jpg": None}
+    assert process_image(src, target, cache)
+    assert target.is_file()
+
+
+def test_an_unreadable_source_fails_that_photo_only(tmp_path, cache):
+    src, target = tmp_path / "desk.jpg", tmp_path / "out" / "desk.jpg"
+    src.mkdir()  # reading it raises IsADirectoryError, an OSError
+    assert not process_image(src, target, cache)
     assert image_processor.cache_key(target) not in cache
 
 

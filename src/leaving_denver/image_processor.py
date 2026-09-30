@@ -139,18 +139,14 @@ def is_up_to_date(target_jpg: Path, digest: str, cache: Cache) -> bool:
     recorded = entry.get("outputs")
     if not isinstance(recorded, dict) or target_jpg.name not in recorded:
         return False
-    return all(stamp(target_jpg.with_name(name)) == value for name, value in recorded.items())
-
-
-def save_atomically(img: Image.Image, path: Path, fmt: str, **options) -> None:
-    """Write beside the target, then rename: a killed build never leaves half a file.
-    The `.tmp` suffix keeps the staged name out of the `<stem>-*w.webp` prune glob."""
-    staged = path.with_name(path.name + ".tmp")
-    try:
-        img.save(staged, fmt, **options)
-        os.replace(staged, path)
-    finally:
-        staged.unlink(missing_ok=True)
+    for name, value in recorded.items():
+        # A stamp is [size, mtime_ns]; anything else (a null, a hand edit) is a miss.
+        valid = isinstance(value, list) and len(value) == 2
+        if not valid or not all(isinstance(v, int) for v in value):
+            return False
+        if stamp(target_jpg.with_name(name)) != value:
+            return False
+    return True
 
 
 def process_image(src_path: Path, dest_path: Path, cache: Cache) -> bool:
@@ -163,7 +159,12 @@ def process_image(src_path: Path, dest_path: Path, cache: Cache) -> bool:
     dest_path.parent.mkdir(parents=True, exist_ok=True)
     target_jpg = dest_path.with_suffix(".jpg")
     key = cache_key(target_jpg)
-    digest = fingerprint(src_path)
+    try:
+        digest = fingerprint(src_path)
+    except OSError as exc:
+        print(f"Error reading image {src_path}: {exc}")
+        cache.pop(key, None)
+        return False
     if is_up_to_date(target_jpg, digest, cache):
         prune_stale_variants(target_jpg)
         return True
@@ -189,6 +190,15 @@ def process_image(src_path: Path, dest_path: Path, cache: Cache) -> bool:
 
 
 def write_outputs(src_path: Path, read_path: Path, target_jpg: Path) -> bool:
+    """Encode every output beside its target first, then rename them all into place: a
+    failed encode leaves the previous set whole, and nothing is ever half written. The
+    `.tmp` suffix keeps staged names out of the `<stem>-*w.webp` prune glob."""
+    staged: dict[Path, Path] = {}
+
+    def stage(img: Image.Image, path: Path, fmt: str, **options) -> None:
+        staged[path] = path.with_name(path.name + ".tmp")
+        img.save(staged[path], fmt, **options)
+
     try:
         with Image.open(read_path) as img:
             # Rotation lives in EXIF, which the fresh RGB buffer below drops.
@@ -201,21 +211,26 @@ def write_outputs(src_path: Path, read_path: Path, target_jpg: Path) -> bool:
                 img = img.resize(new_size, Image.Resampling.LANCZOS)
 
             # Save without EXIF metadata (data is completely fresh RGB)
-            save_atomically(img, target_jpg, "JPEG", quality=JPEG_QUALITY, optimize=True)
+            stage(img, target_jpg, "JPEG", quality=JPEG_QUALITY, optimize=True)
             for width in VARIANT_WIDTHS:
                 if width >= img.width:
                     continue
                 size = (width, round(img.height * width / img.width))
                 variant = img.resize(size, Image.Resampling.LANCZOS)
-                save_atomically(
+                stage(
                     variant, variant_path(target_jpg, width), "WEBP", quality=WEBP_QUALITY, method=6
                 )
 
+        for path, tmp in staged.items():
+            os.replace(tmp, path)
         prune_stale_variants(target_jpg)
         return True
     except Exception as exc:
         print(f"Error processing image {src_path}: {exc}")
         return False
+    finally:
+        for tmp in staged.values():
+            tmp.unlink(missing_ok=True)
 
 
 def sync_all_photos() -> dict[str, list[str]]:
