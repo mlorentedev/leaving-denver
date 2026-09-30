@@ -19,5 +19,12 @@
     "verification": "make build && uv run pytest -q tests/test_native_dialogs.py -k back_closes",
     "state": "pending",
     "evidence": ""
+  },
+  {
+    "id": "FEAT-003-accessible-catalog-f4",
+    "behavior": "AC4: on a fine pointer text links open the contact sheet (number filled on click, Copy); touch keeps sms:",
+    "verification": "make build && uv run pytest -q tests/test_desktop_contact.py",
+    "state": "pending",
+    "evidence": ""
   }
 ]

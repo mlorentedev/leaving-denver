@@ -298,6 +298,20 @@
     </div>
   </dialog>
 
+  <!-- Desktop has no SMS app: the text links open this instead, with the number to text from a phone -->
+  <dialog id="contactSheet" aria-labelledby="contactTitle" class="sheet">
+    <section class="bg-white rounded-t-3xl max-w-2xl w-full min-w-0 p-6 sm:p-7 relative shadow-xl">
+      <button type="button" data-close-sheet class="absolute top-4 right-4 w-10 h-10 rounded-full bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center text-neutral-600 text-sm" aria-label="{{ t.close }}">✕</button>
+      <h3 id="contactTitle" class="pr-12 text-xl font-extrabold text-neutral-900">{{ t.contact_heading }}</h3>
+      <div class="mt-4 flex flex-wrap items-center gap-3">
+        <p id="contactNumber" class="text-2xl font-black tracking-tight text-neutral-900 select-all"></p>
+        <button type="button" id="contactCopy" class="h-10 px-4 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white text-sm font-bold">{{ t.copy_number }}</button>
+      </div>
+      <p class="mt-5 text-xs font-bold uppercase tracking-wider text-neutral-500">{{ t.contact_hint }}</p>
+      <p id="contactMessage" class="mt-1.5 p-3 bg-neutral-50 rounded-xl border border-neutral-100 text-sm text-neutral-700 select-all"></p>
+    </section>
+  </dialog>
+
   <script>
     // Contact Obfuscation (Defeats automated scraping spiders & telemarketing bots)
     const _C = {{ contact_json | safe }};
@@ -415,6 +429,27 @@
       document.getElementById('itemSheet').close();
     }
 
+    // sms: does nothing on most desktops. With a mouse, a text link shows the number and
+    // the message it would have sent; phones and tablets keep the native SMS hand-off.
+    const desktop = window.matchMedia('(hover: hover) and (pointer: fine)');
+
+    function openContactSheet(link) {
+      const body = link.href.split('?body=')[1];
+      document.getElementById('contactNumber').textContent = `(${_C.area}) ${_C.prefix}-${_C.line}`;
+      document.getElementById('contactMessage').textContent = body ? decodeURIComponent(body) : UI.sms_generic;
+      document.getElementById('contactCopy').textContent = UI.copy_number;
+      openSheet(document.getElementById('contactSheet'));
+    }
+
+    function copyNumber() {
+      const button = document.getElementById('contactCopy');
+      const done = () => { button.textContent = UI.copied; };
+      // No clipboard (plain http, permission denied): select the number for Ctrl+C.
+      const select = () => window.getSelection().selectAllChildren(document.getElementById('contactNumber'));
+      if (navigator.clipboard) navigator.clipboard.writeText(getSellerPhone()).then(done, select);
+      else select();
+    }
+
     function applyFilter(cat) {
       document.querySelectorAll('.filter-btn').forEach(b => {
         const on = b.dataset.cat === cat;
@@ -433,6 +468,13 @@
       if (history.state && history.state.sheet) history.replaceState(null, '');
       updateDepartureCountdown();
       initDynamicContacts();
+      document.addEventListener('click', e => {
+        const link = e.target.closest('a[href^="sms:"]');
+        if (!link || !desktop.matches) return;
+        e.preventDefault();
+        openContactSheet(link);
+      });
+      document.getElementById('contactCopy').addEventListener('click', copyNumber);
       document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', () => applyFilter(btn.dataset.cat));
       });
@@ -457,9 +499,13 @@
           if (history.state && history.state.sheet === sheet.id) history.back();
         });
       });
-      // Back: the entry is already gone, so closing here does not go back twice.
+      // Back: the entry is already gone, so closing here does not go back twice. A sheet
+      // opened over another (contact over an item) closes one level per Back.
       window.addEventListener('popstate', () => {
-        document.querySelectorAll('dialog.sheet[open]').forEach(sheet => sheet.close());
+        const current = history.state && history.state.sheet;
+        document.querySelectorAll('dialog.sheet[open]').forEach(sheet => {
+          if (sheet.id !== current) sheet.close();
+        });
       });
     });
   </script>
