@@ -2,7 +2,8 @@
 Text meets WCAG AA (4.5:1) on the ground it sits on and is never under 12 px (FEAT-003).
 
 On the light grounds neutral-400 (#a3a3a3) is 2.52:1 and emerald-600 is 3.76:1. On the
-dark cards (neutral-900) it runs the other way: neutral-400 is 7.1:1, neutral-500 3.78:1.
+grey panels (neutral-100/200) neutral-500 drops to 4.35:1 as well. On the dark cards
+(neutral-900) it runs the other way: neutral-400 is 7.1:1, neutral-500 3.78:1.
 """
 
 import re
@@ -20,7 +21,12 @@ FAILS_ON = {
     "light": {"text-neutral-300", "text-neutral-400", "text-emerald-500", "text-emerald-600"},
     "dark": {"text-neutral-500", "text-neutral-600", "text-neutral-700"},
 }
+FAILS_ON["grey"] = FAILS_ON["light"] | {"text-neutral-500"}
 DARK_GROUNDS = {"bg-neutral-800", "bg-neutral-900", "bg-black", "bg-black/50"}
+GREY_GROUNDS = {"bg-neutral-100", "bg-neutral-200"}
+GROUND_OF = {**dict.fromkeys(DARK_GROUNDS, "dark"), **dict.fromkeys(GREY_GROUNDS, "grey")}
+# Only hover/focus states may change colour; a breakpoint colour would go unchecked below.
+RESPONSIVE_COLOUR = re.compile(r"(sm|md|lg|xl|2xl):(text|bg)-(white|black|[a-z]+-\d)")
 TEXT_COLOUR = re.compile(r"text-(white|black|[a-z]+-\d{2,3})(/\d+)?")
 VOID = {"area", "br", "hr", "img", "input", "link", "meta", "source", "wbr"}
 
@@ -40,7 +46,7 @@ class GroundChecker(HTMLParser):
         colours = [c for c in classes if TEXT_COLOUR.fullmatch(c)]
         ground, colour = self.stack[-1]
         if grounds:
-            ground = "dark" if grounds[-1] in DARK_GROUNDS else "light"
+            ground = GROUND_OF.get(grounds[-1], "light")
         if colours:
             colour = colours[-1]
         # Checked where the pair changes; decoration hidden from assistive tech (the EN / ES
@@ -69,12 +75,18 @@ def test_text_contrast_holds_on_its_ground(page):
         '<div class="bg-neutral-900"><p class="text-neutral-500">x</p></div>',
         '<div class="text-neutral-500"><p class="bg-neutral-900">inherits the grey</p></div>',
         '<div class="bg-neutral-900 text-neutral-400"><p class="bg-white">inherits the grey</p></div>',
+        '<div class="bg-neutral-100"><p class="text-neutral-500">4.35:1</p></div>',
     ],
 )
 def test_checker_catches_set_and_inherited_colours(markup):
     checker = GroundChecker()
     checker.feed(markup)
     assert checker.failures
+
+
+def test_colours_do_not_change_at_breakpoints():
+    hits = RESPONSIVE_COLOUR.findall(TEMPLATE.read_text(encoding="utf-8"))
+    assert not hits, hits
 
 
 def test_script_built_text_is_readable():
