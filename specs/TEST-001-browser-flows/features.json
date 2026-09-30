@@ -1,0 +1,9 @@
+[
+  {
+    "id": "TEST-001-browser-flows-f1",
+    "behavior": "Sheet close paths, Back, stacked sheets, desktop and touch contact, and the deep link, run in headless Chrome",
+    "verification": "uv run -q --extra dev pytest -q tests/test_catalog_flows_browser.py tests/test_share_button_browser.py",
+    "state": "passing",
+    "evidence": "19 passed, 8 runs in a row; 11 of 11 mutations caught"
+  }
+]
