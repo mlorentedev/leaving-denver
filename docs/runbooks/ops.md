@@ -15,7 +15,9 @@ with the age key. This restricts both GitHub deployment environments to the
 `main` workflow ref, moves the Cloudflare token out of repository-wide secrets,
 and refreshes the contact secret. Verify the environments still allow only
 `main` after changing deployment settings. A branch workflow must never receive
-a production-capable Pages token, even for a preview.
+a production-capable Pages token, even for a preview. `make protect-deploy`
+removes any stale extra branch or tag policies as well as ensuring the `main`
+branch policy exists.
 
 ## Deploy and roll back
 

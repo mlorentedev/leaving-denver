@@ -67,3 +67,12 @@ def test_deploy_token_is_environment_scoped_and_branches_are_restricted():
     assert "gh secret set CLOUDFLARE_API_TOKEN --env" in makefile
     assert "gh secret delete CLOUDFLARE_API_TOKEN" in makefile
     assert "make ci-secrets" in (ROOT / "docs/runbooks/ops.md").read_text(encoding="utf-8")
+
+
+def test_deploy_protection_removes_stale_branch_and_tag_policies():
+    makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
+    protect_deploy = makefile.split("protect-deploy:", 1)[1].split("ci-secrets:", 1)[0]
+    assert "--paginate" in protect_deploy
+    assert '.name != "main" or .type != "branch"' in protect_deploy
+    assert "gh api -X DELETE" in protect_deploy
+    assert '.name == "main" and .type == "branch"' in protect_deploy

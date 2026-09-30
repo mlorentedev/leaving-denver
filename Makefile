@@ -83,8 +83,14 @@ cf-project: ## Create the Cloudflare Pages project if it does not exist (idempot
 protect-deploy: ## Allow deploy secrets only from main, including manual previews
 	@set -e; for environment in production preview; do \
 		gh api -X PUT "repos/{owner}/{repo}/environments/$$environment" --input .github/deployment-environment.json >/dev/null; \
-		if ! gh api "repos/{owner}/{repo}/environments/$$environment/deployment-branch-policies" --jq '.branch_policies[].name' | grep -Fxq main; then \
-			gh api -X POST "repos/{owner}/{repo}/environments/$$environment/deployment-branch-policies" -f name=main -f type=branch >/dev/null; \
+		policies="repos/{owner}/{repo}/environments/$$environment/deployment-branch-policies"; \
+		stale="$$(gh api --paginate "$$policies" --jq '.branch_policies[] | select(.name != "main" or .type != "branch") | .id')"; \
+		for policy_id in $$stale; do \
+			gh api -X DELETE "$$policies/$$policy_id" >/dev/null; \
+		done; \
+		main="$$(gh api --paginate "$$policies" --jq '.branch_policies[] | select(.name == "main" and .type == "branch") | .id')"; \
+		if [ -z "$$main" ]; then \
+			gh api -X POST "$$policies" -f name=main -f type=branch >/dev/null; \
 		fi; \
 	done
 
