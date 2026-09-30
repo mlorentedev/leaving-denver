@@ -8,15 +8,15 @@ created: "2026-09-30"
 ## Evidence
 
 - [x] AC1: `test_every_class_is_covered[index.html]` and `[poster_assistant.html]`
-- [x] AC2: `test_detector_reports_a_typo_but_not_utilities_or_hooks`
-- [x] AC3: `test_class_lookups_use_a_registered_map`, and `source_tokens` asserts that every indexed map is defined
+- [x] AC2: `test_detector_reports_a_typo_but_not_utilities_or_hooks`, which also covers a single-quoted attribute and class names in declaration values, strings and `url()`s that must not count as defined
+- [x] AC3: `test_detector_fails_closed_on_classes_it_cannot_read` covers six forms: a variable, a `${var}`, a call, an unregistered map, `classList.add(var)` and `setAttribute('class', var)`
 - [x] AC4: `test_compiled_css_contains_v4_utilities` checks membership in the parsed class set
 - [x] AC5: `test_missing_cli_fails_direct_build` seeds `.old{}` and asserts that it survives unchanged
 - [x] AC6: `test_package_declares_the_node_it_needs` checks `engines.node` `>=20`, from `@tailwindcss/oxide`'s own `engines`
 
 ## Test status
 
-- `make check`: 186 passed.
+- `make check`: 190 passed, after the CodeRabbit round.
 - Mutation check. With the build as is, a `zz-typo` injected in each context was reported by name:
   - a static attribute inside a Jinja `if`;
   - a Jinja branch that only renders for a Sold item;
@@ -25,8 +25,9 @@ created: "2026-09-30"
   - a `${...}` ternary;
   - `classList.add`;
   - an `innerHTML` template string;
-  - a `className` in the poster assistant.
-  All 8 were caught, and the templates were restored afterwards.
+  - a `className` in the poster assistant;
+  - after the CodeRabbit round, a `+ (on ? ... : ...)` join.
+  All 9 were caught. A `className = cls + '...'` was rejected as `Unresolved`. The templates were restored afterwards.
 - The current templates have zero gaps: every token maps to a rule, to the template's own `<style>`, or to one of seven declared hooks.
 
 ## Promotion candidates

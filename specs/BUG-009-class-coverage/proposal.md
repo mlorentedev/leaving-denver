@@ -22,7 +22,8 @@ Tailwind v4 compiles only the classes it recognises and drops the rest without a
    - the rendered public pages (EN and ES), built from the real inventory with an item Sold, one Pending and the vehicle Sold, so every Jinja branch and macro argument is rendered;
    - the static `class="..."` words of both templates, including the ones in JS template strings;
    - the string literals in `className =` and `classList.*(...)` statements, with their `${...}` ternary branches;
-   - every JS class map (`STATUS_PILL`). A `className` built from an unregistered map fails the test.
+   - every JS class map (`STATUS_PILL`). Any class expression that is not literals, ternary branches, `+` joins or a registered map lookup fails the test (fail closed).
+   Defined classes come from selector preludes only; declaration values, strings, `url()`s and comments define nothing.
    `make check` runs the test, and both the CI `test` job and `make deploy` require `make check`, so a missing class stops a deploy.
 2. **A self-test for the detector:** a typo in a template string is reported, while a hook or a real utility is not.
 3. **Robust utility assertions:** the four v4 utilities are checked as members of the parsed class set, not as minified bytes.
@@ -38,7 +39,7 @@ Tailwind v4 compiles only the classes it recognises and drops the rest without a
 
 - AC1: every class token used by `index.html` and `poster_assistant.html` has a CSS rule or is a declared hook.
 - AC2: the detector reports a typo, and does not report hooks or real utilities.
-- AC3: a JS `className` built from an unregistered lookup map fails the test.
+- AC3: a JS class expression the detector cannot resolve (a variable, a call, an interpolation, an unregistered map) fails the test instead of being skipped.
 - AC4: the v4 utility test no longer depends on minified byte order.
 - AC5: a missing CLI raises even when an old `styles.css` exists, and the old file is left untouched.
 - AC6: `package.json` declares `engines.node`.

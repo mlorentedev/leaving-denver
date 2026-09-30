@@ -35,59 +35,122 @@ HOOKS = {
 # JS objects whose values are class lists, looked up at runtime: `STATUS_PILL[item.status]`.
 CLASS_MAPS = ("STATUS_PILL",)
 
-LITERAL = re.compile(r"'([^'\n]*)'|`([^`]*)`|\"([^\"\n]*)\"")
 EXPRESSION = re.compile(r"\{\{.*?\}\}|\{%.*?%\}|\$\{.*?\}", re.S)
-CLASS_STATEMENT = re.compile(r"(?:className\s*=|classList\.(?:add|remove|toggle|replace)\()([^;]*)")
+CLASS_ATTRIBUTE = re.compile(r"(?<![\w-])class=([\"'])(.*?)\1", re.S)
+CLASS_ASSIGNMENT = re.compile(r"className\s*\+?=(?!=)|setAttribute\(\s*['\"]class['\"]\s*,")
+CLASS_LIST_CALL = re.compile(r"classList\.(add|remove|toggle|replace)\(")
+
+
+class Unresolved(ValueError):
+    """A class expression the detector cannot read: a variable, a call, an unknown map."""
 
 
 def css_classes(css: str) -> set[str]:
-    """Every class selector in a stylesheet, unescaped (`.md\\:flex` -> `md:flex`)."""
-    names = re.findall(r"\.((?:\\.|[A-Za-z0-9_-])+)", css)
+    """Class selectors of a stylesheet, unescaped (`.md\\:flex` -> `md:flex`).
+
+    Only selector preludes count: a class name inside a declaration value, a string,
+    a `url()` or a comment defines nothing."""
+    css = re.sub(r"/\*.*?\*/", "", css, flags=re.S)
+    css = re.sub(r"url\([^)]*\)", "url()", css)
+    css = re.sub(r"(?<!\\)([\"'])(?:\\.|(?!\1).)*\1", '""', css)
+    names = [
+        name
+        for prelude in re.findall(r"([^{};]*)\{", css)
+        if not prelude.lstrip().startswith("@")
+        for name in re.findall(r"\.((?:\\.|[A-Za-z0-9_-])+)", prelude)
+    ]
     return {re.sub(r"\\(.)", r"\1", name) for name in names}
 
 
-def literal_words(text: str) -> set[str]:
-    """Words of the quoted strings in a JS expression: the branches of a ternary."""
-    # Compared values (`item.status === 'Sold'`) are data, not classes.
-    text = re.sub(r"[!=]==?\s*(['\"`])[^'\"`]*\1", "", text)
-    words = set()
-    for single, template, double in LITERAL.findall(text):
-        words |= class_value_words(template) if template else set((single or double).split())
-    return words
+def string_end(text: str, i: int) -> int:
+    """Index of the quote closing the JS string that opens at `i`."""
+    quote, i = text[i], i + 1
+    while text[i] != quote:
+        if text[i] == "\\":
+            i += 1
+        elif quote == "`" and text.startswith("${", i):
+            i = scan(text, i + 2, "}")
+        i += 1
+    return i
 
 
-def class_value_words(value: str) -> set[str]:
-    """Static words of a class attribute; `${...}` branches count, Jinja is rendered instead."""
+def scan(text: str, start: int, stop: str) -> int:
+    """First `stop` character at bracket depth 0 and outside strings; len(text) if none."""
+    depth, i = 0, start
+    while i < len(text):
+        char = text[i]
+        if char in "'\"`":
+            i = string_end(text, i)
+        elif depth == 0 and char in stop:
+            return i
+        elif char in "([{":
+            depth += 1
+        elif char in ")]}":
+            depth -= 1
+        i += 1
+    return len(text)
+
+
+def split_top(text: str, sep: str) -> list[str]:
+    parts, start = [], 0
+    while (end := scan(text, start, sep)) < len(text):
+        parts.append(text[start:end])
+        start = end + 1
+    return [*parts, text[start:]]
+
+
+def class_words(expr: str, maps: set[str]) -> set[str]:
+    """Classes a JS class expression can produce: literals, ternary branches, `+` joins and
+    registered map lookups (collected in `maps`). Anything else fails closed."""
+    expr = expr.strip()
+    while expr[:1] == "(" and scan(expr, 1, ")") == len(expr) - 1:
+        expr = expr[1:-1].strip()
+    if (mark := scan(expr, 0, "?")) < len(expr):  # the condition is data, not classes
+        colon = scan(expr, mark + 1, ":")
+        return class_words(expr[mark + 1 : colon], maps) | class_words(expr[colon + 1 :], maps)
+    if len(parts := split_top(expr, "+")) > 1:
+        return set().union(*(class_words(part, maps) for part in parts))
+    if expr[:1] in "'\"" and string_end(expr, 0) == len(expr) - 1:
+        return set(expr[1:-1].split())
+    if expr[:1] == "`" and string_end(expr, 0) == len(expr) - 1:
+        return class_value_words(expr[1:-1], maps)
+    lookup = re.fullmatch(r"([A-Za-z_]\w*)\[.*\]", expr, re.S)
+    if lookup and lookup.group(1) in CLASS_MAPS:
+        maps.add(lookup.group(1))
+        return set()
+    raise Unresolved(f"cannot resolve class expression: {expr!r}")
+
+
+def class_value_words(value: str, maps: set[str]) -> set[str]:
+    """Static words of a class value; `${...}` is resolved, Jinja is rendered instead."""
     words = set()
     for expr in EXPRESSION.findall(value):
         if expr.startswith("${"):
-            words |= literal_words(expr)
+            words |= class_words(expr[2:-1], maps)
     return words | set(EXPRESSION.sub(" ", value).split())
 
 
 def source_tokens(template: str) -> set[str]:
-    tokens = set()
-    for value in re.findall(r'\bclass="([^"]*)"', template):
-        tokens |= class_value_words(value)
-    for statement in CLASS_STATEMENT.findall(template):
-        tokens |= literal_words(statement)
-    for name in class_lookups(template):
+    tokens, maps = set(), set()
+    for _, value in CLASS_ATTRIBUTE.findall(template):
+        tokens |= class_value_words(value, maps)
+    for match in CLASS_ASSIGNMENT.finditer(template):
+        tokens |= class_words(template[match.end() : scan(template, match.end(), ";")], maps)
+    for match in CLASS_LIST_CALL.finditer(template):
+        args = split_top(template[match.end() : scan(template, match.end(), ")")], ",")
+        # toggle's second argument is the on/off condition.
+        for arg in args[:1] if match.group(1) == "toggle" else args:
+            tokens |= class_words(arg, maps)
+    for name in maps:
         body = re.search(rf"const {name} = \{{(.*?)\}};", template, re.S)
         assert body, f"class map {name} not found"
-        tokens |= literal_words(body.group(1))
+        for _, value in re.findall(r"([\"'])(.*?)\1", body.group(1)):
+            tokens |= set(value.split())
     return tokens
 
 
-def class_lookups(template: str) -> set[str]:
-    """Names indexed inside class statements: `... + STATUS_PILL[item.status]`."""
-    names = set()
-    for statement in CLASS_STATEMENT.findall(template):
-        names |= set(re.findall(r"\b([A-Za-z_]\w*)\[", statement))
-    return names
-
-
 def rendered_tokens(html: str) -> set[str]:
-    return {word for value in re.findall(r'\bclass="([^"]*)"', html) for word in value.split()}
+    return {word for _, value in CLASS_ATTRIBUTE.findall(html) for word in value.split()}
 
 
 def missing(tokens: set[str], css: str, template: str = "") -> set[str]:
@@ -99,24 +162,45 @@ def missing(tokens: set[str], css: str, template: str = "") -> set[str]:
 
 
 def test_detector_reports_a_typo_but_not_utilities_or_hooks():
-    css = r".text-neutral-500{color:red}.md\:flex{display:flex}.w-1\/2{width:50%}"
+    css = (
+        r".text-neutral-500{color:red}.md\:flex{display:flex}.w-1\/2{width:50%}"
+        # Declaration values, strings and urls define nothing.
+        '.other{content:".text-netural-500"}.bg{background:url(x.text-nuetral-500)}'
+        r"@media (min-width:640px){.sm\:p-7{padding:1.75rem}}"
+    )
     template = (
         "<style>.hide-scrollbar{scrollbar-width:none}</style>"
-        '<p class="text-netural-500 md:flex w-1/2 item-card hide-scrollbar"></p>'
+        '<p class="text-netural-500 md:flex w-1/2 item-card hide-scrollbar sm:p-7"></p>'
+        "<i class='text-nuetral-600'></i>"
         "<script>const STATUS_PILL = { Sold: 'text-neutral-500' };"
         "el.className = `p-1 ${on ? 'md:flex' : 'text-nuetral-500'}`;"
         "if (x.status === 'Sold') el.classList.add('md:flex');"
-        "pill.className = 'md:flex ' + STATUS_PILL[x.status];</script>"
+        "el.classList.toggle('w-1/2', x.status === 'Sold');"
+        "pill.className = 'md:flex ' + (on ? STATUS_PILL[x.status] : 'sm:p-7');</script>"
     )
     tokens = source_tokens(template)
-    assert missing(tokens, css, template) == {"text-netural-500", "text-nuetral-500", "p-1"}
+    assert missing(tokens, css, template) == {
+        "text-netural-500",
+        "text-nuetral-500",
+        "text-nuetral-600",
+        "p-1",
+    }
 
 
-@pytest.mark.parametrize("name", ["index.html", "poster_assistant.html"])
-def test_class_lookups_use_a_registered_map(name):
-    template = (TEMPLATES / name).read_text(encoding="utf-8")
-    lookups = class_lookups(template)
-    assert lookups <= set(CLASS_MAPS), f"className built from an unregistered map: {lookups}"
+@pytest.mark.parametrize(
+    "script",
+    [
+        "el.className = classes;",
+        "el.className = `${classes}`;",
+        "el.className = 'p-1 ' + pick(item);",
+        "el.className = OTHER_MAP[item.status];",
+        "el.classList.add(extra);",
+        "el.setAttribute('class', classes);",
+    ],
+)
+def test_detector_fails_closed_on_classes_it_cannot_read(script):
+    with pytest.raises(Unresolved):
+        source_tokens(f"<script>{script}</script>")
 
 
 @pytest.fixture(scope="module")
@@ -148,7 +232,7 @@ def rendered(tmp_path_factory):
 @pytest.mark.parametrize("name", ["index.html", "poster_assistant.html"])
 def test_every_class_is_covered(name, rendered):
     template = (TEMPLATES / name).read_text(encoding="utf-8")
-    tokens = source_tokens(template)
+    tokens = source_tokens(template)  # raises Unresolved on a class it cannot read
     if name == "index.html":
         for html in rendered:
             tokens |= rendered_tokens(html)
