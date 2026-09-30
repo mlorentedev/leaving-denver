@@ -18,6 +18,7 @@ from typing import Any
 
 import yaml
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
+from PIL import Image
 
 from leaving_denver.config import (
     BASE_DIR,
@@ -30,8 +31,9 @@ from leaving_denver.config import (
     PUBLIC_HEADERS,
     PUBLIC_INDEX_HTML,
     PUBLIC_ROBOTS_TXT,
+    VARIANT_WIDTHS,
 )
-from leaving_denver.image_processor import sync_all_photos
+from leaving_denver.image_processor import sync_all_photos, variant_path
 from leaving_denver.private_data import floors, load_private, phone_parts, seller_phone
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
@@ -138,6 +140,29 @@ def apply_photos(item: dict[str, Any], synced: list[str]) -> None:
         images.insert(0, match[0])
     item["images"] = images
     item["primary_image"] = images[0]
+
+
+def photo_set(image: str, asset_prefix: str) -> dict[str, Any]:
+    """A built photo's `<img>` attributes: its WebP variants and the JPEG itself, by width."""
+    jpg = DIST_DIR / image
+    photo: dict[str, Any] = {
+        "src": asset_prefix + image,
+        "srcset": "",
+        "width": None,
+        "height": None,
+    }
+    if not jpg.is_file():
+        return photo
+    with Image.open(jpg) as img:
+        width, height = img.size
+    candidates = [
+        f"{asset_prefix}{Path(image).parent.as_posix()}/{variant_path(jpg, w).name} {w}w"
+        for w in VARIANT_WIDTHS
+        if w < width and variant_path(jpg, w).is_file()
+    ]
+    candidates.append(f"{asset_prefix}{image} {width}w")
+    photo.update(srcset=", ".join(candidates), width=width, height=height)
+    return photo
 
 
 def sanitize_public_inventory(full_data: dict[str, Any]) -> dict[str, Any]:
@@ -296,6 +321,7 @@ def localize_public_inventory(
                 item[public_field] = copy[source_field]
         item["category_label"] = translations["categories"].get(item["category"], item["category"])
         item["status"] = translations["statuses"].get(item["status"], item["status"])
+        item["photos"] = [photo_set(image, asset_prefix) for image in item["images"]]
         item["images"] = [asset_prefix + image for image in item["images"]]
 
     source_bundles = {bundle["id"]: bundle for bundle in full_data.get("bundles", [])}
