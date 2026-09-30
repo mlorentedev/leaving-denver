@@ -240,7 +240,7 @@ def write_share_image(cover_jpg: Path) -> Path:
     """The link-preview image for an item: its built cover letterboxed onto the page
     background at SHARE_IMAGE_SIZE, in `og/` beside it. The cards show whole photos, so a
     crop would cut the furniture. Written only when the bytes differ, so a rebuild with
-    nothing new leaves it alone; any older preview in `og/` (a previous cover) is removed."""
+    nothing new leaves it alone; any older preview JPEG in `og/` (a previous cover) is removed."""
     target = cover_jpg.parent / "og" / cover_jpg.name
     with Image.open(cover_jpg) as img:
         photo = img.convert("RGB")
@@ -264,9 +264,9 @@ def write_share_image(cover_jpg: Path) -> Path:
             os.replace(staged, target)
         finally:
             staged.unlink(missing_ok=True)
-    for other in target.parent.iterdir():
-        if other != target and other.is_file():
-            other.unlink()
+    for other in target.parent.glob("*.jpg"):
+        if other != target:
+            other.unlink(missing_ok=True)
     return target
 
 

@@ -27,7 +27,8 @@ css=$(curl -fsS "$url/styles.css") || fail "compiled stylesheet missing"
 grep -Fq '.aspect-4\/3{' <<<"$css" || fail "Tailwind v4 utility missing"
 
 robots=$(curl -fsS "$url/robots.txt") || fail "robots.txt missing"
-grep -q 'Disallow: /' <<<"$robots" || fail "robots.txt is permissive"
+# The catch-all group itself must disallow; a stray "Disallow: /" elsewhere proves nothing.
+grep -A1 -x 'User-agent: \*' <<<"$robots" | grep -qx 'Disallow: /' || fail "robots.txt is permissive"
 grep -q '^User-agent: facebookexternalhit' <<<"$robots" || fail "robots.txt shuts out link previews"
 
 # Link previews (FEAT-002). og:image is absolute on the production origin; fetch its path

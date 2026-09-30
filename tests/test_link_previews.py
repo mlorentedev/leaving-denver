@@ -200,9 +200,12 @@ def test_a_new_cover_prunes_the_old_preview(tmp_path):
     make_cover(folder / "desk-1.jpg")
     make_cover(folder / "desk-2.jpg")
     old = image_processor.write_share_image(folder / "desk-1.jpg")
+    notes = folder / "og" / "notes.txt"
+    notes.write_text("kept")
     new = image_processor.write_share_image(folder / "desk-2.jpg")
     assert new.is_file()
     assert not old.exists()
+    assert notes.exists(), "only preview JPEGs are pruned"
 
 
 def test_deep_link_opens_the_item_after_load():
