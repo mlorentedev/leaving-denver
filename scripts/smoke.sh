@@ -48,7 +48,7 @@ share_page() {
   printf '%s' "$share"
 }
 # Every card has both share pages. An item with no photo has no og:image, which is content,
-# not a defect, so the images are checked on the first item that has one.
+# not a defect, so the images are checked, in both locales, on the first item that has one.
 items=$(grep -oE 'data-item="[^"]+"' <<<"$page" | cut -d'"' -f2)
 [ -n "$items" ] || fail "no item cards on the page"
 pictured=""
@@ -56,8 +56,8 @@ for item in $items; do
   for share_path in "i/$item/" "es/i/$item/"; do
     share=$(share_page "$share_path") || exit 1
     image=$(og image <<<"$share")
-    # Once an item is picked, its Spanish page must carry the image too.
-    if [ "$pictured" = "$item" ] || { [ -z "$pictured" ] && [ -n "$image" ]; }; then
+    # The pick is made on the English page, so both of the picked item's pages are checked.
+    if [ "$pictured" = "$item" ] || { [ -z "$pictured" ] && [ "$share_path" = "i/$item/" ] && [ -n "$image" ]; }; then
       pictured=$item
       check_image "$image" "/$share_path"
     fi
