@@ -60,11 +60,19 @@ def test_sticky_bar_clears_the_home_indicator(page):
 
 
 def test_body_and_sheets_clear_the_safe_areas():
-    css = re.sub(r"\s+", "", (ROOT / "build" / "public" / "styles.css").read_text(encoding="utf-8"))
-    # Body clearance under the sticky bar, and every sheet panel, both sides of 640 px.
-    body = re.search(r"(?<![\w-])body\{padding:([^}]*)\}", css).group(1)
-    assert body.count("env(safe-area-inset-") == 3, body
-    panels = re.findall(r"dialog\.sheet>\*\{padding-bottom:([^}]*)\}", css)
+    css = re.sub(
+        r"\s+", " ", (ROOT / "build" / "public" / "styles.css").read_text(encoding="utf-8")
+    )
+    # Every body padding rule clears each side on its own side: top right bottom left.
+    bodies = re.findall(r"(?<![\w-])body ?\{padding:([^}]*)\}", css)
+    assert bodies, "no body padding rule"
+    for body in bodies:
+        sides = re.findall(r"(?:[^\s(]|\([^()]*(?:\([^()]*\))*[^()]*\))+", body)
+        assert len(sides) == 4, sides
+        for side, inset in zip(sides[1:], ("right", "bottom", "left")):
+            assert f"env(safe-area-inset-{inset})" in side, (side, inset)
+    # Every sheet panel, both sides of 640 px.
+    panels = re.findall(r"dialog\.sheet ?> ?\* ?\{padding-bottom:([^}]*)\}", css)
     assert len(panels) == 2, panels
     assert all("env(safe-area-inset-bottom)" in panel for panel in panels), panels
 
