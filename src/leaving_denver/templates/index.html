@@ -192,8 +192,12 @@
 
   <!-- Footer -->
   <footer class="mt-16 w-full min-w-0 py-8 border-t border-neutral-200/80 bg-white text-xs text-neutral-400">
-    <div class="max-w-5xl w-full min-w-0 mx-auto px-4 sm:px-6 flex justify-center">
-      <div>{{ t.footer }}</div>
+    <div class="max-w-5xl w-full min-w-0 mx-auto px-4 sm:px-6 flex flex-wrap justify-center gap-x-2 gap-y-1 text-center">
+      <span>{{ t.footer }}</span>
+      <span>· {{ t.built_by }} <a class="underline hover:text-neutral-700" href="https://github.com/mlorentedev">@mlorentedev</a></span>
+      {% if build_sha %}
+      <span>· <a class="underline hover:text-neutral-700" href="https://github.com/mlorentedev/leaving-denver/commit/{{ build_sha }}">{{ t.build_label }} {{ build_sha[:7] }}</a></span>
+      {% endif %}
     </div>
   </footer>
 

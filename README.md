@@ -63,6 +63,8 @@ production redeploy), use *Actions → ci → Run workflow* with a `branch` inpu
 (default `preview`) creates `<branch>.leaving-denver.pages.dev`. The deploy
 job rebuilds with the real phone, runs `make check`, deploys with wrangler
 and smoke-tests the deployment (`scripts/smoke.sh`).
+The bilingual footer links the developer's GitHub profile and, on CI builds,
+the deployed commit (`GITHUB_SHA`) so the live version is identifiable.
 
 One-time setup, all idempotent and run from a machine with the age key:
 
