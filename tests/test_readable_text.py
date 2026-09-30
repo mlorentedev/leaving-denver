@@ -21,7 +21,9 @@ PAGES = (ROOT / "build" / "public" / "index.html", ROOT / "build" / "public" / "
 AA = 4.5
 MIN_PX = 12
 # Only hover/focus states may change colour; a breakpoint colour would go unchecked below.
-RESPONSIVE_COLOUR = re.compile(r"(sm|md|lg|xl|2xl):(text|bg)-(white|black|[a-z]+-\d)")
+RESPONSIVE_COLOUR = re.compile(
+    r"(?:sm|md|lg|xl|2xl):(?:(?:text|bg)-(?:\[#|white|black|[a-z]+-\d)|opacity-\d)"
+)
 COLOUR = re.compile(
     r"(text|bg)-(?:\[(#[0-9a-fA-F]{3,6})\]|(white|black|[a-z]+-\d{2,3}))(?:/(\d+))?"
 )
@@ -91,14 +93,16 @@ def blend(top, alpha, bottom):
 class ContrastChecker(HTMLParser):
     """Walks rendered markup and measures each run of visible text against its ground.
 
-    The stack carries (ground, text colour + alpha, opacity, exempt). `opacity-*` fades the
-    text towards the ground it sits on, which is how it reads to the eye; screen-reader-only
-    and `aria-hidden` text is exempt, as in WCAG 1.4.3."""
+    The stack carries (ground, text colour + alpha, shown, exempt). Colours are painted in
+    the element's own group; `shown` maps them to the screen as (k, offset), shown = k·c +
+    offset. `opacity-*` composites the whole group, its ground included, over the ground
+    behind it, so both the text and its ground are mapped before they are compared.
+    Screen-reader-only and `aria-hidden` text is exempt, as in WCAG 1.4.3."""
 
     def __init__(self, colours, ground=WHITE, text=((0.0, 0.0, 0.0), 1.0)):
         super().__init__()
         self.colours = colours
-        self.stack = [(ground, text, 1.0, False)]
+        self.stack = [(ground, text, (1.0, (0.0, 0.0, 0.0)), False)]
         self.skip = 0
         self.failures = []
 
@@ -112,22 +116,28 @@ class ContrastChecker(HTMLParser):
         if tag in ("script", "style"):
             self.skip += 1
         attrs = dict(attrs)
-        ground, text, opacity, exempt = self.stack[-1]
-        # Hover, focus and selection states are not the resting colour.
-        for token in (c for c in (attrs.get("class") or "").split() if ":" not in c):
+        ground, text, (k, offset), exempt = self.stack[-1]
+        # Hover, focus and selection states are not the resting colour; breakpoint colours
+        # are refused by test_colours_do_not_change_at_breakpoints.
+        tokens = [c for c in (attrs.get("class") or "").split() if ":" not in c]
+        for token in tokens:
+            if fade := OPACITY.fullmatch(token):
+                # This group lands on the parent's ground: shown(o·c + (1-o)·ground).
+                o = int(fade.group(1)) / 100
+                offset = tuple(k * (1 - o) * g + b for g, b in zip(ground, offset, strict=True))
+                k *= o
+        for token in tokens:
             if COLOUR.fullmatch(token):
                 kind, rgb, alpha = self.colour(token)
                 if kind == "bg":
                     ground = blend(rgb, alpha, ground)
                 else:
                     text = (rgb, alpha)
-            elif (fade := OPACITY.fullmatch(token)) and tag not in ("img", "picture"):
-                opacity *= int(fade.group(1)) / 100
             elif token == "sr-only":
                 exempt = True
         exempt = exempt or attrs.get("aria-hidden") == "true"
         if tag not in VOID:
-            self.stack.append((ground, text, opacity, exempt))
+            self.stack.append((ground, text, (k, offset), exempt))
 
     def handle_endtag(self, tag):
         if tag in ("script", "style"):
@@ -136,10 +146,14 @@ class ContrastChecker(HTMLParser):
             self.stack.pop()
 
     def handle_data(self, data):
-        ground, (rgb, alpha), opacity, exempt = self.stack[-1]
+        ground, (rgb, alpha), (k, offset), exempt = self.stack[-1]
         if self.skip or exempt or not data.strip():
             return
-        ratio = contrast(blend(rgb, alpha * opacity, ground), ground)
+
+        def shown(colour):
+            return tuple(k * c + b for c, b in zip(colour, offset, strict=True))
+
+        ratio = contrast(shown(blend(rgb, alpha, ground)), shown(ground))
         if ratio < AA:
             snippet = data.strip()[:30]
             self.failures.append(f"line {self.getpos()[0]}: {ratio:.2f}:1 {snippet!r}")
@@ -182,6 +196,9 @@ def test_text_contrast_holds_on_its_ground(page, colours):
         '<p class="text-[#999]">arbitrary hex</p>',
         '<p class="text-neutral-900 opacity-40">faded</p>',
         '<div class="bg-neutral-900"><p class="bg-white/10 text-neutral-500">tinted</p></div>',
+        # opacity fades the ground too: white on a 50% black reads 3.98:1, not 5.28:1.
+        '<p class="bg-[#000] text-[#fff] opacity-50">group opacity</p>',
+        '<div class="opacity-50"><p class="bg-[#000] text-[#fff]">inherited group</p></div>',
     ],
 )
 def test_checker_catches_low_contrast(markup, colours):
@@ -198,6 +215,7 @@ def test_checker_catches_low_contrast(markup, colours):
         '<span aria-hidden="true" class="text-neutral-300">/</span>',
         '<p class="text-neutral-400 hover:text-neutral-900 bg-neutral-900">hover is not rest</p>',
         '<img class="opacity-60"><p class="text-neutral-900">a faded photo</p>',
+        '<div class="opacity-90"><p class="text-neutral-900">slightly faded</p></div>',
     ],
 )
 def test_checker_passes_readable_or_exempt_text(markup, colours):
@@ -211,20 +229,45 @@ def test_colours_do_not_change_at_breakpoints():
     assert not hits, hits
 
 
+@pytest.mark.parametrize("token", ["sm:text-neutral-400", "md:bg-[#999]", "lg:opacity-50"])
+def test_breakpoint_guard_sees_every_colour_form(token):
+    assert RESPONSIVE_COLOUR.search(f'class="text-[#000] {token}"')
+
+
+def script_samples(scripts):
+    """Markup each script literal paints. A class string is measured as a <p> on the white
+    sheet; an HTML fragment is parsed as it is, so its own classes and grounds count."""
+    for literal in re.findall(r"'([^'\n]*)'|`([^`]*)`", scripts):
+        text = " ".join(literal)
+        if not re.search(r"(?<![\w:-])text-(\[#|white|black|[a-z]+-\d)", text):
+            continue
+        if "<" in text:
+            yield re.sub(r"\$\{[^}]*\}", "x", text)
+        else:
+            yield f'<p class="{text}">x</p>'
+
+
+def test_script_fragments_are_parsed_as_markup(colours):
+    scripts = """row.innerHTML = `<span class="text-[#999]">${label}</span>`;"""
+    [sample] = script_samples(scripts)
+    checker = ContrastChecker(colours)
+    checker.feed(sample)
+    assert checker.failures
+
+
 def test_script_built_text_is_readable(colours):
     # Markup built in JS (status pills, spec bullets) is not in the rendered page. Each class
     # string is measured on its own ground, or on the white sheet it is rendered into.
     scripts = "".join(re.findall(r"<script>(.*?)</script>", TEMPLATE.read_text(), re.S))
-    checked = 0
-    for literal in re.findall(r"'([^'\n]*)'|`([^`]*)`", scripts):
-        classes = " ".join(literal)
-        if not re.search(r"(?<![\w:-])text-(\[#|white|black|[a-z]+-\d)", classes):
-            continue
-        checked += 1
+    samples = list(script_samples(scripts))
+    assert samples, "no script-built text colour found: the pattern above has drifted"
+    assert any(s.lstrip().startswith("<span") for s in samples), (
+        "the spec bullet fragment is unchecked"
+    )
+    for sample in samples:
         checker = ContrastChecker(colours)
-        checker.feed(f'<p class="{classes}">x</p>')
-        assert not checker.failures, (classes, checker.failures)
-    assert checked, "no script-built text colour found: the pattern above has drifted"
+        checker.feed(sample)
+        assert not checker.failures, (sample, checker.failures)
 
 
 @pytest.mark.parametrize("path", [TEMPLATE, *PAGES], ids=["template", "en", "es"])
