@@ -24,8 +24,9 @@ created: "2026-09-30"
 
 ## PR 2 — dialogs
 
-- [ ] [AC2] [AC3] Failing tests on the built page (dialog elements, showModal, history handlers)
-- [ ] [AC2] [AC3] `<dialog>` for item and bundle sheets, scroll lock, focus return, Back closes
+- [x] [AC2] [AC3] Failing tests `tests/test_native_dialogs.py` (RED: 5)
+- [x] [AC2] [AC3] `<dialog>` for item and bundle sheets, scroll lock, focus return, Back closes
+- [x] Behaviour driven in headless Chrome over CDP (real clicks/Escape/history navigation) on the preview
 
 ## PR 3 — desktop contact (blocked on owner)
 
