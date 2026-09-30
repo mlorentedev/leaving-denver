@@ -67,7 +67,7 @@ def prune_stale_variants(target_jpg: Path) -> None:
     width = output_width(target_jpg)
     if width is None:
         return
-    wanted = {variant_path(target_jpg, w) for w in VARIANT_WIDTHS if w < width}
+    wanted = {variant_path(target_jpg, w) for w in VARIANT_WIDTHS if w <= width}
     for path in target_jpg.parent.glob(f"{target_jpg.stem}-*w.webp"):
         if path not in wanted and path.stem.removeprefix(f"{target_jpg.stem}-")[:-1].isdigit():
             path.unlink()
@@ -125,7 +125,7 @@ def stamp(path: Path) -> list[int] | None:
 
 def outputs_of(target_jpg: Path) -> list[Path]:
     width = output_width(target_jpg)
-    variants = [variant_path(target_jpg, w) for w in VARIANT_WIDTHS if width and w < width]
+    variants = [variant_path(target_jpg, w) for w in VARIANT_WIDTHS if width and w <= width]
     return [target_jpg, *variants]
 
 
@@ -213,7 +213,7 @@ def write_outputs(src_path: Path, read_path: Path, target_jpg: Path) -> bool:
             # Save without EXIF metadata (data is completely fresh RGB)
             stage(img, target_jpg, "JPEG", quality=JPEG_QUALITY, optimize=True)
             for width in VARIANT_WIDTHS:
-                if width >= img.width:
+                if width > img.width:
                     continue
                 size = (width, round(img.height * width / img.width))
                 variant = img.resize(size, Image.Resampling.LANCZOS)

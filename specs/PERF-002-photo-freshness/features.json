@@ -44,7 +44,7 @@
   {
     "id": "PERF-002-photo-freshness-f7",
     "behavior": "AC7: at 430 px DPR 3 the hero picks a candidate lighter than the full JPEG",
-    "verification": "make build && uv run pytest -q tests/test_responsive_images.py -k hero",
+    "verification": "make build && uv run pytest -q tests/test_responsive_images.py -k 'dpr3 or as_wide_as'",
     "state": "pending",
     "evidence": ""
   }

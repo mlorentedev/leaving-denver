@@ -43,13 +43,14 @@ def outputs(target):
 def test_wide_photo_gets_every_variant_upright_and_without_exif(tmp_path, cache):
     src, target = tmp_path / "sofa.jpg", tmp_path / "out" / "sofa.jpg"
     # 2000x2400 stored sideways (orientation 6 = rotate 90° to display): upright and
-    # capped at 1600 px tall it is 1333 px wide, so every variant applies.
+    # capped at 1600 px tall it is 1333 px wide: every variant up to 1200 applies.
     make_photo(src, (2400, 2000), orientation=6)
     assert process_image(src, target, cache)
 
     with Image.open(target) as img:
         assert img.height > img.width, "EXIF rotation was not applied"
-    for width in VARIANT_WIDTHS:
+    assert widths(target) == (1333, [480, 800, 1200])
+    for width in (480, 800, 1200):
         with Image.open(variant_path(target, width)) as img:
             assert img.format == "WEBP"
             assert img.width == width
@@ -101,6 +102,19 @@ def test_photo_set_lists_variants_then_the_jpeg(tmp_path, monkeypatch, cache):
     }
 
 
+def test_a_variant_as_wide_as_the_jpeg_replaces_it_in_srcset(tmp_path, monkeypatch, cache):
+    # Two candidates with one width descriptor is invalid srcset; the WebP is the lighter.
+    monkeypatch.setattr(site_builder, "DIST_DIR", tmp_path)
+    src, target = tmp_path / "raw.jpg", tmp_path / "catalog" / "car" / "car-1.jpg"
+    make_photo(src, (2000, 1500))
+    assert process_image(src, target, cache)
+
+    photo = site_builder.photo_set("catalog/car/car-1.jpg", "")
+    assert photo["src"] == "catalog/car/car-1.jpg"
+    assert photo["srcset"].split(", ")[-1] == "catalog/car/car-1-1600w.webp 1600w"
+    assert ".jpg" not in photo["srcset"]
+
+
 def catalog_imgs(page):
     html = page.read_text(encoding="utf-8")
     return re.findall(r"<img\b[^>]*>", html), html
@@ -132,10 +146,53 @@ def test_vehicle_hero_loads_first(page):
     assert attr(hero, "loading") != "lazy"
 
 
+def resolve_sizes(sizes, viewport):
+    """CSS px a `sizes` value asks for at this viewport width. Only the grammar the template
+    uses: `(min-width: Npx) L, ..., default`, with each length in px or vw."""
+    *conditions, default = [part.strip() for part in sizes.split(",")]
+    length = default
+    for condition in conditions:
+        found = re.fullmatch(r"\(min-width: (\d+)px\) (\S+)", condition)
+        assert found, f"unsupported sizes condition: {condition!r}"
+        if viewport >= int(found.group(1)):
+            length = found.group(2)
+            break
+    value = re.fullmatch(r"(\d+(?:\.\d+)?)(px|vw)", length)
+    assert value, f"unsupported sizes length: {length!r}"
+    number = float(value.group(1))
+    return number if value.group(2) == "px" else viewport * number / 100
+
+
+def test_resolve_sizes_follows_the_first_matching_condition():
+    card = "(min-width: 1024px) 320px, (min-width: 640px) 31vw, 46vw"
+    assert resolve_sizes(card, 390) == pytest.approx(179.4)
+    assert resolve_sizes(card, 800) == pytest.approx(248)
+    assert resolve_sizes(card, 1280) == 320
+    assert resolve_sizes("48px", 390) == 48
+
+
+def inventory(html):
+    start = html.index("const INVENTORY = ") + len("const INVENTORY = ")
+    return json.JSONDecoder().raw_decode(html, start)[0]
+
+
 def test_item_dialog_uses_srcset():
     _, html = catalog_imgs(PAGES[0])
-    assert "modalMainImg').srcset" in html or "mainImg.srcset" in html
-    assert "thumb.srcset" in html
+    # Each photo the dialog shows carries a srcset whose files exist at their stated width.
+    photos = [p for item in inventory(html)["items"] for p in item.get("photos", [])]
+    assert photos, "no dialog photos found in INVENTORY"
+    for photo in photos:
+        for candidate in photo["srcset"].split(", "):
+            url, descriptor = candidate.split()
+            with Image.open(DIST_DIR / url) as img:
+                assert f"{img.width}w" == descriptor, candidate
+    # The script hands those srcsets over as they are, with a sizes it can resolve.
+    assignments = dict(re.findall(r"(\w+)\.srcset = ([^;]+);", html))
+    assert assignments == {"mainImg": "p ? p.srcset : ''", "thumb": "p.srcset"}, assignments
+    sizes = dict(re.findall(r"(\w+)\.sizes = '([^']*)';", html))
+    assert set(sizes) == {"mainImg", "thumb"}, sizes
+    assert resolve_sizes(sizes["mainImg"], 390) == 390
+    assert resolve_sizes(sizes["thumb"], 390) == 48
 
 
 def pick(srcset, needed):
@@ -146,20 +203,52 @@ def pick(srcset, needed):
     return next((url for w, url in candidates if w >= needed), candidates[-1][1])
 
 
-def test_phone_downloads_a_third_of_the_full_covers():
-    # A 390 px phone at DPR 2: cards two per row (~180 CSS px, 360 device px), the
-    # vehicle hero full width (780 device px).
-    tags, _ = catalog_imgs(PAGES[0])
+def cover_weights(tags, viewport, dpr):
+    """Bytes the covers (vehicle hero and cards) cost as the browser picks them from
+    `sizes` at this viewport and DPR, against the bytes of their full JPEGs."""
     covers = [t for t in tags if attr(t, "srcset") and "w-full" in (attr(t, "class") or "").split()]
     assert any(attr(t, "fetchpriority") == "high" for t in covers), "hero not measured"
     full = sum((DIST_DIR / attr(t, "src")).stat().st_size for t in covers)
     picked = sum(
-        (DIST_DIR / pick(attr(t, "srcset"), 360 if attr(t, "loading") == "lazy" else 780))
+        (DIST_DIR / pick(attr(t, "srcset"), resolve_sizes(attr(t, "sizes"), viewport) * dpr))
         .stat()
         .st_size
         for t in covers
     )
-    assert picked * 3 < full, f"phone covers weigh {picked} B against {full} B of full JPEGs"
+    return picked, full
+
+
+# Largest share of the full JPEGs a phone may download, by (viewport, DPR). DPR 2 is the
+# PERF-001 budget; DPR 3 phones take a size up, and the 1600w WebP keeps the hero off the JPEG.
+PHONES = {(390, 2): 1 / 3, (390, 3): 1 / 3, (430, 3): 1 / 3}
+
+
+@pytest.mark.parametrize(("viewport", "dpr"), PHONES, ids=lambda v: str(v))
+def test_phone_downloads_a_third_of_the_full_covers(viewport, dpr):
+    tags, _ = catalog_imgs(PAGES[0])
+    picked, full = cover_weights(tags, viewport, dpr)
+    assert picked < full * PHONES[viewport, dpr], (
+        f"{viewport} px at DPR {dpr}: covers weigh {picked} B against {full} B of full JPEGs"
+    )
+
+
+def test_the_budget_catches_a_card_sized_to_the_viewport():
+    tags, _ = catalog_imgs(PAGES[0])
+    wide = [
+        re.sub(r'sizes="[^"]*"', 'sizes="100vw"', t) if 'loading="lazy"' in t else t for t in tags
+    ]
+    picked, full = cover_weights(wide, 390, 3)
+    assert picked >= full * PHONES[390, 3]
+
+
+def test_a_dpr3_phone_never_falls_back_to_the_hero_jpeg():
+    tags, _ = catalog_imgs(PAGES[0])
+    [hero] = [t for t in tags if attr(t, "fetchpriority") == "high"]
+    for viewport in (390, 430):
+        needed = resolve_sizes(attr(hero, "sizes"), viewport) * 3
+        chosen = pick(attr(hero, "srcset"), needed)
+        assert chosen.endswith(".webp"), f"{viewport} px at DPR 3 picks {chosen}"
+        assert (DIST_DIR / chosen).stat().st_size < (DIST_DIR / attr(hero, "src")).stat().st_size
 
 
 def widths(target):
@@ -348,4 +437,4 @@ def test_variants_outside_the_current_widths_are_removed(tmp_path, cache):
         path.write_bytes(b"old")
     assert process_image(src, target, cache)
     assert not any(path.exists() for path in stale)
-    assert all(variant_path(target, w).is_file() for w in VARIANT_WIDTHS)
+    assert widths(target) == (1300, [480, 800, 1200])

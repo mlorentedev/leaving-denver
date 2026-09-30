@@ -144,7 +144,8 @@ def apply_photos(item: dict[str, Any], synced: list[str]) -> None:
 
 
 def photo_set(image: str, asset_prefix: str) -> dict[str, Any]:
-    """A built photo's `<img>` attributes: its WebP variants and the JPEG itself, by width."""
+    """A built photo's `<img>` attributes: its WebP variants and the JPEG itself, by width.
+    A variant as wide as the JPEG takes its place: one width, one candidate."""
     jpg = DIST_DIR / image
     photo: dict[str, Any] = {
         "src": asset_prefix + image,
@@ -159,9 +160,10 @@ def photo_set(image: str, asset_prefix: str) -> dict[str, Any]:
     candidates = [
         f"{asset_prefix}{Path(image).parent.as_posix()}/{variant_path(jpg, w).name} {w}w"
         for w in VARIANT_WIDTHS
-        if w < width and variant_path(jpg, w).is_file()
+        if w <= width and variant_path(jpg, w).is_file()
     ]
-    candidates.append(f"{asset_prefix}{image} {width}w")
+    if width not in VARIANT_WIDTHS or not variant_path(jpg, width).is_file():
+        candidates.append(f"{asset_prefix}{image} {width}w")
     photo.update(srcset=", ".join(candidates), width=width, height=height)
     return photo
 
