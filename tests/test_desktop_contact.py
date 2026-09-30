@@ -69,7 +69,7 @@ def test_body_and_sheets_clear_the_safe_areas():
     for body in bodies:
         sides = re.findall(r"(?:[^\s(]|\([^()]*(?:\([^()]*\))*[^()]*\))+", body)
         assert len(sides) == 4, sides
-        for side, inset in zip(sides[1:], ("right", "bottom", "left")):
+        for side, inset in zip(sides[1:], ("right", "bottom", "left"), strict=True):
             assert f"env(safe-area-inset-{inset})" in side, (side, inset)
     # Every sheet panel, both sides of 640 px.
     panels = re.findall(r"dialog\.sheet ?> ?\* ?\{padding-bottom:([^}]*)\}", css)
