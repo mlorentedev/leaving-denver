@@ -16,11 +16,11 @@ Map every acceptance criterion from `proposal.md` to concrete proof (commit hash
 - [x] AC5 -> `test_catalog_pages_carry_their_own_preview[en/es]`
 - [x] AC6 -> `test_deep_link_opens_the_item_after_load` (static) and headless Chrome (below)
 - [x] AC7 -> `test_a_site_url_that_is_not_a_bare_https_origin_fails` (4 cases), `test_site_url_comes_from_the_environment`, `test_an_item_id_that_is_not_a_slug_fails` (5 cases)
-- [ ] AC8 -> PR 2
+- [x] AC8 -> `test_item_sheet_has_a_share_button[en/es]`, `test_the_shared_url_is_the_items_share_page[en/es]` (the URL the button builds is the share page's own `og:url`), `test_share_falls_back_to_copying_the_link`, `test_share_strings_exist[en/es]`. A 390 px headless screenshot of `/es/#sofa-sleeper` shows Share between "Escribir sobre este artículo" and Close, on one row.
 
 ## Test status
 
-- Test suite: `make check` -> ruff clean, 260 passed
+- Test suite: `make check` -> ruff clean, 260 passed (PR 1), 267 passed (PR 2)
 - Headless Chrome (`--dump-dom`) over the real build:
   - `es/index.html#sofa-sleeper` -> `<dialog id="itemSheet" ... open>`, with the sofa's Spanish title;
   - `#nope` -> sheet closed;
@@ -37,6 +37,8 @@ Brief log of non-obvious trade-offs or course corrections taken during the work.
 - Share pages are removed and rebuilt on every build, like `index.html`. A page left by an item unpublished since keeps its title public otherwise.
 - The preview image is built from the processed cover JPEG, not the source. It inherits the EXIF scrub and the size cap, and its freshness is decided by comparing the encoded bytes. No manifest entry is needed.
 - `test_template_sees_only_sanitized_data` merged every render's context into one set. It now keeps one set per template, so the share pages' smaller context is asserted too.
+
+- PR 2 builds the shared URL from the catalog's own `og:url` meta tag plus `i/<id>/`, rather than from a new template variable. The tag already holds the locale's absolute root, and a test pins the result to the share page's `og:url`, so the two cannot drift.
 
 ## Independent review (reviewer subagent, 9a0405f): PASS-WITH-GAPS
 

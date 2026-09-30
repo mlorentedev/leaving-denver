@@ -320,10 +320,14 @@
           <a id="modalSmsLink" href="#" class="flex-1 py-3 px-4 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-semibold text-xs text-center transition-colors">
             {{ t.text_about_this }}
           </a>
+          <button type="button" id="modalShare" aria-live="polite" class="py-3 px-4 rounded-xl border border-neutral-200 hover:bg-neutral-50 text-neutral-700 font-semibold text-xs transition-colors">
+            {{ t.share }}
+          </button>
           <button onclick="closeModal()" class="py-3 px-4 rounded-xl border border-neutral-200 hover:bg-neutral-50 text-neutral-700 font-semibold text-xs transition-colors">
             {{ t.close }}
           </button>
         </div>
+        <p id="modalShareUrl" hidden class="p-3 bg-neutral-50 rounded-xl border border-neutral-100 text-sm text-neutral-700 select-all break-all"></p>
       </div>
     </div>
   </dialog>
@@ -456,7 +460,36 @@
       // A pending item keeps its link: a backup buyer is worth having if the pickup falls through.
       document.getElementById('modalSmsLink').hidden = item.status === 'Sold';
 
+      sheetItem = itemId;
+      document.getElementById('modalShare').textContent = UI.share;
+      document.getElementById('modalShareUrl').hidden = true;
+
       openSheet(document.getElementById('itemSheet'));
+    }
+
+    // Shares the item's share page, not /#<id>: a link to the catalog previews the catalog.
+    // The catalog's og:url is the locale's root, and the share page sits at i/<id>/ under it.
+    let sheetItem = null;
+    function shareItem() {
+      const item = INVENTORY.items.find(i => i.id === sheetItem);
+      if (!item) return;
+      const url = document.querySelector('meta[property="og:url"]').content + 'i/' + item.id + '/';
+      const button = document.getElementById('modalShare');
+      const shown = document.getElementById('modalShareUrl');
+      // No clipboard (plain http, permission denied): show the link, selected.
+      const select = () => {
+        shown.textContent = url;
+        shown.hidden = false;
+        window.getSelection().selectAllChildren(shown);
+        button.textContent = UI.copy_fallback;
+      };
+      const copy = () => {
+        if (!navigator.clipboard) return select();
+        navigator.clipboard.writeText(url).then(() => { button.textContent = UI.link_copied; }, select);
+      };
+      // A cancelled share sheet is not a failure; anything else falls back to copying.
+      if (navigator.share) navigator.share({ title: item.title, url }).catch(err => { if (err.name !== 'AbortError') copy(); });
+      else copy();
     }
 
     // Sheets are modal <dialog>s: Escape, focus return and the inert page come from the
@@ -528,6 +561,7 @@
         openContactSheet(link);
       });
       document.getElementById('contactCopy').addEventListener('click', copyNumber);
+      document.getElementById('modalShare').addEventListener('click', shareItem);
       document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', () => applyFilter(btn.dataset.cat));
       });

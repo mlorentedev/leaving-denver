@@ -24,7 +24,8 @@ created: "2026-09-30"
 
 ## PR 2: share button
 
-- [ ] [AC8] Share button in the item sheet: `navigator.share`, clipboard fallback, select fallback; locale strings; classes that compile
+- [x] [AC8] Tests first (RED: 7 failed): button in the item sheet, shared URL equals the share page's own `og:url`, share/copy/select fallbacks, locale strings
+- [x] [AC8] Share button in the item sheet: `navigator.share`, clipboard fallback, select fallback; `share` / `link_copied` strings; classes compile (class coverage green)
 
 ## Closing
 
