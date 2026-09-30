@@ -35,6 +35,15 @@ from leaving_denver.image_processor import sync_all_photos
 from leaving_denver.private_data import floors, load_private, phone_parts, seller_phone
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
+# The theme font (theme.css @font-face), copied next to each stylesheet.
+FONT_FILE = (
+    BASE_DIR
+    / "node_modules"
+    / "@fontsource-variable"
+    / "plus-jakarta-sans"
+    / "files"
+    / "plus-jakarta-sans-latin-wght-normal.woff2"
+)
 CSS_CLI = (
     BASE_DIR / "node_modules" / ".bin" / ("tailwindcss.cmd" if os.name == "nt" else "tailwindcss")
 )
@@ -44,6 +53,8 @@ def build_stylesheets() -> None:
     """Compile separate explicit template sources; never publish private template styles."""
     if not CSS_CLI.is_file():
         raise RuntimeError("Tailwind CLI missing; run npm ci before leaving-denver build")
+    if not FONT_FILE.is_file():
+        raise RuntimeError("Theme font missing; run npm ci before leaving-denver build")
     for source, output in (
         ("public", DIST_DIR / "styles.css"),
         ("private", DIST_PRIVATE_DIR / "styles.css"),
@@ -66,6 +77,8 @@ def build_stylesheets() -> None:
             if not staged.is_file() or not staged.stat().st_size:
                 raise RuntimeError(f"Tailwind CLI produced no CSS for {source}")
             staged.replace(output)
+            (output.parent / "fonts").mkdir(exist_ok=True)
+            shutil.copy2(FONT_FILE, output.parent / "fonts" / FONT_FILE.name)
         except (OSError, subprocess.CalledProcessError) as exc:
             raise RuntimeError(f"Tailwind CSS build failed for {source}: {exc}") from exc
         finally:
