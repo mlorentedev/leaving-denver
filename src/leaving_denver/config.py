@@ -13,6 +13,8 @@ PHOTOS_DIR = CONTENT_DIR / "photos"
 LOCALES_DIR = BASE_DIR / "locales"
 DIST_DIR = BASE_DIR / "build" / "public"
 DIST_PRIVATE_DIR = BASE_DIR / "build" / "private"
+# Photo freshness manifest (PERF-002): beside build/public, never deployed.
+PHOTO_CACHE = BASE_DIR / "build" / ".photo-cache.json"
 DOCS_DIR = BASE_DIR / "docs"
 
 # Files

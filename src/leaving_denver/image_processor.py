@@ -4,6 +4,9 @@ Handles automatic discovery, format conversion (including HEIC), EXIF metadata s
 and optimization to a web-ready JPEG plus smaller WebP width variants.
 """
 
+import hashlib
+import json
+import os
 import subprocess
 from pathlib import Path
 
@@ -14,6 +17,7 @@ from leaving_denver.config import (
     JPEG_QUALITY,
     MAX_IMAGE_HEIGHT,
     MAX_IMAGE_WIDTH,
+    PHOTO_CACHE,
     PHOTOS_DIR,
     SUPPORTED_IMAGE_EXTS,
     VARIANT_WIDTHS,
@@ -47,39 +51,97 @@ def variant_path(jpg: Path, width: int) -> Path:
     return jpg.with_name(f"{jpg.stem}-{width}w.webp")
 
 
+def output_width(target_jpg: Path) -> int | None:
+    """The built JPEG's width, or None when it is missing or unreadable (a killed build)."""
+    try:
+        with Image.open(target_jpg) as img:
+            return img.width
+    except (OSError, Image.UnidentifiedImageError):
+        return None
+
+
 def prune_stale_variants(target_jpg: Path) -> None:
     """Drop `<stem>-<N>w.webp` files the current JPEG and VARIANT_WIDTHS no longer call for."""
-    with Image.open(target_jpg) as img:
-        width = img.width
+    width = output_width(target_jpg)
+    if width is None:
+        return
     wanted = {variant_path(target_jpg, w) for w in VARIANT_WIDTHS if w < width}
     for path in target_jpg.parent.glob(f"{target_jpg.stem}-*w.webp"):
         if path not in wanted and path.stem.removeprefix(f"{target_jpg.stem}-")[:-1].isdigit():
             path.unlink()
 
 
-def is_up_to_date(src_path: Path, target_jpg: Path) -> bool:
-    """The JPEG and every variant its width calls for exist and are newer than the source."""
-    source_mtime = src_path.stat().st_mtime
-    if not target_jpg.exists() or target_jpg.stat().st_mtime < source_mtime:
+def fingerprint(src_path: Path) -> str:
+    """The source's bytes plus every setting that shapes the outputs: a change to either
+    means a rebuild, whatever the timestamps say."""
+    digest = hashlib.sha256(src_path.read_bytes())
+    settings = (MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT, JPEG_QUALITY, WEBP_QUALITY, VARIANT_WIDTHS)
+    digest.update(json.dumps(settings).encode())
+    return digest.hexdigest()
+
+
+def cache_key(target_jpg: Path) -> str:
+    """Manifest key: the output's path under build/public, so the checkout can move."""
+    if target_jpg.is_relative_to(DIST_DIR):
+        return target_jpg.relative_to(DIST_DIR).as_posix()
+    return target_jpg.as_posix()
+
+
+def load_cache(path: Path) -> dict[str, str]:
+    """The last build's manifest; missing or unreadable means rebuild everything."""
+    try:
+        cache = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    return cache if isinstance(cache, dict) else {}
+
+
+def save_cache(cache: dict[str, str], path: Path) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    staged = path.with_name(path.name + ".tmp")
+    staged.write_text(json.dumps(cache, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    os.replace(staged, path)
+
+
+def is_up_to_date(target_jpg: Path, digest: str, cache: dict[str, str]) -> bool:
+    """The manifest holds this source and these settings for the JPEG, the JPEG opens,
+    and every variant its width calls for is a non-empty file."""
+    if cache.get(cache_key(target_jpg)) != digest:
         return False
-    with Image.open(target_jpg) as img:
-        width = img.width
-    # A build that died after the JPEG write leaves current JPEG, old variants.
+    width = output_width(target_jpg)
+    if width is None:
+        return False
     variants = [variant_path(target_jpg, w) for w in VARIANT_WIDTHS if w < width]
-    return all(v.exists() and v.stat().st_mtime >= source_mtime for v in variants)
+    return all(v.is_file() and v.stat().st_size > 0 for v in variants)
 
 
-def process_image(src_path: Path, dest_path: Path) -> bool:
+def save_atomically(img: Image.Image, path: Path, fmt: str, **options) -> None:
+    """Write beside the target, then rename: a killed build never leaves half a file.
+    The `.tmp` suffix keeps the staged name out of the `<stem>-*w.webp` prune glob."""
+    staged = path.with_name(path.name + ".tmp")
+    try:
+        img.save(staged, fmt, **options)
+        os.replace(staged, path)
+    finally:
+        staged.unlink(missing_ok=True)
+
+
+def process_image(src_path: Path, dest_path: Path, cache: dict[str, str]) -> bool:
     """
     Applies the EXIF rotation, then drops all metadata (GPS included), scales down if
     larger than MAX bounds, and saves an optimized JPEG plus the WebP width variants.
-    Skips the work when the outputs are already newer than the source.
+    Skips the work when `cache` (the build's manifest) says the outputs match this source
+    and these settings; records them there once every output is in place.
     """
     dest_path.parent.mkdir(parents=True, exist_ok=True)
     target_jpg = dest_path.with_suffix(".jpg")
-    if is_up_to_date(src_path, target_jpg):
+    key = cache_key(target_jpg)
+    digest = fingerprint(src_path)
+    if is_up_to_date(target_jpg, digest, cache):
         prune_stale_variants(target_jpg)
         return True
+    # Stale until every output below is written.
+    cache.pop(key, None)
 
     # Handle HEIC files
     if src_path.suffix.lower() == ".heic":
@@ -102,24 +164,25 @@ def process_image(src_path: Path, dest_path: Path) -> bool:
                 img = img.resize(new_size, Image.Resampling.LANCZOS)
 
             # Save without EXIF metadata (data is completely fresh RGB)
-            img.save(target_jpg, "JPEG", quality=JPEG_QUALITY, optimize=True)
+            save_atomically(img, target_jpg, "JPEG", quality=JPEG_QUALITY, optimize=True)
             for width in VARIANT_WIDTHS:
                 if width >= img.width:
                     continue
                 size = (width, round(img.height * width / img.width))
                 variant = img.resize(size, Image.Resampling.LANCZOS)
-                variant.save(
-                    variant_path(target_jpg, width), "WEBP", quality=WEBP_QUALITY, method=6
+                save_atomically(
+                    variant, variant_path(target_jpg, width), "WEBP", quality=WEBP_QUALITY, method=6
                 )
 
-        if read_path != src_path and read_path.exists():
-            read_path.unlink()
-
         prune_stale_variants(target_jpg)
+        cache[key] = digest
         return True
     except Exception as exc:
         print(f"Error processing image {src_path}: {exc}")
         return False
+    finally:
+        if read_path != src_path:
+            read_path.unlink(missing_ok=True)
 
 
 def sync_all_photos() -> dict[str, list[str]]:
@@ -134,6 +197,7 @@ def sync_all_photos() -> dict[str, list[str]]:
         print(f"Warning: Photos directory {PHOTOS_DIR} does not exist.")
         return catalog_map
 
+    cache = load_cache(PHOTO_CACHE)
     for item_dir in sorted(PHOTOS_DIR.iterdir()):
         if not item_dir.is_dir():
             continue
@@ -150,11 +214,12 @@ def sync_all_photos() -> dict[str, list[str]]:
             target_path = dest_item_dir / target_name
 
             # Process / update image
-            success = process_image(photo, target_path)
+            success = process_image(photo, target_path, cache)
             if success:
                 rel_url = f"catalog/{item_id}/{target_name}"
                 processed_files.append(rel_url)
 
         catalog_map[item_id] = processed_files
 
+    save_cache(cache, PHOTO_CACHE)
     return catalog_map
