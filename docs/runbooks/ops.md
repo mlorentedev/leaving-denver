@@ -45,6 +45,10 @@ commit before the next production dispatch.
   YAML and rebuilds locally. Inspect the diff, commit and merge the inventory
   change, then verify the automatic deployment. Take down marketplace listings
   separately.
+- **Reserved:** `uv run leaving-denver pending <item-id>` when a buyer agrees a
+  pickup: the card shows "Pending pickup" and its bundles go off sale. If the
+  pickup falls through, `uv run leaving-denver available <item-id>` puts it
+  back. Commit and merge either change like a sale.
 - **Price:** edit the item's `recommended_list_price` in
   `data/inventory.yaml`; run `make check`, inspect the diff, commit and merge,
   then verify the automatic deployment. Never put reserve floors in public inventory.
