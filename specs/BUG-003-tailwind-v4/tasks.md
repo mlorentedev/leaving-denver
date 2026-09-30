@@ -21,7 +21,7 @@ created: "2026-09-29"
 ## Closing
 
 - [x] Run `make check` (92 passed), inspect CSS and public/private isolation, record results in `verification.md`.
-- [ ] Commit on isolated branch with trailer and open PR with `Closes #8` (do not merge).
+- [x] Commit on isolated branch with trailer and open PR #83 with `Closes #8` (do not merge).
 
 ## Machine-readable features
 

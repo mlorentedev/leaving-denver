@@ -17,9 +17,11 @@ created: "2026-09-29"
 - RED: `uv run pytest -q tests/test_tailwind_build.py` → 5 failures (missing stylesheet/CDN still present/missing CLI did not fail).
 - GREEN: `uv run leaving-denver build` then `uv run pytest -q tests/test_tailwind_build.py` → 5 passed.
 - Full suite: `make check` → Ruff clean and 92 passed (baseline 87).
+- GitHub Actions `test` check passed on PR #83 (deploy skipped, as expected for a pull request).
 - npm lock: `npm ci --dry-run --ignore-scripts` succeeded; package-lock includes Linux and Windows optional binaries.
 - Deploy smoke: `scripts/smoke.sh` now checks `/styles.css`, both language links and absence of play CDN; production Pages deployment is intentionally not performed in this PR.
 - Public compiled CSS is 23,918 bytes and private CSS 18,494 bytes locally; no reserve-price markers in either.
+- PR: https://github.com/mlorentedev/leaving-denver/pull/83 (`Closes #8`; not merged).
 
 ## Decisions made during implementation
 
