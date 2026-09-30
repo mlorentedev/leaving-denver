@@ -361,7 +361,7 @@
       document.getElementById('modalTitle').textContent = item.title;
       document.getElementById('modalCategory').textContent = item.category_label + ' · ' + item.brand;
       document.getElementById('modalPrice').textContent = item.free ? item.note : '$' + item.price.toLocaleString();
-      document.getElementById('modalStatus').textContent = item.status;
+      document.getElementById('modalStatus').textContent = item.status_label;
       document.getElementById('modalRetail').textContent = item.retail ? UI.original + ': $' + item.retail.toLocaleString() : '';
       document.getElementById('modalPickup').textContent = item.pickup || UI.default_pickup;
 

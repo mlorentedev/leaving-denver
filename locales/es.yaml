@@ -74,6 +74,7 @@ categories:
   Vehicle: Auto
 statuses:
   Available: Disponible
+  Pending: Reservado
   Sold: Vendido
 payment_methods:
   Cash: Efectivo

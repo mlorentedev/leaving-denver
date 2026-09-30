@@ -32,3 +32,6 @@ JPEG_QUALITY = 85
 VARIANT_WIDTHS = (480, 800, 1200)
 WEBP_QUALITY = 78
 SUPPORTED_IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".heic"}
+
+# Item lifecycle (FEAT-006). "Free" is a price attribute (free_with_purchase), not a status.
+STATUSES = ("Available", "Pending", "Sold")

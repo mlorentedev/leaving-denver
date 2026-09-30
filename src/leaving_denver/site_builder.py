@@ -31,6 +31,7 @@ from leaving_denver.config import (
     PUBLIC_HEADERS,
     PUBLIC_INDEX_HTML,
     PUBLIC_ROBOTS_TXT,
+    STATUSES,
     VARIANT_WIDTHS,
 )
 from leaving_denver.image_processor import sync_all_photos, variant_path
@@ -181,6 +182,9 @@ def sanitize_public_inventory(full_data: dict[str, Any]) -> dict[str, Any]:
     for item in full_data.get("items", []):
         if item["id"] in hidden:
             continue
+        status = item.get("status", "Available")
+        if status not in STATUSES:
+            raise RuntimeError(f"Item {item['id']}: status {status!r} is not one of {STATUSES}")
         pub = {
             "id": item.get("id"),
             "category": item.get("category"),
@@ -199,7 +203,7 @@ def sanitize_public_inventory(full_data: dict[str, Any]) -> dict[str, Any]:
             "free": bool(item.get("free_with_purchase")),
             "note": item.get("note", ""),
             "retail": item.get("original_price", 0),
-            "status": item.get("status", "Available"),
+            "status": status,
             "dimensions": item.get("dimensions", ""),
             "color": item.get("color", ""),
             "images": item.get("images", []),
@@ -210,7 +214,10 @@ def sanitize_public_inventory(full_data: dict[str, Any]) -> dict[str, Any]:
         }
         public_items.append(pub)
 
+    # Sold items stay visible but go last; sorted() is stable, so the rest keep their order.
+    public_items = sorted(public_items, key=lambda item: item["status"] == "Sold")
     prices = {item["id"]: item["price"] for item in public_items}
+    statuses = {item["id"]: item["status"] for item in public_items}
     public_bundles = []
     for bundle in full_data.get("bundles", []):
         if hidden & set(bundle["items"]):
@@ -231,6 +238,8 @@ def sanitize_public_inventory(full_data: dict[str, Any]) -> dict[str, Any]:
                 "savings": total - bundle["bundle_price"],
                 "note": bundle.get("note", ""),
                 "everything": bool(bundle.get("everything")),
+                # One reserved or sold item and the bundle can no longer be bought as offered.
+                "available": all(statuses[i] == "Available" for i in bundle["items"]),
             }
         )
 
@@ -320,7 +329,7 @@ def localize_public_inventory(
             if source_field in copy:
                 item[public_field] = copy[source_field]
         item["category_label"] = translations["categories"].get(item["category"], item["category"])
-        item["status"] = translations["statuses"].get(item["status"], item["status"])
+        item["status_label"] = translations["statuses"][item["status"]]
         item["photos"] = [photo_set(image, asset_prefix) for image in item["images"]]
         item["images"] = [asset_prefix + image for image in item["images"]]
 

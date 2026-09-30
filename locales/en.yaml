@@ -74,6 +74,7 @@ categories:
   Vehicle: Vehicle
 statuses:
   Available: Available
+  Pending: Pending pickup
   Sold: Sold
 payment_methods:
   Cash: Cash
