@@ -27,3 +27,4 @@ tags: [lessons, index, docs, leaving-denver]
 | [lesson-012](lesson-012-template-contexts-are-public-data-contracts.md) | Template Contexts Are Public Data Contracts | 2026-09-28 | [security, templates, privacy, testing] |
 | [lesson-013](lesson-013-budget-page-weight-by-what-the-browser-picks.md) | Budget Page Weight by What the Browser Picks | 2026-09-30 | [performance, images, testing] |
 | [lesson-014](lesson-014-headless-chrome-has-no-pointer.md) | Headless Chrome Has No Pointer | 2026-09-30 | [testing, browser, accessibility] |
+| [lesson-015](lesson-015-check-classes-against-the-compiled-css.md) | Check Classes Against the Compiled CSS | 2026-09-30 | [testing, css, tailwind] |
