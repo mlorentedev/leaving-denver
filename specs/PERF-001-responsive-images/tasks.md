@@ -39,7 +39,7 @@ created: "2026-09-29"
 - [x] `verification.md` filled in
 - [x] PR opened referencing this spec folder (#89)
 - [x] Review findings dispositioned on #89 (PR-Agent + CodeRabbit: 3 applied, 4 declined with reasons)
-- [ ] Independent adversarial review (`review.md`) before archive
+- [x] Independent adversarial review before archive (recorded in `verification.md`, 2026-09-30)
 
 ## Machine-readable features
 

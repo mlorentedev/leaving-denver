@@ -16,7 +16,7 @@ Map every acceptance criterion from `proposal.md` to concrete proof (commit hash
 - [x] AC5 -> `test_deploy_token_is_environment_scoped_and_branches_are_restricted`;
   GitHub API shows custom branch policies `["main"]` for both environments,
   environment-scoped tokens present and repository token absent.
-- [ ] Live production deployment from a merged `main` push -> verify after merge.
+- [x] Live production deployment from a merged `main` push -> push run `36699028361` deployed `908b1e3` to `production`, smoke green (2026-09-30).
 
 ## Test status
 
@@ -34,6 +34,27 @@ Brief log of non-obvious trade-offs or course corrections taken during the work.
 - A shell ref check cannot protect a repository-wide token against a modified
   branch workflow. Both deployment environments are limited to `main`, and the
   Pages token is only available as an environment-scoped secret.
+
+## Independent adversarial review (2026-09-30)
+
+Reviewer: the `reviewer` subagent, not the implementer, at main `908b1e3`. Confirmed live:
+- The `production` and `preview` environments each allow only `main`.
+- `CLOUDFLARE_API_TOKEN` exists only in those environments.
+- `allow_auto_merge=false` and default workflow permissions are `read`.
+- The `test` job gets no token.
+- A failing `test` blocks `deploy`.
+- Push run `36699028361` deployed `908b1e3` with smoke green, and production deployments also exist for `966fcb1` and `1d6c2b7`.
+
+Verdict: **PASS-WITH-GAPS on substance.** Archive after the contract-set housekeeping below and a re-review.
+
+| # | Finding | Disposition |
+|---|---|---|
+| 1 | Production is published before smoke, and rollback is manual | **Ticketed** #102 (smoke a preview, then promote) |
+| 2 | Spec housekeeping: status `implementing`, ACs unticked, "live deployment pending" | **Live deployment recorded above.** Status, AC ticks and promotions are left for the archive pass, which needs a re-review. |
+| 3 | AC5 is proven by greps, not by live settings | **Ticketed** #102 |
+| 4 | `SELLER_PHONE` is a repo-level secret | **Ticketed** #102 |
+| 5 | Actions are pinned to floating tags; branch protection requires only `test` | **Ticketed** #102 (SHA pins). The trust model is accepted in the proposal. |
+| 6–7 | Runbook step numbering; placeholder phone accepted | **Ticketed** #102 |
 
 ## Promotion candidates
 

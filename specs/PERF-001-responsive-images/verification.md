@@ -27,6 +27,19 @@ created: "2026-09-29"
 - Freshness = JPEG and every variant its width calls for exist with mtime >= source; a deleted or older variant is rebuilt (CodeRabbit), and variants outside the current widths are pruned (PR-Agent).
 - Fonts shipped separately in #90: one 27 KB variable woff2 replaces five Google Fonts weights; verified on its preview and on production.
 
+## Independent adversarial review (2026-09-30)
+
+Reviewer: the `reviewer` subagent, not the implementer. It ran read-only on main `908b1e3` and re-ran `sync_all_photos` and `photo_set` on the 14 LFS photos. Every `srcset` width descriptor matched the real pixel width, and `width`/`height` matched the post-`exif_transpose` JPEG. Verdict: **PASS-WITH-GAPS, no blocker.**
+
+| # | Finding | Disposition |
+|---|---|---|
+| 1 | Major (tests): the page-weight test never reads `sizes` | **Ticketed** #101 |
+| 2 | Major (tests): the dialog `srcset` test is a substring check | **Ticketed** #101, plus #99 for browser tests |
+| 3 | mtime-only freshness keeps stale outputs after an older-mtime replace or a settings change (reproduced; local builds only, CI builds from scratch) | **Ticketed** #101 |
+| 4 | A corrupt or zero-byte output crashes the build; writes are not atomic | **Ticketed** #101 |
+| 5 | The "-89% / 0.54 MB" figure is the DPR-2 case. At DPR 3 the covers are 26–30% of the full JPEGs, and at 430 px the hero falls back to the JPEG | **Recorded here**; a 1600w variant is **ticketed** #101 |
+| 6–7 | `sizes` values are correct; removed photos are not pruned from `build/public` | **No action** / pre-existing |
+
 ## Promotion candidates
 
 - [x] Lesson for the repo's `docs/lessons/`? yes: docs/lessons/lesson-013-budget-page-weight-by-what-the-browser-picks.md
