@@ -34,5 +34,5 @@ created: "2026-09-30"
 
 ## Archive checklist
 
-- [x] Independent review: waived by the owner on 2026-09-30, see `review_waived_reason` in proposal.md
+- [x] Independent review: the launcher review (`dotf spec review`) was waived by the owner on 2026-09-30, see `review_waived_reason` in proposal.md. The only review on record is CodeRabbit on #109; no independent reviewer-subagent pass ran.
 - [x] Status `archived`, folder moved, #106 closed with the PR link

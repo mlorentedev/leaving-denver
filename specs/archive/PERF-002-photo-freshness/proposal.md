@@ -59,4 +59,4 @@ CI builds from scratch, so 1 and 2 hit local previews and `make deploy` only. It
 - Spec: `specs/archive/PERF-001-responsive-images/verification.md`
 - Lessons: `docs/lessons/lesson-013-budget-page-weight-by-what-the-browser-picks.md`, `docs/lessons/lesson-016-key-build-freshness-on-content-and-settings.md`
 
-<!-- archived 2026-09-30 — PR: https://github.com/mlorentedev/leaving-denver/pull/111 -->
+<!-- archived 2026-09-30 — PRs: https://github.com/mlorentedev/leaving-denver/pull/110 https://github.com/mlorentedev/leaving-denver/pull/111 -->
