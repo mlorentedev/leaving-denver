@@ -32,6 +32,23 @@ created: "2026-09-30"
 - PR 3: `popstate` closes only the open sheets whose id is not the current entry's, so stacked sheets close one per Back.
 - PR 3: one document-level click listener covers every `sms:` link, including those built later in JS (item sheet, upsell).
 
+## Independent adversarial review (2026-09-30)
+
+Reviewer: the `reviewer` subagent, not the implementer. It ran read-only against `feat/desktop-contact`, which holds all three PRs. Verdict: **PASS-WITH-GAPS, no blocker**; `make check` 147 passed at the time.
+
+| # | Finding | Disposition |
+|---|---|---|
+| 1 | Major: the dialog and contact tests are string-presence checks, and the CDP runs are not committed | **Ticketed** #99, which adds a real browser suite in CI. The CDP evidence stays recorded above. |
+| 2 | Major: the fine-pointer interception removes the `sms:` path a Mac with Messages could use | **Applied** (PR 3): the contact sheet has "Open in Messages instead" (`data-native-sms`, not intercepted), and verified over CDP. |
+| 3 | Item sheet ✕ has no accessible name | **Applied** (PR 2): `aria-label` plus `test_icon_only_close_buttons_are_named`. |
+| 4 | "1 items shown"; the same chip twice is not re-announced | **Applied**: added `results_one`. The repeat case is **declined**: the count did not change, so there is nothing new to announce. |
+| 5 | A text drag from the panel onto the backdrop closes the sheet | **Applied** (PR 2): only a press that starts on the backdrop closes it (`pointerdown` guard). |
+| 6 | The Copy fallback gives no hint, and "Copied" is not announced | **Applied**: the fallback text reads "Selected: press Ctrl+C or ⌘C", and the button is `aria-live="polite"`. The display and clipboard formats differ on purpose: dialers accept both. |
+| 7 | A stale sheet entry after Forward or a reload makes Back take two presses | **Applied for reload** (PR 2): the load-time `replaceState(null)` clears it. **Declined for Forward**: rare in a one-page catalog, and reopening the sheet would need the item id in the state. |
+| 8 | No fallback when `showModal()` / `:has()` are missing (Safari < 15.4) | **Declined**: iOS 15.4 shipped in March 2022, and in-app browsers use the system WebView. |
+| 9 | Safe-area CSS: `sm:p-7` override; left/right body insets strip the header/footer; sticky bar ignores side insets | **Applied** for `sm` (1.75rem restored under 640px+). **Declined** the rest: the strips are `#fbfbfb` against white, and the sticky bar is centred at `max-w-sm`. |
+| 10 | The 12 px test is a denylist | **Declined**: the three tokens are the only arbitrary sizes Tailwind classes here produce, and the template has no other `text-[..]`. |
+
 ## Promotion candidates
 
 Answer each line `yes: <path>`, naming the file you promoted, or `no: <reason>`. `dotf spec archive` refuses a line left unanswered, a `no` without a reason, and a `yes` whose file does not exist; a `00_meta/` path is looked up in the vault.

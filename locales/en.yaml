@@ -39,6 +39,9 @@ contact_hint: "Suggested message:"
 copy_number: Copy number
 copied: Copied
 results: "{n} items shown"
+results_one: "1 item shown"
+copy_fallback: "Selected: press Ctrl+C or ⌘C"
+open_messages: Open in Messages instead
 see_included: See what's included
 free: Free
 separately: Separately

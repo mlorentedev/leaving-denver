@@ -11,7 +11,16 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 PAGES = (ROOT / "build" / "public" / "index.html", ROOT / "build" / "public" / "es" / "index.html")
-KEYS = ("contact_heading", "contact_hint", "copy_number", "copied", "results")
+KEYS = (
+    "contact_heading",
+    "contact_hint",
+    "copy_number",
+    "copied",
+    "copy_fallback",
+    "open_messages",
+    "results",
+    "results_one",
+)
 
 
 @pytest.mark.parametrize("page", PAGES, ids=["en", "es"])
@@ -55,4 +64,13 @@ def test_filtering_announces_the_result_count(page):
     html = page.read_text(encoding="utf-8")
     assert re.search(r'<p id="resultCount"[^>]*aria-live="polite"', html)
     js = "".join(re.findall(r"<script>(.*?)</script>", html, re.S))
-    assert "UI.results" in js and "getElementById('resultCount')" in js
+    assert "'results_one' : 'results'" in js and "getElementById('resultCount')" in js
+
+
+@pytest.mark.parametrize("page", PAGES, ids=["en", "es"])
+def test_sheet_keeps_a_native_sms_way_out(page):
+    html = page.read_text(encoding="utf-8")
+    assert re.search(r'<a id="contactSms"[^>]*data-native-sms', html)
+    js = "".join(re.findall(r"<script>(.*?)</script>", html, re.S))
+    # The sheet's own sms: link is not intercepted again.
+    assert "link.hasAttribute('data-native-sms')" in js

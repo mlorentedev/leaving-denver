@@ -39,6 +39,9 @@ contact_hint: "Mensaje sugerido:"
 copy_number: Copiar número
 copied: Copiado
 results: "{n} artículos visibles"
+results_one: "1 artículo visible"
+copy_fallback: "Seleccionado: pulse Ctrl+C o ⌘C"
+open_messages: Abrir en Mensajes
 see_included: Ver qué incluye
 free: Gratis
 separately: Por separado

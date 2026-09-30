@@ -33,3 +33,9 @@ body {
 dialog.sheet > * {
   padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
 }
+
+@media (min-width: 640px) {
+  dialog.sheet > * {
+    padding-bottom: max(1.75rem, env(safe-area-inset-bottom));
+  }
+}

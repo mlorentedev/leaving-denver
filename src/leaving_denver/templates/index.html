@@ -306,10 +306,12 @@
       <h3 id="contactTitle" class="pr-12 text-xl font-extrabold text-neutral-900">{{ t.contact_heading }}</h3>
       <div class="mt-4 flex flex-wrap items-center gap-3">
         <p id="contactNumber" class="text-2xl font-black tracking-tight text-neutral-900 select-all"></p>
-        <button type="button" id="contactCopy" class="h-10 px-4 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white text-sm font-bold">{{ t.copy_number }}</button>
+        <button type="button" id="contactCopy" aria-live="polite" class="h-10 px-4 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white text-sm font-bold">{{ t.copy_number }}</button>
       </div>
       <p class="mt-5 text-xs font-bold uppercase tracking-wider text-neutral-500">{{ t.contact_hint }}</p>
       <p id="contactMessage" class="mt-1.5 p-3 bg-neutral-50 rounded-xl border border-neutral-100 text-sm text-neutral-700 select-all"></p>
+      <!-- Desktops with a Messages app (a Mac with iMessage) can still take the sms: hand-off. -->
+      <a id="contactSms" href="#" data-native-sms class="mt-4 inline-flex min-h-10 items-center text-sm font-semibold text-neutral-900 underline underline-offset-2">{{ t.open_messages }}</a>
     </section>
   </dialog>
 
@@ -443,14 +445,18 @@
       document.getElementById('contactNumber').textContent = `(${_C.area}) ${_C.prefix}-${_C.line}`;
       document.getElementById('contactMessage').textContent = message;
       document.getElementById('contactCopy').textContent = UI.copy_number;
+      document.getElementById('contactSms').href = link.href;
       openSheet(document.getElementById('contactSheet'));
     }
 
     function copyNumber() {
       const button = document.getElementById('contactCopy');
       const done = () => { button.textContent = UI.copied; };
-      // No clipboard (plain http, permission denied): select the number for Ctrl+C.
-      const select = () => window.getSelection().selectAllChildren(document.getElementById('contactNumber'));
+      // No clipboard (plain http, permission denied): select the number and say how to copy it.
+      const select = () => {
+        window.getSelection().selectAllChildren(document.getElementById('contactNumber'));
+        button.textContent = UI.copy_fallback;
+      };
       if (navigator.clipboard) navigator.clipboard.writeText(getSellerPhone()).then(done, select);
       else select();
     }
@@ -467,7 +473,7 @@
         card.classList.toggle('hidden', hide);
         if (!hide) shown++;
       });
-      document.getElementById('resultCount').textContent = UI.results.replace('{n}', shown);
+      document.getElementById('resultCount').textContent = UI[shown === 1 ? 'results_one' : 'results'].replace('{n}', shown);
     }
 
     // Init
@@ -479,7 +485,7 @@
       initDynamicContacts();
       document.addEventListener('click', e => {
         const link = e.target.closest('a[href^="sms:"]');
-        if (!link || !desktop.matches) return;
+        if (!link || link.hasAttribute('data-native-sms') || !desktop.matches) return;
         e.preventDefault();
         openContactSheet(link);
       });
