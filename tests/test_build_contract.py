@@ -117,6 +117,33 @@ def test_published_defaults_to_true(public_dir):
     assert "hidden-widget" in text_under(public_dir)
 
 
+@pytest.mark.parametrize(
+    ("locale", "credit", "build"),
+    [("index.html", "Built by", "Build"), ("es/index.html", "Creado por", "Versión")],
+)
+def test_footer_links_developer_and_deployed_commit(public_dir, monkeypatch, locale, credit, build):
+    monkeypatch.setenv("GITHUB_SHA", "a" * 40)
+    site_builder.build_public_site(inventory())
+    html = (public_dir / locale).read_text(encoding="utf-8")
+    assert credit in html
+    assert 'href="https://github.com/mlorentedev"' in html
+    assert "@mlorentedev" in html
+    assert f'href="https://github.com/mlorentedev/leaving-denver/commit/{"a" * 40}"' in html
+    assert f"{build} {'a' * 7}" in html
+
+
+def test_footer_omits_deployment_link_without_sha(public_dir, monkeypatch):
+    monkeypatch.delenv("GITHUB_SHA", raising=False)
+    site_builder.build_public_site(inventory())
+    assert "/leaving-denver/commit/" not in (public_dir / "index.html").read_text(encoding="utf-8")
+
+
+def test_footer_rejects_invalid_commit_sha(public_dir, monkeypatch):
+    monkeypatch.setenv("GITHUB_SHA", "not-a-commit")
+    with pytest.raises(ValueError, match="GITHUB_SHA"):
+        site_builder.build_public_site(inventory())
+
+
 def test_unpublished_item_is_in_private_marked_draft(tmp_path, monkeypatch):
     private_dir = tmp_path / "private"
     monkeypatch.setenv("SELLER_PHONE", PHONE)

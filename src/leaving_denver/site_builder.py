@@ -9,6 +9,7 @@ Compiles Single Source of Truth (data/inventory.yaml) into:
 
 import json
 import os
+import re
 import shutil
 import subprocess
 from datetime import date, timedelta
@@ -296,6 +297,9 @@ def localize_public_inventory(
 def build_public_site(full_data: dict[str, Any]) -> None:
     DIST_DIR.mkdir(parents=True, exist_ok=True)
 
+    build_sha = os.environ.get("GITHUB_SHA")
+    if build_sha and not re.fullmatch(r"[0-9a-fA-F]{40}", build_sha):
+        raise ValueError("GITHUB_SHA must be a 40-character commit hash")
     phone = seller_phone()
     if not phone:
         raise RuntimeError(
@@ -333,6 +337,7 @@ def build_public_site(full_data: dict[str, Any]) -> None:
             t=translations,
             ui_json=json.dumps(translations, ensure_ascii=False).replace("<", "\\u003c"),
             asset_prefix=asset_prefix,
+            build_sha=build_sha,
             inventory_json=inventory_json,
             contact_json=contact_json,
             seller=localized_seller,
