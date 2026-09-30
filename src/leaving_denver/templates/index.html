@@ -561,8 +561,13 @@
         });
       });
       // A share page (/i/<id>/) sends buyers here as /#<id>: open that item. An unknown
-      // id opens nothing, and Back closes the sheet onto the catalog like any other.
-      if (location.hash) openModal(location.hash.slice(1));
+      // id opens nothing, and Back closes the sheet onto the catalog like any other. The
+      // hash is dropped first, so a reload after closing the sheet shows the catalog.
+      const linked = location.hash.slice(1);
+      if (linked) {
+        history.replaceState(null, '', location.pathname + location.search);
+        openModal(linked);
+      }
     });
   </script>
 </body>

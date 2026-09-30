@@ -20,6 +20,7 @@ created: "2026-09-30"
 - [x] `scripts/smoke.sh`: robots names `facebookexternalhit`, the catalog `og:image` answers as a JPEG, the first item's share page exists
 - [x] ADR-004, ADR-001 note, runbook "Link previews"
 - [x] `make check` green
+- [x] Independent review (reviewer subagent, 9a0405f) dispositioned in `verification.md`
 
 ## PR 2: share button
 

@@ -265,7 +265,7 @@ def write_share_image(cover_jpg: Path) -> Path:
         finally:
             staged.unlink(missing_ok=True)
     for other in target.parent.iterdir():
-        if other != target:
+        if other != target and other.is_file():
             other.unlink()
     return target
 

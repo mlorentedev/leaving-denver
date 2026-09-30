@@ -187,6 +187,9 @@ def sanitize_public_inventory(full_data: dict[str, Any]) -> dict[str, Any]:
     for item in full_data.get("items", []):
         if item["id"] in hidden:
             continue
+        # Ids become paths (i/<id>/, catalog/<id>/) and URL fragments: slugs only.
+        if not re.fullmatch(r"[a-z0-9]+(-[a-z0-9]+)*", item["id"]):
+            raise RuntimeError(f"Item id {item['id']!r} must be a lower-case slug")
         status = item.get("status", "Available")
         if status not in STATUSES:
             raise RuntimeError(f"Item {item['id']}: status {status!r} is not one of {STATUSES}")
@@ -323,6 +326,71 @@ def item_description(item: dict[str, Any], t: dict[str, Any]) -> str:
     return f"{asking} · {item['status_label']} · {t['pickup_near']}"
 
 
+def locale_path(locale: str) -> str:
+    """A locale's path under the site root: "" for English, "es/" for Spanish."""
+    return "" if locale == "en" else f"{locale}/"
+
+
+def og_common(locale: str) -> dict[str, Any]:
+    width, height = SHARE_IMAGE_SIZE
+    return {
+        "locale": OG_LOCALES[locale],
+        "locale_alternate": OG_LOCALES["es" if locale == "en" else "en"],
+        "image_width": width,
+        "image_height": height,
+    }
+
+
+def catalog_og(
+    locale: str,
+    t: dict[str, Any],
+    vehicle: dict[str, Any] | None,
+    items: list[dict[str, Any]],
+    previews: dict[str, str],
+    origin: str,
+    departure: date,
+) -> dict[str, Any]:
+    """The catalog page's own preview: the hero line, and the vehicle's image (or the
+    first item's with one)."""
+    showcase = next((i for i in [vehicle, *items] if i and i["id"] in previews), None)
+    suffix = t["hero_vehicle_suffix" if vehicle else "hero_household_suffix"]
+    return {
+        **og_common(locale),
+        "title": t["page_title_vehicle" if vehicle else "page_title_household"],
+        "description": f"{t['hero_prefix']} {t['months'][departure.month]} {suffix}",
+        "url": f"{origin}/{locale_path(locale)}",
+        "image": f"{origin}/{previews[showcase['id']]}" if showcase else None,
+        "image_alt": showcase["title"] if showcase else "",
+    }
+
+
+def write_share_pages(
+    locale: str,
+    t: dict[str, Any],
+    items: list[dict[str, Any]],
+    previews: dict[str, str],
+    origin: str,
+) -> None:
+    """One share page per published item, at i/<id>/ under the locale's path. Rebuilt
+    whole, so an item unpublished since the last build loses its page."""
+    share_root = DIST_DIR / locale_path(locale) / "i"
+    shutil.rmtree(share_root, ignore_errors=True)
+    for item in items:
+        page = share_root / item["id"] / "index.html"
+        page.parent.mkdir(parents=True)
+        preview = previews.get(item["id"])
+        og = {
+            **og_common(locale),
+            "title": item["title"],
+            "description": item_description(item, t),
+            "url": f"{origin}/{locale_path(locale)}i/{item['id']}/",
+            "image": f"{origin}/{preview}" if preview else None,
+            "image_alt": item["title"],
+        }
+        html = render("share.html", locale=locale, t=t, og=og, target=f"../../#{item['id']}")
+        page.write_text(html, encoding="utf-8")
+
+
 # Filter chips, in page order: category in the data -> chip label.
 CHIPS = {
     "Living Room": "Living room",
@@ -402,7 +470,6 @@ def build_public_site(full_data: dict[str, Any]) -> None:
     contact_json = json.dumps(phone_parts(phone))
     origin = site_url()
     previews = share_images(public_data["items"])
-    image_width, image_height = SHARE_IMAGE_SIZE
     for locale in ("en", "es"):
         translations = load_locale(locale)
         asset_prefix = "" if locale == "en" else "../"
@@ -421,31 +488,7 @@ def build_public_site(full_data: dict[str, Any]) -> None:
         vehicle = next((i for i in localized_data["items"] if i["category"] == "Vehicle"), None)
         items = [i for i in localized_data["items"] if i["category"] != "Vehicle"]
         bundles = localized_data["bundles"]
-        prefix = "" if locale == "en" else f"{locale}/"
-        og_base = {
-            "locale": OG_LOCALES[locale],
-            "locale_alternate": OG_LOCALES["es" if locale == "en" else "en"],
-            "image_width": image_width,
-            "image_height": image_height,
-        }
-        page_title = translations["page_title_vehicle" if vehicle else "page_title_household"]
-        showcase = next(
-            (i for i in ([vehicle] if vehicle else []) + items if i["id"] in previews), None
-        )
-        catalog_og = {
-            **og_base,
-            "title": page_title,
-            "description": " ".join(
-                (
-                    translations["hero_prefix"],
-                    translations["months"][departure.month],
-                    translations["hero_vehicle_suffix" if vehicle else "hero_household_suffix"],
-                )
-            ),
-            "url": f"{origin}/{prefix}",
-            "image": f"{origin}/{previews[showcase['id']]}" if showcase else None,
-            "image_alt": showcase["title"] if showcase else "",
-        }
+        og = catalog_og(locale, translations, vehicle, items, previews, origin, departure)
         # `<` escaped so item text cannot close the inline <script> ("</script>", "<!--").
         inventory_json = json.dumps(localized_data, indent=2).replace("<", "\\u003c")
         html = render(
@@ -458,7 +501,7 @@ def build_public_site(full_data: dict[str, Any]) -> None:
             inventory_json=inventory_json,
             contact_json=contact_json,
             seller=localized_seller,
-            og=catalog_og,
+            og=og,
             departure_month=translations["months"][departure.month],
             vehicle=vehicle,
             items=items,
@@ -486,31 +529,7 @@ def build_public_site(full_data: dict[str, Any]) -> None:
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(html, encoding="utf-8")
 
-        # Rebuilt whole, so an item unpublished since the last build loses its page.
-        share_root = DIST_DIR / prefix / "i"
-        shutil.rmtree(share_root, ignore_errors=True)
-        for item in localized_data["items"]:
-            page = share_root / item["id"] / "index.html"
-            page.parent.mkdir(parents=True)
-            preview = previews.get(item["id"])
-            og = {
-                **og_base,
-                "title": item["title"],
-                "description": item_description(item, translations),
-                "url": f"{origin}/{prefix}i/{item['id']}/",
-                "image": f"{origin}/{preview}" if preview else None,
-                "image_alt": item["title"],
-            }
-            page.write_text(
-                render(
-                    "share.html",
-                    locale=locale,
-                    t=translations,
-                    og=og,
-                    target=f"../../#{item['id']}",
-                ),
-                encoding="utf-8",
-            )
+        write_share_pages(locale, translations, localized_data["items"], previews, origin)
 
     PUBLIC_ROBOTS_TXT.write_text(ROBOTS_TXT, encoding="utf-8")
 

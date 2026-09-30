@@ -31,11 +31,11 @@ PR 1 (previews and links):
    - `og:locale` and its alternate;
    - `twitter:card=summary_large_image`.
    A script sends people on to `../../#<id>` with `location.replace`, and a plain link in the body covers browsers without JavaScript. The redirect is JavaScript only, never `meta refresh` or an HTTP redirect: a crawler following either would land on `/`, where the hash is lost, and would read the catalog's tags instead of the item's. The pages are built from the sanitized public inventory only. So an unpublished item never gets one, and no page carries the contact fragments.
-3. **Preview image.** `catalog/<id>/<cover>-og.jpg` is 1200×630. The cover is letterboxed onto the page background (`#fbfbfb`), not centre-cropped, because the cards use `object-contain` and a crop would cut the furniture. The image is encoded from the processed cover JPEG and written only when its bytes change, so a rebuild with nothing new touches nothing (lesson-016). Pillow's JPEG encoder is deterministic for one version, and the photo manifest already pins that version. A stale `*-og.jpg` left by an earlier cover is pruned. An item with no photo gets no `og:image`.
+3. **Preview image.** `catalog/<id>/og/<cover>.jpg` is 1200×630, in its own folder, so no photo name can collide with it. The cover is letterboxed onto the page background (`#fbfbfb`), not centre-cropped, because the cards use `object-contain` and a crop would cut the furniture. The image is encoded from the processed cover JPEG and written only when its bytes change, so a rebuild with nothing new touches nothing (lesson-016). Pillow's JPEG encoder is deterministic for one version, and the photo manifest already pins that version. Any other file in `og/`, such as the preview of an earlier cover, is pruned. An item with no photo gets no `og:image`.
 4. **Catalog preview.** `index.html` and `es/index.html` get the same tags for the catalog: the page title, a one-line summary from the locale, and the vehicle's preview image (or the first item's when there is no vehicle).
-5. **Deep link.** Opening `/#<id>` (or `/es/#<id>`) opens that item's sheet after the page loads. It opens through the same `openSheet`, so Back closes the sheet and stays on the catalog. An unknown id does nothing.
+5. **Deep link.** Opening `/#<id>` (or `/es/#<id>`) opens that item's sheet after the page loads. The hash is dropped from the address first, so a reload after closing shows the catalog. It opens through the same `openSheet`, so Back closes the sheet and stays on the catalog. An unknown id does nothing. Item ids must be lower-case slugs (the build fails otherwise), since they become paths and fragments.
 6. **Canonical origin.** `SITE_URL` in `config.py` defaults to `https://leaving-denver.pages.dev` and can be overridden from the environment. The build fails on a value that is not an `https://` origin without a path. Preview deployments therefore emit production `og:image` URLs. That is acceptable, because only production links get shared.
-7. **Smoke.** `scripts/smoke.sh` also checks that `robots.txt` names `facebookexternalhit`, and that the first item's share page has an absolute `og:image` which answers 200 on the deployment.
+7. **Smoke.** `scripts/smoke.sh` also checks that `robots.txt` names `facebookexternalhit`. It checks that the catalog's `og:image` answers as a JPEG on the deployment. It checks that the first item's EN and ES share pages exist (matched by their own `og:url`, since Pages answers unknown paths with `index.html`) and that their `og:image` answers as a JPEG.
 
 PR 2 (share button):
 
@@ -62,7 +62,7 @@ PR 2 (share button):
 - [ ] AC4: the preview image is 1200×630, letterboxed on `#fbfbfb`, and is not rewritten when nothing changed. A replaced cover prunes the old one.
 - [ ] AC5: both catalog pages carry catalog-level Open Graph tags with an existing absolute image.
 - [ ] AC6: `/#<id>` opens that item's sheet, and an unknown id opens nothing (checked in a browser, recorded in verification.md).
-- [ ] AC7: a `SITE_URL` that is not a bare `https://` origin fails the build.
+- [ ] AC7: a `SITE_URL` that is not a bare `https://` origin fails the build, and so does an item id that is not a lower-case slug.
 - [ ] AC8 (PR 2): the item sheet has a Share button that shares or copies the item's share page URL.
 
 ## References

@@ -6,6 +6,7 @@ and the preview image is a letterboxed 1200x630 JPEG rebuilt only when it change
 
 import re
 from html import unescape
+from urllib.robotparser import RobotFileParser
 
 import pytest
 from PIL import Image
@@ -53,16 +54,14 @@ def meta(html, prop):
 
 def test_robots_lets_preview_crawlers_in_and_keeps_everyone_else_out(public_dir):
     site_builder.build_public_site(with_photos(public_dir))
-    robots = (public_dir / "robots.txt").read_text(encoding="utf-8")
-    groups = {
-        block.splitlines()[0].removeprefix("User-agent: "): block
-        for block in robots.split("\n\n")
-        if block.startswith("User-agent: ")
-    }
+    robots = RobotFileParser()
+    robots.parse((public_dir / "robots.txt").read_text(encoding="utf-8").splitlines())
+    paths = ("/", "/i/shown-lamp/", "/es/i/shown-lamp/", "/catalog/shown-lamp/og/cover.jpg")
     for bot in PREVIEW_BOTS:
-        assert "Allow: /" in groups[bot], bot
-        assert "Disallow: /" not in groups[bot], bot
-    assert "Disallow: /" in groups["*"]
+        agent = f"{bot}/1.1 (+https://example.com)"
+        assert all(robots.can_fetch(agent, path) for path in paths), bot
+    for bot in ("Googlebot/2.1", "bingbot/2.0", "GPTBot/1.0", "CCBot/2.0", "Slackbot"):
+        assert not any(robots.can_fetch(bot, path) for path in paths), bot
     assert "X-Robots-Tag: noindex" in (public_dir / "_headers").read_text(encoding="utf-8")
 
 
@@ -104,6 +103,26 @@ def test_share_pages_leak_nothing_unpublished_and_no_contact(public_dir):
         html = page.read_text(encoding="utf-8")
         assert "const _C" not in html
         assert "5550100" not in html
+
+
+def test_markup_in_a_title_stays_text(public_dir):
+    data = with_photos(public_dir)
+    data["items"][0]["title"] = 'Lamp "Arc" & shade </script><b>'
+    site_builder.build_public_site(data)
+    html = (public_dir / "i" / "shown-lamp" / "index.html").read_text(encoding="utf-8")
+    assert meta(html, "og:title") == 'Lamp "Arc" & shade </script><b>'
+    assert "<b>" not in html
+    assert html.count("</script>") == 1
+
+
+@pytest.mark.parametrize("item_id", ["../escape", "Shown-Lamp", "lamp/x", "lamp#x", "-lamp"])
+def test_an_item_id_that_is_not_a_slug_fails(public_dir, item_id):
+    data = with_photos(public_dir)
+    data["items"][0]["id"] = item_id
+    data["bundles"] = []
+    with pytest.raises(RuntimeError, match="slug"):
+        site_builder.build_public_site(data)
+    assert not (public_dir.parent / "escape").exists()
 
 
 def test_an_item_without_a_photo_has_no_preview_image(public_dir):
@@ -189,5 +208,8 @@ def test_a_new_cover_prunes_the_old_preview(tmp_path):
 def test_deep_link_opens_the_item_after_load():
     html = (site_builder.TEMPLATES_DIR / "index.html").read_text(encoding="utf-8")
     ready = html.split("document.addEventListener('DOMContentLoaded'")[1]
-    assert "location.hash" in ready
-    assert re.search(r"openModal\(\s*location\.hash\.slice\(1\)\s*\)", ready)
+    assert "const linked = location.hash.slice(1);" in ready
+    # The hash goes before the sheet opens: a reload after closing shows the catalog.
+    assert ready.index("history.replaceState(null, '', location.pathname") < ready.index(
+        "openModal(linked)"
+    )

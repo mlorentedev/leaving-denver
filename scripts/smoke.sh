@@ -32,15 +32,21 @@ grep -q '^User-agent: facebookexternalhit' <<<"$robots" || fail "robots.txt shut
 
 # Link previews (FEAT-002). og:image is absolute on the production origin; fetch its path
 # here, so a preview deployment is checked against its own files.
-og_image=$(sed -nE 's/.*<meta property="og:image" content="([^"]+)".*/\1/p' <<<"$page" | head -1)
-[[ "$og_image" == https://* ]] || fail "catalog has no absolute og:image"
-curl -fsSI "$url/${og_image#https://*/}" | grep -qi '^content-type: image/jpeg' \
-  || fail "og:image ${og_image#https://*/} does not answer as a JPEG"
+og() { sed -nE "s/.*<meta property=\"og:$1\" content=\"([^\"]+)\".*/\\1/p" | head -1; }
+check_image() {
+  [[ "$1" == https://* ]] || fail "$2 has no absolute og:image"
+  curl -fsSI "$url/${1#https://*/}" | grep -qi '^content-type: image/jpeg' \
+    || fail "$2 og:image ${1#https://*/} does not answer as a JPEG"
+}
+check_image "$(og image <<<"$page")" "catalog"
 item=$(grep -oE 'data-item="[^"]+"' <<<"$page" | head -1 | cut -d'"' -f2)
 [ -n "$item" ] || fail "no item cards on the page"
-# Unknown paths answer with index.html, so match the page's own og:url, not the status.
-curl -fsS "$url/i/$item/" | grep -q "<meta property=\"og:url\" content=\"[^\"]*/i/$item/\"" \
-  || fail "share page /i/$item/ missing"
+for share_path in "i/$item/" "es/i/$item/"; do
+  share=$(curl -fsS "$url/$share_path") || fail "/$share_path unreachable"
+  # Unknown paths answer with index.html, so match the page's own og:url, not the status.
+  [[ "$(og url <<<"$share")" == */$share_path ]] || fail "share page /$share_path missing"
+  check_image "$(og image <<<"$share")" "/$share_path"
+done
 curl -fsSI "$url/" | grep -qi '^x-content-type-options: nosniff' || fail "_headers not applied"
 
 # Pages answers unknown paths with index.html, so check content, not status.
