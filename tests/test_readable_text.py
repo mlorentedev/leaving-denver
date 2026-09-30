@@ -21,29 +21,35 @@ FAILS_ON = {
     "dark": {"text-neutral-500", "text-neutral-600", "text-neutral-700"},
 }
 DARK_GROUNDS = {"bg-neutral-800", "bg-neutral-900", "bg-black", "bg-black/50"}
+TEXT_COLOUR = re.compile(r"text-(white|black|[a-z]+-\d{2,3})(/\d+)?")
 VOID = {"area", "br", "hr", "img", "input", "link", "meta", "source", "wbr"}
 
 
 class GroundChecker(HTMLParser):
-    """Each element's text colour against the nearest background set on it or an ancestor."""
+    """Each element's text colour, set or inherited, against the nearest background."""
 
     def __init__(self):
         super().__init__()
-        self.stack = ["light"]
+        self.stack = [("light", None)]
         self.failures = []
 
     def handle_starttag(self, tag, attrs):
-        classes = (dict(attrs).get("class") or "").split()
-        grounds = [c for c in classes if c.startswith("bg-") and ":" not in c]
-        ground = self.stack[-1]
+        attrs = dict(attrs)
+        classes = [c for c in (attrs.get("class") or "").split() if ":" not in c]
+        grounds = [c for c in classes if c.startswith("bg-")]
+        colours = [c for c in classes if TEXT_COLOUR.fullmatch(c)]
+        ground, colour = self.stack[-1]
         if grounds:
             ground = "dark" if grounds[-1] in DARK_GROUNDS else "light"
-        # Decoration hidden from assistive tech (the EN / ES slash) is exempt, as in WCAG 1.4.3.
-        bad = FAILS_ON[ground] & set(classes)
-        if bad and dict(attrs).get("aria-hidden") != "true":
-            self.failures.append(f"line {self.getpos()[0]}: {sorted(bad)} on a {ground} ground")
+        if colours:
+            colour = colours[-1]
+        # Checked where the pair changes; decoration hidden from assistive tech (the EN / ES
+        # slash) is exempt, as in WCAG 1.4.3.
+        changed = grounds or colours
+        if changed and colour in FAILS_ON[ground] and attrs.get("aria-hidden") != "true":
+            self.failures.append(f"line {self.getpos()[0]}: {colour} on a {ground} ground")
         if tag not in VOID:
-            self.stack.append(ground)
+            self.stack.append((ground, colour))
 
     def handle_endtag(self, tag):
         if tag not in VOID and len(self.stack) > 1:
@@ -55,6 +61,20 @@ def test_text_contrast_holds_on_its_ground(page):
     checker = GroundChecker()
     checker.feed(page.read_text(encoding="utf-8"))
     assert not checker.failures, "\n".join(checker.failures)
+
+
+@pytest.mark.parametrize(
+    "markup",
+    [
+        '<div class="bg-neutral-900"><p class="text-neutral-500">x</p></div>',
+        '<div class="text-neutral-500"><p class="bg-neutral-900">inherits the grey</p></div>',
+        '<div class="bg-neutral-900 text-neutral-400"><p class="bg-white">inherits the grey</p></div>',
+    ],
+)
+def test_checker_catches_set_and_inherited_colours(markup):
+    checker = GroundChecker()
+    checker.feed(markup)
+    assert checker.failures
 
 
 def test_script_built_text_is_readable():
