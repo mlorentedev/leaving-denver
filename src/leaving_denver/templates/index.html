@@ -2,7 +2,7 @@
 <html lang="{{ locale }}">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
   <title>{{ t.page_title_vehicle if vehicle else t.page_title_household }}</title>
   <link rel="icon" type="image/svg+xml" href="{{ asset_prefix }}favicon.svg">
@@ -16,7 +16,7 @@
     .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body class="bg-[#fbfbfb] text-[#1c1c1c] antialiased min-h-screen flex flex-col overflow-x-clip pb-24 selection:bg-neutral-900 selection:text-white">
+<body class="bg-[#fbfbfb] text-[#1c1c1c] antialiased min-h-screen flex flex-col overflow-x-clip selection:bg-neutral-900 selection:text-white">
 {# A catalog photo: `srcset` lets the browser take the smallest variant that fills `sizes`. #}
 {% macro photo(p, sizes, alt, class, lazy=true, priority=false) %}
 <img src="{{ p.src }}"{% if p.srcset %} srcset="{{ p.srcset }}" sizes="{{ sizes }}" width="{{ p.width }}" height="{{ p.height }}"{% endif %} alt="{{ alt }}"{% if lazy %} loading="lazy"{% endif %}{% if priority %} fetchpriority="high"{% endif %} class="{{ class }}">
@@ -125,6 +125,7 @@
 
   <!-- Items Grid: two columns on phones, the whole card opens the item -->
   <main class="max-w-5xl w-full min-w-0 mx-auto px-4 sm:px-6 py-2 flex-1">
+    <p id="resultCount" class="sr-only" aria-live="polite"></p>
     <div id="itemsGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-x-3 gap-y-5 sm:gap-5">
       {% for item in items %}
       <button type="button" class="item-card group flex flex-col gap-2 text-left" data-item="{{ item.id }}" data-cat="{{ item.category }}">
@@ -207,7 +208,7 @@
     </div>
   </footer>
 
-  <a href="#" data-sms-role="sticky-text" class="fixed inset-x-4 bottom-4 z-40 max-w-sm mx-auto h-12 rounded-xl bg-neutral-900 text-white text-sm font-bold flex items-center justify-center shadow-xl">
+  <a href="#" data-sms-role="sticky-text" style="bottom: calc(1rem + env(safe-area-inset-bottom))" class="fixed inset-x-4 z-40 max-w-sm mx-auto h-12 rounded-xl bg-neutral-900 text-white text-sm font-bold flex items-center justify-center shadow-xl">
     {{ t.text_us }}
   </a>
 
@@ -298,13 +299,31 @@
     </div>
   </dialog>
 
+  <!-- Desktop has no SMS app: the text links open this instead, with the number to text from a phone -->
+  <dialog id="contactSheet" aria-labelledby="contactTitle" class="sheet">
+    <section class="bg-white rounded-t-3xl max-w-2xl w-full min-w-0 p-6 sm:p-7 relative shadow-xl">
+      <button type="button" data-close-sheet class="absolute top-4 right-4 w-10 h-10 rounded-full bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center text-neutral-600 text-sm" aria-label="{{ t.close }}">✕</button>
+      <h3 id="contactTitle" class="pr-12 text-xl font-extrabold text-neutral-900">{{ t.contact_heading }}</h3>
+      <div class="mt-4 flex flex-wrap items-center gap-3">
+        <p id="contactNumber" class="text-2xl font-black tracking-tight text-neutral-900 select-all"></p>
+        <button type="button" id="contactCopy" aria-live="polite" class="h-10 px-4 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white text-sm font-bold">{{ t.copy_number }}</button>
+      </div>
+      <p class="mt-5 text-xs font-bold uppercase tracking-wider text-neutral-500">{{ t.contact_hint }}</p>
+      <p id="contactMessage" class="mt-1.5 p-3 bg-neutral-50 rounded-xl border border-neutral-100 text-sm text-neutral-700 select-all"></p>
+      <!-- Desktops with a Messages app (a Mac with iMessage) can still take the sms: hand-off. -->
+      <a id="contactSms" href="#" data-native-sms class="mt-4 inline-flex min-h-10 items-center text-sm font-semibold text-neutral-900 underline underline-offset-2">{{ t.open_messages }}</a>
+    </section>
+  </dialog>
+
   <script>
     // Contact Obfuscation (Defeats automated scraping spiders & telemarketing bots)
     const _C = {{ contact_json | safe }};
     const UI = {{ ui_json | safe }};
     function getSellerPhone() { return _C.cc + _C.area + _C.prefix + _C.line; }
+    // The contact sheet reads the message back out of the href with the same separator.
+    const SMS_BODY = '?body=';
     function buildSmsUri(body) {
-      return `sms:${getSellerPhone()}${body ? '?body=' + encodeURIComponent(body) : ''}`;
+      return `sms:${getSellerPhone()}${body ? SMS_BODY + encodeURIComponent(body) : ''}`;
     }
 
     function updateDepartureCountdown() {
@@ -415,15 +434,46 @@
       document.getElementById('itemSheet').close();
     }
 
+    // sms: does nothing on most desktops. With a mouse, a text link shows the number and
+    // the message it would have sent; phones and tablets keep the native SMS hand-off.
+    const desktop = window.matchMedia('(hover: hover) and (pointer: fine)');
+
+    function openContactSheet(link) {
+      const body = link.href.split(SMS_BODY)[1];
+      let message = UI.sms_generic;
+      try { if (body) message = decodeURIComponent(body); } catch (err) { /* malformed: keep the generic text */ }
+      document.getElementById('contactNumber').textContent = `(${_C.area}) ${_C.prefix}-${_C.line}`;
+      document.getElementById('contactMessage').textContent = message;
+      document.getElementById('contactCopy').textContent = UI.copy_number;
+      document.getElementById('contactSms').href = link.href;
+      openSheet(document.getElementById('contactSheet'));
+    }
+
+    function copyNumber() {
+      const button = document.getElementById('contactCopy');
+      const done = () => { button.textContent = UI.copied; };
+      // No clipboard (plain http, permission denied): select the number and say how to copy it.
+      const select = () => {
+        window.getSelection().selectAllChildren(document.getElementById('contactNumber'));
+        button.textContent = UI.copy_fallback;
+      };
+      if (navigator.clipboard) navigator.clipboard.writeText(getSellerPhone()).then(done, select);
+      else select();
+    }
+
     function applyFilter(cat) {
       document.querySelectorAll('.filter-btn').forEach(b => {
         const on = b.dataset.cat === cat;
         b.setAttribute('aria-pressed', on);
         b.className = 'filter-btn shrink-0 whitespace-nowrap h-10 px-4 rounded-full text-sm transition-colors ' + (on ? 'font-bold bg-neutral-900 text-white' : 'font-semibold bg-white border border-neutral-200 text-neutral-600 hover:text-neutral-900');
       });
+      let shown = 0;
       document.querySelectorAll('.item-card').forEach(card => {
-        card.classList.toggle('hidden', cat !== 'all' && card.dataset.cat !== cat);
+        const hide = cat !== 'all' && card.dataset.cat !== cat;
+        card.classList.toggle('hidden', hide);
+        if (!hide) shown++;
       });
+      document.getElementById('resultCount').textContent = UI[shown === 1 ? 'results_one' : 'results'].replace('{n}', shown);
     }
 
     // Init
@@ -433,6 +483,13 @@
       if (history.state && history.state.sheet) history.replaceState(null, '');
       updateDepartureCountdown();
       initDynamicContacts();
+      document.addEventListener('click', e => {
+        const link = e.target.closest('a[href^="sms:"]');
+        if (!link || link.hasAttribute('data-native-sms') || !desktop.matches) return;
+        e.preventDefault();
+        openContactSheet(link);
+      });
+      document.getElementById('contactCopy').addEventListener('click', copyNumber);
       document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', () => applyFilter(btn.dataset.cat));
       });
@@ -457,9 +514,13 @@
           if (history.state && history.state.sheet === sheet.id) history.back();
         });
       });
-      // Back: the entry is already gone, so closing here does not go back twice.
+      // Back: the entry is already gone, so closing here does not go back twice. A sheet
+      // opened over another (contact over an item) closes one level per Back.
       window.addEventListener('popstate', () => {
-        document.querySelectorAll('dialog.sheet[open]').forEach(sheet => sheet.close());
+        const current = history.state && history.state.sheet;
+        document.querySelectorAll('dialog.sheet[open]').forEach(sheet => {
+          if (sheet.id !== current) sheet.close();
+        });
       });
     });
   </script>

@@ -28,9 +28,13 @@ created: "2026-09-30"
 - [x] [AC2] [AC3] `<dialog>` for item and bundle sheets, scroll lock, focus return, Back closes
 - [x] Behaviour driven in headless Chrome over CDP (real clicks/Escape/history navigation) on the preview
 
-## PR 3 — desktop contact (blocked on owner)
+## PR 3 — desktop contact
 
-- [ ] [AC4] Owner picks channels; implement with the phone obfuscation of ADR-002
+- [x] Owner chose show-and-copy (2026-09-30)
+- [x] [AC4] Failing tests `tests/test_desktop_contact.py` (RED: 6)
+- [x] [AC4] `contactSheet` dialog, fine-pointer click interception, Copy with selection fallback; Back closes one sheet level at a time
+- [x] Behaviour driven over CDP (desktop via `matchMedia` stub, mobile via touch emulation); lesson-014
+- [x] [AC5] [AC6] Rest of #15: safe-area insets, `aria-live` result count (RED: 4)
 
 ## Closing
 
