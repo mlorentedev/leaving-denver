@@ -589,6 +589,7 @@ items:
   - camping mattress
 - id: dinnerware-glassware-set
   category: Dining & Kitchen
+  published: false
   title: '20-Piece Kitchen Dining Set: Stoneware Dinnerware (9-Pc) + Drinkware Glasses
     (11-Pc)'
   short_title: 20-Pc Dinnerware & Glassware Set
@@ -805,16 +806,6 @@ bundles:
   es:
     name: Conjunto multimedia para la sala
     short_name: Sala multimedia
-- id: bundle-kitchen-island
-  name: Kitchen Island & Breakfast Bar Starter Kit
-  short_name: Kitchen bar
-  items:
-  - bar-stools-pair
-  - dinnerware-glassware-set
-  bundle_price: 40
-  es:
-    name: Juego inicial para barra de cocina
-    short_name: Barra de cocina
 - id: bundle-take-all
   name: Whole Apartment Relocation Liquidation
   short_name: Take everything
@@ -831,7 +822,6 @@ bundles:
   - office-chair-ergonomic
   - nightstand-espresso
   - air-mattress-twin-pump
-  - dinnerware-glassware-set
   - auxiliary-c-table
   bundle_price: 540
   es:
