@@ -40,14 +40,30 @@ check_image() {
     || fail "$2 og:image ${1#https://*/} does not answer as a JPEG"
 }
 check_image "$(og image <<<"$page")" "catalog"
-item=$(grep -oE 'data-item="[^"]+"' <<<"$page" | head -1 | cut -d'"' -f2)
-[ -n "$item" ] || fail "no item cards on the page"
-for share_path in "i/$item/" "es/i/$item/"; do
-  share=$(curl -fsS "$url/$share_path") || fail "/$share_path unreachable"
+share_page() {
+  local share
+  share=$(curl -fsS "$url/$1") || fail "/$1 unreachable"
   # Unknown paths answer with index.html, so match the page's own og:url, not the status.
-  [[ "$(og url <<<"$share")" == */$share_path ]] || fail "share page /$share_path missing"
-  check_image "$(og image <<<"$share")" "/$share_path"
+  [[ "$(og url <<<"$share")" == */$1 ]] || fail "share page /$1 missing"
+  printf '%s' "$share"
+}
+# Every card has both share pages. An item with no photo has no og:image, which is content,
+# not a defect, so the images are checked, in both locales, on the first item that has one.
+items=$(grep -oE 'data-item="[^"]+"' <<<"$page" | cut -d'"' -f2)
+[ -n "$items" ] || fail "no item cards on the page"
+pictured=""
+for item in $items; do
+  for share_path in "i/$item/" "es/i/$item/"; do
+    share=$(share_page "$share_path") || exit 1
+    image=$(og image <<<"$share")
+    # The pick is made on the English page, so both of the picked item's pages are checked.
+    if [ "$pictured" = "$item" ] || { [ -z "$pictured" ] && [ "$share_path" = "i/$item/" ] && [ -n "$image" ]; }; then
+      pictured=$item
+      check_image "$image" "/$share_path"
+    fi
+  done
 done
+[ -n "$pictured" ] || fail "no share page has an og:image"
 curl -fsSI "$url/" | grep -qi '^x-content-type-options: nosniff' || fail "_headers not applied"
 
 # Pages answers unknown paths with index.html, so check content, not status.
