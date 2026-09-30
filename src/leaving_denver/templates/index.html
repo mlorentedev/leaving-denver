@@ -214,10 +214,10 @@
   <!-- Item Detail Bottom Sheet -->
   {% for b in bundles + ([everything] if everything else []) %}
   <!-- Bundle sheet: what the bundle holds, each item's price, and the bundle price -->
-  <div id="sheet-{{ b.id }}" class="bundle-sheet fixed inset-0 z-50 bg-black/50 backdrop-blur-xs hidden items-end justify-center overflow-y-auto">
+  <dialog id="sheet-{{ b.id }}" aria-labelledby="sheet-title-{{ b.id }}" class="bundle-sheet sheet">
     <section data-bundle-sheet="{{ b.id }}" class="bg-white rounded-t-3xl max-w-2xl w-full min-w-0 p-6 sm:p-7 relative shadow-xl max-h-[90vh] overflow-y-auto">
       <button type="button" data-close-sheet class="absolute top-4 right-4 w-10 h-10 rounded-full bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center text-neutral-600 text-sm" aria-label="{{ t.close }}">✕</button>
-      <h3 class="pr-12 text-xl font-extrabold text-neutral-900">{{ b.short_name }}</h3>
+      <h3 id="sheet-title-{{ b.id }}" class="pr-12 text-xl font-extrabold text-neutral-900">{{ b.short_name }}</h3>
       {% if b.note %}
       <p class="mt-1 text-sm font-semibold text-emerald-700">{{ b.note }}</p>
       {% endif %}
@@ -242,12 +242,12 @@
       <p class="mt-1 text-right text-xs font-bold text-emerald-700">{{ t.save }} ${{ b.savings }}</p>
       <a href="#" data-sms-intent="{{ t.sms_bundle_prefix }} {{ b.short_name }} {{ t.sms_bundle_word }} (${{ b.bundle_price }}) {{ t.sms_in_dtc }}" class="mt-5 h-12 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white text-sm font-bold flex items-center justify-center">{{ t.text_about_bundle }}</a>
     </section>
-  </div>
+  </dialog>
   {% endfor %}
 
-  <div id="itemSheet" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs hidden items-end justify-center overflow-y-auto">
+  <dialog id="itemSheet" aria-labelledby="modalTitle" class="sheet">
     <div class="bg-white rounded-t-3xl max-w-2xl w-full min-w-0 p-6 sm:p-7 relative shadow-xl max-h-[90vh] overflow-y-auto">
-      <button onclick="closeModal()" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center text-neutral-600 text-sm">
+      <button type="button" onclick="closeModal()" aria-label="{{ t.close }}" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center text-neutral-600 text-sm">
         ✕
       </button>
 
@@ -296,7 +296,7 @@
         </div>
       </div>
     </div>
-  </div>
+  </dialog>
 
   <script>
     // Contact Obfuscation (Defeats automated scraping spiders & telemarketing bots)
@@ -399,18 +399,20 @@
       const asking = item.free ? item.note.toLowerCase() : '$' + item.price;
       document.getElementById('modalSmsLink').href = buildSmsUri(UI.sms_item_prefix + ' ' + item.short_title + ' (' + asking + ') ' + UI.sms_in_dtc);
 
-      document.getElementById('itemSheet').classList.remove('hidden');
-      document.getElementById('itemSheet').classList.add('flex');
+      openSheet(document.getElementById('itemSheet'));
     }
 
-    function toggleSheet(sheet, open) {
-      sheet.classList.toggle('hidden', !open);
-      sheet.classList.toggle('flex', open);
+    // Sheets are modal <dialog>s: Escape, focus return and the inert page come from the
+    // browser. Each open sheet also owns one history entry, so Back closes the sheet
+    // instead of leaving the catalog (in-app browsers would drop the buyer).
+    function openSheet(dialog) {
+      if (dialog.open) return;
+      dialog.showModal();
+      history.pushState({ sheet: dialog.id }, '');
     }
 
     function closeModal() {
-      document.getElementById('itemSheet').classList.add('hidden');
-      document.getElementById('itemSheet').classList.remove('flex');
+      document.getElementById('itemSheet').close();
     }
 
     function applyFilter(cat) {
@@ -426,6 +428,9 @@
 
     // Init
     document.addEventListener('DOMContentLoaded', () => {
+      // A reload keeps a sheet's history entry but no sheet is open: neutralise it, or the
+      // next close would go back onto it and Back would need two presses.
+      if (history.state && history.state.sheet) history.replaceState(null, '');
       updateDepartureCountdown();
       initDynamicContacts();
       document.querySelectorAll('.filter-btn').forEach(btn => {
@@ -436,13 +441,25 @@
       });
       document.querySelectorAll('.bundle-card').forEach(card => {
         const id = card.dataset.bundle || card.dataset.everything;
-        card.addEventListener('click', () => toggleSheet(document.getElementById('sheet-' + id), true));
+        card.addEventListener('click', () => openSheet(document.getElementById('sheet-' + id)));
       });
-      document.querySelectorAll('.bundle-sheet').forEach(sheet => {
-        // Closes on the backdrop or the close button, not on a tap inside the sheet.
+      document.querySelectorAll('dialog.sheet').forEach(sheet => {
+        // The backdrop is the dialog itself: the panel fills it, so a tap inside never matches.
+        // A drag that starts in the panel (selecting text) and ends outside also clicks the
+        // dialog; only a press that starts on the backdrop closes it.
+        let pressedBackdrop = false;
+        sheet.addEventListener('pointerdown', e => { pressedBackdrop = e.target === sheet; });
         sheet.addEventListener('click', e => {
-          if (e.target === sheet || e.target.closest('[data-close-sheet]')) toggleSheet(sheet, false);
+          if ((e.target === sheet && pressedBackdrop) || e.target.closest('[data-close-sheet]')) sheet.close();
         });
+        // Closed by a button, Escape or the backdrop: drop the entry openSheet added.
+        sheet.addEventListener('close', () => {
+          if (history.state && history.state.sheet === sheet.id) history.back();
+        });
+      });
+      // Back: the entry is already gone, so closing here does not go back twice.
+      window.addEventListener('popstate', () => {
+        document.querySelectorAll('dialog.sheet[open]').forEach(sheet => sheet.close());
       });
     });
   </script>

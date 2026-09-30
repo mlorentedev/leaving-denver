@@ -7,24 +7,22 @@ created: "2026-09-30"
 
 ## Evidence
 
-Map every acceptance criterion from `proposal.md` to concrete proof (commit hash, test name, or observed behavior).
-
-- [ ] Criterion 1 -> commit `<hash>` / test `<name>`
-- [ ] Criterion 2 -> commit `<hash>` / test `<name>`
-- [ ] Criterion 3 -> commit `<hash>` / test `<name>`
+- [x] AC1 -> `tests/test_readable_text.py` (ground-aware after PR-Agent caught two dark-card regressions on #94)
+- [x] AC2 -> `test_every_sheet_is_a_labelled_dialog`, `test_page_behind_an_open_dialog_does_not_scroll`
+- [x] AC3 -> `test_sheets_open_modally_and_back_closes_them` (static) + CDP run below (behaviour)
+- [ ] AC4 -> PR 3, blocked on the owner
 
 ## Test status
 
-- Test suite: `<command> -> <output / coverage %>`
-- Manual smoke test: what was exercised, what was observed
-- No regressions in existing test suite: yes / no (if no, document)
+- `make check` -> 137 passed
+- Headless Chrome (390x844) over CDP against `feat-native-dialogs.leaving-denver.pages.dev`, real mouse/key events and `Page.navigateToHistoryEntry` for Back:
+  item card opens `itemSheet` modal, `history.state={sheet}`, html overflow hidden; Escape closes and drops the entry; reopen + Back closes and stays on the page; bundle card opens its sheet; backdrop tap, close button and "Close" all close and drop the entry; focus returns to the card each time; Back with nothing open leaves the page.
+- Note: the interactive Chrome window was hidden (`visibilityState: hidden`), where Chrome dispatches no dialog `close` events at all; behaviour was therefore verified headless.
 
 ## Decisions made during implementation
 
-Brief log of non-obvious trade-offs or course corrections taken during the work. Routine choices belong in commit messages, not here.
-
--
--
+- History: one `pushState` per open sheet; `close` calls `history.back()` only while that sheet's entry is current, so a close caused by Back (popstate) does not go back twice.
+- Styling moved to `dialog.sheet` / `::backdrop` in `public.css`; the panels keep their classes.
 
 ## Promotion candidates
 

@@ -5,5 +5,19 @@
     "verification": "uv run pytest -q tests/test_readable_text.py",
     "state": "pending",
     "evidence": ""
+  },
+  {
+    "id": "FEAT-003-accessible-catalog-f2",
+    "behavior": "AC2: sheets are labelled <dialog>s opened with showModal(); page scroll locked while open",
+    "verification": "make build && uv run pytest -q tests/test_native_dialogs.py -k 'labelled or scroll'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-003-accessible-catalog-f3",
+    "behavior": "AC3: opening pushes one history entry; Back closes; other closes drop the entry",
+    "verification": "make build && uv run pytest -q tests/test_native_dialogs.py -k back_closes",
+    "state": "pending",
+    "evidence": ""
   }
 ]
