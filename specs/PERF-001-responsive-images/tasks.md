@@ -28,7 +28,7 @@ created: "2026-09-29"
 
 ## Follow-up (PR B, same issue)
 
-- [ ] Fonts: self-host one variable font or use the system stack (5 Google weights today)
+- [x] Fonts: one self-hosted variable woff2, preloaded; Google Fonts removed (#90, merged)
 
 ## Closing
 
@@ -38,6 +38,8 @@ created: "2026-09-29"
 - [x] No unrelated changes in the diff
 - [x] `verification.md` filled in
 - [x] PR opened referencing this spec folder (#89)
+- [x] Review findings dispositioned on #89 (PR-Agent + CodeRabbit: 3 applied, 4 declined with reasons)
+- [ ] Independent adversarial review (`review.md`) before archive
 
 ## Machine-readable features
 

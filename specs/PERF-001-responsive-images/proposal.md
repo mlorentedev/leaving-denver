@@ -1,7 +1,7 @@
 ---
 id: "PERF-001-responsive-images"
 type: spec
-status: implementing # draft | implementing | verifying | archived
+status: verifying # draft | implementing | verifying | archived
 created: "2026-09-29"
 issue: "mlorentedev/leaving-denver#20"   # repo#NNN — GitHub issue / Project item that tracks this spec
 tags: [spec, proposal]
@@ -24,7 +24,7 @@ Each synced photo also ships as WebP variants 480/800/1200 px wide (never upscal
 
 ## Out of scope
 
-- Fonts (self-hosting or the system stack): a follow-up PR under the same issue.
+- Fonts (self-hosting or the system stack): the second PR under the same issue (#90).
 - Changing `images:` in `data/inventory.yaml`, the canonical JPEG size, or the private poster assistant (it keeps full JPEGs for posting).
 - Per-item share pages and OG images (#14).
 

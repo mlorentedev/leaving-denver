@@ -15,7 +15,7 @@ created: "2026-09-29"
 
 ## Test status
 
-- `make check` -> 118 passed (ruff clean)
+- `make check` -> 126 passed (ruff clean)
 - Baseline (live, 2026-09-29): 13 unique cover/hero JPEGs = 5.11 MB
 - After (built page, candidates a DPR-3/2 phone picks for each slot): 13 files = 0.54 MB (-89%)
 - Preview smoke (feat-responsive-images.leaving-denver.pages.dev, Chrome): EN/ES 200; 45 srcset candidates all 200 with image/webp or image/jpeg; cards pick 480w, hero 800w, dialog main photo 800w and thumbnails 480w; thumbnail click swaps the photo; no console errors
@@ -24,7 +24,8 @@ created: "2026-09-29"
 
 - Variants are a parallel `photos` field; `images` (YAML, poster assistant, JSON consumers) is untouched (lesson-012).
 - The canonical JPEG stays the largest `srcset` candidate, so desktop/retina still gets full quality and no variant is ever upscaled.
-- Freshness = JPEG mtime >= source mtime and every variant its width calls for exists; a deleted variant is rebuilt.
+- Freshness = JPEG and every variant its width calls for exist with mtime >= source; a deleted or older variant is rebuilt (CodeRabbit), and variants outside the current widths are pruned (PR-Agent).
+- Fonts shipped separately in #90: one 27 KB variable woff2 replaces five Google Fonts weights; verified on its preview and on production.
 
 ## Promotion candidates
 
