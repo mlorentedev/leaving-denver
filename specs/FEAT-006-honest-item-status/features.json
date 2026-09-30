@@ -1,0 +1,44 @@
+[
+  {
+    "id": "FEAT-006-honest-item-status-f1",
+    "behavior": "AC1: a status outside Available / Pending / Sold fails the build",
+    "verification": "uv run pytest -q tests/test_item_status.py -k unknown_status",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-006-honest-item-status-f2",
+    "behavior": "AC2: sold items sort last; the rest keep their order",
+    "verification": "uv run pytest -q tests/test_item_status.py -k 'sort_last or sold_card'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-006-honest-item-status-f3",
+    "behavior": "AC3: a bundle with a Pending or Sold item is unavailable, has no text link, is not an upsell",
+    "verification": "uv run pytest -q tests/test_item_status.py -k 'bundle or sheet_logic'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-006-honest-item-status-f4",
+    "behavior": "AC4: sold card faded and struck with a Sold badge; pending badge; no text link on a sold item",
+    "verification": "uv run pytest -q tests/test_item_status.py -k 'card or sheet_logic'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-006-honest-item-status-f5",
+    "behavior": "AC5: availability line computed from the data",
+    "verification": "uv run pytest -q tests/test_item_status.py -k availability_line",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-006-honest-item-status-f6",
+    "behavior": "AC6: pending/available commands; realized_price stays private",
+    "verification": "uv run pytest -q tests/test_item_status.py -k 'commands or realized'",
+    "state": "pending",
+    "evidence": ""
+  }
+]

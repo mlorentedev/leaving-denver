@@ -41,6 +41,10 @@ uv run leaving-denver drops
 # Mark an item as sold and trigger automatic site rebuild
 uv run leaving-denver sold sofa-sleeper 200
 
+# Reserve an item for an agreed pickup, or put it back on sale
+uv run leaving-denver pending sofa-sleeper
+uv run leaving-denver available sofa-sleeper
+
 # Start local preview server (Port 8088)
 uv run leaving-denver serve --port 8088
 

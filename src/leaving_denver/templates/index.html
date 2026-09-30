@@ -21,6 +21,9 @@
 {% macro photo(p, sizes, alt, class, lazy=true, priority=false) %}
 <img src="{{ p.src }}"{% if p.srcset %} srcset="{{ p.srcset }}" sizes="{{ sizes }}" width="{{ p.width }}" height="{{ p.height }}"{% endif %} alt="{{ alt }}"{% if lazy %} loading="lazy"{% endif %}{% if priority %} fetchpriority="high"{% endif %} class="{{ class }}">
 {%- endmacro %}
+{% macro status_badge(item) -%}
+<span data-role="status-badge" class="self-start px-2 py-0.5 rounded-md text-xs font-bold {{ 'bg-neutral-900 text-white' if item.status == 'Sold' else 'bg-amber-100 text-amber-900' }}">{{ item.status_label }}</span>
+{%- endmacro %}
 
   <!-- Minimal Header -->
   <header class="sticky top-0 z-40 w-full min-w-0 bg-white/90 backdrop-blur-md border-b border-neutral-200/80">
@@ -74,6 +77,9 @@
           <div class="absolute top-3 left-3 flex gap-2">
             <span class="px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider bg-neutral-900 text-white">{{ t.vehicle }}</span>
             <span class="px-2.5 py-1 rounded-md text-xs font-semibold bg-white/95 backdrop-blur-xs text-neutral-800 border border-neutral-200/60">{{ t.winter_ready }}</span>
+            {% if vehicle.status != "Available" %}
+            {{ status_badge(vehicle) }}
+            {% endif %}
           </div>
         </div>
 
@@ -103,9 +109,11 @@
             <button onclick="openModal('2019-ford-escape-sel-awd')" class="flex-1 py-2.5 px-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-semibold text-xs transition-colors">
               {{ t.view_specs }}
             </button>
+            {% if vehicle.status != "Sold" %}
             <a href="#" data-sms-intent="{{ t.sms_item_prefix }} {{ vehicle.short_title }} (${{ vehicle.price }}) {{ t.sms_in_dtc }}" class="min-h-10 py-2.5 px-3 rounded-xl border border-neutral-200 hover:bg-neutral-50 text-neutral-800 font-semibold text-xs transition-colors">
               {{ t.schedule_test_drive }}
             </a>
+            {% endif %}
           </div>
           <p data-role="vehicle-payment" class="text-xs text-neutral-500">{{ seller.payment_methods.vehicle | join(' ' ~ t.or ~ ' ') }}</p>
         </div>
@@ -121,6 +129,11 @@
       <button type="button" class="filter-btn shrink-0 whitespace-nowrap h-10 px-4 rounded-full text-sm transition-colors font-semibold bg-white border border-neutral-200 text-neutral-600 hover:text-neutral-900" data-cat="{{ cat }}" aria-pressed="false">{{ label }}</button>
       {% endfor %}
     </div>
+    {% set n_available = items | selectattr('status', 'equalto', 'Available') | list | length %}
+    {% set n_sold = items | selectattr('status', 'equalto', 'Sold') | list | length %}
+    {% if n_available < items | length %}
+    <p data-role="availability" class="mt-2 text-xs font-semibold text-neutral-500">{{ t.availability_line | replace('{available}', n_available) | replace('{total}', items | length) }}{% if n_sold %} · {{ t.sold_count | replace('{n}', n_sold) }}{% endif %}</p>
+    {% endif %}
   </section>
 
   <!-- Items Grid: two columns on phones, the whole card opens the item -->
@@ -128,19 +141,23 @@
     <p id="resultCount" class="sr-only" aria-live="polite"></p>
     <div id="itemsGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-x-3 gap-y-5 sm:gap-5">
       {% for item in items %}
-      <button type="button" class="item-card group flex flex-col gap-2 text-left" data-item="{{ item.id }}" data-cat="{{ item.category }}">
+      <button type="button" class="item-card group flex flex-col gap-2 text-left" data-item="{{ item.id }}" data-cat="{{ item.category }}" data-status="{{ item.status }}">
         {% if item.photos %}
-        {{ photo(item.photos[0], "(min-width: 1024px) 320px, (min-width: 640px) 31vw, 46vw", item.short_title, "w-full aspect-square object-cover rounded-2xl bg-neutral-100 group-hover:opacity-90 transition-opacity") }}
+        {# Sold: only the photo fades, so the text keeps its contrast. #}
+        {{ photo(item.photos[0], "(min-width: 1024px) 320px, (min-width: 640px) 31vw, 46vw", item.short_title, "w-full aspect-square object-cover rounded-2xl bg-neutral-100 transition-opacity " ~ ("opacity-60 grayscale" if item.status == "Sold" else "group-hover:opacity-90")) }}
         {% else %}
         <span class="w-full aspect-square rounded-2xl bg-neutral-100"></span>
         {% endif %}
         <span class="flex flex-col gap-0.5 px-0.5">
+          {% if item.status != "Available" %}
+          {{ status_badge(item) }}
+          {% endif %}
           <span class="text-sm font-semibold leading-snug text-neutral-900">{{ item.short_title }}</span>
           {% if item.free %}
           <span class="text-sm font-bold text-emerald-700">{{ item.note }}</span>
           {% else %}
           <span class="flex items-baseline gap-1.5">
-            <span class="text-base font-extrabold text-neutral-900">${{ item.price }}</span>
+            <span class="text-base font-extrabold text-neutral-900{% if item.status == 'Sold' %} line-through{% endif %}">${{ item.price }}</span>
             {% if item.retail %}
             <span class="text-xs text-neutral-500 line-through">${{ item.retail }}</span>
             {% endif %}
@@ -157,12 +174,16 @@
       <h2 class="text-lg font-extrabold text-neutral-900">{{ t.save_with_bundle }}</h2>
       <div class="mt-3 -mx-4 px-4 sm:mx-0 sm:px-0 flex gap-3 overflow-x-auto hide-scrollbar pb-1">
         {% for b in bundles %}
-        <button type="button" data-bundle="{{ b.id }}" class="bundle-card flex-none w-[216px] flex flex-col gap-2.5 p-4 rounded-2xl bg-white border border-neutral-200 hover:border-neutral-400 transition-colors text-left">
+        <button type="button" data-bundle="{{ b.id }}" data-available="{{ b.available | lower }}" class="bundle-card flex-none w-[216px] flex flex-col gap-2.5 p-4 rounded-2xl bg-white border border-neutral-200 hover:border-neutral-400 transition-colors text-left">
           <span class="text-sm font-bold text-neutral-900">{{ b.short_name }}</span>
           <span class="text-xs text-neutral-500">{{ b['items'] | length }} {{ t['items'] }}{% if b.note %} · {{ b.note }}{% endif %}</span>
           <span class="flex items-baseline justify-between">
             <span class="text-lg font-extrabold text-neutral-900">${{ b.bundle_price }}</span>
+            {% if b.available %}
             <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">{{ t.save }} ${{ b.savings }}</span>
+            {% else %}
+            <span class="text-xs font-bold text-neutral-700">{{ t.unavailable }}</span>
+            {% endif %}
           </span>
           <span class="text-xs font-semibold text-neutral-900 underline underline-offset-2">{{ t.see_included }}</span>
         </button>
@@ -172,9 +193,12 @@
     {% endif %}
 
     {% if everything %}
-    <button type="button" data-everything="{{ everything.id }}" class="bundle-card mt-6 w-full flex flex-col gap-3.5 p-5 rounded-2xl bg-neutral-900 text-white text-left">
+    <button type="button" data-everything="{{ everything.id }}" data-available="{{ everything.available | lower }}" class="bundle-card mt-6 w-full flex flex-col gap-3.5 p-5 rounded-2xl bg-neutral-900 text-white text-left">
       <span class="flex flex-col gap-1">
         <span class="text-lg font-extrabold">{{ t.take_everything }}: ${{ everything.bundle_price }}</span>
+        {% if not everything.available %}
+        <span class="text-sm font-bold text-white">{{ t.unavailable }}</span>
+        {% endif %}
         <span class="text-sm text-neutral-400">{{ t.all }} {{ everything['items'] | length }} {{ t.all_items_one_trip }} {{ t.save }} ${{ everything.savings }}.</span>
       </span>
       <span class="h-12 rounded-xl bg-white text-neutral-900 text-[15px] font-bold flex items-center justify-center">{{ t.see_included }}</span>
@@ -241,7 +265,11 @@
         <span class="text-2xl font-black text-neutral-900">${{ b.bundle_price }}</span>
       </div>
       <p class="mt-1 text-right text-xs font-bold text-emerald-700">{{ t.save }} ${{ b.savings }}</p>
+      {% if b.available %}
       <a href="#" data-sms-intent="{{ t.sms_bundle_prefix }} {{ b.short_name }} {{ t.sms_bundle_word }} (${{ b.bundle_price }}) {{ t.sms_in_dtc }}" class="mt-5 h-12 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white text-sm font-bold flex items-center justify-center">{{ t.text_about_bundle }}</a>
+      {% else %}
+      <p class="mt-5 h-12 rounded-xl bg-neutral-100 text-neutral-700 text-sm font-bold flex items-center justify-center">{{ t.unavailable }}</p>
+      {% endif %}
     </section>
   </dialog>
   {% endfor %}
@@ -353,6 +381,11 @@
     }
 
     const INVENTORY = {{ inventory_json | safe }};
+    const STATUS_PILL = {
+      Available: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+      Pending: 'bg-amber-50 text-amber-800 border-amber-200',
+      Sold: 'bg-neutral-100 text-neutral-700 border-neutral-200',
+    };
 
     function openModal(itemId) {
       const item = INVENTORY.items.find(i => i.id === itemId);
@@ -361,7 +394,9 @@
       document.getElementById('modalTitle').textContent = item.title;
       document.getElementById('modalCategory').textContent = item.category_label + ' · ' + item.brand;
       document.getElementById('modalPrice').textContent = item.free ? item.note : '$' + item.price.toLocaleString();
-      document.getElementById('modalStatus').textContent = item.status;
+      const status = document.getElementById('modalStatus');
+      status.textContent = item.status_label;
+      status.className = 'text-xs font-semibold px-2.5 py-0.5 rounded-full border ' + STATUS_PILL[item.status];
       document.getElementById('modalRetail').textContent = item.retail ? UI.original + ': $' + item.retail.toLocaleString() : '';
       document.getElementById('modalPickup').textContent = item.pickup || UI.default_pickup;
 
@@ -405,7 +440,7 @@
       });
 
       // The bundle this item belongs to, from the data.
-      const bundle = INVENTORY.bundles.find(b => !b.everything && b.items.includes(itemId));
+      const bundle = INVENTORY.bundles.find(b => b.available && !b.everything && b.items.includes(itemId));
       const upsellBox = document.getElementById('modalUpsell');
       if (bundle) {
         document.getElementById('upsellText').textContent = bundle.short_name + ' · $' + bundle.bundle_price + ' · ' + UI.save + ' $' + bundle.savings;
@@ -417,6 +452,8 @@
 
       const asking = item.free ? item.note.toLowerCase() : '$' + item.price;
       document.getElementById('modalSmsLink').href = buildSmsUri(UI.sms_item_prefix + ' ' + item.short_title + ' (' + asking + ') ' + UI.sms_in_dtc);
+      // A pending item keeps its link: a backup buyer is worth having if the pickup falls through.
+      document.getElementById('modalSmsLink').hidden = item.status === 'Sold';
 
       openSheet(document.getElementById('itemSheet'));
     }

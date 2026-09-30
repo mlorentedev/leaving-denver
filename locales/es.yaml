@@ -46,6 +46,9 @@ see_included: Ver qué incluye
 free: Gratis
 separately: Por separado
 text_about_bundle: Escribir sobre este paquete
+unavailable: Ya no está disponible
+availability_line: "{available} de {total} disponibles"
+sold_count: "{n} vendidos"
 days: días
 default_pickup: Recogida en Denver Tech Center (DTC). El comprador debe cargar el artículo.
 sms_generic: ¡Hola! Vi su catálogo de venta por mudanza en DTC y tengo una pregunta.
@@ -74,6 +77,7 @@ categories:
   Vehicle: Auto
 statuses:
   Available: Disponible
+  Pending: Reservado
   Sold: Vendido
 payment_methods:
   Cash: Efectivo
