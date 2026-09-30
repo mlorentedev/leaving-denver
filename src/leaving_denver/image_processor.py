@@ -47,6 +47,16 @@ def variant_path(jpg: Path, width: int) -> Path:
     return jpg.with_name(f"{jpg.stem}-{width}w.webp")
 
 
+def prune_stale_variants(target_jpg: Path) -> None:
+    """Drop `<stem>-<N>w.webp` files the current JPEG and VARIANT_WIDTHS no longer call for."""
+    with Image.open(target_jpg) as img:
+        width = img.width
+    wanted = {variant_path(target_jpg, w) for w in VARIANT_WIDTHS if w < width}
+    for path in target_jpg.parent.glob(f"{target_jpg.stem}-*w.webp"):
+        if path not in wanted and path.stem.removeprefix(f"{target_jpg.stem}-")[:-1].isdigit():
+            path.unlink()
+
+
 def is_up_to_date(src_path: Path, target_jpg: Path) -> bool:
     """The JPEG is newer than its source and every variant its width calls for exists."""
     if not target_jpg.exists() or target_jpg.stat().st_mtime < src_path.stat().st_mtime:
@@ -65,6 +75,7 @@ def process_image(src_path: Path, dest_path: Path) -> bool:
     dest_path.parent.mkdir(parents=True, exist_ok=True)
     target_jpg = dest_path.with_suffix(".jpg")
     if is_up_to_date(src_path, target_jpg):
+        prune_stale_variants(target_jpg)
         return True
 
     # Handle HEIC files
@@ -101,6 +112,7 @@ def process_image(src_path: Path, dest_path: Path) -> bool:
         if read_path != src_path and read_path.exists():
             read_path.unlink()
 
+        prune_stale_variants(target_jpg)
         return True
     except Exception as exc:
         print(f"Error processing image {src_path}: {exc}")

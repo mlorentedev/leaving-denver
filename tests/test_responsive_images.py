@@ -148,3 +148,16 @@ def test_phone_downloads_a_third_of_the_full_covers():
     full = sum((DIST_DIR / attr(t, "src")).stat().st_size for t in cards)
     picked = sum((DIST_DIR / pick(attr(t, "srcset"), 360)).stat().st_size for t in cards)
     assert picked * 3 < full, f"phone covers weigh {picked} B against {full} B of full JPEGs"
+
+
+def test_variants_outside_the_current_widths_are_removed(tmp_path):
+    src, target = tmp_path / "desk.jpg", tmp_path / "out" / "desk.jpg"
+    make_photo(src, (1300, 900))
+    assert process_image(src, target)
+    # Left by a build whose VARIANT_WIDTHS had 640, or by a wider earlier source.
+    stale = [target.with_name("desk-640w.webp"), target.with_name("desk-1600w.webp")]
+    for path in stale:
+        path.write_bytes(b"old")
+    assert process_image(src, target)
+    assert not any(path.exists() for path in stale)
+    assert all(variant_path(target, w).is_file() for w in VARIANT_WIDTHS)
