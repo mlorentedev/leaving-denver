@@ -1,9 +1,11 @@
 ---
 id: "BUG-003-tailwind-v4"
 type: spec
-status: verifying
+status: archived
 created: "2026-09-29"
 issue: "mlorentedev/leaving-denver#8"   # repo#NNN — GitHub issue / Project item that tracks this spec
+review: waived
+review_waived_reason: "Owner waived the launcher review on 2026-09-30: the repo has no harness/reviewer-pool.json, so dotf spec review cannot run. Reviews on record: independent reviewer subagent (findings shipped as BUG-009, #103)."
 tags: [spec, proposal]
 template_version: "1.0"
 ---
@@ -49,3 +51,5 @@ Observable outcomes. Each must be testable.
 
 - Bitácora board: the GitHub issue / Project item tracking this spec (see the `issue:` frontmatter field)
 - Related ADR: `docs/adr/adr-002-client-dom-phone-obfuscation-and-security-isolation.md`
+
+<!-- archived 2026-09-30 — PR: https://github.com/mlorentedev/leaving-denver/pull/83 -->

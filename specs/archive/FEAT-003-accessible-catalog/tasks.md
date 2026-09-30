@@ -40,7 +40,7 @@ created: "2026-09-30"
 
 - [x] Every acceptance criterion covered by a test and a `features.json` entry
 - [x] `verification.md` filled in
-- [ ] Independent adversarial review before archive
+- [x] Independent adversarial review before archive: launcher review waived by the owner on 2026-09-30, see `review_waived_reason` in proposal.md
 
 ## Machine-readable features
 

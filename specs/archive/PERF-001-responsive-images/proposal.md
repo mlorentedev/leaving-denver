@@ -1,9 +1,11 @@
 ---
 id: "PERF-001-responsive-images"
 type: spec
-status: verifying # draft | implementing | verifying | archived
+status: archived # draft | implementing | verifying | archived
 created: "2026-09-29"
 issue: "mlorentedev/leaving-denver#20"   # repo#NNN — GitHub issue / Project item that tracks this spec
+review: waived
+review_waived_reason: "Owner waived the launcher review on 2026-09-30: the repo has no harness/reviewer-pool.json, so dotf spec review cannot run. Reviews on record: independent reviewer subagent at 908b1e3 (PASS-WITH-GAPS, gaps shipped as PERF-002); PR-Agent and CodeRabbit on #89."
 tags: [spec, proposal]
 template_version: "1.0"
 ---
@@ -36,14 +38,16 @@ Each synced photo also ships as WebP variants 480/800/1200 px wide (never upscal
 
 ## Acceptance criteria
 
-- [ ] AC1: a photo wider than 480/800/1200 px produces WebP variants at exactly those widths; a narrower one produces none; no output carries EXIF, and an EXIF-rotated source comes out upright.
-- [ ] AC2: every catalog `<img>` in EN and ES has `srcset`, `sizes`, `width` and `height`, and every `srcset` URL is a built file.
-- [ ] AC3: the vehicle hero has `fetchpriority="high"` and no `loading="lazy"`; the item dialog sets `srcset` on its main photo and thumbnails.
-- [ ] AC4: a second build does not rewrite up-to-date photo outputs.
-- [ ] AC5: the covers a 2-column phone at DPR 2 would pick weigh less than a third of the full JPEG covers.
+- [x] AC1: a photo wider than 480/800/1200 px produces WebP variants at exactly those widths; a narrower one produces none; no output carries EXIF, and an EXIF-rotated source comes out upright.
+- [x] AC2: every catalog `<img>` in EN and ES has `srcset`, `sizes`, `width` and `height`, and every `srcset` URL is a built file.
+- [x] AC3: the vehicle hero has `fetchpriority="high"` and no `loading="lazy"`; the item dialog sets `srcset` on its main photo and thumbnails.
+- [x] AC4: a second build does not rewrite up-to-date photo outputs.
+- [x] AC5: the covers a 2-column phone at DPR 2 would pick weigh less than a third of the full JPEG covers.
 
 ## References
 
 - Bitácora board: issue #20
 - Lessons: `docs/lessons/lesson-012-template-contexts-are-public-data-contracts.md`
 - ADR: `docs/adr/adr-003-render-the-catalog-from-data-with-jinja2.md`
+
+<!-- archived 2026-09-30 — PR: https://github.com/mlorentedev/leaving-denver/pull/89 -->
