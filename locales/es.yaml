@@ -22,7 +22,6 @@ all_items_one_trip: artículos en un solo viaje.
 pickup_heading: Cómo funciona la recogida
 household_items: Artículos del hogar
 in_person: en persona
-footer: Venta por mudanza en Denver Tech Center · CO 80111
 built_by: Creado por
 build_label: Versión
 text_us: Escríbeme
@@ -31,6 +30,7 @@ item_title: Artículo
 main_photo: Foto principal
 original: Original
 details: Detalles y especificaciones
+included: Qué incluye
 pickup_note: Nota para la recogida
 text_about_this: Escribir sobre este artículo
 close: Cerrar

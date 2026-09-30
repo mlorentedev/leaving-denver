@@ -261,8 +261,9 @@ def test_script_built_text_is_readable(colours):
     scripts = "".join(re.findall(r"<script>(.*?)</script>", TEMPLATE.read_text(), re.S))
     samples = list(script_samples(scripts))
     assert samples, "no script-built text colour found: the pattern above has drifted"
-    assert any(s.lstrip().startswith("<span") for s in samples), (
-        "the spec bullet fragment is unchecked"
+    # The spec bullets are built with createElement since FEAT-011: their mark's class string.
+    assert any('class="text-neutral-500 font-bold' in s for s in samples), (
+        "the spec bullet colour is unchecked"
     )
     for sample in samples:
         checker = ContrastChecker(colours)

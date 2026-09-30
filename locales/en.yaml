@@ -22,7 +22,6 @@ all_items_one_trip: items in one trip.
 pickup_heading: How pickup works
 household_items: Household items
 in_person: in person
-footer: Denver Tech Center Relocation Sale · CO 80111
 built_by: Built by
 build_label: Build
 text_us: Text me
@@ -31,6 +30,7 @@ item_title: Item Title
 main_photo: Main photo
 original: Original
 details: Details & Specifications
+included: What's included
 pickup_note: Pickup note
 text_about_this: Text about this
 close: Close
