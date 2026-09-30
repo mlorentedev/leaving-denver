@@ -66,6 +66,10 @@ make protect-main   # require the CI `test` check on main
 The deploy token (Cloudflare Pages: Edit, this account only) lives in
 `data/private.sops.yaml` as `cloudflare_pages_token`; the account id is
 `CF_ACCOUNT_ID` in the Makefile (Pages' `wrangler.toml` rejects it). `make deploy BRANCH=<name>` deploys from this machine as a fallback.
+For rollbacks, inventory and phone changes, key recovery, and monitoring, see
+[site operations](docs/runbooks/ops.md).
+For the listing calendar, platform rules and buyer scripts, see the
+[seller playbook](docs/runbooks/seller-playbook.md).
 
 ---
 
