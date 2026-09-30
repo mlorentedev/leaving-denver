@@ -46,3 +46,17 @@ def test_sheets_open_modally_and_back_closes_them(page):
 def test_page_behind_an_open_dialog_does_not_scroll():
     css = CSS.read_text(encoding="utf-8")
     assert re.search(r"html:has\(dialog\[open\]\)\{overflow:hidden", css.replace(" ", ""))
+
+
+@pytest.mark.parametrize("page", PAGES, ids=["en", "es"])
+def test_icon_only_close_buttons_are_named(page):
+    html = page.read_text(encoding="utf-8")
+    for button in re.findall(r"<button[^>]*>\s*✕\s*</button>", html):
+        assert "aria-label=" in button, button
+
+
+@pytest.mark.parametrize("page", PAGES, ids=["en", "es"])
+def test_backdrop_close_needs_a_press_on_the_backdrop(page):
+    js = "".join(re.findall(r"<script>(.*?)</script>", page.read_text(encoding="utf-8"), re.S))
+    assert "pressedBackdrop = e.target === sheet" in js
+    assert "history.replaceState(null, '')" in js

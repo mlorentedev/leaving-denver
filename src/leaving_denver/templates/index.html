@@ -247,7 +247,7 @@
 
   <dialog id="itemSheet" aria-labelledby="modalTitle" class="sheet">
     <div class="bg-white rounded-t-3xl max-w-2xl w-full min-w-0 p-6 sm:p-7 relative shadow-xl max-h-[90vh] overflow-y-auto">
-      <button onclick="closeModal()" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center text-neutral-600 text-sm">
+      <button type="button" onclick="closeModal()" aria-label="{{ t.close }}" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center text-neutral-600 text-sm">
         ✕
       </button>
 
@@ -428,6 +428,9 @@
 
     // Init
     document.addEventListener('DOMContentLoaded', () => {
+      // A reload keeps a sheet's history entry but no sheet is open: neutralise it, or the
+      // next close would go back onto it and Back would need two presses.
+      if (history.state && history.state.sheet) history.replaceState(null, '');
       updateDepartureCountdown();
       initDynamicContacts();
       document.querySelectorAll('.filter-btn').forEach(btn => {
@@ -442,8 +445,12 @@
       });
       document.querySelectorAll('dialog.sheet').forEach(sheet => {
         // The backdrop is the dialog itself: the panel fills it, so a tap inside never matches.
+        // A drag that starts in the panel (selecting text) and ends outside also clicks the
+        // dialog; only a press that starts on the backdrop closes it.
+        let pressedBackdrop = false;
+        sheet.addEventListener('pointerdown', e => { pressedBackdrop = e.target === sheet; });
         sheet.addEventListener('click', e => {
-          if (e.target === sheet || e.target.closest('[data-close-sheet]')) sheet.close();
+          if ((e.target === sheet && pressedBackdrop) || e.target.closest('[data-close-sheet]')) sheet.close();
         });
         // Closed by a button, Escape or the backdrop: drop the entry openSheet added.
         sheet.addEventListener('close', () => {

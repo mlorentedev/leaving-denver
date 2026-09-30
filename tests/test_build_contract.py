@@ -357,7 +357,7 @@ def test_mobile_shell(public_dir):
     for marker in (
         'href="index.html" class="flex min-h-10',
         'in DTC." class="min-h-10',
-        'onclick="closeModal()" class="absolute top-4 right-4 w-10 h-10',
+        'aria-label="Close" class="absolute top-4 right-4 w-10 h-10',
     ):
         if marker not in html:
             failures.append(f"missing 40px tap-target guard: {marker}")
