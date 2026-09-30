@@ -37,6 +37,8 @@ close: Cerrar
 contact_heading: Escríbame desde su teléfono
 contact_hint: "Mensaje sugerido:"
 copy_number: Copiar número
+share: Compartir
+link_copied: Enlace copiado
 copied: Copiado
 results: "{n} artículos visibles"
 results_one: "1 artículo visible"

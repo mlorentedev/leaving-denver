@@ -216,3 +216,46 @@ def test_deep_link_opens_the_item_after_load():
     assert ready.index("history.replaceState(null, '', location.pathname") < ready.index(
         "openModal(linked)"
     )
+
+
+# PR 2: the Share button shares the item's share page, whose preview shows the item.
+def script_of(html):
+    return "".join(re.findall(r"<script>(.*?)</script>", html, re.S))
+
+
+@pytest.mark.parametrize(
+    ("page", "label"), [("index.html", "Share"), ("es/index.html", "Compartir")]
+)
+def test_item_sheet_has_a_share_button(public_dir, page, label):
+    site_builder.build_public_site(with_photos(public_dir))
+    html = (public_dir / page).read_text(encoding="utf-8")
+    button = re.search(r'<button type="button" id="modalShare"[^>]*>\s*([^<]+?)\s*</button>', html)
+    assert button, "no Share button in the item sheet"
+    assert button.group(1) == label
+    assert html.index('id="itemSheet"') < button.start() < html.index('id="contactSheet"')
+
+
+@pytest.mark.parametrize("page", ["index.html", "es/index.html"])
+def test_the_shared_url_is_the_items_share_page(public_dir, page):
+    """The button builds `<catalog og:url>i/<id>/`; that must be the share page's own og:url."""
+    site_builder.build_public_site(with_photos(public_dir))
+    html = (public_dir / page).read_text(encoding="utf-8")
+    js = script_of(html)
+    assert "document.querySelector('meta[property=\"og:url\"]').content" in js
+    assert "'i/' + item.id + '/'" in js
+    shared = meta(html, "og:url") + "i/shown-lamp/"
+    share_page = public_dir / page.removesuffix("index.html") / "i" / "shown-lamp" / "index.html"
+    assert meta(share_page.read_text(encoding="utf-8"), "og:url") == shared
+
+
+def test_share_button_keeps_its_width():
+    html = (site_builder.TEMPLATES_DIR / "index.html").read_text(encoding="utf-8")
+    button = re.search(r'<button type="button" id="modalShare"[^>]*class="([^"]*)"', html)
+    # "Link copied" must not reflow the row and squeeze the text-me button.
+    assert {"shrink-0", "whitespace-nowrap"} <= set(button.group(1).split())
+
+
+@pytest.mark.parametrize("locale", ["en", "es"])
+def test_share_strings_exist(locale):
+    t = site_builder.load_locale(locale)
+    assert t["share"] and t["link_copied"]
