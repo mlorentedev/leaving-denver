@@ -18,7 +18,7 @@ created: "2026-09-29"
 - `make check` -> 118 passed (ruff clean)
 - Baseline (live, 2026-09-29): 13 unique cover/hero JPEGs = 5.11 MB
 - After (built page, candidates a DPR-3/2 phone picks for each slot): 13 files = 0.54 MB (-89%)
-- Preview smoke: see PR
+- Preview smoke (feat-responsive-images.leaving-denver.pages.dev, Chrome): EN/ES 200; 45 srcset candidates all 200 with image/webp or image/jpeg; cards pick 480w, hero 800w, dialog main photo 800w and thumbnails 480w; thumbnail click swaps the photo; no console errors
 
 ## Decisions made during implementation
 
