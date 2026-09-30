@@ -14,7 +14,8 @@ pytestmark = needs_chrome
 
 EN = yaml.safe_load((ROOT / "locales" / "en.yaml").read_text(encoding="utf-8"))
 
-# The top-left corner is backdrop: sheets rise from the bottom, at most 90% of the viewport.
+# The top-left corner is backdrop in headless Chrome's window: a sheet is at most 672 px wide
+# and 90% of the viewport tall. test_a_press_on_the_backdrop_closes_the_sheet checks it.
 BACKDROP = (5, 5)
 
 SETTLED = """
@@ -73,6 +74,17 @@ def test_escape_closes_the_sheet_and_its_history_entry(tmp_path, item):
 def test_a_press_on_the_backdrop_closes_the_sheet(tmp_path, item):
     with open_page(tmp_path, "index.html") as browser:
         assert open_item(browser, item) == ["itemSheet"]
+        # The panel fills the dialog, so the only way to click the dialog itself is from its
+        # ::backdrop (public.css); padding on the dialog would make a tap beside the panel close.
+        boxes = browser.run(
+            "const box = e => { const r = e.getBoundingClientRect();"
+            "  return [r.left, r.top, r.width, r.height]; };"
+            "const sheet = document.getElementById('itemSheet');"
+            "return [box(sheet), box(sheet.firstElementChild)];"
+        )
+        dialog, panel = boxes
+        assert dialog == panel
+        assert dialog[0] > BACKDROP[0] and dialog[1] > BACKDROP[1], f"{BACKDROP} is in {dialog}"
         browser.drag(BACKDROP, BACKDROP)
         assert_closed_onto_the_catalog(browser.run(SETTLED))
 
@@ -87,6 +99,50 @@ def test_a_drag_from_the_panel_onto_the_backdrop_keeps_the_sheet(tmp_path, item)
         browser.drag(tuple(title), BACKDROP)
         result = browser.run("await wait(200); return { open: sheets(), state: history.state };")
     assert result == {"open": ["itemSheet"], "state": {"sheet": "itemSheet"}}
+
+
+@pytest.mark.parametrize("opener", ["contact", "bundle"])
+def test_the_close_button_of_other_sheets_closes_them(tmp_path, opener):
+    open_it = {
+        "contact": "document.querySelector('[data-sms-role=\"sticky-text\"]').click();",
+        "bundle": "document.querySelector('.bundle-card').click();",
+    }[opener]
+    steps = f"""
+    {open_it}
+    await until(() => history.state);
+    const opened = sheets();
+    document.querySelector('dialog.sheet[open] [data-close-sheet]').click();
+    {SETTLED}
+    """
+    result = run_page(tmp_path, "index.html", steps, setup=pointer(fine=True))
+    assert_closed_onto_the_catalog(result)
+
+
+def test_a_sheet_opened_twice_owns_one_history_entry(tmp_path, item):
+    steps = f"""
+    const before = history.length;
+    openModal({item!r});
+    openModal({item!r});
+    await until(() => history.state);
+    const added = history.length - before;
+    history.back();
+    {SETTLED.replace("return {", "return { added,")}
+    """
+    result = run_page(tmp_path, "index.html", steps)
+    assert result["added"] == 1
+    assert_closed_onto_the_catalog(result)
+
+
+def test_a_reload_with_a_sheet_open_leaves_no_stale_entry(tmp_path, item):
+    with open_page(tmp_path, "index.html") as browser:
+        open_item(browser, item)
+        browser.send("Page.reload")
+        browser.wait_for("Page.loadEventFired")
+        result = browser.run(
+            "await until(() => document.readyState === 'complete' && history.state === null);"
+            "return { open: sheets(), state: history.state, page: location.pathname };"
+        )
+    assert_closed_onto_the_catalog(result)
 
 
 def test_back_closes_the_sheet_and_stays_on_the_catalog(tmp_path, item):
@@ -115,6 +171,30 @@ def test_back_closes_a_contact_sheet_over_an_item_one_level_at_a_time(tmp_path, 
     assert result["stacked"] == ["itemSheet", "contactSheet"]
     assert result["first"] == {"open": ["itemSheet"], "state": {"sheet": "itemSheet"}}
     assert result["second"] == {"open": [], "state": None}
+
+
+def test_escape_closes_a_contact_sheet_over_an_item_one_level(tmp_path, item):
+    # The text link is clicked for real: Chrome groups dialogs opened with no user activation
+    # in between, and one Escape then closes the whole group. A buyer always clicks.
+    with open_page(tmp_path, "index.html", setup=pointer(fine=True)) as browser:
+        link = browser.run(
+            f"openModal({item!r}); await until(() => history.state);"
+            "const text = document.getElementById('modalSmsLink');"
+            "text.scrollIntoView({ block: 'center' });"
+            "const r = text.getBoundingClientRect();"
+            "return [r.left + r.width / 2, r.top + r.height / 2];"
+        )
+        browser.drag(tuple(link), tuple(link))
+        assert browser.run(
+            "await until(() => history.state.sheet === 'contactSheet'); return sheets();"
+        ) == ["itemSheet", "contactSheet"]
+        browser.key("Escape", 27)
+        result = browser.run(
+            "await until(() => history.state && history.state.sheet === 'itemSheet');"
+            "await wait(100);"
+            "return { open: sheets(), state: history.state };"
+        )
+    assert result == {"open": ["itemSheet"], "state": {"sheet": "itemSheet"}}
 
 
 def contact(tmp_path, clipboard):

@@ -26,6 +26,7 @@ created: "2026-09-30"
 - [x] [P] [AC4] [AC5] Desktop contact (copy, refused clipboard, item message, native link), and touch keeps `sms:`
 - [x] [P] [AC6] Deep link, known and unknown id
 - [x] [AC7] Mutation check: 11 mutations of the built page, each turns the suite red
+- [x] Reviewer findings: stage the page with its stylesheet, fds above 4, overall deadlines and Chrome's log, the load belongs to the staged page; new tests for the other sheets' ✕, reload, double open and Escape on stacked sheets; mutation check re-run with 15 mutations
 
 ## Verification
 
