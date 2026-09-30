@@ -29,8 +29,8 @@
   },
   {
     "id": "FEAT-003-accessible-catalog-f5",
-    "behavior": "AC5: viewport-fit=cover and safe-area insets on the sticky bar",
-    "verification": "make build && uv run pytest -q tests/test_desktop_contact.py -k home_indicator",
+    "behavior": "AC5: viewport-fit=cover and safe-area insets on the sticky bar, body clearance and sheet panels",
+    "verification": "make build && uv run pytest -q tests/test_desktop_contact.py -k 'home_indicator or safe_areas'",
     "state": "pending",
     "evidence": ""
   },

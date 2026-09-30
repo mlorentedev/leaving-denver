@@ -59,6 +59,25 @@ def test_sticky_bar_clears_the_home_indicator(page):
     assert "env(safe-area-inset-bottom)" in sticky
 
 
+def test_body_and_sheets_clear_the_safe_areas():
+    css = re.sub(
+        r"\s+", " ", (ROOT / "build" / "public" / "styles.css").read_text(encoding="utf-8")
+    )
+    # Every body padding rule (top right bottom left) clears each inset on its own side.
+    # The top stays 0: outside a standalone app, the browser bar sits above the viewport.
+    bodies = re.findall(r"(?<![\w-])body ?\{padding:([^}]*)\}", css)
+    assert bodies, "no body padding rule"
+    for body in bodies:
+        sides = re.findall(r"(?:[^\s(]|\([^()]*(?:\([^()]*\))*[^()]*\))+", body)
+        assert len(sides) == 4, sides
+        for side, inset in zip(sides[1:], ("right", "bottom", "left"), strict=True):
+            assert f"env(safe-area-inset-{inset})" in side, (side, inset)
+    # Every sheet panel, both sides of 640 px.
+    panels = re.findall(r"dialog\.sheet ?> ?\* ?\{padding-bottom:([^}]*)\}", css)
+    assert len(panels) == 2, panels
+    assert all("env(safe-area-inset-bottom)" in panel for panel in panels), panels
+
+
 @pytest.mark.parametrize("page", PAGES, ids=["en", "es"])
 def test_filtering_announces_the_result_count(page):
     html = page.read_text(encoding="utf-8")

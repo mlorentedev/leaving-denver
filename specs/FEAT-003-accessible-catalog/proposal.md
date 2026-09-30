@@ -1,7 +1,7 @@
 ---
 id: "FEAT-003-accessible-catalog"
 type: spec
-status: implementing # draft | implementing | verifying | archived
+status: verifying # draft | implementing | verifying | archived
 created: "2026-09-30"
 issue: "mlorentedev/leaving-denver#15"   # repo#NNN — GitHub issue / Project item that tracks this spec
 tags: [spec, proposal]
@@ -38,12 +38,12 @@ Buyers read the catalog on phones in bright light and inside Facebook's in-app b
 
 ## Acceptance criteria
 
-- [ ] AC1: every text colour meets 4.5:1 on its own ground (light: no neutral-300/400, emerald-500/600; dark: no neutral-500–700), and no text is under 12 px.
-- [ ] AC2: item and bundle sheets are `<dialog>` elements opened with `showModal()`; Escape and backdrop close them; body scroll is locked while one is open.
-- [ ] AC3: opening a sheet pushes one history entry; Back closes the sheet and stays on the page; closing by button or Escape removes the entry.
-- [ ] AC4: on a fine pointer, a text link opens a sheet with the number (assembled on click, ADR-002), a Copy button and the suggested message; touch devices keep `sms:`.
-- [ ] AC5: `viewport-fit=cover`; the sticky bar, body clearance and sheet panels add `env(safe-area-inset-*)`.
-- [ ] AC6: choosing a category chip announces the visible item count through an `aria-live` region.
+- [x] AC1: every text colour meets 4.5:1 on its own ground (light: no neutral-300/400, emerald-500/600; dark: no neutral-500–700), and no text is under 12 px.
+- [x] AC2: item and bundle sheets are `<dialog>` elements opened with `showModal()`; Escape and backdrop close them; body scroll is locked while one is open.
+- [x] AC3: opening a sheet pushes one history entry; Back closes the sheet and stays on the page; closing by button or Escape removes the entry.
+- [x] AC4: on a fine pointer, a text link opens a sheet with the number (assembled on click, ADR-002), a Copy button and the suggested message; touch devices keep `sms:`.
+- [x] AC5: `viewport-fit=cover`; the sticky bar, body clearance and sheet panels add `env(safe-area-inset-*)`.
+- [x] AC6: choosing a category chip announces the visible item count through an `aria-live` region.
 
 ## References
 
