@@ -39,6 +39,10 @@ jobs:
       - run: git lfs pull
 
       - uses: astral-sh/setup-uv@v7
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
       - run: make install
       - run: make check
 
@@ -77,6 +81,10 @@ jobs:
       - run: git lfs pull
 
       - uses: astral-sh/setup-uv@v7
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
       - run: make install
       # Same gate as the test job, now against the build with the real number.
       - run: make check

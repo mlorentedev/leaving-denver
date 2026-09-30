@@ -18,6 +18,13 @@ page=$(curl -fsS "$url/")
 grep -q 'const _C = {"cc"' <<<"$page" || fail "contact fragments missing from the page"
 grep -q '__SELLER_CONTACT__' <<<"$page" && fail "contact placeholder was not replaced"
 grep -qE 'floor_price|"floors"' <<<"$page" && fail "the page carries reserve floor data"
+grep -Fq 'href="styles.css"' <<<"$page" || fail "EN stylesheet link missing"
+grep -q 'cdn.tailwindcss.com' <<<"$page" && fail "EN loads the Tailwind play CDN"
+es_page=$(curl -fsS "$url/es/")
+grep -Fq 'href="../styles.css"' <<<"$es_page" || fail "ES stylesheet link missing"
+grep -q 'cdn.tailwindcss.com' <<<"$es_page" && fail "ES loads the Tailwind play CDN"
+css=$(curl -fsS "$url/styles.css") || fail "compiled stylesheet missing"
+grep -Fq '.aspect-4\/3{' <<<"$css" || fail "Tailwind v4 utility missing"
 
 curl -fsS "$url/robots.txt" | grep -q 'Disallow: /' || fail "robots.txt missing or permissive"
 curl -fsSI "$url/" | grep -qi '^x-content-type-options: nosniff' || fail "_headers not applied"

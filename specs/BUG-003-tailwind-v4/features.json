@@ -1,0 +1,6 @@
+[
+  {"id":"BUG-003-tailwind-v4-f1","behavior":"EN/ES catalog pages link deployed local CSS without play CDN","verification":"make build && uv run pytest -q tests/test_tailwind_build.py -k public","state":"pending","evidence":""},
+  {"id":"BUG-003-tailwind-v4-f2","behavior":"Private assistant loads its own CSS without public data leaks","verification":"make build && uv run pytest -q tests/test_tailwind_build.py -k private","state":"pending","evidence":""},
+  {"id":"BUG-003-tailwind-v4-f3","behavior":"Built CSS includes v4 utilities and font theme","verification":"make build && uv run pytest -q tests/test_tailwind_build.py -k utilities","state":"pending","evidence":""},
+  {"id":"BUG-003-tailwind-v4-f4","behavior":"Build compiles CSS or fails explicitly when CLI unavailable","verification":"make build && uv run pytest -q tests/test_tailwind_build.py -k missing_cli","state":"pending","evidence":""}
+]
