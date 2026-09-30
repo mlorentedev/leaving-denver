@@ -131,17 +131,23 @@ def unpublished_ids(full_data: dict[str, Any]) -> set[str]:
 
 
 def apply_photos(item: dict[str, Any], synced: list[str]) -> None:
-    """Set an item's synced photos, its `cover:` photo first when it names one."""
-    images = list(synced)
-    cover = item.get("cover")
-    if cover:
+    """Order an item's synced photos by its `photos:` list; the first is the cover. Unlisted
+    photos follow in name order, so a newly added one still builds until it is placed."""
+    if "cover" in item:
+        raise RuntimeError(
+            f"{item['id']}: cover: was replaced by photos:, a list whose first is the cover"
+        )
+    by_name = {Path(img).name: img for img in synced}
+    ordered = []
+    for listed in item.get("photos", []):
         # Photo sync renames files this way (image_processor.sync_all_photos).
-        name = Path(cover).stem.lower().replace(" ", "_") + ".jpg"
-        match = [img for img in images if Path(img).name == name]
-        if not match:
-            raise RuntimeError(f"{item['id']}: cover {cover} is not among its photos")
-        images.remove(match[0])
-        images.insert(0, match[0])
+        name = Path(listed).stem.lower().replace(" ", "_") + ".jpg"
+        if name not in by_name:
+            raise RuntimeError(f"{item['id']}: photo {listed} is not among its photos")
+        if by_name[name] in ordered:
+            raise RuntimeError(f"{item['id']}: photo {listed} is listed twice")
+        ordered.append(by_name[name])
+    images = ordered + [img for img in synced if img not in ordered]
     item["images"] = images
     item["primary_image"] = images[0]
 
