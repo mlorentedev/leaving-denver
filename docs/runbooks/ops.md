@@ -41,9 +41,12 @@ commit before the next production dispatch.
 
 ## Inventory and contact
 
-- **Sold:** `uv run leaving-denver sold <item-id> <realized-usd>` updates the
-  YAML and rebuilds locally. Inspect the diff, commit and merge the inventory
-  change, then verify the automatic deployment. Take down marketplace listings
+- **Sold:** `uv run leaving-denver sold <item-id> <realized-usd>` records the
+  price in `data/private.sops.yaml` (`sales.<item-id>`, needs sops and the age
+  key; nothing changes if that fails), marks the item Sold in the YAML and
+  rebuilds locally. The repository is public: a realized price never goes in
+  `data/inventory.yaml`. Inspect the diff, commit and merge both
+  `data/inventory.yaml` and `data/private.sops.yaml`, then verify the automatic deployment. Take down marketplace listings
   separately.
 - **Reserved:** `uv run leaving-denver pending <item-id>` when a buyer agrees a
   pickup: the card shows "Pending pickup" and its bundles go off sale. If the

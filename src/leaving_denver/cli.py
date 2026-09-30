@@ -13,6 +13,7 @@ import urllib.parse
 from pathlib import Path
 
 from leaving_denver.config import DIST_DIR, DIST_PRIVATE_DIR
+from leaving_denver.private_data import record_sale
 from leaving_denver.site_builder import (
     apply_photos,
     build_all,
@@ -66,10 +67,16 @@ def cmd_available(args):
 
 def cmd_sold(args):
     data = load_inventory_yaml()
-    target_item = next((item for item in data.get("items", []) if item["id"] == args.id), None)
-    if target_item and args.price is not None:
-        target_item["realized_price"] = args.price
-        save_inventory_yaml(data)
+    if not any(item["id"] == args.id for item in data.get("items", [])):
+        print(f"Error: Item with ID '{args.id}' not found.")
+        sys.exit(1)
+    # The repo is public: the price goes to the encrypted file first, or nothing changes.
+    if args.price is not None:
+        try:
+            record_sale(args.id, args.price)
+        except RuntimeError as err:
+            print(f"Error: could not record the price privately ({err}). Nothing changed.")
+            sys.exit(1)
     target_item = set_status(args.id, "Sold")
     print(
         f"Item '{target_item['title']}' marked as SOLD (Price: ${args.price or target_item.get('recommended_list_price')})."
