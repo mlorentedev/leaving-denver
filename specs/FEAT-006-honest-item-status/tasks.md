@@ -13,31 +13,27 @@ created: "2026-09-30"
 
 ## Setup
 
-- [ ] Branch created from main: `feat/FEAT-006-honest-item-status`
-- [ ] `proposal.md` is complete and acceptance criteria are testable
-- [ ] No open questions left in `proposal.md` "Risks / open questions"
+- [x] Branch `feat/honest-item-status` from main 887134c; #18 In Progress
+- [x] `proposal.md` complete; price-drop display deferred behind #19
 
-## Implementation
+## PR 1 — statuses, builder and page
 
-> Replace these with the actual steps for this feature. Keep them small (one commit each) and in TDD order.
-> The `[P]` / `[AC<n>]` markers are optional — see the legend above. Behaviors 1 and 2 below are independent, so their *first* test task carries `[P]`.
+- [x] [AC1] [AC2] [AC3] [AC6] Failing builder tests `tests/test_item_status.py` (RED: 8)
+- [x] [AC1] [AC2] [AC3] Status validation, sold-last order, bundle `available`, `status_label`
+- [x] [AC6] `pending` / `available` commands through one `set_status` helper; `sold` reuses it
+- [x] [AC3] [AC4] [AC5] Failing page tests (RED: 5)
+- [x] [AC3] [AC4] [AC5] Cards, bundle cards and sheets, item sheet logic, vehicle hero, availability line
+- [x] Rendered with a sold sofa and a pending monitor; screenshots and sheet logic checked in headless Chrome
 
-- [ ] [P] [AC1] Write failing test for <behavior 1>
-- [ ] [AC1] Implement <module/function> to make it pass
-- [ ] Refactor for clarity (extract, rename, dedupe)
-- [ ] [P] [AC2] Write failing test for <behavior 2>
-- [ ] [AC2] Implement to make it pass
-- [ ] ...
+## PR 2 — hide sold
+
+- [ ] Hide-sold toggle, once real sales push available items down
 
 ## Closing
 
-- [ ] Every acceptance criterion from `proposal.md` is covered by at least one test
-- [ ] Every acceptance criterion has a matching entry in `features.json` (see below) with a non-vacuous verification command
-- [ ] Type checks pass
-- [ ] Lint passes
-- [ ] No unrelated changes in the diff (no scope creep)
+- [ ] Every acceptance criterion covered by a test and a `features.json` entry
 - [ ] `verification.md` filled in
-- [ ] PR opened referencing this spec folder
+- [ ] Independent adversarial review before archive
 
 ## Machine-readable features
 
