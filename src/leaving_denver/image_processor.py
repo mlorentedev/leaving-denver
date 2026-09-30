@@ -8,8 +8,10 @@ import hashlib
 import json
 import os
 import subprocess
+import tempfile
 from pathlib import Path
 
+import PIL
 from PIL import Image, ImageOps
 
 from leaving_denver.config import (
@@ -72,10 +74,17 @@ def prune_stale_variants(target_jpg: Path) -> None:
 
 
 def fingerprint(src_path: Path) -> str:
-    """The source's bytes plus every setting that shapes the outputs: a change to either
-    means a rebuild, whatever the timestamps say."""
+    """The source's bytes plus every setting that shapes the outputs, and the encoder: a
+    change to any of them means a rebuild, whatever the timestamps say."""
     digest = hashlib.sha256(src_path.read_bytes())
-    settings = (MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT, JPEG_QUALITY, WEBP_QUALITY, VARIANT_WIDTHS)
+    settings = (
+        MAX_IMAGE_WIDTH,
+        MAX_IMAGE_HEIGHT,
+        JPEG_QUALITY,
+        WEBP_QUALITY,
+        VARIANT_WIDTHS,
+        PIL.__version__,
+    )
     digest.update(json.dumps(settings).encode())
     return digest.hexdigest()
 
@@ -87,7 +96,10 @@ def cache_key(target_jpg: Path) -> str:
     return target_jpg.as_posix()
 
 
-def load_cache(path: Path) -> dict[str, str]:
+Cache = dict[str, dict]
+
+
+def load_cache(path: Path) -> Cache:
     """The last build's manifest; missing or unreadable means rebuild everything."""
     try:
         cache = json.loads(path.read_text(encoding="utf-8"))
@@ -96,23 +108,38 @@ def load_cache(path: Path) -> dict[str, str]:
     return cache if isinstance(cache, dict) else {}
 
 
-def save_cache(cache: dict[str, str], path: Path) -> None:
+def save_cache(cache: Cache, path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     staged = path.with_name(path.name + ".tmp")
     staged.write_text(json.dumps(cache, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     os.replace(staged, path)
 
 
-def is_up_to_date(target_jpg: Path, digest: str, cache: dict[str, str]) -> bool:
-    """The manifest holds this source and these settings for the JPEG, the JPEG opens,
-    and every variant its width calls for is a non-empty file."""
-    if cache.get(cache_key(target_jpg)) != digest:
-        return False
+def stamp(path: Path) -> list[int] | None:
+    try:
+        stat = path.stat()
+    except OSError:
+        return None
+    return [stat.st_size, stat.st_mtime_ns]
+
+
+def outputs_of(target_jpg: Path) -> list[Path]:
     width = output_width(target_jpg)
-    if width is None:
+    variants = [variant_path(target_jpg, w) for w in VARIANT_WIDTHS if width and w < width]
+    return [target_jpg, *variants]
+
+
+def is_up_to_date(target_jpg: Path, digest: str, cache: Cache) -> bool:
+    """The manifest holds this source and these settings for the JPEG, and every output
+    it recorded is still the file it wrote (same size and mtime). Any rewrite since, by a
+    build killed half-way through or by hand, makes the entry stale."""
+    entry = cache.get(cache_key(target_jpg))
+    if not isinstance(entry, dict) or entry.get("digest") != digest:
         return False
-    variants = [variant_path(target_jpg, w) for w in VARIANT_WIDTHS if w < width]
-    return all(v.is_file() and v.stat().st_size > 0 for v in variants)
+    recorded = entry.get("outputs")
+    if not isinstance(recorded, dict) or target_jpg.name not in recorded:
+        return False
+    return all(stamp(target_jpg.with_name(name)) == value for name, value in recorded.items())
 
 
 def save_atomically(img: Image.Image, path: Path, fmt: str, **options) -> None:
@@ -126,7 +153,7 @@ def save_atomically(img: Image.Image, path: Path, fmt: str, **options) -> None:
         staged.unlink(missing_ok=True)
 
 
-def process_image(src_path: Path, dest_path: Path, cache: dict[str, str]) -> bool:
+def process_image(src_path: Path, dest_path: Path, cache: Cache) -> bool:
     """
     Applies the EXIF rotation, then drops all metadata (GPS included), scales down if
     larger than MAX bounds, and saves an optimized JPEG plus the WebP width variants.
@@ -143,15 +170,25 @@ def process_image(src_path: Path, dest_path: Path, cache: dict[str, str]) -> boo
     # Stale until every output below is written.
     cache.pop(key, None)
 
-    # Handle HEIC files
-    if src_path.suffix.lower() == ".heic":
-        temp_jpg = dest_path.with_suffix(".tmp.jpg")
-        if not convert_heic_to_jpg(src_path, temp_jpg):
+    # HEIC is decoded outside the deployed tree, so a failed or killed ffmpeg leaves
+    # nothing there.
+    with tempfile.TemporaryDirectory() as scratch:
+        if src_path.suffix.lower() == ".heic":
+            read_path = Path(scratch) / "decoded.jpg"
+            if not convert_heic_to_jpg(src_path, read_path):
+                return False
+        else:
+            read_path = src_path
+        if not write_outputs(src_path, read_path, target_jpg):
             return False
-        read_path = temp_jpg
-    else:
-        read_path = src_path
+    cache[key] = {
+        "digest": digest,
+        "outputs": {path.name: stamp(path) for path in outputs_of(target_jpg)},
+    }
+    return True
 
+
+def write_outputs(src_path: Path, read_path: Path, target_jpg: Path) -> bool:
     try:
         with Image.open(read_path) as img:
             # Rotation lives in EXIF, which the fresh RGB buffer below drops.
@@ -175,14 +212,10 @@ def process_image(src_path: Path, dest_path: Path, cache: dict[str, str]) -> boo
                 )
 
         prune_stale_variants(target_jpg)
-        cache[key] = digest
         return True
     except Exception as exc:
         print(f"Error processing image {src_path}: {exc}")
         return False
-    finally:
-        if read_path != src_path:
-            read_path.unlink(missing_ok=True)
 
 
 def sync_all_photos() -> dict[str, list[str]]:
@@ -197,6 +230,9 @@ def sync_all_photos() -> dict[str, list[str]]:
         print(f"Warning: Photos directory {PHOTOS_DIR} does not exist.")
         return catalog_map
 
+    # Writes a killed build staged under the deployed tree are never published.
+    for staged in (DIST_DIR / "catalog").glob("**/*.tmp"):
+        staged.unlink()
     cache = load_cache(PHOTO_CACHE)
     for item_dir in sorted(PHOTOS_DIR.iterdir()):
         if not item_dir.is_dir():

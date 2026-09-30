@@ -21,5 +21,5 @@ The photo sync skips a photo whose outputs look current, so local rebuilds stay 
 
 - Freshness is a fingerprint, sha256(source bytes + every setting that shapes the output), stored in a manifest outside the deployed tree (`build/.photo-cache.json`). Adding a setting means adding it to the fingerprint. `test_a_settings_change_rebuilds_the_outputs` shows why.
 - An output that is unreadable or empty counts as missing, so it gets rebuilt and never raises.
-- Every output is written to `<name>.tmp` and renamed into place. The manifest entry is written last, so a killed build leaves a stale entry, never a current one pointing at half a file.
+- Every output is written to `<name>.tmp` and renamed into place. The manifest entry also records each output's size and mtime, so it vouches only for the files it saw written. The first version dropped the entry in memory before rebuilding, but a killed build never saved that drop. The saved entry for the old photo then vouched for the half-built new one once the old photo came back. The independent review reproduced it.
 - Before trusting the check, break it (drop the digest, drop a setting, drop the size check) and watch a test fail.

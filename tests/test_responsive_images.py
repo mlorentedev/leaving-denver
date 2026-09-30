@@ -37,7 +37,7 @@ def cache():
 
 
 def outputs(target):
-    return [target] + [variant_path(target, w) for w in VARIANT_WIDTHS]
+    return [target] + [v for w in VARIANT_WIDTHS if (v := variant_path(target, w)).is_file()]
 
 
 def test_wide_photo_gets_every_variant_upright_and_without_exif(tmp_path, cache):
@@ -179,13 +179,94 @@ def test_a_replaced_source_with_an_older_mtime_is_rebuilt(tmp_path, cache):
     assert widths(target) == (700, [480])
 
 
-def test_a_settings_change_rebuilds_the_outputs(tmp_path, cache, monkeypatch):
+def inodes(target):
+    return {p.name: p.stat().st_ino for p in outputs(target)}
+
+
+@pytest.mark.parametrize(
+    ("setting", "value"),
+    [
+        ("MAX_IMAGE_WIDTH", 1000),
+        ("MAX_IMAGE_HEIGHT", 600),
+        ("JPEG_QUALITY", 50),
+        ("WEBP_QUALITY", 40),
+        ("VARIANT_WIDTHS", (480, 800)),
+    ],
+)
+def test_a_settings_change_rebuilds_the_outputs(tmp_path, cache, monkeypatch, setting, value):
     src, target = tmp_path / "desk.jpg", tmp_path / "out" / "desk.jpg"
     make_photo(src, (1300, 900))
     assert process_image(src, target, cache)
-    monkeypatch.setattr(image_processor, "MAX_IMAGE_WIDTH", 1000)
+    before = inodes(target)
+    monkeypatch.setattr(image_processor, setting, value)
     assert process_image(src, target, cache)
-    assert widths(target) == (1000, [480, 800])
+    # A rewrite renames a fresh file into place, so every surviving output has a new inode.
+    after = inodes(target)
+    assert after and all(after[name] != before.get(name) for name in after), setting
+
+
+def test_a_killed_rebuild_never_leaves_a_fresh_entry(tmp_path, cache, monkeypatch):
+    src, target = tmp_path / "desk.jpg", tmp_path / "out" / "desk.jpg"
+    make_photo(src, (1300, 900))
+    assert process_image(src, target, cache)
+    on_disk = json.loads(json.dumps(cache))  # the manifest the last finished build saved
+    # The photo is swapped and the next build dies after writing its JPEG ...
+    make_photo(src, (700, 500))
+    real_save = image_processor.save_atomically
+    calls = []
+
+    def dies_on_second_write(*args, **kwargs):
+        calls.append(args[1])
+        if len(calls) == 2:
+            raise KeyboardInterrupt
+        return real_save(*args, **kwargs)
+
+    monkeypatch.setattr(image_processor, "save_atomically", dies_on_second_write)
+    with pytest.raises(KeyboardInterrupt):
+        process_image(src, target, cache)
+    monkeypatch.setattr(image_processor, "save_atomically", real_save)
+    # ... then the old photo comes back (`git checkout`): its entry must not vouch for B's JPEG.
+    make_photo(src, (1300, 900))
+    assert process_image(src, target, on_disk)
+    assert widths(target) == (1300, [480, 800, 1200])
+
+
+def test_a_failed_write_keeps_the_previous_outputs(tmp_path, cache, monkeypatch):
+    src, target = tmp_path / "desk.jpg", tmp_path / "out" / "desk.jpg"
+    make_photo(src, (1300, 900))
+    assert process_image(src, target, cache)
+    real_save = Image.Image.save
+
+    def fails_on_webp(img, fp, fmt=None, **kwargs):
+        if fmt == "WEBP":
+            Path(fp).write_bytes(b"half a")
+            raise OSError("disk full")
+        return real_save(img, fp, fmt, **kwargs)
+
+    monkeypatch.setattr(Image.Image, "save", fails_on_webp)
+    monkeypatch.setattr(image_processor, "WEBP_QUALITY", 40)
+    assert not process_image(src, target, cache)
+    assert not list(target.parent.glob("*.tmp"))
+    with Image.open(variant_path(target, 800)) as img:
+        img.verify()
+    assert image_processor.cache_key(target) not in cache
+
+
+def test_a_failed_heic_conversion_leaves_nothing_in_the_output_dir(tmp_path, cache, monkeypatch):
+    src, target = tmp_path / "car.heic", tmp_path / "out" / "car.jpg"
+    src.write_bytes(b"heic bytes")
+    staged = []
+
+    def half_converted(heic, dest):
+        staged.append(dest)
+        dest.write_bytes(b"partial")
+        return False
+
+    monkeypatch.setattr(image_processor, "convert_heic_to_jpg", half_converted)
+    assert not process_image(src, target, cache)
+    assert not staged[0].is_relative_to(target.parent), "HEIC staged inside the deployed tree"
+    assert not staged[0].exists()
+    assert not list(target.parent.iterdir())
 
 
 @pytest.mark.parametrize("damage", ["empty jpeg", "empty variant", "garbage jpeg"])
@@ -225,9 +306,13 @@ def test_the_manifest_survives_a_rebuild_and_stays_out_of_public(tmp_path, monke
     monkeypatch.setattr(image_processor, "PHOTO_CACHE", manifest)
     assert image_processor.sync_all_photos() == {"desk": ["catalog/desk/desk-1.jpg"]}
     assert list(json.loads(manifest.read_text())) == ["catalog/desk/desk-1.jpg"]
-    before = {p: p.stat().st_mtime_ns for p in dist.rglob("*")}
+    before = {p: p.stat().st_mtime_ns for p in dist.rglob("*") if p.is_file()}
+    # A write a killed build staged in the deployed tree is swept, never published.
+    stray = dist / "catalog" / "desk" / "desk-1-800w.webp.tmp"
+    stray.write_bytes(b"half")
     assert image_processor.sync_all_photos()
-    assert {p: p.stat().st_mtime_ns for p in dist.rglob("*")} == before
+    assert not stray.exists()
+    assert {p: p.stat().st_mtime_ns for p in dist.rglob("*") if p.is_file()} == before
     assert not [p for p in dist.rglob("*") if "cache" in p.name]
     # A corrupt manifest means a full rebuild, never a crash.
     manifest.write_text("{not json")
