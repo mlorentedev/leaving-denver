@@ -31,6 +31,8 @@ def test_fine_pointer_text_links_open_the_contact_sheet(page):
     assert "matchMedia('(hover: hover) and (pointer: fine)')" in js
     assert 'a[href^="sms:"]' in js or "a[href^='sms:']" in js
     assert "navigator.clipboard.writeText" in js
+    # The sheet parses the message with the separator buildSmsUri writes, never a copy of it.
+    assert js.count("'?body='") == 1 and "split(SMS_BODY)" in js
 
 
 @pytest.mark.parametrize("locale", ["en", "es"])

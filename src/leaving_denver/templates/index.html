@@ -318,8 +318,10 @@
     const _C = {{ contact_json | safe }};
     const UI = {{ ui_json | safe }};
     function getSellerPhone() { return _C.cc + _C.area + _C.prefix + _C.line; }
+    // The contact sheet reads the message back out of the href with the same separator.
+    const SMS_BODY = '?body=';
     function buildSmsUri(body) {
-      return `sms:${getSellerPhone()}${body ? '?body=' + encodeURIComponent(body) : ''}`;
+      return `sms:${getSellerPhone()}${body ? SMS_BODY + encodeURIComponent(body) : ''}`;
     }
 
     function updateDepartureCountdown() {
@@ -435,9 +437,11 @@
     const desktop = window.matchMedia('(hover: hover) and (pointer: fine)');
 
     function openContactSheet(link) {
-      const body = link.href.split('?body=')[1];
+      const body = link.href.split(SMS_BODY)[1];
+      let message = UI.sms_generic;
+      try { if (body) message = decodeURIComponent(body); } catch (err) { /* malformed: keep the generic text */ }
       document.getElementById('contactNumber').textContent = `(${_C.area}) ${_C.prefix}-${_C.line}`;
-      document.getElementById('contactMessage').textContent = body ? decodeURIComponent(body) : UI.sms_generic;
+      document.getElementById('contactMessage').textContent = message;
       document.getElementById('contactCopy').textContent = UI.copy_number;
       openSheet(document.getElementById('contactSheet'));
     }
