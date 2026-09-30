@@ -26,5 +26,19 @@
     "verification": "make build && uv run pytest -q tests/test_desktop_contact.py",
     "state": "pending",
     "evidence": ""
+  },
+  {
+    "id": "FEAT-003-accessible-catalog-f5",
+    "behavior": "AC5: viewport-fit=cover and safe-area insets on the sticky bar",
+    "verification": "make build && uv run pytest -q tests/test_desktop_contact.py -k home_indicator",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-003-accessible-catalog-f6",
+    "behavior": "AC6: filtering announces the visible item count via aria-live",
+    "verification": "make build && uv run pytest -q tests/test_desktop_contact.py -k result_count",
+    "state": "pending",
+    "evidence": ""
   }
 ]

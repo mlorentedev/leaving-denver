@@ -23,3 +23,13 @@ dialog.sheet::backdrop {
 html:has(dialog[open]) {
   overflow: hidden;
 }
+
+/* viewport-fit=cover lets the page run under the notch and the home indicator; the insets
+   (0 elsewhere) keep content, the sticky bar's clearance and the sheets' last row out of them. */
+body {
+  padding: 0 env(safe-area-inset-right) calc(6rem + env(safe-area-inset-bottom)) env(safe-area-inset-left);
+}
+
+dialog.sheet > * {
+  padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+}

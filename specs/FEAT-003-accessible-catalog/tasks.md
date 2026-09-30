@@ -34,6 +34,7 @@ created: "2026-09-30"
 - [x] [AC4] Failing tests `tests/test_desktop_contact.py` (RED: 6)
 - [x] [AC4] `contactSheet` dialog, fine-pointer click interception, Copy with selection fallback; Back closes one sheet level at a time
 - [x] Behaviour driven over CDP (desktop via `matchMedia` stub, mobile via touch emulation); lesson-014
+- [x] [AC5] [AC6] Rest of #15: safe-area insets, `aria-live` result count (RED: 4)
 
 ## Closing
 
