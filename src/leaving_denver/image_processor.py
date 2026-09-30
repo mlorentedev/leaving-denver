@@ -58,12 +58,15 @@ def prune_stale_variants(target_jpg: Path) -> None:
 
 
 def is_up_to_date(src_path: Path, target_jpg: Path) -> bool:
-    """The JPEG is newer than its source and every variant its width calls for exists."""
-    if not target_jpg.exists() or target_jpg.stat().st_mtime < src_path.stat().st_mtime:
+    """The JPEG and every variant its width calls for exist and are newer than the source."""
+    source_mtime = src_path.stat().st_mtime
+    if not target_jpg.exists() or target_jpg.stat().st_mtime < source_mtime:
         return False
     with Image.open(target_jpg) as img:
         width = img.width
-    return all(variant_path(target_jpg, w).exists() for w in VARIANT_WIDTHS if w < width)
+    # A build that died after the JPEG write leaves current JPEG, old variants.
+    variants = [variant_path(target_jpg, w) for w in VARIANT_WIDTHS if w < width]
+    return all(v.exists() and v.stat().st_mtime >= source_mtime for v in variants)
 
 
 def process_image(src_path: Path, dest_path: Path) -> bool:

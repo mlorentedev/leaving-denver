@@ -3,6 +3,7 @@ Responsive photos (PERF-001): each photo ships as width variants and every catal
 <img> lets the browser pick the smallest adequate one.
 """
 
+import os
 import re
 from html import unescape
 from pathlib import Path
@@ -139,15 +140,31 @@ def pick(srcset, needed):
 
 
 def test_phone_downloads_a_third_of_the_full_covers():
-    # A 390 px phone at DPR 2 shows two cards per row, ~180 CSS px each: 360 device px.
+    # A 390 px phone at DPR 2: cards two per row (~180 CSS px, 360 device px), the
+    # vehicle hero full width (780 device px).
     tags, _ = catalog_imgs(PAGES[0])
-    cards = [
-        t for t in tags if attr(t, "loading") == "lazy" and "w-full" in (attr(t, "class") or "")
-    ]
-    assert cards
-    full = sum((DIST_DIR / attr(t, "src")).stat().st_size for t in cards)
-    picked = sum((DIST_DIR / pick(attr(t, "srcset"), 360)).stat().st_size for t in cards)
+    covers = [t for t in tags if attr(t, "srcset") and "w-full" in (attr(t, "class") or "").split()]
+    assert any(attr(t, "fetchpriority") == "high" for t in covers), "hero not measured"
+    full = sum((DIST_DIR / attr(t, "src")).stat().st_size for t in covers)
+    picked = sum(
+        (DIST_DIR / pick(attr(t, "srcset"), 360 if attr(t, "loading") == "lazy" else 780))
+        .stat()
+        .st_size
+        for t in covers
+    )
     assert picked * 3 < full, f"phone covers weigh {picked} B against {full} B of full JPEGs"
+
+
+def test_variants_older_than_the_source_are_rebuilt(tmp_path):
+    src, target = tmp_path / "desk.jpg", tmp_path / "out" / "desk.jpg"
+    make_photo(src, (1300, 900))
+    assert process_image(src, target)
+    # A build that died after the JPEG write: JPEG current, one variant still old.
+    old = variant_path(target, 800)
+    stamp = src.stat().st_mtime_ns - 10**9
+    os.utime(old, ns=(stamp, stamp))
+    assert process_image(src, target)
+    assert old.stat().st_mtime_ns >= src.stat().st_mtime_ns
 
 
 def test_variants_outside_the_current_widths_are_removed(tmp_path):
