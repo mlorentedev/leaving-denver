@@ -1,0 +1,37 @@
+[
+  {
+    "id": "PERF-001-responsive-images-f1",
+    "behavior": "AC1: variants at exact widths, never upscaled, no EXIF, upright",
+    "verification": "make build && uv run pytest -q tests/test_responsive_images.py -k 'wide_photo or narrow_photo'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "PERF-001-responsive-images-f2",
+    "behavior": "AC2: every catalog img in EN/ES has srcset, sizes, width, height; srcset URLs exist",
+    "verification": "make build && uv run pytest -q tests/test_responsive_images.py -k 'every_catalog_img or photo_set'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "PERF-001-responsive-images-f3",
+    "behavior": "AC3: vehicle hero fetchpriority=high and not lazy; dialog uses srcset",
+    "verification": "make build && uv run pytest -q tests/test_responsive_images.py -k 'vehicle_hero or item_dialog'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "PERF-001-responsive-images-f4",
+    "behavior": "AC4: second build does not rewrite up-to-date outputs",
+    "verification": "make build && uv run pytest -q tests/test_responsive_images.py -k 'up_to_date or missing_variant'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "PERF-001-responsive-images-f5",
+    "behavior": "AC5: phone-picked covers weigh under a third of full JPEGs",
+    "verification": "make build && uv run pytest -q tests/test_responsive_images.py -k 'phone_downloads'",
+    "state": "pending",
+    "evidence": ""
+  }
+]

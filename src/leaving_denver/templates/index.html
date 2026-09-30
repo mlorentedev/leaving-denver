@@ -17,6 +17,10 @@
   </style>
 </head>
 <body class="bg-[#fbfbfb] text-[#1c1c1c] antialiased min-h-screen flex flex-col overflow-x-clip pb-24 selection:bg-neutral-900 selection:text-white">
+{# A catalog photo: `srcset` lets the browser take the smallest variant that fills `sizes`. #}
+{% macro photo(p, sizes, alt, class, lazy=true, priority=false) %}
+<img src="{{ p.src }}"{% if p.srcset %} srcset="{{ p.srcset }}" sizes="{{ sizes }}" width="{{ p.width }}" height="{{ p.height }}"{% endif %} alt="{{ alt }}"{% if lazy %} loading="lazy"{% endif %}{% if priority %} fetchpriority="high"{% endif %} class="{{ class }}">
+{%- endmacro %}
 
   <!-- Minimal Header -->
   <header class="sticky top-0 z-40 w-full min-w-0 bg-white/90 backdrop-blur-md border-b border-neutral-200/80">
@@ -62,7 +66,11 @@
         
         <!-- Image -->
         <div class="md:col-span-7 bg-neutral-100 relative min-h-[240px] sm:min-h-[300px] flex items-center justify-center cursor-pointer group" onclick="openModal('2019-ford-escape-sel-awd')">
-          <img src="{{ vehicle.images[0] if vehicle.images else asset_prefix ~ 'catalog/2019-ford-escape-sel-awd/2019_ford_escape_white_front.jpg' }}" alt="{{ vehicle.short_title }}" class="w-full h-full object-cover group-hover:scale-101 transition-transform duration-300">
+          {% if vehicle.photos %}
+          {{ photo(vehicle.photos[0], "(min-width: 1024px) 600px, (min-width: 768px) 58vw, 100vw", vehicle.short_title, "w-full h-full object-cover group-hover:scale-101 transition-transform duration-300", lazy=false, priority=true) }}
+          {% else %}
+          <img src="{{ asset_prefix ~ 'catalog/2019-ford-escape-sel-awd/2019_ford_escape_white_front.jpg' }}" alt="{{ vehicle.short_title }}" fetchpriority="high" class="w-full h-full object-cover group-hover:scale-101 transition-transform duration-300">
+          {% endif %}
           <div class="absolute top-3 left-3 flex gap-2">
             <span class="px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider bg-neutral-900 text-white">{{ t.vehicle }}</span>
             <span class="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-white/95 backdrop-blur-xs text-neutral-800 border border-neutral-200/60">{{ t.winter_ready }}</span>
@@ -120,8 +128,8 @@
     <div id="itemsGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-x-3 gap-y-5 sm:gap-5">
       {% for item in items %}
       <button type="button" class="item-card group flex flex-col gap-2 text-left" data-item="{{ item.id }}" data-cat="{{ item.category }}">
-        {% if item.images %}
-        <img src="{{ item.images[0] }}" alt="{{ item.short_title }}" loading="lazy" class="w-full aspect-square object-cover rounded-2xl bg-neutral-100 group-hover:opacity-90 transition-opacity">
+        {% if item.photos %}
+        {{ photo(item.photos[0], "(min-width: 1024px) 320px, (min-width: 640px) 31vw, 46vw", item.short_title, "w-full aspect-square object-cover rounded-2xl bg-neutral-100 group-hover:opacity-90 transition-opacity") }}
         {% else %}
         <span class="w-full aspect-square rounded-2xl bg-neutral-100"></span>
         {% endif %}
@@ -217,8 +225,8 @@
         {% for item_id in b['items'] %}
         {% set item = items | selectattr('id', 'equalto', item_id) | first %}
         <li data-sheet-item="{{ item_id }}" class="flex items-center gap-3 py-2.5">
-          {% if item.images %}
-          <img src="{{ item.images[0] }}" alt="" loading="lazy" class="w-12 h-12 flex-none rounded-lg object-cover bg-neutral-100">
+          {% if item.photos %}
+          {{ photo(item.photos[0], "48px", "", "w-12 h-12 flex-none rounded-lg object-cover bg-neutral-100") }}
           {% else %}
           <span class="w-12 h-12 flex-none rounded-lg bg-neutral-100"></span>
           {% endif %}
@@ -338,17 +346,26 @@
       document.getElementById('modalRetail').textContent = item.retail ? UI.original + ': $' + item.retail.toLocaleString() : '';
       document.getElementById('modalPickup').textContent = item.pickup || UI.default_pickup;
 
-      const mainImg = item.images && item.images.length > 0 ? item.images[0] : '';
-      document.getElementById('modalMainImg').src = mainImg;
+      // srcset before src, so the browser never starts fetching the full JPEG first.
+      const mainImg = document.getElementById('modalMainImg');
+      const showPhoto = p => {
+        mainImg.srcset = p ? p.srcset : '';
+        mainImg.sizes = '(min-width: 672px) 620px, 100vw';
+        mainImg.src = p ? p.src : '';
+      };
+      const photos = item.photos || [];
+      showPhoto(photos[0]);
 
       const strip = document.getElementById('modalThumbStrip');
       strip.innerHTML = '';
-      (item.images || []).forEach((img, idx) => {
+      photos.forEach((p, idx) => {
         const thumb = document.createElement('img');
-        thumb.src = img;
+        thumb.srcset = p.srcset;
+        thumb.sizes = '48px';
+        thumb.src = p.src;
         thumb.className = `w-12 h-12 object-contain bg-white rounded-lg border p-1 cursor-pointer transition-all ${idx === 0 ? 'border-neutral-900' : 'border-neutral-200 opacity-60 hover:opacity-100'}`;
         thumb.onclick = () => {
-          document.getElementById('modalMainImg').src = img;
+          showPhoto(p);
           strip.querySelectorAll('img').forEach(t => {
             t.classList.remove('border-neutral-900');
             t.classList.add('border-neutral-200', 'opacity-60');

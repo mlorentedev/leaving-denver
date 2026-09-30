@@ -25,3 +25,4 @@ tags: [lessons, index, docs, leaving-denver]
 | [lesson-010](lesson-010-redact-scanned-documents-on-pixels.md) | Redact Scanned Documents on the Pixels, Then Re-Encode | 2026-09-26 | [privacy, documents, images] |
 | [lesson-011](lesson-011-derive-figures-never-type-them.md) | Derive Figures at Build Time, Never Type Them | 2026-09-27 | [data, templates, testing] |
 | [lesson-012](lesson-012-template-contexts-are-public-data-contracts.md) | Template Contexts Are Public Data Contracts | 2026-09-28 | [security, templates, privacy, testing] |
+| [lesson-013](lesson-013-budget-page-weight-by-what-the-browser-picks.md) | Budget Page Weight by What the Browser Picks | 2026-09-30 | [performance, images, testing] |

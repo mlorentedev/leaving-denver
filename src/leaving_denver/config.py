@@ -28,4 +28,7 @@ PRIVATE_POSTER_HTML = DIST_PRIVATE_DIR / "poster_assistant.html"
 MAX_IMAGE_WIDTH = 1600
 MAX_IMAGE_HEIGHT = 1600
 JPEG_QUALITY = 85
+# Widths of the WebP copies each photo also ships as (never upscaled); `srcset` picks one.
+VARIANT_WIDTHS = (480, 800, 1200)
+WEBP_QUALITY = 78
 SUPPORTED_IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".heic"}
