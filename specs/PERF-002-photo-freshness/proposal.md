@@ -37,7 +37,7 @@ CI builds from scratch, so 1 and 2 hit local previews and `make deploy` only. It
 
 ## Risks / open questions
 
-- PR B: `MAX_IMAGE_WIDTH` is 1600, and variants are emitted only below the JPEG's width (`w < width`), so adding `1600` to `VARIANT_WIDTHS` emits nothing. The fix is a WebP at the JPEG's own width, or a smaller cap. That decision belongs to PR B.
+- PR B: `MAX_IMAGE_WIDTH` is 1600, and variants were emitted only below the JPEG's width (`w < width`), so adding `1600` to `VARIANT_WIDTHS` alone would have emitted nothing. The decision: a variant may be as wide as the JPEG (`w <= width`), and when one is, it replaces the JPEG in `srcset`, because two candidates with the same width descriptor are invalid. The JPEG stays as `src`. Portrait photos capped at 1600 px tall (1200–1333 px wide) still offer their JPEG above 1200w. That is known and out of AC7's scope, because the hero is landscape.
 - Hashing reads every source on every build: 14 photos, about 60 MB, well under a second. Hashing is still cheaper than one re-encode.
 - `process_image` gains a required `cache` argument. Its only callers are `sync_all_photos` and the tests.
 
@@ -48,8 +48,8 @@ CI builds from scratch, so 1 and 2 hit local previews and `make deploy` only. It
 - [x] AC3: an empty or corrupt JPEG, or an empty variant, is rebuilt instead of crashing the build.
 - [x] AC4: every output is written under a temporary name and renamed into place. A failed write leaves the previous outputs intact and no `.tmp` behind. A killed rebuild never leaves an entry vouching for outputs it did not write.
 - [x] AC5: the manifest lives outside `build/public`, a second sync rewrites nothing, and a corrupt manifest means a full rebuild.
-- [ ] AC6 (PR B): the page-weight test reads `sizes` at 390 and 430 px, DPR 2 and 3, and fails if a card regresses to `100vw`.
-- [ ] AC7 (PR B): at 430 px and DPR 3 the hero picks a candidate lighter than the full JPEG.
+- [x] AC6 (PR B): the page-weight test reads `sizes` at 390 and 430 px, DPR 2 and 3, on both pages. A card regressing to `100vw` fails (the DPR 3 budget and the half-screen `sizes` check).
+- [x] AC7 (PR B): at 430 px and DPR 3 the hero picks a candidate lighter than the full JPEG.
 
 ## References
 

@@ -31,7 +31,9 @@ MAX_IMAGE_WIDTH = 1600
 MAX_IMAGE_HEIGHT = 1600
 JPEG_QUALITY = 85
 # Widths of the WebP copies each photo also ships as (never upscaled); `srcset` picks one.
-VARIANT_WIDTHS = (480, 800, 1200)
+# 1600 matches the JPEG cap: a 430 px phone at DPR 3 needs ~1290 px, and a WebP that wide
+# weighs 0.4–0.8 of the JPEG it replaces in `srcset` (0.6 for the vehicle hero).
+VARIANT_WIDTHS = (480, 800, 1200, 1600)
 WEBP_QUALITY = 78
 SUPPORTED_IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".heic"}
 

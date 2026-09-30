@@ -13,6 +13,13 @@ created: "2026-09-30"
 - [x] AC4 -> `test_outputs_are_written_through_a_temporary_name`, `test_a_null_stamp_never_vouches_for_a_missing_output`, `test_an_unreadable_source_fails_that_photo_only`, `test_a_failed_write_keeps_the_previous_outputs`, `test_a_killed_rebuild_never_leaves_a_fresh_entry`, `test_a_failed_heic_conversion_leaves_nothing_in_the_output_dir`
 - [x] AC5 -> `test_the_manifest_survives_a_rebuild_and_stays_out_of_public`, `test_up_to_date_outputs_are_not_rewritten`
 
+## Evidence (PR B)
+
+- [x] AC6 -> `test_phone_downloads_a_third_of_the_full_covers[en|es × 390-2|390-3|430-3]`, `test_cards_ask_for_half_a_phone_screen[en|es]`, `test_the_budget_catches_a_card_sized_to_the_viewport[390-3|430-3]`, `test_resolve_sizes_follows_the_first_matching_condition`, `test_item_dialog_uses_srcset` (it parses `INVENTORY`, checks every descriptor against the file's real width, and pins the script's `srcset`/`sizes` assignments)
+- [x] AC7 -> `test_a_dpr3_phone_never_falls_back_to_the_hero_jpeg`, `test_a_variant_as_wide_as_the_jpeg_replaces_it_in_srcset`
+- Measured on the built page: covers are 9% of the full JPEGs at 390 px DPR 2, 26% at 390 px DPR 3 and 27% at 430 px DPR 3. The hero at 430 px DPR 3 takes the 1600w WebP (207 KB) instead of the JPEG (346 KB).
+- On top of a PR A build (manifest from 09:16), `make build` regenerated every photo and wrote the 1600w files at 09:31, because `VARIANT_WIDTHS` is part of the fingerprint.
+
 ## Test status
 
 - `make check` -> 206 passed (ruff clean)
@@ -46,6 +53,19 @@ Reviewer: the `reviewer` subagent, not the implementer, read-only on 6033b61. Ve
 | A `null` stamp equals `stamp()` of a missing file, so a missing JPEG counted as fresh | **Applied.** A stamp must be two integers, anything else is a miss (`test_a_null_stamp_never_vouches_for_a_missing_output`; dropping the shape check fails it) |
 | An unreadable source raised out of `fingerprint` and aborted the whole sync | **Applied.** It fails that photo only and drops its entry (`test_an_unreadable_source_fails_that_photo_only`) |
 | The JPEG was installed before the variants were encoded, so a failed WebP left a new JPEG beside old variants | **Applied.** Every output is encoded to its `.tmp` first, then all are renamed into place. The failure test changes the source and compares every previous output's inode and bytes; installing each output as it is encoded fails it. |
+
+## Independent adversarial review of PR B (2026-09-30)
+
+Reviewer: the `reviewer` subagent, not the implementer, read-only on 60af84f. It validated 456 srcset candidates on the built EN and ES pages: none missing, no width mismatch, no duplicate, all ascending. It reproduced lesson-013's figures with its own picker. Verdict: **PASS-WITH-GAPS, no blocker.**
+
+| # | Finding | Disposition |
+|---|---|---|
+| 1 | A card at `100vw` passes the DPR 2 budget (780 px still picks 800w) | **Applied.** `test_cards_ask_for_half_a_phone_screen` pins card `sizes` at any DPR; the budget self-check runs at both DPR-3 phones. The card-at-100vw mutation fails 6 tests. |
+| 2 | No page-level check for duplicate or unordered srcset widths | **Applied.** `check_srcset` asserts distinct, ascending widths on every static `<img>` and every dialog photo. Dropping the dedupe guard fails 5 tests. |
+| 3 | Budget and hero tests read the EN page only | **Applied.** They are parametrised over EN and ES. |
+| 4 | Document scans (the recall invoice, the emissions report) now go out as WebP q78 instead of JPEG q85 on DPR 3 phones | **Owner check.** Legibility is a judgement on real pixels; asked on #101. |
+| 5 | The config comment said "about half" (actual 0.42–0.79) | **Applied.** |
+| 6 | `features.json` states are `pending` | **No action:** harness-owned. |
 
 ## Promotion candidates
 

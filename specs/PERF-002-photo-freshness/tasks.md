@@ -22,14 +22,15 @@ created: "2026-09-30"
 
 ## Implementation (PR B)
 
-- [ ] [AC6] Resolve `sizes` in the page-weight test; parse the dialog `srcset`
-- [ ] [AC7] A DPR-3 hero candidate below the JPEG's weight; lesson-013 states the DPR
+- [x] [AC6] [AC7] Failing tests: `resolve_sizes`, per-(viewport, DPR) budget, 100vw self-check, DPR-3 hero, dialog `srcset` parsed from `INVENTORY` (RED: hero picks the JPEG; no 1600w variant)
+- [x] [AC7] `VARIANT_WIDTHS` gains 1600; `w <= width` at all four sites; a variant as wide as the JPEG replaces it in `srcset`
+- [x] lesson-013 states the DPR of each figure
 
 ## Closing
 
 - [x] Every acceptance criterion of PR A is covered by a test
 - [x] Every acceptance criterion has a matching entry in `features.json`
 - [x] Lint passes (`make check`)
-- [ ] `verification.md` filled in for PR B
-- [ ] Review findings dispositioned
+- [x] `verification.md` filled in for PR B
+- [x] Review findings dispositioned (#110: reviewer subagent + CodeRabbit; #111: reviewer subagent)
 - [ ] Independent adversarial review before archive
