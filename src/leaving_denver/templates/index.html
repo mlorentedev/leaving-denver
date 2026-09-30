@@ -174,7 +174,7 @@
     <button type="button" data-everything="{{ everything.id }}" class="bundle-card mt-6 w-full flex flex-col gap-3.5 p-5 rounded-2xl bg-neutral-900 text-white text-left">
       <span class="flex flex-col gap-1">
         <span class="text-lg font-extrabold">{{ t.take_everything }}: ${{ everything.bundle_price }}</span>
-        <span class="text-sm text-neutral-500">{{ t.all }} {{ everything['items'] | length }} {{ t.all_items_one_trip }} {{ t.save }} ${{ everything.savings }}.</span>
+        <span class="text-sm text-neutral-400">{{ t.all }} {{ everything['items'] | length }} {{ t.all_items_one_trip }} {{ t.save }} ${{ everything.savings }}.</span>
       </span>
       <span class="h-12 rounded-xl bg-white text-neutral-900 text-[15px] font-bold flex items-center justify-center">{{ t.see_included }}</span>
     </button>
@@ -189,7 +189,7 @@
           <p data-role="pickup-fact">{{ fact }}</p>
           {% endfor %}
         </div>
-        <p data-role="pickup-terms" class="pt-2 text-sm text-neutral-500 leading-relaxed">
+        <p data-role="pickup-terms" class="pt-2 text-sm text-neutral-400 leading-relaxed">
           {{ t.household_items }}: {{ seller.payment_methods.household | join(', ') }} {{ t.in_person }}{% if vehicle %}. {{ t.vehicle }}: {{ seller.payment_methods.vehicle | join(' ' ~ t.or ~ ' ') }}{% endif %}.
         </p>
       </div>

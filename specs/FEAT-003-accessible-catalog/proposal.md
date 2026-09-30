@@ -37,7 +37,7 @@ Buyers read the catalog on phones in bright light and inside Facebook's in-app b
 
 ## Acceptance criteria
 
-- [ ] AC1: the catalog template uses no `text-neutral-400`, `text-emerald-500/600` or `text-[9–11px]` text utility.
+- [ ] AC1: every text colour meets 4.5:1 on its own ground (light: no neutral-300/400, emerald-500/600; dark: no neutral-500–700), and no text is under 12 px.
 - [ ] AC2: item and bundle sheets are `<dialog>` elements opened with `showModal()`; Escape and backdrop close them; body scroll is locked while one is open.
 - [ ] AC3: opening a sheet pushes one history entry; Back closes the sheet and stays on the page; closing by button or Escape removes the entry.
 - [ ] AC4: on a fine pointer, the contact controls offer `tel:` and copy (owner-approved channels).
