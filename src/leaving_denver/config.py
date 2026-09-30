@@ -35,6 +35,12 @@ JPEG_QUALITY = 85
 # weighs 0.4–0.8 of the JPEG it replaces in `srcset` (0.6 for the vehicle hero).
 VARIANT_WIDTHS = (480, 800, 1200, 1600)
 WEBP_QUALITY = 78
+# Link previews (FEAT-002): the size Facebook, WhatsApp and X show large, and the page
+# background the cover is letterboxed on.
+SHARE_IMAGE_SIZE = (1200, 630)
+SHARE_BACKGROUND = (251, 251, 251)
+# The production origin, for the absolute URLs Open Graph needs. `SITE_URL` overrides it.
+SITE_URL = "https://leaving-denver.pages.dev"
 SUPPORTED_IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".heic"}
 
 # Item lifecycle (FEAT-006). "Free" is a price attribute (free_with_purchase), not a status.

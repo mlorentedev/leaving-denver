@@ -26,7 +26,21 @@ grep -q 'cdn.tailwindcss.com' <<<"$es_page" && fail "ES loads the Tailwind play 
 css=$(curl -fsS "$url/styles.css") || fail "compiled stylesheet missing"
 grep -Fq '.aspect-4\/3{' <<<"$css" || fail "Tailwind v4 utility missing"
 
-curl -fsS "$url/robots.txt" | grep -q 'Disallow: /' || fail "robots.txt missing or permissive"
+robots=$(curl -fsS "$url/robots.txt") || fail "robots.txt missing"
+grep -q 'Disallow: /' <<<"$robots" || fail "robots.txt is permissive"
+grep -q '^User-agent: facebookexternalhit' <<<"$robots" || fail "robots.txt shuts out link previews"
+
+# Link previews (FEAT-002). og:image is absolute on the production origin; fetch its path
+# here, so a preview deployment is checked against its own files.
+og_image=$(sed -nE 's/.*<meta property="og:image" content="([^"]+)".*/\1/p' <<<"$page" | head -1)
+[[ "$og_image" == https://* ]] || fail "catalog has no absolute og:image"
+curl -fsSI "$url/${og_image#https://*/}" | grep -qi '^content-type: image/jpeg' \
+  || fail "og:image ${og_image#https://*/} does not answer as a JPEG"
+item=$(grep -oE 'data-item="[^"]+"' <<<"$page" | head -1 | cut -d'"' -f2)
+[ -n "$item" ] || fail "no item cards on the page"
+# Unknown paths answer with index.html, so match the page's own og:url, not the status.
+curl -fsS "$url/i/$item/" | grep -q "<meta property=\"og:url\" content=\"[^\"]*/i/$item/\"" \
+  || fail "share page /i/$item/ missing"
 curl -fsSI "$url/" | grep -qi '^x-content-type-options: nosniff' || fail "_headers not applied"
 
 # Pages answers unknown paths with index.html, so check content, not status.

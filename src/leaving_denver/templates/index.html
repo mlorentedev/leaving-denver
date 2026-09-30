@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
   <title>{{ t.page_title_vehicle if vehicle else t.page_title_household }}</title>
+{% include "_og.html" %}
   <link rel="icon" type="image/svg+xml" href="{{ asset_prefix }}favicon.svg">
   <link rel="alternate" hreflang="en" href="{{ language_links.en }}">
   <link rel="alternate" hreflang="es" href="{{ language_links.es }}">
@@ -559,6 +560,9 @@
           if (sheet.id !== current) sheet.close();
         });
       });
+      // A share page (/i/<id>/) sends buyers here as /#<id>: open that item. An unknown
+      // id opens nothing, and Back closes the sheet onto the catalog like any other.
+      if (location.hash) openModal(location.hash.slice(1));
     });
   </script>
 </body>

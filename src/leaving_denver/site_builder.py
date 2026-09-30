@@ -2,7 +2,8 @@
 Site Builder for Denver Tech Center Moving Sale.
 Compiles Single Source of Truth (data/inventory.yaml) into:
 1. build/public/index.html - Sanitized, high-speed public catalog (Zero floor prices, obfuscated contacts).
-2. build/public/robots.txt - Total crawler disallow directive.
+   build/public/i/<id>/index.html (and es/i/<id>/) - Per-item share pages with Open Graph tags.
+2. build/public/robots.txt - Link-preview fetchers allowed, every other crawler disallowed.
    build/public/_headers - Cloudflare Pages response headers.
 3. build/private/ - Private local seller tool with multi-platform listing copy and PIN lock.
 """
@@ -31,10 +32,12 @@ from leaving_denver.config import (
     PUBLIC_HEADERS,
     PUBLIC_INDEX_HTML,
     PUBLIC_ROBOTS_TXT,
+    SHARE_IMAGE_SIZE,
+    SITE_URL,
     STATUSES,
     VARIANT_WIDTHS,
 )
-from leaving_denver.image_processor import sync_all_photos, variant_path
+from leaving_denver.image_processor import sync_all_photos, variant_path, write_share_image
 from leaving_denver.private_data import floors, load_private, phone_parts, seller_phone
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
@@ -284,6 +287,42 @@ PAGES_HEADERS = """/*
 """
 
 
+# Link-preview fetchers (ADR-004). They build the card a shared link shows and index
+# nothing; every other crawler stays out, and X-Robots-Tag keeps pages out of search.
+PREVIEW_CRAWLERS = ("facebookexternalhit", "Facebot", "Twitterbot", "TelegramBot", "WhatsApp")
+ROBOTS_TXT = (
+    "# Link-preview fetchers may read the pages; every other crawler is disallowed.\n\n"
+    + "".join(f"User-agent: {bot}\nAllow: /\n\n" for bot in PREVIEW_CRAWLERS)
+    + "User-agent: *\nDisallow: /\n"
+)
+OG_LOCALES = {"en": "en_US", "es": "es_ES"}
+
+
+def site_url() -> str:
+    """The origin Open Graph URLs are built on: `SITE_URL` from the environment, or the
+    production default. A path or a trailing slash would double up in every URL."""
+    url = os.environ.get("SITE_URL") or SITE_URL
+    if not re.fullmatch(r"https://[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+(:\d+)?", url):
+        raise ValueError(f"SITE_URL must be a bare https:// origin, got {url!r}")
+    return url
+
+
+def share_images(items: list[dict[str, Any]]) -> dict[str, str]:
+    """Each item's link-preview image, by id, as a path under build/public. Items with no
+    built cover get none."""
+    previews = {}
+    for item in items:
+        if item["images"] and (DIST_DIR / item["images"][0]).is_file():
+            preview = write_share_image(DIST_DIR / item["images"][0])
+            previews[item["id"]] = preview.relative_to(DIST_DIR).as_posix()
+    return previews
+
+
+def item_description(item: dict[str, Any], t: dict[str, Any]) -> str:
+    asking = item["note"] if item["free"] else f"${item['price']:,}"
+    return f"{asking} · {item['status_label']} · {t['pickup_near']}"
+
+
 # Filter chips, in page order: category in the data -> chip label.
 CHIPS = {
     "Living Room": "Living room",
@@ -361,6 +400,9 @@ def build_public_site(full_data: dict[str, Any]) -> None:
     seller = sanitize_public_seller(full_data)
     departure = date.fromisoformat(seller["departure_date"])
     contact_json = json.dumps(phone_parts(phone))
+    origin = site_url()
+    previews = share_images(public_data["items"])
+    image_width, image_height = SHARE_IMAGE_SIZE
     for locale in ("en", "es"):
         translations = load_locale(locale)
         asset_prefix = "" if locale == "en" else "../"
@@ -379,6 +421,31 @@ def build_public_site(full_data: dict[str, Any]) -> None:
         vehicle = next((i for i in localized_data["items"] if i["category"] == "Vehicle"), None)
         items = [i for i in localized_data["items"] if i["category"] != "Vehicle"]
         bundles = localized_data["bundles"]
+        prefix = "" if locale == "en" else f"{locale}/"
+        og_base = {
+            "locale": OG_LOCALES[locale],
+            "locale_alternate": OG_LOCALES["es" if locale == "en" else "en"],
+            "image_width": image_width,
+            "image_height": image_height,
+        }
+        page_title = translations["page_title_vehicle" if vehicle else "page_title_household"]
+        showcase = next(
+            (i for i in ([vehicle] if vehicle else []) + items if i["id"] in previews), None
+        )
+        catalog_og = {
+            **og_base,
+            "title": page_title,
+            "description": " ".join(
+                (
+                    translations["hero_prefix"],
+                    translations["months"][departure.month],
+                    translations["hero_vehicle_suffix" if vehicle else "hero_household_suffix"],
+                )
+            ),
+            "url": f"{origin}/{prefix}",
+            "image": f"{origin}/{previews[showcase['id']]}" if showcase else None,
+            "image_alt": showcase["title"] if showcase else "",
+        }
         # `<` escaped so item text cannot close the inline <script> ("</script>", "<!--").
         inventory_json = json.dumps(localized_data, indent=2).replace("<", "\\u003c")
         html = render(
@@ -391,6 +458,7 @@ def build_public_site(full_data: dict[str, Any]) -> None:
             inventory_json=inventory_json,
             contact_json=contact_json,
             seller=localized_seller,
+            og=catalog_og,
             departure_month=translations["months"][departure.month],
             vehicle=vehicle,
             items=items,
@@ -418,9 +486,33 @@ def build_public_site(full_data: dict[str, Any]) -> None:
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(html, encoding="utf-8")
 
-    # Write robots.txt
-    with open(PUBLIC_ROBOTS_TXT, "w", encoding="utf-8") as f:
-        f.write("# Disallow all automated crawlers and scrapers\nUser-agent: *\nDisallow: /\n")
+        # Rebuilt whole, so an item unpublished since the last build loses its page.
+        share_root = DIST_DIR / prefix / "i"
+        shutil.rmtree(share_root, ignore_errors=True)
+        for item in localized_data["items"]:
+            page = share_root / item["id"] / "index.html"
+            page.parent.mkdir(parents=True)
+            preview = previews.get(item["id"])
+            og = {
+                **og_base,
+                "title": item["title"],
+                "description": item_description(item, translations),
+                "url": f"{origin}/{prefix}i/{item['id']}/",
+                "image": f"{origin}/{preview}" if preview else None,
+                "image_alt": item["title"],
+            }
+            page.write_text(
+                render(
+                    "share.html",
+                    locale=locale,
+                    t=translations,
+                    og=og,
+                    target=f"../../#{item['id']}",
+                ),
+                encoding="utf-8",
+            )
+
+    PUBLIC_ROBOTS_TXT.write_text(ROBOTS_TXT, encoding="utf-8")
 
     PUBLIC_HEADERS.write_text(PAGES_HEADERS, encoding="utf-8")
 

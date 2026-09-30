@@ -70,6 +70,19 @@ commit before the next production dispatch.
   If decryption fails, stop; never replace the encrypted file or publish with
   an unverified phone. Run `make ci-secrets` only if CI secrets need refreshing.
 
+## Link previews
+
+- Each item has a share page, `https://leaving-denver.pages.dev/i/<item-id>/`
+  (Spanish: `/es/i/<item-id>/`). Share that link rather than the catalog's: its
+  preview shows the item's photo, price and status, and it opens the item.
+- Platforms cache a preview. After a price or status change, paste the item's link into
+  Facebook's Sharing Debugger (`https://developers.facebook.com/tools/debug/`) and
+  press "Scrape Again". Messenger and Marketplace use the same cache. X and Telegram
+  refresh by themselves within days.
+- A preview showing the catalog instead of the item means the crawler reached `/`:
+  check that the share page's `og:url` is its own address and that nothing
+  redirects it on the server.
+
 ## Minimal monitoring (owner setup)
 
 - Configure one free external HTTP monitor for
