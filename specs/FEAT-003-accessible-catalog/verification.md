@@ -57,9 +57,9 @@ Reviewer: the `reviewer` subagent, not the implementer. It reviewed main `2759ab
 |---|---|---|
 | 1 | Major: AC5's body and sheet-panel insets are untested (deleting both rules stayed green), and f5 named only the sticky bar | **Applied**: `test_body_and_sheets_clear_the_safe_areas` reads the compiled CSS and went RED with the panel `env()` removed. f5 now names all three. Device check on a notch is still owed. |
 | 2 | Major: scroll lock is proven by a regex and desktop Chrome only | **Ticketed** in #99 (touch-emulated drag on the backdrop), plus an owner device check on iOS Safari and the Facebook in-app browser |
-| 3 | Minor: the contrast guard misses opacity modifiers, arbitrary colours, `emerald-700` on grey and arbitrary sub-12 px sizes; the poster assistant is unchecked | **Ticketed** #106 (TEST-002). There is no current instance, per the audit. |
+| 3 | Minor: the contrast guard misses opacity modifiers, arbitrary colours, `emerald-700` on grey and arbitrary sub-12 px sizes; the poster assistant is unchecked | **Applied** in TEST-002 (#106): the contrast is now computed from the compiled palette. The poster assistant is **declined** as an owner-only local tool. |
 | 4 | Minor: stacked-sheet Back order, the one-entry rule and focus return have no test | **Ticketed** in #99 |
-| 5 | Minor: a click before `initDynamicContacts` reads `href="#"` | **Ticketed** #107 (BUG-010) |
+| 5 | Minor: a click before `initDynamicContacts` reads `href="#"` | **Declined, not reproducible.** I first ticketed it as #107, then closed it: the only caller of `openContactSheet` is the click listener, which matches `a[href^="sms:"]` and is registered right after `initDynamicContacts()` in the same `DOMContentLoaded` handler. |
 | 6 | Minor: Forward onto a stale entry needs two Backs | **Declined**, as in finding 7 above |
 | 7 | Question: pointer-less and non-Mac desktops fall through to `sms:`; the desktop branch is verified only through a `matchMedia` stub | **Accepted.** "Open in Messages" covers Macs, and lesson-014 records the stub and the one manual device check. |
 
