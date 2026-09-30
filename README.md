@@ -56,23 +56,30 @@ Only `build/public/` is uploaded to Pages.
 
 ### 3. Deploy (Cloudflare Pages)
 
-Deploys run from GitHub Actions: *Actions → ci → Run workflow*, with a `branch`
-input. `main` publishes the live site; any other name (default `preview`) creates
-a preview at `<branch>.leaving-denver.pages.dev`. The job rebuilds with the real
-phone, runs `make check`, deploys with wrangler and smoke-tests the deployment
-(`scripts/smoke.sh`).
+Every push to `main` automatically publishes the live site **after** the CI
+tests pass. Pull requests only run tests. For a manual preview (or an explicit
+production redeploy), use *Actions → ci → Run workflow* with a `branch` input:
+`main` publishes production when dispatched from `main`; any other name
+(default `preview`) creates `<branch>.leaving-denver.pages.dev`. The deploy
+job rebuilds with the real phone, runs `make check`, deploys with wrangler
+and smoke-tests the deployment (`scripts/smoke.sh`).
 
 One-time setup, all idempotent and run from a machine with the age key:
 
 ```bash
 make cf-project     # create the Pages project if missing
-make ci-secrets     # push CLOUDFLARE_API_TOKEN and SELLER_PHONE from the sops file to GitHub
 make protect-main   # require the CI `test` check on main
+make ci-secrets     # restrict both deploy environments to main, scope the token, set the phone
 ```
 
 The deploy token (Cloudflare Pages: Edit, this account only) lives in
 `data/private.sops.yaml` as `cloudflare_pages_token`; the account id is
-`CF_ACCOUNT_ID` in the Makefile (Pages' `wrangler.toml` rejects it). `make deploy BRANCH=<name>` deploys from this machine as a fallback.
+`CF_ACCOUNT_ID` in the Makefile (Pages' `wrangler.toml` rejects it). The token
+is stored in the `production` and `preview` GitHub environments, **not** as a
+repository-wide secret. Both environments accept deployments only from `main`;
+manual previews select a Pages branch while running the trusted workflow from
+`main`. Re-run `make ci-secrets` after rotating the token. `make deploy
+BRANCH=<name>` deploys from this machine as a fallback.
 For rollbacks, inventory and phone changes, key recovery, and monitoring, see
 [site operations](docs/runbooks/ops.md).
 For the listing calendar, platform rules and buyer scripts, see the

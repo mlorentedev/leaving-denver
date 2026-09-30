@@ -1,0 +1,37 @@
+[
+  {
+    "id": "CI-003-auto-deploy-main-f1",
+    "behavior": "Tested pushes to main deploy production; PRs never deploy",
+    "verification": "uv run pytest -q tests/test_cd_workflow.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "CI-003-auto-deploy-main-f2",
+    "behavior": "Manual previews and guarded main redeploy remain available",
+    "verification": "uv run pytest -q tests/test_cd_workflow.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "CI-003-auto-deploy-main-f3",
+    "behavior": "Production uses real contact, public-only build and smoke test",
+    "verification": "uv run pytest -q tests/test_cd_workflow.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "CI-003-auto-deploy-main-f4",
+    "behavior": "README and ops runbook document automatic deployment",
+    "verification": "uv run pytest -q tests/test_cd_workflow.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "CI-003-auto-deploy-main-f5",
+    "behavior": "Only workflows on main can access the deployment token",
+    "verification": "uv run pytest -q tests/test_cd_workflow.py",
+    "state": "pending",
+    "evidence": ""
+  }
+]

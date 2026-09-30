@@ -1,6 +1,6 @@
 # Site operations
 
-The catalog is deployed manually from `main`. The public inventory lives in
+The catalog deploys automatically on tested pushes to `main`. The public inventory lives in
 `data/inventory.yaml`; encrypted phone, reserve floors, and deployment token
 live in `data/private.sops.yaml`. Only `build/public/` is published.
 On a fresh checkout, install Node.js 24+, npm, and `uv`, then run `make install`
@@ -10,13 +10,21 @@ and run `npm ci` rather than publishing old assets. Verify `/styles.css` loads
 for both `/` and `/es/`; the private assistant's stylesheet remains under
 `build/private/` and is never uploaded to Pages.
 
+Before merging CD, run `make protect-main` and `make ci-secrets` from a machine
+with the age key. This restricts both GitHub deployment environments to the
+`main` workflow ref, moves the Cloudflare token out of repository-wide secrets,
+and refreshes the contact secret. Verify the environments still allow only
+`main` after changing deployment settings. A branch workflow must never receive
+a production-capable Pages token, even for a preview.
+
 ## Deploy and roll back
 
-1. Merge the intended change into `main`. A push runs CI but does not deploy.
-2. Dispatch production with `gh workflow run ci.yml --ref main -f branch=main`.
-3. Find the run with
-   `gh run list --workflow ci.yml --event workflow_dispatch --limit 3`, then
-   use `gh run watch <run-id> --exit-status`. The deploy job
+1. Merge the intended change into `main`. The push tests and automatically
+   deploys production only if the test job passes. PR runs never deploy.
+2. Find the run with `gh run list --workflow ci.yml --event push --branch main --limit 3`,
+   then use `gh run watch <run-id> --exit-status`. For a manual preview, dispatch
+   `gh workflow run ci.yml --ref main -f branch=preview`; to redeploy production
+   explicitly, use `gh workflow run ci.yml --ref main -f branch=main`. The deploy job
    rebuilds with the real `SELLER_PHONE`, runs `make check`, publishes to Pages
    and invokes `scripts/smoke.sh` against the deployment URL.
 4. Check `https://leaving-denver.pages.dev/` and `/es/` on a phone. Verify the
@@ -33,16 +41,19 @@ commit before the next production dispatch.
 
 - **Sold:** `uv run leaving-denver sold <item-id> <realized-usd>` updates the
   YAML and rebuilds locally. Inspect the diff, commit and merge the inventory
-  change, then deploy and verify. Take down the marketplace listings separately.
+  change, then verify the automatic deployment. Take down marketplace listings
+  separately.
 - **Price:** edit the item's `recommended_list_price` in
   `data/inventory.yaml`; run `make check`, inspect the diff, commit and merge,
-  then deploy and verify. Never put reserve floors in public inventory.
+  then verify the automatic deployment. Never put reserve floors in public inventory.
 - **Phone spam:** obtain and test a Google Voice number first. Run
-  `make secrets` to update `seller.phone` in `data/private.sops.yaml`; commit
-  only the encrypted file. On a machine with the age key, run `make ci-secrets`
-  to refresh the `SELLER_PHONE` Actions secret. Deploy and test the SMS CTA;
-  update marketplace listings separately. Push CI uses a placeholder phone,
-  so its green check alone does not validate the production contact.
+  `make secrets` to update `seller.phone` in `data/private.sops.yaml`. On a
+  machine with the age key, run `make ci-secrets` **before** merging to refresh
+  the `SELLER_PHONE` Actions secret; otherwise the automatic deployment uses
+  the old phone. Commit only the encrypted file, merge, then verify the
+  automatic deployment and test the SMS CTA. Update marketplace listings
+  separately. Push CI uses a placeholder phone, so its green check alone
+  does not validate the production contact.
 - **New machine:** restore the canonical dotfiles age identity using dotfiles
   `docs/runbooks/guide-secrets-governance.md`. Install `sops`, `uv` and Git
   LFS; confirm access without printing the phone:
