@@ -453,7 +453,7 @@
       const asking = item.free ? item.note.toLowerCase() : '$' + item.price;
       document.getElementById('modalSmsLink').href = buildSmsUri(UI.sms_item_prefix + ' ' + item.short_title + ' (' + asking + ') ' + UI.sms_in_dtc);
       // A pending item keeps its link: a backup buyer is worth having if the pickup falls through.
-      document.getElementById('modalSmsLink').classList.toggle('hidden', item.status === 'Sold');
+      document.getElementById('modalSmsLink').hidden = item.status === 'Sold';
 
       openSheet(document.getElementById('itemSheet'));
     }
