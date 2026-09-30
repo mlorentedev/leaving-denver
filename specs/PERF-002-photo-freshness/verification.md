@@ -18,7 +18,7 @@ created: "2026-09-30"
 - [x] AC6 -> `test_phone_downloads_a_third_of_the_full_covers[390-2|390-3|430-3]`, `test_the_budget_catches_a_card_sized_to_the_viewport`, `test_resolve_sizes_follows_the_first_matching_condition`, `test_item_dialog_uses_srcset` (it parses `INVENTORY`, checks every descriptor against the file's real width, and pins the script's `srcset`/`sizes` assignments)
 - [x] AC7 -> `test_a_dpr3_phone_never_falls_back_to_the_hero_jpeg`, `test_a_variant_as_wide_as_the_jpeg_replaces_it_in_srcset`
 - Measured on the built page: covers are 9% of the full JPEGs at 390 px DPR 2, 26% at 390 px DPR 3 and 27% at 430 px DPR 3. The hero at 430 px DPR 3 takes the 1600w WebP (207 KB) instead of the JPEG (346 KB).
-- After the rebase onto PR A, `make build` regenerated every photo, because `VARIANT_WIDTHS` is part of the fingerprint.
+- On top of a PR A build (manifest from 09:16), `make build` regenerated every photo and wrote the 1600w files at 09:31, because `VARIANT_WIDTHS` is part of the fingerprint.
 
 ## Test status
 
