@@ -61,8 +61,7 @@ def leaked(values, files):
 
 
 def test_the_built_public_site_has_no_panel_file():
-    if not PUBLIC.exists():
-        pytest.skip("public site not built")
+    assert PUBLIC.exists(), "build the site first (make test does)"
     assert not [p for p in PUBLIC.rglob("*") if "panel" in p.name.lower()]
     assert PANEL_MARKER not in "".join(text_of(PUBLIC).values())
 

@@ -66,7 +66,8 @@ def read_sale(entry: Any) -> dict[str, Any] | None:
 
 def days_listed(posts: dict[str, list[date]], end: date) -> int | None:
     first = min((d[0] for d in posts.values()), default=None)
-    return None if first is None else (end - first).days
+    # A sale dated before the first posting (a typo, a backfill) shows 0, never negative days.
+    return None if first is None else max((end - first).days, 0)
 
 
 def renew_due(posts: dict[str, list[date]]) -> date | None:
@@ -79,6 +80,17 @@ def renew_due(posts: dict[str, list[date]]) -> date | None:
     return min(dues, default=None)
 
 
+def private_value(private: dict[str, Any], section: str, item_id: str) -> Any:
+    """One item's entry in a private section; a missing or null section reads as empty."""
+    return (private.get(section) or {}).get(item_id)
+
+
+def listing_end(status: str, sale: dict[str, Any] | None, today: date) -> date:
+    """Days listed stop at the sale date once the item is sold, else run to today."""
+    sold_on = sale["at"] if status == "Sold" and sale else None
+    return sold_on or today
+
+
 def item_row(
     item: dict[str, Any],
     private: dict[str, Any],
@@ -86,14 +98,13 @@ def item_row(
     today: date,
 ) -> dict[str, Any]:
     item_id = item["id"]
-    tracking = (private.get("tracking") or {}).get(item_id) or {}
+    tracking = private_value(private, "tracking", item_id) or {}
     posts = posted_dates(tracking)
     log = price_log(tracking)
-    sale = read_sale((private.get("sales") or {}).get(item_id))
+    sale = read_sale(private_value(private, "sales", item_id))
     status = item.get("status", "Available")
-    sold = status == "Sold"
-    due = None if sold else renew_due(posts)
-    floor = (private.get("floors") or {}).get(item_id)
+    due = None if status == "Sold" else renew_due(posts)
+    floor = private_value(private, "floors", item_id)
     asking = item.get("recommended_list_price")
     return {
         "id": item_id,
@@ -103,9 +114,9 @@ def item_row(
         "draft": item.get("published", True) is False,
         "free": bool(item.get("free_with_purchase")),
         "asking": asking,
-        "target": (private.get("targets") or {}).get(item_id),
+        "target": private_value(private, "targets", item_id),
         "floor": floor,
-        "days_listed": days_listed(posts, sale["at"] if sold and sale and sale["at"] else today),
+        "days_listed": days_listed(posts, listing_end(status, sale, today)),
         "channels": [{"name": c, "last": d[-1], "posts": len(d)} for c, d in posts.items()],
         "renew_due": due,
         "renew_overdue": due is not None and due <= today,
@@ -132,7 +143,7 @@ def panel_actions(rows: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]
 
 def takedown_steps(item_id: str, private: dict[str, Any]) -> list[str]:
     """Where to take a sold item's listing down: the channels it was posted on, else all."""
-    tracking = (private.get("tracking") or {}).get(item_id) or {}
+    tracking = private_value(private, "tracking", item_id) or {}
     posted = [channel for channel in posted_dates(tracking) if channel in CHANNELS]
     if posted:
         return [CHANNELS[channel] for channel in posted]

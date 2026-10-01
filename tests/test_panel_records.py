@@ -60,7 +60,29 @@ def test_record_sale_writes_the_price_and_the_day_as_one_object(tmp_path, monkey
 def test_record_sale_without_a_price_records_only_the_day(tmp_path, monkeypatch):
     sops = FakeSops(monkeypatch, tmp_path)
     private_data.record_sale("lamp", None, TODAY)
-    assert sops.sets[0][1] == {"at": "2026-10-07"}
+    assert sops.sets[0][0] == '["sales"]["lamp"]["at"]'
+    assert sops.sets[0][1] == "2026-10-07"
+
+
+def test_selling_again_without_a_price_keeps_the_price_already_recorded(tmp_path, monkeypatch):
+    """Only the day is set, so a second `make sold` with no PRICE cannot wipe the first price."""
+    sops = FakeSops(monkeypatch, tmp_path, {"sales": {"lamp": {"price": 120, "at": "2026-10-01"}}})
+    private_data.record_sale("lamp", None, TODAY)
+    assert [path for path, _, _ in sops.sets] == ['["sales"]["lamp"]["at"]']
+
+
+def test_selling_again_without_a_price_leaves_a_bare_price_alone(tmp_path, monkeypatch):
+    sops = FakeSops(monkeypatch, tmp_path, {"sales": {"lamp": 120}})
+    private_data.record_sale("lamp", None, TODAY)
+    assert sops.sets == []
+
+
+def test_a_null_tracking_section_reads_as_empty(tmp_path, monkeypatch):
+    sops = FakeSops(monkeypatch, tmp_path, {"tracking": None, "sales": None})
+    private_data.record_post("lamp", "facebook", TODAY)
+    private_data.record_sale("lamp", None, TODAY)
+    assert sops.sets[0][0] == '["tracking"]["lamp"]["channels"]["facebook"][0]'
+    assert sops.sets[1][0] == '["sales"]["lamp"]["at"]'
 
 
 def test_a_post_is_appended_to_the_channels_history(tmp_path, monkeypatch, fixture_private):
@@ -169,13 +191,17 @@ def test_reprice_refuses_an_unknown_item_or_a_non_positive_price(commands, bad):
     assert commands.calls == []
 
 
-def test_a_failed_write_is_an_error_not_a_traceback(commands, monkeypatch):
+@pytest.mark.parametrize(
+    "failure", [RuntimeError("x"), json.JSONDecodeError("bad", "", 0), AttributeError("y")]
+)
+def test_a_failed_write_is_an_error_not_a_traceback(commands, monkeypatch, capsys, failure):
     def refuse(*args):
-        raise RuntimeError("sops unavailable")
+        raise failure
 
     monkeypatch.setattr(cli, "record_post", refuse)
     with pytest.raises(SystemExit):
         cli.cmd_post(post_args())
+    assert capsys.readouterr().out.startswith("Error:")
 
 
 def test_sold_records_the_price_and_the_day(commands):
@@ -252,6 +278,9 @@ def test_the_real_sops_accepts_the_values_and_keeps_the_history(tmp_path, monkey
     assert data["tracking"]["lamp"]["channels"]["facebook"] == ["2026-10-01", "2026-10-08"]
     assert data["tracking"]["lamp"]["price_log"] == [{"at": "2026-10-03", "price": 35}]
     assert data["sales"]["lamp"] == {"price": 30, "at": "2026-10-09"}
+    # Selling again with no price moves the day and keeps the price.
+    private_data.record_sale("lamp", None, date(2026, 10, 10))
+    assert private_data.decrypt_private()["sales"]["lamp"] == {"price": 30, "at": "2026-10-10"}
     # Nothing readable on disk: the values are encrypted.
     assert "2026-10-08" not in encrypted.read_text()
 

@@ -105,7 +105,7 @@ def record_privately(recorder, *record_args):
     """Run one private write; its failure is an error message, never a traceback."""
     try:
         recorder(*record_args)
-    except RuntimeError as err:
+    except (RuntimeError, ValueError, AttributeError) as err:
         print(f"Error: could not record it privately ({err}). Nothing changed.")
         sys.exit(1)
 
@@ -141,7 +141,7 @@ def cmd_sold(args):
     else:
         try:
             record_sale(args.id, None, today)
-        except RuntimeError as err:
+        except (RuntimeError, ValueError, AttributeError) as err:
             print(f"Warning: the sale date was not recorded privately ({err}).")
     target_item = set_status(args.id, "Sold")
     print(

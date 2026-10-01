@@ -316,3 +316,17 @@ def test_the_runbooks_document_each_command_and_the_targets_step():
     assert "targets:" in playbook
     ops = (ROOT / "docs" / "runbooks" / "ops.md").read_text(encoding="utf-8")
     assert "seller-playbook.md#the-control-panel" in ops
+
+
+def test_a_sale_dated_before_the_first_posting_does_not_show_negative_days(inventory, private):
+    data = copy.deepcopy(private)
+    data["sales"]["onn-43-4k-tv"] = {"price": 59, "at": "2026-09-01"}
+    inv = with_item(inventory, "onn-43-4k-tv", status="Sold")
+    assert rows_by_id(inv, data)["onn-43-4k-tv"]["days_listed"] == 0
+
+
+@pytest.mark.parametrize("section", ["floors", "targets", "sales", "tracking"])
+def test_a_null_section_in_the_private_data_reads_as_empty(inventory, private, section):
+    data = {**private, section: None}
+    assert len(panel.panel_rows(inventory, data, TODAY)) == len(inventory["items"])
+    assert panel.takedown_steps("sofa-sleeper", data)

@@ -48,7 +48,7 @@ All tests run against `tests/fixtures/private.example.yaml` (fake numbers); none
 - The new tests were written first and failed on missing modules and functions (collection
   error, then 8 failed and 16 errors in `test_panel_records.py`, then 3 failed in the isolation
   tests before the guard existed).
-- After: `make check` -> 444 passed, 1 skipped; ruff (C901 max 10) clean.
+- After: `make check` -> 454 passed, 1 skipped; ruff (C901 max 10) clean.
 - Visual check: headless Chrome screenshot of the panel rendered from the fixture, 1400 px wide:
   one row per item, "log differs from asking" flag, em dashes for missing data.
 
@@ -67,6 +67,35 @@ All tests run against `tests/fixtures/private.example.yaml` (fake numbers); none
   `test_item_status` stubbed everything but the recorder). Reverted before committing; the
   suite-wide guard in `tests/conftest.py` makes it a failing test (lesson-019).
 - **`decrypt_private` raises** where `load_private` returns `{}`; all writers use the former.
+
+## Review findings (independent review of #138)
+
+Fixed, each with a test written first:
+
+- `make sold` a second time with no price wiped the recorded price (`sops set` replaces the
+  whole value): with no price only `sales.<id>.at` is set, and a bare-price sale is left alone
+  (`test_selling_again_without_a_price_...`, and the real-sops test).
+- `item_row` was radon CC 16 (ruff skips ternaries and comprehensions): helpers extracted,
+  now 9 (`uvx radon cc -s`).
+- A null `tracking:` or `sales:` section raised AttributeError; it reads as empty now, and a
+  failed private write (RuntimeError, bad JSON, AttributeError) prints `Error:` instead of a
+  traceback (`test_a_null_tracking_section_reads_as_empty`, `test_a_null_section_...`,
+  `test_a_failed_write_is_an_error_not_a_traceback`).
+- A sale dated before the first posting no longer shows negative days.
+- `test_the_built_public_site_has_no_panel_file` asserts the build exists instead of skipping
+  (`make test` builds first, so it runs in CI). The 1 skipped test locally is the Windows-only
+  collection test; in CI the skips are the real-sops test (no sops there), the private
+  workspace gate and the Windows one.
+- The conftest guard has its own test (`test_a_test_that_forgets_to_stub_the_recorder_...`),
+  and every `cmd_sold` test stubs `load_private`.
+
+Declined, with reasons:
+
+- Next-drop staleness until the inventory price is edited: by design, `log_mismatch` flags a
+  log that disagrees with the asking price, and `reprice` does not edit the public inventory.
+- `OPEN` uses `<` (overdue once the window's opening day has passed): what AC3 says.
+- Future dates, duplicate posts and an unquoted `$(ID)`: owner-only inputs on a local tool.
+  A non-positive price is already refused by `reprice`.
 
 ## Promotion candidates
 

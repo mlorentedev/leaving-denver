@@ -89,11 +89,16 @@ def set_private(keys: list[str | int], value: Any) -> None:
 
 
 def record_sale(item_id: str, price: int | None, on: date) -> None:
-    """Keep what an item sold for, and when, in the encrypted file, never in the public repo."""
-    sale: dict[str, Any] = {"at": on.isoformat()}
+    """Keep what an item sold for, and when, in the encrypted file, never in the public repo.
+
+    With no price only the day is set, so selling again cannot wipe the price already kept;
+    a sale kept the old way, as a bare price, is left as it is."""
     if price is not None:
-        sale = {"price": int(price), **sale}
-    set_private(["sales", item_id], sale)
+        set_private(["sales", item_id], {"price": int(price), "at": on.isoformat()})
+        return
+    kept = (decrypt_private().get("sales") or {}).get(item_id)
+    if kept is None or isinstance(kept, dict):
+        set_private(["sales", item_id, "at"], on.isoformat())
 
 
 def append_tracking(item_id: str, path: list[str], entry: Any) -> None:
@@ -101,7 +106,7 @@ def append_tracking(item_id: str, path: list[str], entry: Any) -> None:
 
     Reads the file first and refuses to write if it cannot be read: an index counted on an
     unreadable file would overwrite an entry already there."""
-    node: Any = decrypt_private().get("tracking", {}).get(item_id, {})
+    node: Any = (decrypt_private().get("tracking") or {}).get(item_id) or {}
     for key in path:
         node = (node or {}).get(key)
     set_private(["tracking", item_id, *path, len(node or [])], entry)
