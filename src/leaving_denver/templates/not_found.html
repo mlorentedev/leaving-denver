@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+  <title>{{ copy.en.title }} · {{ copy.es.title }} · {{ site_name }}</title>
+  {# Pages serves this one file for every missing path, at the path that was asked for, so every URL is root-absolute. #}
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="preload" href="/fonts/plus-jakarta-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
+  </style>
+</head>
+<body class="bg-[#fbfbfb] text-[#1c1c1c] antialiased min-h-screen flex flex-col">
+  <header class="w-full border-b border-neutral-200/80 bg-white">
+    <div class="max-w-5xl w-full mx-auto px-4 sm:px-6 h-16 flex items-center">
+      <span class="flex items-center gap-2.5">
+        <span class="w-8 h-8 rounded-lg bg-neutral-900 text-white font-bold text-xs flex items-center justify-center">DTC</span>
+        <span class="font-bold tracking-tight text-neutral-900 text-sm sm:text-base">{{ site_name }}</span>
+      </span>
+    </div>
+  </header>
+  <main data-role="not-found" class="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 py-24 text-center">
+{% for language, home in (("en", "/"), ("es", "/es/")) %}
+    <section lang="{{ language }}" class="{{ 'mt-16' if language == 'es' else '' }}">
+      <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-neutral-900">{{ copy[language].heading }}</h1>
+      <p class="mt-4 text-lg text-neutral-600">{{ copy[language].body }}</p>
+      <a href="{{ home }}" class="mt-6 inline-flex min-h-10 items-center text-sm font-bold text-neutral-900 underline">{{ copy[language].home }}</a>
+    </section>
+{% endfor %}
+  </main>
+</body>
+</html>

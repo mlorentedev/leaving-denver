@@ -36,6 +36,22 @@ done
 [ "$code" = 200 ] || fail "$url/ returned $code"
 
 page=$(get "$url/")
+# Without a top-level 404.html Pages runs the site as a single-page app and answers any unknown
+# path with the catalog and a 200 (BUG-013). A fresh deployment can lag, so retry like `get`.
+not_found() {
+  local reply code body
+  for _ in $(seq 0 "${SMOKE_RETRIES:-6}"); do
+    reply=$(curl -sS -w '\n%{http_code}' "$url/smoke-not-found-$RANDOM/") || reply=$'\nunreachable'
+    code=${reply##*$'\n'}
+    [ "$code" = 404 ] && break
+    sleep "${SMOKE_RETRY_DELAY:-5}"
+  done
+  [ "$code" = 404 ] || fail "an unknown path answers $code, not 404"
+  body=${reply%$'\n'*}
+  grep -Fq 'data-role="not-found"' <<<"$body" || fail "the 404 is not the not-found page"
+  grep -qE 'const _C = |data-item=|\b(sms|tel):' <<<"$body" && fail "the 404 page carries contact or item data"
+  return 0
+}
 # The end-of-sale build (OPS-011) has no catalog: tell it by what is served, since smoke runs
 # against a URL and not against the repo. It must stay a page with no way to reach the seller.
 if grep -Fq 'data-role="sale-over"' <<<"$page"; then
@@ -49,6 +65,7 @@ if grep -Fq 'data-role="sale-over"' <<<"$page"; then
     grep -qE '[0-9]{3}[^0-9]{0,3}[0-9]{3}[^0-9]{0,3}[0-9]{4}' <<<"$(sed 's/<[^>]*>/ /g' <<<"$served")" \
       && fail "the end page writes out a phone number"
   done
+  not_found
   [ "$(curl -s -o /dev/null -w '%{http_code}' "$url/seller/")" = 200 ] && fail "/seller/ answers 200 on the end page"
   get "$url/styles.css" >/dev/null || fail "compiled stylesheet missing"
   # Old share links redirect to the end page of their language; a fresh deployment can lag.
@@ -72,6 +89,7 @@ if grep -Fq 'data-role="sale-over"' <<<"$page"; then
   echo "smoke OK (sale over): $url"
   exit 0
 fi
+not_found
 grep -q 'const _C = {"cc"' <<<"$page" || fail "contact fragments missing from the page"
 grep -q '__SELLER_CONTACT__' <<<"$page" && fail "contact placeholder was not replaced"
 grep -qE 'floor_price|"floors"' <<<"$page" && fail "the page carries reserve floor data"
@@ -100,7 +118,7 @@ check_image "$(og image <<<"$page")" "catalog"
 share_page() {
   local share
   share=$(get "$url/$1") || fail "/$1 unreachable"
-  # Unknown paths answer with index.html, so match the page's own og:url, not the status.
+  # A missing share page is a 404 now, but the page's own og:url still proves it is the right one.
   [[ "$(og url <<<"$share")" == */$1 ]] || fail "share page /$1 missing"
   printf '%s' "$share"
 }
@@ -123,7 +141,7 @@ done
 [ -n "$pictured" ] || fail "no share page has an og:image"
 get -I "$url/" | grep -qi '^x-content-type-options: nosniff' || fail "_headers not applied"
 
-# Pages answers unknown paths with index.html, so check content, not status.
+# An unknown path is a 404 (not_found above), so the body is the not-found page, never a private file.
 for path in /inventory.json /poster_assistant.html /private/inventory.json; do
   body=$(curl -sS "$url$path")
   grep -qE 'firm_floor_price|pinGateModal' <<<"$body" && fail "$path serves private content"

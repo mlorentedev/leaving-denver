@@ -10,13 +10,14 @@ import threading
 from pathlib import Path
 
 import pytest
+from pages_stub import MissingPath
 
 ROOT = Path(__file__).resolve().parents[1]
 PUBLIC = ROOT / "build" / "public"
 pytestmark = pytest.mark.skipif(not (PUBLIC / "index.html").exists(), reason="site not built")
 
 
-class FreshDeployment(http.server.SimpleHTTPRequestHandler):
+class FreshDeployment(MissingPath, http.server.SimpleHTTPRequestHandler):
     not_ready = {"/es/": 2}  # 404s each path gives before it is ready
     fallback = {}  # times each path answers with index.html (200) before its own file
 
@@ -68,6 +69,21 @@ def test_without_retries_the_same_deployment_fails():
     result = smoke(retries=0)
     assert result.returncode != 0
     assert "404" in result.stderr
+
+
+def test_an_unknown_path_that_answers_200_fails(monkeypatch):
+    # Pages with no 404.html: every unknown path is the catalog and a 200.
+    monkeypatch.setattr(FreshDeployment, "spa_fallback", True)
+    result = smoke(retries=3)
+    assert result.returncode != 0
+    assert "answers 200, not 404" in result.stderr
+
+
+def test_a_404_that_is_not_the_not_found_page_fails(monkeypatch):
+    monkeypatch.setattr(FreshDeployment, "not_found_page", "no-such-page.html")
+    result = smoke(retries=3)
+    assert result.returncode != 0
+    assert "the 404 is not the not-found page" in result.stderr
 
 
 def test_robots_txt_served_as_the_catalog_is_retried():
