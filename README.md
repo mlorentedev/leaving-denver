@@ -109,6 +109,7 @@ When running `uv run leaving-denver serve`:
 - **Public Minimalist Catalog:** `http://127.0.0.1:8088/`
 - **Spanish Public Catalog:** `http://127.0.0.1:8088/es/`
 - **Private Seller Workspace (local only):** `http://127.0.0.1:8088/poster_assistant.html`. `make serve` binds loopback only and refuses paths outside `build/`. The PIN screen is a UI gate against shoulder-surfing, not access control: the PIN is in the page's JavaScript and the tool is never deployed.
+- **Mobile seller listing copy:** `https://leaving-denver.pages.dev/seller/` after owner-only Cloudflare Access is configured and tested. It uses published inventory only; missing Access configuration fails closed. Follow [site operations](docs/runbooks/ops.md#owner-only-mobile-listing-copy-cloudflare-access) before using or sharing the URL.
 
 ---
 

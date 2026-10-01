@@ -1,3 +1,4 @@
 @import "tailwindcss" source(none);
 @import "./theme.css";
 @source "./templates/index.html";
+@source "./templates/seller.html";

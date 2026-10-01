@@ -101,6 +101,7 @@ def test_template_sees_only_sanitized_data(tmp_path, monkeypatch):
 
     assert set(seen) == {
         "inventory_json",
+        "items_json",
         "contact_json",
         "ui_json",
         "locale",

@@ -92,6 +92,10 @@ def test_missing_marker_fails(public_dir, tmp_path, monkeypatch, script, missing
     templates = tmp_path / "templates"
     templates.mkdir()
     (templates / "index.html").write_text(f"<script>{script}</script>")
+    (templates / "seller.html").write_text(
+        (site_builder.TEMPLATES_DIR / "seller.html").read_text(encoding="utf-8"),
+        encoding="utf-8",
+    )
     monkeypatch.setattr(site_builder, "TEMPLATES_DIR", templates)
     with pytest.raises(RuntimeError, match=missing):
         site_builder.build_public_site(inventory())

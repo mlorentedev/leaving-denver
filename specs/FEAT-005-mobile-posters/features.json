@@ -1,0 +1,30 @@
+[
+  {
+    "id": "FEAT-005-mobile-posters-f1",
+    "behavior": "Mobile listing copy uses only published sanitized inventory",
+    "verification": "uv run pytest -q tests/test_mobile_poster.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-005-mobile-posters-f2",
+    "behavior": "Every seller request fails closed without a verified Access JWT",
+    "verification": "uv run pytest -q tests/test_mobile_poster.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-005-mobile-posters-f3",
+    "behavior": "Local private assistant remains isolated from public output",
+    "verification": "uv run pytest -q tests/test_mobile_poster.py tests/test_security_isolation.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-005-mobile-posters-f4",
+    "behavior": "Owner-only Access setup and smoke checks are documented",
+    "verification": "uv run pytest -q tests/test_mobile_poster.py",
+    "state": "pending",
+    "evidence": ""
+  }
+]
