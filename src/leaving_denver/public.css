@@ -1,6 +1,7 @@
 @import "tailwindcss" source(none);
 @import "./theme.css";
 @source "./templates/index.html";
+@source "./templates/seller.html";
 
 /* Item and bundle sheets: native modal dialogs docked to the bottom edge. */
 dialog.sheet {

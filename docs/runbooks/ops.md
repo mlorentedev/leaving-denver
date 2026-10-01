@@ -39,6 +39,41 @@ run `scripts/smoke.sh https://leaving-denver.pages.dev` from a shell with
 `curl`. A Pages rollback does not revert `main`: fix or revert the offending
 commit before the next production dispatch.
 
+## Owner-only mobile listing copy (Cloudflare Access)
+
+The mobile poster at `https://leaving-denver.pages.dev/seller/` is generated
+from **published asking prices only**. It does not contain negotiation floors
+or the local private assistant. There is no server-side AI endpoint or shared
+JavaScript PIN: select an item and platform, then copy the editable title,
+description, and UTM-attributed item link on a phone. Until Access is
+configured, the Pages middleware responds `503` rather than serving the tool.
+
+To enable it, an administrator of the Cloudflare Zero Trust account must:
+
+1. Enable the **One-time PIN** identity provider. Create a self-hosted
+   Cloudflare Access application for
+   `leaving-denver.pages.dev/seller` **and** `/seller/*`, with an **Allow**
+   policy for the owner's **exact email address only** (not the whole domain).
+   Cover preview hostnames (`*.leaving-denver.pages.dev`) and any future custom
+   domains with the same paths. A path ending `/*` does not cover its parent.
+2. In Workers & Pages > `leaving-denver` > Settings > Variables and Secrets,
+   set `ACCESS_TEAM_DOMAIN` to the HTTPS Access team origin
+   (`https://<team>.cloudflareaccess.com`) and `ACCESS_AUD` to that application's
+   64-character audience. Configure both production and preview environments;
+   these values are runtime bindings, **not** fields in public inventory.
+3. Deploy from tested `main`. From an anonymous browser and a preview URL,
+   request `/seller/`, `/seller/index.html`, and `/seller/seller.mjs`: none
+   may return the HTML/JS (`200`); expect a redirect to Access or a denial.
+   Sign in as the allowed owner using the one-time email code, verify the
+   poster and copy buttons work on a phone, then test an unlisted identity is
+   denied. Only then bookmark or advertise the URL. Recheck after any Access
+   policy, Pages hostname, or deployment-route change.
+
+The seller workspace at `build/private/` is **never** uploaded. Never put
+floors, private drafts, or a plaintext PIN under `build/public/`, even behind
+Access: disabling an edge policy must not disclose them. The buyer catalog
+must stay reachable anonymously.
+
 ## Inventory and contact
 
 - **Sold:** `uv run leaving-denver sold <item-id> <realized-usd>` records the

@@ -479,6 +479,16 @@ def build_public_site(full_data: dict[str, Any]) -> None:
     # The template sees the sanitized data only, never full_data.
     public_data = sanitize_public_inventory(full_data)
     seller = sanitize_public_seller(full_data)
+    poster_dir = DIST_DIR / "seller"
+    poster_dir.mkdir(parents=True, exist_ok=True)
+    listable_items = [
+        item for item in public_data["items"] if item["status"] == "Available" and not item["free"]
+    ]
+    items_json = json.dumps(listable_items).replace("<", "\\u003c")
+    (poster_dir / "index.html").write_text(
+        render("seller.html", items_json=items_json), encoding="utf-8"
+    )
+    shutil.copy2(Path(__file__).parent / "assets" / "seller.mjs", poster_dir / "seller.mjs")
     departure = date.fromisoformat(seller["departure_date"])
     contact_json = json.dumps(phone_parts(phone))
     origin = site_url()
