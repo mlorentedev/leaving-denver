@@ -45,3 +45,9 @@ anything event-driven in `<dialog>` should not use virtual time.
 A related trap: Chrome groups dialogs opened with no user activation in between, and one
 Escape closes the whole group. A test that opens a stacked sheet with a synthetic `click()`
 sees Escape close both; a real click, sent over CDP, keeps them apart, as a buyer's does.
+
+A third: the first command waits for Chrome to start, and on a fresh GitHub runner that took
+about 25 s (main at d32d491, 2026-10-01). With the start counted, the first test ran past the
+30 s budget of one command and failed while every later test passed. Only that first answer
+gets a longer deadline (`STARTUP`); every other command keeps 30 s, so a hung page still fails
+fast.
