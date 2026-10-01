@@ -103,7 +103,7 @@ sops data/private.sops.yaml          # edit floors / phone
 ```
 
 - The **public build** only needs the phone: from `SELLER_PHONE` (CI secret) or the sops file.
-- The **private workspace** and `uv run leaving-denver drops` need the floors, so they only work where the file decrypts.
+- `uv run leaving-denver drops` and `uv run leaving-denver seal` need the floors, so they only work where the file decrypts. The deployed `/seller/` gets them only as the `SELLER_SEALED` ciphertext (ADR-007).
 - Photos under `content/photos/` are stored with Git LFS (`git lfs install --local --skip-repo`).
 
 ---
@@ -114,7 +114,7 @@ When running `uv run leaving-denver serve`:
 - **Public Minimalist Catalog:** `http://127.0.0.1:8088/`
 - **Spanish Public Catalog:** `http://127.0.0.1:8088/es/`
 - **Seller tool:** `http://127.0.0.1:8088/seller/`. `make serve` binds loopback only and refuses paths outside `build/public/`. Built without `SELLER_SEALED` it shows the public copy tools only; the private views need the sealed envelope and its passphrase (see [site operations](docs/runbooks/ops.md#the-sealed-private-data-seller_sealed)).
-- **Mobile seller listing copy:** `https://leaving-denver.pages.dev/seller/` after owner-only Cloudflare Access is configured and tested. It uses published inventory only; missing Access configuration fails closed. Follow [site operations](docs/runbooks/ops.md#owner-only-mobile-listing-copy-cloudflare-access) before using or sharing the URL.
+- **Mobile seller listing copy:** `https://leaving-denver.pages.dev/seller/` after owner-only Cloudflare Access is configured and tested. Its private views open only with the sealed envelope's passphrase; missing Access configuration fails closed. Follow [site operations](docs/runbooks/ops.md#owner-only-mobile-listing-copy-cloudflare-access) before using or sharing the URL.
 
 ---
 
