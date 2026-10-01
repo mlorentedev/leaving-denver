@@ -31,8 +31,8 @@ def test_browser_suite_collects_without_posix_fcntl():
 
 @pytest.mark.skipif(os.name != "posix", reason="the harness reads Chrome over a POSIX pipe")
 def test_send_waits_for_an_answer_up_to_its_deadline(tmp_path):
-    # A cold Chrome on a fresh CI runner first answered after about 25 s; with the browser's
-    # start counted, that ran past the 30 s budget of one command. Only the start waits longer.
+    # A cold Chrome on a fresh CI runner had not answered its first command when the 30 s
+    # budget ran out; its log showed it still starting 25 s in. Only the start waits longer.
     import threading
     import time
 

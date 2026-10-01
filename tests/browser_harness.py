@@ -42,7 +42,7 @@ CHROME = (
 )
 needs_chrome = pytest.mark.skipif(CHROME is None, reason="Chrome CDP pipe needs POSIX and Chrome")
 DEADLINE = 30
-# A cold start on a fresh CI runner took about 25 s to its first answer (lesson-017).
+# A cold start on a fresh CI runner outlasted DEADLINE before its first answer (lesson-017).
 STARTUP = 120
 
 # Stubs the page's pointer check: True is a desktop mouse, False a phone or a tablet.
