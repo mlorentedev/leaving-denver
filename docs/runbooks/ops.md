@@ -15,7 +15,9 @@ with the age key. This restricts both GitHub deployment environments to the
 `main` workflow ref, moves the Cloudflare token out of repository-wide secrets,
 and refreshes the contact secret. Verify the environments still allow only
 `main` after changing deployment settings. A branch workflow must never receive
-a production-capable Pages token, even for a preview.
+a production-capable Pages token, even for a preview. `make protect-deploy`
+removes any stale extra branch or tag policies as well as ensuring the `main`
+branch policy exists.
 
 ## Deploy and roll back
 
@@ -74,10 +76,17 @@ must stay reachable anonymously.
 
 ## Inventory and contact
 
-- **Sold:** `uv run leaving-denver sold <item-id> <realized-usd>` updates the
-  YAML and rebuilds locally. Inspect the diff, commit and merge the inventory
-  change, then verify the automatic deployment. Take down marketplace listings
+- **Sold:** `uv run leaving-denver sold <item-id> <realized-usd>` records the
+  price in `data/private.sops.yaml` (`sales.<item-id>`, needs sops and the age
+  key; nothing changes if that fails), marks the item Sold in the YAML and
+  rebuilds locally. The repository is public: a realized price never goes in
+  `data/inventory.yaml`. Inspect the diff, commit and merge both
+  `data/inventory.yaml` and `data/private.sops.yaml`, then verify the automatic deployment. Take down marketplace listings
   separately.
+- **Reserved:** `uv run leaving-denver pending <item-id>` when a buyer agrees a
+  pickup: the card shows "Pending pickup" and its bundles go off sale. If the
+  pickup falls through, `uv run leaving-denver available <item-id>` puts it
+  back. Commit and merge either change like a sale.
 - **Price:** edit the item's `recommended_list_price` in
   `data/inventory.yaml`; run `make check`, inspect the diff, commit and merge,
   then verify the automatic deployment. Never put reserve floors in public inventory.
@@ -95,6 +104,19 @@ must stay reachable anonymously.
   `sops -d --extract '["seller"]["phone"]' data/private.sops.yaml >/dev/null`.
   If decryption fails, stop; never replace the encrypted file or publish with
   an unverified phone. Run `make ci-secrets` only if CI secrets need refreshing.
+
+## Link previews
+
+- Each item has a share page, `https://leaving-denver.pages.dev/i/<item-id>/`
+  (Spanish: `/es/i/<item-id>/`). Share that link rather than the catalog's: its
+  preview shows the item's photo, price and status, and it opens the item.
+- Platforms cache a preview. After a price or status change, paste the item's link into
+  Facebook's Sharing Debugger (`https://developers.facebook.com/tools/debug/`) and
+  press "Scrape Again". Messenger and Marketplace use the same cache. X and Telegram
+  refresh by themselves within days.
+- A preview showing the catalog instead of the item means the crawler reached `/`:
+  check that the share page's `og:url` is its own address and that nothing
+  redirects it on the server.
 
 ## Minimal monitoring (owner setup)
 

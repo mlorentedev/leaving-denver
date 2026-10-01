@@ -32,3 +32,17 @@ updates:
     groups:
       actions-minor-patch:
         update-types: ["minor", "patch"]
+
+  # Tailwind CLI and the theme font, locked in package-lock.json.
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels: ["dependencies"]
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      npm-minor-patch:
+        update-types: ["minor", "patch"]

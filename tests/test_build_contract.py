@@ -121,6 +121,33 @@ def test_published_defaults_to_true(public_dir):
     assert "hidden-widget" in text_under(public_dir)
 
 
+@pytest.mark.parametrize(
+    ("locale", "credit", "build"),
+    [("index.html", "Built by", "Build"), ("es/index.html", "Creado por", "Versión")],
+)
+def test_footer_links_developer_and_deployed_commit(public_dir, monkeypatch, locale, credit, build):
+    monkeypatch.setenv("GITHUB_SHA", "a" * 40)
+    site_builder.build_public_site(inventory())
+    html = (public_dir / locale).read_text(encoding="utf-8")
+    assert credit in html
+    assert 'href="https://github.com/mlorentedev"' in html
+    assert "@mlorentedev" in html
+    assert f'href="https://github.com/mlorentedev/leaving-denver/commit/{"a" * 40}"' in html
+    assert f"{build} {'a' * 7}" in html
+
+
+def test_footer_omits_deployment_link_without_sha(public_dir, monkeypatch):
+    monkeypatch.delenv("GITHUB_SHA", raising=False)
+    site_builder.build_public_site(inventory())
+    assert "/leaving-denver/commit/" not in (public_dir / "index.html").read_text(encoding="utf-8")
+
+
+def test_footer_rejects_invalid_commit_sha(public_dir, monkeypatch):
+    monkeypatch.setenv("GITHUB_SHA", "not-a-commit")
+    with pytest.raises(ValueError, match="GITHUB_SHA"):
+        site_builder.build_public_site(inventory())
+
+
 def test_unpublished_item_is_in_private_marked_draft(tmp_path, monkeypatch):
     private_dir = tmp_path / "private"
     monkeypatch.setenv("SELLER_PHONE", PHONE)
@@ -305,8 +332,9 @@ def test_mobile_shell(public_dir):
     if len(sticky_text_bars) != 1:
         failures.append(f"expected one sticky Text me bar, found {len(sticky_text_bars)}")
 
-    sheet = re.search(r'<div id="itemSheet" class="([^"]+)"', html)
-    if not sheet or "items-end" not in sheet.group(1).split():
+    # Docked to the bottom by `dialog.sheet` in public.css.
+    sheet = re.search(r'<dialog id="itemSheet"[^>]* class="([^"]+)"', html)
+    if not sheet or "sheet" not in sheet.group(1).split():
         failures.append("item detail is not a bottom sheet")
     if 'id="itemFacts" data-max-facts="4"' not in html or ".slice(0, 4)" not in html:
         failures.append("item sheet is not capped at four facts")
@@ -333,7 +361,7 @@ def test_mobile_shell(public_dir):
     for marker in (
         'href="index.html" class="flex min-h-10',
         'in DTC." class="min-h-10',
-        'onclick="closeModal()" class="absolute top-4 right-4 w-10 h-10',
+        'aria-label="Close" class="absolute top-4 right-4 w-10 h-10',
     ):
         if marker not in html:
             failures.append(f"missing 40px tap-target guard: {marker}")

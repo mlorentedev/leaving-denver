@@ -2,15 +2,14 @@
 <html lang="{{ locale }}">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
   <title>{{ t.page_title_vehicle if vehicle else t.page_title_household }}</title>
+{% include "_og.html" %}
   <link rel="icon" type="image/svg+xml" href="{{ asset_prefix }}favicon.svg">
   <link rel="alternate" hreflang="en" href="{{ language_links.en }}">
   <link rel="alternate" hreflang="es" href="{{ language_links.es }}">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preload" href="{{ asset_prefix }}fonts/plus-jakarta-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="{{ asset_prefix }}styles.css">
   <style>
     body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
@@ -18,7 +17,14 @@
     .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body class="bg-[#fbfbfb] text-[#1c1c1c] antialiased min-h-screen flex flex-col overflow-x-clip pb-24 selection:bg-neutral-900 selection:text-white">
+<body class="bg-[#fbfbfb] text-[#1c1c1c] antialiased min-h-screen flex flex-col overflow-x-clip selection:bg-neutral-900 selection:text-white">
+{# A catalog photo: `srcset` lets the browser take the smallest variant that fills `sizes`. #}
+{% macro photo(p, sizes, alt, class, lazy=true, priority=false) %}
+<img src="{{ p.src }}"{% if p.srcset %} srcset="{{ p.srcset }}" sizes="{{ sizes }}" width="{{ p.width }}" height="{{ p.height }}"{% endif %} alt="{{ alt }}"{% if lazy %} loading="lazy"{% endif %}{% if priority %} fetchpriority="high"{% endif %} class="{{ class }}">
+{%- endmacro %}
+{% macro status_badge(item) -%}
+<span data-role="status-badge" class="self-start px-2 py-0.5 rounded-md text-xs font-bold {{ 'bg-neutral-900 text-white' if item.status == 'Sold' else 'bg-amber-100 text-amber-900' }}">{{ item.status_label }}</span>
+{%- endmacro %}
 
   <!-- Minimal Header -->
   <header class="sticky top-0 z-40 w-full min-w-0 bg-white/90 backdrop-blur-md border-b border-neutral-200/80">
@@ -27,13 +33,13 @@
         <a href="{{ language_links.en }}" class="flex min-h-10 items-center gap-2.5">
           <span class="w-8 h-8 rounded-lg bg-neutral-900 text-white font-bold text-xs flex items-center justify-center">DTC</span>
           <span class="font-bold tracking-tight text-neutral-900 text-sm sm:text-base">{{ t.site_name }}</span>
-          <span class="text-xs text-neutral-400 font-medium hidden sm:inline">· Denver Tech Center, CO 80111</span>
+          <span class="text-xs text-neutral-500 font-medium hidden sm:inline">· Denver Tech Center, CO 80111</span>
         </a>
       </div>
       <nav class="ml-auto flex items-center gap-2 text-xs font-bold">
-        <a href="{{ language_links.en }}" hreflang="en" lang="en" class="min-w-10 min-h-10 flex items-center justify-center {{ 'text-neutral-900' if locale == 'en' else 'text-neutral-400' }}">EN</a>
-        <span class="text-neutral-300">/</span>
-        <a href="{{ language_links.es }}" hreflang="es" lang="es" class="min-w-10 min-h-10 flex items-center justify-center {{ 'text-neutral-900' if locale == 'es' else 'text-neutral-400' }}">ES</a>
+        <a href="{{ language_links.en }}" hreflang="en" lang="en" class="min-w-10 min-h-10 flex items-center justify-center {{ 'text-neutral-900' if locale == 'en' else 'text-neutral-500' }}">EN</a>
+        <span class="text-neutral-300" aria-hidden="true">/</span>
+        <a href="{{ language_links.es }}" hreflang="es" lang="es" class="min-w-10 min-h-10 flex items-center justify-center {{ 'text-neutral-900' if locale == 'es' else 'text-neutral-500' }}">ES</a>
       </nav>
     </div>
   </header>
@@ -64,10 +70,17 @@
         
         <!-- Image -->
         <div class="md:col-span-7 bg-neutral-100 relative min-h-[240px] sm:min-h-[300px] flex items-center justify-center cursor-pointer group" onclick="openModal('2019-ford-escape-sel-awd')">
-          <img src="{{ vehicle.images[0] if vehicle.images else asset_prefix ~ 'catalog/2019-ford-escape-sel-awd/2019_ford_escape_white_front.jpg' }}" alt="{{ vehicle.short_title }}" class="w-full h-full object-cover group-hover:scale-101 transition-transform duration-300">
+          {% if vehicle.photos %}
+          {{ photo(vehicle.photos[0], "(min-width: 1024px) 600px, (min-width: 768px) 58vw, 100vw", vehicle.short_title, "w-full h-full object-cover group-hover:scale-101 transition-transform duration-300", lazy=false, priority=true) }}
+          {% else %}
+          <img src="{{ asset_prefix ~ 'catalog/2019-ford-escape-sel-awd/2019_ford_escape_white_front.jpg' }}" alt="{{ vehicle.short_title }}" fetchpriority="high" class="w-full h-full object-cover group-hover:scale-101 transition-transform duration-300">
+          {% endif %}
           <div class="absolute top-3 left-3 flex gap-2">
-            <span class="px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider bg-neutral-900 text-white">{{ t.vehicle }}</span>
-            <span class="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-white/95 backdrop-blur-xs text-neutral-800 border border-neutral-200/60">{{ t.winter_ready }}</span>
+            <span class="px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider bg-neutral-900 text-white">{{ t.vehicle }}</span>
+            <span class="px-2.5 py-1 rounded-md text-xs font-semibold bg-white/95 backdrop-blur-xs text-neutral-800 border border-neutral-200/60">{{ t.winter_ready }}</span>
+            {% if vehicle.status != "Available" %}
+            {{ status_badge(vehicle) }}
+            {% endif %}
           </div>
         </div>
 
@@ -76,17 +89,17 @@
           <div>
             <div class="flex items-start justify-between gap-3">
               <div>
-                <span class="text-[11px] font-bold uppercase tracking-wider text-neutral-400">{{ vehicle.year }} {{ vehicle.brand }} · {{ vehicle.title_status }}</span>
+                <span class="text-xs font-bold uppercase tracking-wider text-neutral-500">{{ vehicle.year }} {{ vehicle.brand }} · {{ vehicle.title_status }}</span>
                 <h2 class="text-xl font-bold text-neutral-900 mt-0.5">{{ vehicle.model }}</h2>
                 <div class="text-xs text-neutral-500">{{ "{:,}".format(vehicle.odometer) }} {{ t.miles }} · {{ vehicle.color }}</div>
               </div>
               <div class="text-right">
                 <div class="text-2xl font-black text-neutral-900">${{ "{:,}".format(vehicle.price) }}</div>
-                <div class="text-[10px] font-semibold text-emerald-600">{{ vehicle.title_status }}</div>
+                <div class="text-xs font-semibold text-emerald-700">{{ vehicle.title_status }}</div>
               </div>
             </div>
 
-            <div class="grid grid-cols-1 gap-1.5 mt-3 text-[11px] text-neutral-600 font-medium">
+            <div class="grid grid-cols-1 gap-1.5 mt-3 text-xs text-neutral-600 font-medium">
               {% for claim in vehicle.specs[:4] %}
               <div><span aria-hidden="true">✓</span> <span data-vehicle-claim>{{ claim }}</span></div>
               {% endfor %}
@@ -97,11 +110,13 @@
             <button onclick="openModal('2019-ford-escape-sel-awd')" class="flex-1 py-2.5 px-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-semibold text-xs transition-colors">
               {{ t.view_specs }}
             </button>
+            {% if vehicle.status != "Sold" %}
             <a href="#" data-sms-intent="{{ t.sms_item_prefix }} {{ vehicle.short_title }} (${{ vehicle.price }}) {{ t.sms_in_dtc }}" class="min-h-10 py-2.5 px-3 rounded-xl border border-neutral-200 hover:bg-neutral-50 text-neutral-800 font-semibold text-xs transition-colors">
               {{ t.schedule_test_drive }}
             </a>
+            {% endif %}
           </div>
-          <p data-role="vehicle-payment" class="text-[10px] text-neutral-500">{{ seller.payment_methods.vehicle | join(' ' ~ t.or ~ ' ') }}</p>
+          <p data-role="vehicle-payment" class="text-xs text-neutral-500">{{ seller.payment_methods.vehicle | join(' ' ~ t.or ~ ' ') }}</p>
         </div>
 
       </div>
@@ -115,27 +130,37 @@
       <button type="button" class="filter-btn shrink-0 whitespace-nowrap h-10 px-4 rounded-full text-sm transition-colors font-semibold bg-white border border-neutral-200 text-neutral-600 hover:text-neutral-900" data-cat="{{ cat }}" aria-pressed="false">{{ label }}</button>
       {% endfor %}
     </div>
+    {% set n_available = items | selectattr('status', 'equalto', 'Available') | list | length %}
+    {% set n_sold = items | selectattr('status', 'equalto', 'Sold') | list | length %}
+    {% if n_available < items | length %}
+    <p data-role="availability" class="mt-2 text-xs font-semibold text-neutral-500">{{ t.availability_line | replace('{available}', n_available) | replace('{total}', items | length) }}{% if n_sold %} · {{ t.sold_count | replace('{n}', n_sold) }}{% endif %}</p>
+    {% endif %}
   </section>
 
   <!-- Items Grid: two columns on phones, the whole card opens the item -->
   <main class="max-w-5xl w-full min-w-0 mx-auto px-4 sm:px-6 py-2 flex-1">
+    <p id="resultCount" class="sr-only" aria-live="polite"></p>
     <div id="itemsGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-x-3 gap-y-5 sm:gap-5">
       {% for item in items %}
-      <button type="button" class="item-card group flex flex-col gap-2 text-left" data-item="{{ item.id }}" data-cat="{{ item.category }}">
-        {% if item.images %}
-        <img src="{{ item.images[0] }}" alt="{{ item.short_title }}" loading="lazy" class="w-full aspect-square object-cover rounded-2xl bg-neutral-100 group-hover:opacity-90 transition-opacity">
+      <button type="button" class="item-card group flex flex-col gap-2 text-left" data-item="{{ item.id }}" data-cat="{{ item.category }}" data-status="{{ item.status }}">
+        {% if item.photos %}
+        {# Sold: only the photo fades, so the text keeps its contrast. #}
+        {{ photo(item.photos[0], "(min-width: 1024px) 320px, (min-width: 640px) 31vw, 46vw", item.short_title, "w-full aspect-square object-cover rounded-2xl bg-neutral-100 transition-opacity " ~ ("opacity-60 grayscale" if item.status == "Sold" else "group-hover:opacity-90")) }}
         {% else %}
         <span class="w-full aspect-square rounded-2xl bg-neutral-100"></span>
         {% endif %}
         <span class="flex flex-col gap-0.5 px-0.5">
+          {% if item.status != "Available" %}
+          {{ status_badge(item) }}
+          {% endif %}
           <span class="text-sm font-semibold leading-snug text-neutral-900">{{ item.short_title }}</span>
           {% if item.free %}
           <span class="text-sm font-bold text-emerald-700">{{ item.note }}</span>
           {% else %}
           <span class="flex items-baseline gap-1.5">
-            <span class="text-base font-extrabold text-neutral-900">${{ item.price }}</span>
+            <span class="text-base font-extrabold text-neutral-900{% if item.status == 'Sold' %} line-through{% endif %}">${{ item.price }}</span>
             {% if item.retail %}
-            <span class="text-xs text-neutral-400 line-through">${{ item.retail }}</span>
+            <span class="text-xs text-neutral-500 line-through">${{ item.retail }}</span>
             {% endif %}
           </span>
           {% endif %}
@@ -150,12 +175,16 @@
       <h2 class="text-lg font-extrabold text-neutral-900">{{ t.save_with_bundle }}</h2>
       <div class="mt-3 -mx-4 px-4 sm:mx-0 sm:px-0 flex gap-3 overflow-x-auto hide-scrollbar pb-1">
         {% for b in bundles %}
-        <button type="button" data-bundle="{{ b.id }}" class="bundle-card flex-none w-[216px] flex flex-col gap-2.5 p-4 rounded-2xl bg-white border border-neutral-200 hover:border-neutral-400 transition-colors text-left">
+        <button type="button" data-bundle="{{ b.id }}" data-available="{{ b.available | lower }}" class="bundle-card flex-none w-[216px] flex flex-col gap-2.5 p-4 rounded-2xl bg-white border border-neutral-200 hover:border-neutral-400 transition-colors text-left">
           <span class="text-sm font-bold text-neutral-900">{{ b.short_name }}</span>
           <span class="text-xs text-neutral-500">{{ b['items'] | length }} {{ t['items'] }}{% if b.note %} · {{ b.note }}{% endif %}</span>
           <span class="flex items-baseline justify-between">
             <span class="text-lg font-extrabold text-neutral-900">${{ b.bundle_price }}</span>
+            {% if b.available %}
             <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">{{ t.save }} ${{ b.savings }}</span>
+            {% else %}
+            <span class="text-xs font-bold text-neutral-700">{{ t.unavailable }}</span>
+            {% endif %}
           </span>
           <span class="text-xs font-semibold text-neutral-900 underline underline-offset-2">{{ t.see_included }}</span>
         </button>
@@ -165,9 +194,12 @@
     {% endif %}
 
     {% if everything %}
-    <button type="button" data-everything="{{ everything.id }}" class="bundle-card mt-6 w-full flex flex-col gap-3.5 p-5 rounded-2xl bg-neutral-900 text-white text-left">
+    <button type="button" data-everything="{{ everything.id }}" data-available="{{ everything.available | lower }}" class="bundle-card mt-6 w-full flex flex-col gap-3.5 p-5 rounded-2xl bg-neutral-900 text-white text-left">
       <span class="flex flex-col gap-1">
         <span class="text-lg font-extrabold">{{ t.take_everything }}: ${{ everything.bundle_price }}</span>
+        {% if not everything.available %}
+        <span class="text-sm font-bold text-white">{{ t.unavailable }}</span>
+        {% endif %}
         <span class="text-sm text-neutral-400">{{ t.all }} {{ everything['items'] | length }} {{ t.all_items_one_trip }} {{ t.save }} ${{ everything.savings }}.</span>
       </span>
       <span class="h-12 rounded-xl bg-white text-neutral-900 text-[15px] font-bold flex items-center justify-center">{{ t.see_included }}</span>
@@ -191,23 +223,27 @@
   </main>
 
   <!-- Footer -->
-  <footer class="mt-16 w-full min-w-0 py-8 border-t border-neutral-200/80 bg-white text-xs text-neutral-400">
-    <div class="max-w-5xl w-full min-w-0 mx-auto px-4 sm:px-6 flex justify-center">
-      <div>{{ t.footer }}</div>
+  <footer class="mt-16 w-full min-w-0 py-8 border-t border-neutral-200/80 bg-white text-xs text-neutral-500">
+    <div class="max-w-5xl w-full min-w-0 mx-auto px-4 sm:px-6 flex flex-wrap justify-center gap-x-2 gap-y-1 text-center">
+      <span>{{ t.footer }}</span>
+      <span>· {{ t.built_by }} <a class="underline hover:text-neutral-700" href="https://github.com/mlorentedev">@mlorentedev</a></span>
+      {% if build_sha %}
+      <span>· <a class="underline hover:text-neutral-700" href="https://github.com/mlorentedev/leaving-denver/commit/{{ build_sha }}">{{ t.build_label }} {{ build_sha[:7] }}</a></span>
+      {% endif %}
     </div>
   </footer>
 
-  <a href="#" data-sms-role="sticky-text" class="fixed inset-x-4 bottom-4 z-40 max-w-sm mx-auto h-12 rounded-xl bg-neutral-900 text-white text-sm font-bold flex items-center justify-center shadow-xl">
+  <a href="#" data-sms-role="sticky-text" style="bottom: calc(1rem + env(safe-area-inset-bottom))" class="fixed inset-x-4 z-40 max-w-sm mx-auto h-12 rounded-xl bg-neutral-900 text-white text-sm font-bold flex items-center justify-center shadow-xl">
     {{ t.text_us }}
   </a>
 
   <!-- Item Detail Bottom Sheet -->
   {% for b in bundles + ([everything] if everything else []) %}
   <!-- Bundle sheet: what the bundle holds, each item's price, and the bundle price -->
-  <div id="sheet-{{ b.id }}" class="bundle-sheet fixed inset-0 z-50 bg-black/50 backdrop-blur-xs hidden items-end justify-center overflow-y-auto">
+  <dialog id="sheet-{{ b.id }}" aria-labelledby="sheet-title-{{ b.id }}" class="bundle-sheet sheet">
     <section data-bundle-sheet="{{ b.id }}" class="bg-white rounded-t-3xl max-w-2xl w-full min-w-0 p-6 sm:p-7 relative shadow-xl max-h-[90vh] overflow-y-auto">
       <button type="button" data-close-sheet class="absolute top-4 right-4 w-10 h-10 rounded-full bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center text-neutral-600 text-sm" aria-label="{{ t.close }}">✕</button>
-      <h3 class="pr-12 text-xl font-extrabold text-neutral-900">{{ b.short_name }}</h3>
+      <h3 id="sheet-title-{{ b.id }}" class="pr-12 text-xl font-extrabold text-neutral-900">{{ b.short_name }}</h3>
       {% if b.note %}
       <p class="mt-1 text-sm font-semibold text-emerald-700">{{ b.note }}</p>
       {% endif %}
@@ -215,8 +251,8 @@
         {% for item_id in b['items'] %}
         {% set item = items | selectattr('id', 'equalto', item_id) | first %}
         <li data-sheet-item="{{ item_id }}" class="flex items-center gap-3 py-2.5">
-          {% if item.images %}
-          <img src="{{ item.images[0] }}" alt="" loading="lazy" class="w-12 h-12 flex-none rounded-lg object-cover bg-neutral-100">
+          {% if item.photos %}
+          {{ photo(item.photos[0], "48px", "", "w-12 h-12 flex-none rounded-lg object-cover bg-neutral-100") }}
           {% else %}
           <span class="w-12 h-12 flex-none rounded-lg bg-neutral-100"></span>
           {% endif %}
@@ -230,20 +266,24 @@
         <span class="text-2xl font-black text-neutral-900">${{ b.bundle_price }}</span>
       </div>
       <p class="mt-1 text-right text-xs font-bold text-emerald-700">{{ t.save }} ${{ b.savings }}</p>
+      {% if b.available %}
       <a href="#" data-sms-intent="{{ t.sms_bundle_prefix }} {{ b.short_name }} {{ t.sms_bundle_word }} (${{ b.bundle_price }}) {{ t.sms_in_dtc }}" class="mt-5 h-12 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white text-sm font-bold flex items-center justify-center">{{ t.text_about_bundle }}</a>
+      {% else %}
+      <p class="mt-5 h-12 rounded-xl bg-neutral-100 text-neutral-700 text-sm font-bold flex items-center justify-center">{{ t.unavailable }}</p>
+      {% endif %}
     </section>
-  </div>
+  </dialog>
   {% endfor %}
 
-  <div id="itemSheet" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs hidden items-end justify-center overflow-y-auto">
+  <dialog id="itemSheet" aria-labelledby="modalTitle" class="sheet">
     <div class="bg-white rounded-t-3xl max-w-2xl w-full min-w-0 p-6 sm:p-7 relative shadow-xl max-h-[90vh] overflow-y-auto">
-      <button onclick="closeModal()" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center text-neutral-600 text-sm">
+      <button type="button" onclick="closeModal()" aria-label="{{ t.close }}" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center text-neutral-600 text-sm">
         ✕
       </button>
 
       <div class="space-y-4">
         <div>
-          <span id="modalCategory" class="text-[11px] font-bold uppercase tracking-wider text-neutral-400">{{ t.category }}</span>
+          <span id="modalCategory" class="text-xs font-bold uppercase tracking-wider text-neutral-500">{{ t.category }}</span>
           <h3 id="modalTitle" class="text-xl font-bold text-neutral-900 mt-0.5">{{ t.item_title }}</h3>
         </div>
 
@@ -256,13 +296,13 @@
         <div class="flex items-baseline justify-between pt-2 border-t border-neutral-100">
           <div>
             <span id="modalPrice" class="text-2xl font-black text-neutral-900">$0</span>
-            <span id="modalRetail" class="text-xs text-neutral-400 line-through ml-2"></span>
+            <span id="modalRetail" class="text-xs text-neutral-500 line-through ml-2"></span>
           </div>
           <span id="modalStatus" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200"></span>
         </div>
 
         <div>
-          <h4 class="text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1.5">{{ t.details }}</h4>
+          <h4 class="text-xs font-bold uppercase tracking-wider text-neutral-500 mb-1.5">{{ t.details }}</h4>
           <ul id="itemFacts" data-max-facts="4" class="space-y-1 text-xs text-neutral-700"></ul>
         </div>
 
@@ -271,7 +311,7 @@
         </div>
 
         <div id="modalUpsell" class="hidden">
-          <a id="upsellLink" href="#" class="block whitespace-nowrap p-3.5 bg-neutral-50 rounded-xl border border-neutral-200/90 text-[11px] sm:text-xs font-bold text-neutral-900">
+          <a id="upsellLink" href="#" class="block whitespace-nowrap p-3.5 bg-neutral-50 rounded-xl border border-neutral-200/90 text-xs font-bold text-neutral-900">
             <span id="upsellText"></span>
           </a>
         </div>
@@ -280,21 +320,43 @@
           <a id="modalSmsLink" href="#" class="flex-1 py-3 px-4 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-semibold text-xs text-center transition-colors">
             {{ t.text_about_this }}
           </a>
+          <button type="button" id="modalShare" aria-live="polite" class="shrink-0 whitespace-nowrap py-3 px-4 rounded-xl border border-neutral-200 hover:bg-neutral-50 text-neutral-700 font-semibold text-xs transition-colors">
+            {{ t.share }}
+          </button>
           <button onclick="closeModal()" class="py-3 px-4 rounded-xl border border-neutral-200 hover:bg-neutral-50 text-neutral-700 font-semibold text-xs transition-colors">
             {{ t.close }}
           </button>
         </div>
+        <p id="modalShareUrl" hidden class="p-3 bg-neutral-50 rounded-xl border border-neutral-100 text-sm text-neutral-700 select-all break-all"></p>
       </div>
     </div>
-  </div>
+  </dialog>
+
+  <!-- Desktop has no SMS app: the text links open this instead, with the number to text from a phone -->
+  <dialog id="contactSheet" aria-labelledby="contactTitle" class="sheet">
+    <section class="bg-white rounded-t-3xl max-w-2xl w-full min-w-0 p-6 sm:p-7 relative shadow-xl">
+      <button type="button" data-close-sheet class="absolute top-4 right-4 w-10 h-10 rounded-full bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center text-neutral-600 text-sm" aria-label="{{ t.close }}">✕</button>
+      <h3 id="contactTitle" class="pr-12 text-xl font-extrabold text-neutral-900">{{ t.contact_heading }}</h3>
+      <div class="mt-4 flex flex-wrap items-center gap-3">
+        <p id="contactNumber" class="text-2xl font-black tracking-tight text-neutral-900 select-all"></p>
+        <button type="button" id="contactCopy" aria-live="polite" class="h-10 px-4 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white text-sm font-bold">{{ t.copy_number }}</button>
+      </div>
+      <p class="mt-5 text-xs font-bold uppercase tracking-wider text-neutral-500">{{ t.contact_hint }}</p>
+      <p id="contactMessage" class="mt-1.5 p-3 bg-neutral-50 rounded-xl border border-neutral-100 text-sm text-neutral-700 select-all"></p>
+      <!-- Desktops with a Messages app (a Mac with iMessage) can still take the sms: hand-off. -->
+      <a id="contactSms" href="#" data-native-sms class="mt-4 inline-flex min-h-10 items-center text-sm font-semibold text-neutral-900 underline underline-offset-2">{{ t.open_messages }}</a>
+    </section>
+  </dialog>
 
   <script>
     // Contact Obfuscation (Defeats automated scraping spiders & telemarketing bots)
     const _C = {{ contact_json | safe }};
     const UI = {{ ui_json | safe }};
     function getSellerPhone() { return _C.cc + _C.area + _C.prefix + _C.line; }
+    // The contact sheet reads the message back out of the href with the same separator.
+    const SMS_BODY = '?body=';
     function buildSmsUri(body) {
-      return `sms:${getSellerPhone()}${body ? '?body=' + encodeURIComponent(body) : ''}`;
+      return `sms:${getSellerPhone()}${body ? SMS_BODY + encodeURIComponent(body) : ''}`;
     }
 
     function updateDepartureCountdown() {
@@ -324,6 +386,11 @@
     }
 
     const INVENTORY = {{ inventory_json | safe }};
+    const STATUS_PILL = {
+      Available: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+      Pending: 'bg-amber-50 text-amber-800 border-amber-200',
+      Sold: 'bg-neutral-100 text-neutral-700 border-neutral-200',
+    };
 
     function openModal(itemId) {
       const item = INVENTORY.items.find(i => i.id === itemId);
@@ -332,21 +399,32 @@
       document.getElementById('modalTitle').textContent = item.title;
       document.getElementById('modalCategory').textContent = item.category_label + ' · ' + item.brand;
       document.getElementById('modalPrice').textContent = item.free ? item.note : '$' + item.price.toLocaleString();
-      document.getElementById('modalStatus').textContent = item.status;
+      const status = document.getElementById('modalStatus');
+      status.textContent = item.status_label;
+      status.className = 'text-xs font-semibold px-2.5 py-0.5 rounded-full border ' + STATUS_PILL[item.status];
       document.getElementById('modalRetail').textContent = item.retail ? UI.original + ': $' + item.retail.toLocaleString() : '';
       document.getElementById('modalPickup').textContent = item.pickup || UI.default_pickup;
 
-      const mainImg = item.images && item.images.length > 0 ? item.images[0] : '';
-      document.getElementById('modalMainImg').src = mainImg;
+      // srcset before src, so the browser never starts fetching the full JPEG first.
+      const mainImg = document.getElementById('modalMainImg');
+      const showPhoto = p => {
+        mainImg.srcset = p ? p.srcset : '';
+        mainImg.sizes = '(min-width: 672px) 620px, 100vw';
+        mainImg.src = p ? p.src : '';
+      };
+      const photos = item.photos || [];
+      showPhoto(photos[0]);
 
       const strip = document.getElementById('modalThumbStrip');
       strip.innerHTML = '';
-      (item.images || []).forEach((img, idx) => {
+      photos.forEach((p, idx) => {
         const thumb = document.createElement('img');
-        thumb.src = img;
+        thumb.srcset = p.srcset;
+        thumb.sizes = '48px';
+        thumb.src = p.src;
         thumb.className = `w-12 h-12 object-contain bg-white rounded-lg border p-1 cursor-pointer transition-all ${idx === 0 ? 'border-neutral-900' : 'border-neutral-200 opacity-60 hover:opacity-100'}`;
         thumb.onclick = () => {
-          document.getElementById('modalMainImg').src = img;
+          showPhoto(p);
           strip.querySelectorAll('img').forEach(t => {
             t.classList.remove('border-neutral-900');
             t.classList.add('border-neutral-200', 'opacity-60');
@@ -362,12 +440,12 @@
       (item.specs || []).slice(0, 4).forEach(spec => {
         const li = document.createElement('li');
         li.className = 'flex items-start gap-1.5';
-        li.innerHTML = `<span class="text-neutral-400 font-bold">•</span> <span>${spec}</span>`;
+        li.innerHTML = `<span class="text-neutral-500 font-bold">•</span> <span>${spec}</span>`;
         specsList.appendChild(li);
       });
 
       // The bundle this item belongs to, from the data.
-      const bundle = INVENTORY.bundles.find(b => !b.everything && b.items.includes(itemId));
+      const bundle = INVENTORY.bundles.find(b => b.available && !b.everything && b.items.includes(itemId));
       const upsellBox = document.getElementById('modalUpsell');
       if (bundle) {
         document.getElementById('upsellText').textContent = bundle.short_name + ' · $' + bundle.bundle_price + ' · ' + UI.save + ' $' + bundle.savings;
@@ -379,19 +457,82 @@
 
       const asking = item.free ? item.note.toLowerCase() : '$' + item.price;
       document.getElementById('modalSmsLink').href = buildSmsUri(UI.sms_item_prefix + ' ' + item.short_title + ' (' + asking + ') ' + UI.sms_in_dtc);
+      // A pending item keeps its link: a backup buyer is worth having if the pickup falls through.
+      document.getElementById('modalSmsLink').hidden = item.status === 'Sold';
 
-      document.getElementById('itemSheet').classList.remove('hidden');
-      document.getElementById('itemSheet').classList.add('flex');
+      sheetItem = itemId;
+      document.getElementById('modalShare').textContent = UI.share;
+      document.getElementById('modalShareUrl').hidden = true;
+
+      openSheet(document.getElementById('itemSheet'));
     }
 
-    function toggleSheet(sheet, open) {
-      sheet.classList.toggle('hidden', !open);
-      sheet.classList.toggle('flex', open);
+    // Shares the item's share page, not /#<id>: a link to the catalog previews the catalog.
+    // The catalog's og:url is the locale's root, and the share page sits at i/<id>/ under it.
+    let sheetItem = null;
+    function shareItem() {
+      const item = INVENTORY.items.find(i => i.id === sheetItem);
+      if (!item) return;
+      const url = document.querySelector('meta[property="og:url"]').content + 'i/' + item.id + '/';
+      const button = document.getElementById('modalShare');
+      const shown = document.getElementById('modalShareUrl');
+      // The answer can arrive after the sheet moved on to another item: drop it then.
+      const current = () => sheetItem === item.id;
+      // No clipboard (plain http, permission denied): show the link, selected. The label
+      // stays: the selected link is the cue, and phones offer Copy on a selection.
+      const select = () => {
+        if (!current()) return;
+        shown.textContent = url;
+        shown.hidden = false;
+        window.getSelection().selectAllChildren(shown);
+      };
+      const copy = () => {
+        if (!navigator.clipboard) return select();
+        navigator.clipboard.writeText(url).then(() => { if (current()) button.textContent = UI.link_copied; }, select);
+      };
+      // A cancelled share sheet is not a failure; anything else falls back to copying.
+      if (navigator.share) navigator.share({ title: item.title, url }).catch(err => { if (err.name !== 'AbortError') copy(); });
+      else copy();
+    }
+
+    // Sheets are modal <dialog>s: Escape, focus return and the inert page come from the
+    // browser. Each open sheet also owns one history entry, so Back closes the sheet
+    // instead of leaving the catalog (in-app browsers would drop the buyer).
+    function openSheet(dialog) {
+      if (dialog.open) return;
+      dialog.showModal();
+      history.pushState({ sheet: dialog.id }, '');
     }
 
     function closeModal() {
-      document.getElementById('itemSheet').classList.add('hidden');
-      document.getElementById('itemSheet').classList.remove('flex');
+      document.getElementById('itemSheet').close();
+    }
+
+    // sms: does nothing on most desktops. With a mouse, a text link shows the number and
+    // the message it would have sent; phones and tablets keep the native SMS hand-off.
+    const desktop = window.matchMedia('(hover: hover) and (pointer: fine)');
+
+    function openContactSheet(link) {
+      const body = link.href.split(SMS_BODY)[1];
+      let message = UI.sms_generic;
+      try { if (body) message = decodeURIComponent(body); } catch (err) { /* malformed: keep the generic text */ }
+      document.getElementById('contactNumber').textContent = `(${_C.area}) ${_C.prefix}-${_C.line}`;
+      document.getElementById('contactMessage').textContent = message;
+      document.getElementById('contactCopy').textContent = UI.copy_number;
+      document.getElementById('contactSms').href = link.href;
+      openSheet(document.getElementById('contactSheet'));
+    }
+
+    function copyNumber() {
+      const button = document.getElementById('contactCopy');
+      const done = () => { button.textContent = UI.copied; };
+      // No clipboard (plain http, permission denied): select the number and say how to copy it.
+      const select = () => {
+        window.getSelection().selectAllChildren(document.getElementById('contactNumber'));
+        button.textContent = UI.copy_fallback;
+      };
+      if (navigator.clipboard) navigator.clipboard.writeText(getSellerPhone()).then(done, select);
+      else select();
     }
 
     function applyFilter(cat) {
@@ -400,15 +541,30 @@
         b.setAttribute('aria-pressed', on);
         b.className = 'filter-btn shrink-0 whitespace-nowrap h-10 px-4 rounded-full text-sm transition-colors ' + (on ? 'font-bold bg-neutral-900 text-white' : 'font-semibold bg-white border border-neutral-200 text-neutral-600 hover:text-neutral-900');
       });
+      let shown = 0;
       document.querySelectorAll('.item-card').forEach(card => {
-        card.classList.toggle('hidden', cat !== 'all' && card.dataset.cat !== cat);
+        const hide = cat !== 'all' && card.dataset.cat !== cat;
+        card.classList.toggle('hidden', hide);
+        if (!hide) shown++;
       });
+      document.getElementById('resultCount').textContent = UI[shown === 1 ? 'results_one' : 'results'].replace('{n}', shown);
     }
 
     // Init
     document.addEventListener('DOMContentLoaded', () => {
+      // A reload keeps a sheet's history entry but no sheet is open: neutralise it, or the
+      // next close would go back onto it and Back would need two presses.
+      if (history.state && history.state.sheet) history.replaceState(null, '');
       updateDepartureCountdown();
       initDynamicContacts();
+      document.addEventListener('click', e => {
+        const link = e.target.closest('a[href^="sms:"]');
+        if (!link || link.hasAttribute('data-native-sms') || !desktop.matches) return;
+        e.preventDefault();
+        openContactSheet(link);
+      });
+      document.getElementById('contactCopy').addEventListener('click', copyNumber);
+      document.getElementById('modalShare').addEventListener('click', shareItem);
       document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', () => applyFilter(btn.dataset.cat));
       });
@@ -417,14 +573,38 @@
       });
       document.querySelectorAll('.bundle-card').forEach(card => {
         const id = card.dataset.bundle || card.dataset.everything;
-        card.addEventListener('click', () => toggleSheet(document.getElementById('sheet-' + id), true));
+        card.addEventListener('click', () => openSheet(document.getElementById('sheet-' + id)));
       });
-      document.querySelectorAll('.bundle-sheet').forEach(sheet => {
-        // Closes on the backdrop or the close button, not on a tap inside the sheet.
+      document.querySelectorAll('dialog.sheet').forEach(sheet => {
+        // The backdrop is the dialog itself: the panel fills it, so a tap inside never matches.
+        // A drag that starts in the panel (selecting text) and ends outside also clicks the
+        // dialog; only a press that starts on the backdrop closes it.
+        let pressedBackdrop = false;
+        sheet.addEventListener('pointerdown', e => { pressedBackdrop = e.target === sheet; });
         sheet.addEventListener('click', e => {
-          if (e.target === sheet || e.target.closest('[data-close-sheet]')) toggleSheet(sheet, false);
+          if ((e.target === sheet && pressedBackdrop) || e.target.closest('[data-close-sheet]')) sheet.close();
+        });
+        // Closed by a button, Escape or the backdrop: drop the entry openSheet added.
+        sheet.addEventListener('close', () => {
+          if (history.state && history.state.sheet === sheet.id) history.back();
         });
       });
+      // Back: the entry is already gone, so closing here does not go back twice. A sheet
+      // opened over another (contact over an item) closes one level per Back.
+      window.addEventListener('popstate', () => {
+        const current = history.state && history.state.sheet;
+        document.querySelectorAll('dialog.sheet[open]').forEach(sheet => {
+          if (sheet.id !== current) sheet.close();
+        });
+      });
+      // A share page (/i/<id>/) sends buyers here as /#<id>: open that item. An unknown
+      // id opens nothing, and Back closes the sheet onto the catalog like any other. The
+      // hash is dropped first, so a reload after closing the sheet shows the catalog.
+      const linked = location.hash.slice(1);
+      if (linked) {
+        history.replaceState(null, '', location.pathname + location.search);
+        openModal(linked);
+      }
     });
   </script>
 </body>

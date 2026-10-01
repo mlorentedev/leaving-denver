@@ -23,6 +23,8 @@ pickup_heading: Cómo funciona la recogida
 household_items: Artículos del hogar
 in_person: en persona
 footer: Venta por mudanza en Denver Tech Center · CO 80111
+built_by: Creado por
+build_label: Versión
 text_us: Escríbeme
 category: Categoría
 item_title: Artículo
@@ -32,10 +34,23 @@ details: Detalles y especificaciones
 pickup_note: Nota para la recogida
 text_about_this: Escribir sobre este artículo
 close: Cerrar
+contact_heading: Escríbame desde su teléfono
+contact_hint: "Mensaje sugerido:"
+copy_number: Copiar número
+share: Compartir
+link_copied: Enlace copiado
+copied: Copiado
+results: "{n} artículos visibles"
+results_one: "1 artículo visible"
+copy_fallback: "Seleccionado: pulse Ctrl+C o ⌘C"
+open_messages: Abrir en Mensajes
 see_included: Ver qué incluye
 free: Gratis
 separately: Por separado
 text_about_bundle: Escribir sobre este paquete
+unavailable: Ya no está disponible
+availability_line: "{available} de {total} disponibles"
+sold_count: "{n} vendidos"
 days: días
 default_pickup: Recogida en Denver Tech Center (DTC). El comprador debe cargar el artículo.
 sms_generic: ¡Hola! Vi su catálogo de venta por mudanza en DTC y tengo una pregunta.
@@ -64,6 +79,7 @@ categories:
   Vehicle: Auto
 statuses:
   Available: Disponible
+  Pending: Reservado
   Sold: Vendido
 payment_methods:
   Cash: Efectivo

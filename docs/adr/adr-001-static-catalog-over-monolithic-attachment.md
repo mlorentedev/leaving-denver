@@ -32,7 +32,7 @@ Deploy a lightweight (<50 KB) static HTML/CSS/JS catalog hosted on Cloudflare Pa
 ### Positive
 - Sub-50ms TTFB across mobile devices via Cloudflare's edge network.
 - Zero buyer friction: opens natively in mobile Safari/Chrome.
-- Total asset privacy: search crawlers blocked via `robots.txt` and `X-Robots-Tag: noindex`.
+- Total asset privacy: search crawlers blocked via `robots.txt` and `X-Robots-Tag: noindex`. Link-preview crawlers were allowed later (ADR-004); indexers stay blocked.
 - Decouples text metadata from image payloads, avoiding megabyte-scale payload transfers.
 
 ### Negative

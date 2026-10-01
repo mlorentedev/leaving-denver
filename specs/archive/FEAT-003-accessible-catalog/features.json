@@ -1,0 +1,44 @@
+[
+  {
+    "id": "FEAT-003-accessible-catalog-f1",
+    "behavior": "AC1: no sub-AA text utility or text under 12 px in the catalog template",
+    "verification": "uv run pytest -q tests/test_readable_text.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-003-accessible-catalog-f2",
+    "behavior": "AC2: sheets are labelled <dialog>s opened with showModal(); page scroll locked while open",
+    "verification": "make build && uv run pytest -q tests/test_native_dialogs.py -k 'labelled or scroll'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-003-accessible-catalog-f3",
+    "behavior": "AC3: opening pushes one history entry; Back closes; other closes drop the entry",
+    "verification": "make build && uv run pytest -q tests/test_native_dialogs.py -k back_closes",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-003-accessible-catalog-f4",
+    "behavior": "AC4: on a fine pointer text links open the contact sheet (number filled on click, Copy); touch keeps sms:",
+    "verification": "make build && uv run pytest -q tests/test_desktop_contact.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-003-accessible-catalog-f5",
+    "behavior": "AC5: viewport-fit=cover and safe-area insets on the sticky bar, body clearance and sheet panels",
+    "verification": "make build && uv run pytest -q tests/test_desktop_contact.py -k 'home_indicator or safe_areas'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-003-accessible-catalog-f6",
+    "behavior": "AC6: filtering announces the visible item count via aria-live",
+    "verification": "make build && uv run pytest -q tests/test_desktop_contact.py -k result_count",
+    "state": "pending",
+    "evidence": ""
+  }
+]

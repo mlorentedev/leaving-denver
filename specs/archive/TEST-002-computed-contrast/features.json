@@ -1,0 +1,7 @@
+[
+  {"id": "TEST-002-computed-contrast-f1", "behavior": "AC1: every visible text run on the rendered pages reaches 4.5:1", "verification": "make build && uv run pytest -q tests/test_readable_text.py -k contrast_holds", "state": "pending", "evidence": ""},
+  {"id": "TEST-002-computed-contrast-f2", "behavior": "AC2: the checker fails low-contrast markup in every form", "verification": "uv run pytest -q tests/test_readable_text.py -k catches_low_contrast", "state": "pending", "evidence": ""},
+  {"id": "TEST-002-computed-contrast-f3", "behavior": "AC3: the checker passes readable and exempt text", "verification": "uv run pytest -q tests/test_readable_text.py -k passes_readable", "state": "pending", "evidence": ""},
+  {"id": "TEST-002-computed-contrast-f4", "behavior": "AC4: conversion and ratio are calibrated", "verification": "uv run pytest -q tests/test_readable_text.py -k calibrated", "state": "pending", "evidence": ""},
+  {"id": "TEST-002-computed-contrast-f5", "behavior": "AC5: no arbitrary font size under 12 px", "verification": "uv run pytest -q tests/test_readable_text.py -k under_12px", "state": "pending", "evidence": ""}
+]

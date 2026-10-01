@@ -27,7 +27,11 @@ def test_mobile_poster_uses_only_published_sanitized_inventory(tmp_path, monkeyp
     payload = poster.split("const ITEMS = ", 1)[1].split("; window.posterItems", 1)[0]
     items = json.loads(payload)
     assert {item["id"] for item in items} == {
-        item["id"] for item in inventory["items"] if item.get("published", True)
+        item["id"]
+        for item in inventory["items"]
+        if item.get("published", True)
+        and item.get("status", "Available") == "Available"
+        and not item.get("free_with_purchase")
     }
     assert items and all("price" in item for item in items)
     for forbidden in ("private sentinel", "firm_floor_price", "pinGateModal", "8011"):
@@ -35,6 +39,30 @@ def test_mobile_poster_uses_only_published_sanitized_inventory(tmp_path, monkeyp
     assert (public / "seller/seller.mjs").is_file()
     assert (public / "seller/index.html").is_file()
     assert (public / "index.html").is_file()
+
+
+def test_mobile_poster_does_not_offer_sold_pending_or_free_items(tmp_path, monkeypatch):
+    public = tmp_path / "public"
+    monkeypatch.setenv("SELLER_PHONE", "+15555550100")
+    monkeypatch.setattr(site_builder, "DIST_DIR", public)
+    monkeypatch.setattr(site_builder, "PUBLIC_INDEX_HTML", public / "index.html")
+    monkeypatch.setattr(site_builder, "PUBLIC_ROBOTS_TXT", public / "robots.txt")
+    monkeypatch.setattr(site_builder, "PUBLIC_HEADERS", public / "_headers")
+    inventory = site_builder.load_inventory_yaml()
+    candidates = [item for item in inventory["items"] if item.get("published", True)]
+    assert len(candidates) >= 4
+    for item, status in zip(candidates[:3], ["Sold", "Pending", "Available"], strict=True):
+        item["status"] = status
+    candidates[2]["free_with_purchase"] = True
+    candidates[3]["status"] = "Available"
+
+    site_builder.build_public_site(inventory)
+
+    poster = (public / "seller/index.html").read_text(encoding="utf-8")
+    payload = poster.split("const ITEMS = ", 1)[1].split("; window.posterItems", 1)[0]
+    ids = {item["id"] for item in json.loads(payload)}
+    assert not ids.intersection({item["id"] for item in candidates[:3]})
+    assert candidates[3]["id"] in ids
 
 
 def test_mobile_copy_uses_public_price_and_singular_voice():

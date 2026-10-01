@@ -74,7 +74,8 @@ def test_static_image_paths_exist():
 
 
 def test_template_sees_only_sanitized_data(tmp_path, monkeypatch):
-    """The page template gets the sanitized inventory and the phone parts, nothing else."""
+    """The page template gets the sanitized inventory and the phone parts, nothing else;
+    the share pages get less still: no inventory and no phone."""
     from leaving_denver import site_builder
 
     dist = tmp_path / "public"
@@ -83,11 +84,11 @@ def test_template_sees_only_sanitized_data(tmp_path, monkeypatch):
     monkeypatch.setattr(site_builder, "PUBLIC_INDEX_HTML", dist / "index.html")
     monkeypatch.setattr(site_builder, "PUBLIC_ROBOTS_TXT", dist / "robots.txt")
     monkeypatch.setattr(site_builder, "PUBLIC_HEADERS", dist / "_headers")
-    seen = {}
+    seen: dict[str, dict] = {}
     real_render = site_builder.render
 
     def spy(template, **ctx):
-        seen.update(ctx)
+        seen.setdefault(template, {}).update(ctx)
         return real_render(template, **ctx)
 
     monkeypatch.setattr(site_builder, "render", spy)
@@ -99,14 +100,16 @@ def test_template_sees_only_sanitized_data(tmp_path, monkeypatch):
     data["seller"]["phone"] = "+15555550199"
     site_builder.build_public_site(data)
 
-    assert set(seen) == {
+    assert set(seen["share.html"]) == {"locale", "t", "og", "target"}
+    assert set(seen["seller.html"]) == {"items_json"}
+    assert set(seen["index.html"]) == {
         "inventory_json",
-        "items_json",
         "contact_json",
         "ui_json",
         "locale",
         "t",
         "asset_prefix",
+        "build_sha",
         "language_links",
         "seller",
         "departure_month",
@@ -115,6 +118,7 @@ def test_template_sees_only_sanitized_data(tmp_path, monkeypatch):
         "chips",
         "bundles",
         "everything",
+        "og",
     }
     context = json.dumps(seen)
     for private in ("firm_floor_price", "internal_notes", "private note", "5555550199"):

@@ -41,6 +41,10 @@ uv run leaving-denver drops
 # Mark an item as sold and trigger automatic site rebuild
 uv run leaving-denver sold sofa-sleeper 200
 
+# Reserve an item for an agreed pickup, or put it back on sale
+uv run leaving-denver pending sofa-sleeper
+uv run leaving-denver available sofa-sleeper
+
 # Start local preview server (Port 8088)
 uv run leaving-denver serve --port 8088
 
@@ -63,6 +67,8 @@ production redeploy), use *Actions → ci → Run workflow* with a `branch` inpu
 (default `preview`) creates `<branch>.leaving-denver.pages.dev`. The deploy
 job rebuilds with the real phone, runs `make check`, deploys with wrangler
 and smoke-tests the deployment (`scripts/smoke.sh`).
+The bilingual footer links the developer's GitHub profile and, on CI builds,
+the deployed commit (`GITHUB_SHA`) so the live version is identifiable.
 
 One-time setup, all idempotent and run from a machine with the age key:
 

@@ -13,6 +13,7 @@ import urllib.parse
 from pathlib import Path
 
 from leaving_denver.config import DIST_DIR, DIST_PRIVATE_DIR
+from leaving_denver.private_data import record_sale
 from leaving_denver.site_builder import (
     apply_photos,
     build_all,
@@ -41,32 +42,45 @@ def cmd_sync(args):
     print("Sync complete. Run 'leaving-denver build' to recompile sites.")
 
 
-def cmd_sold(args):
-    item_id = args.id
-    realized_price = args.price
+def set_status(item_id, status):
+    """Set one item's status in the SSOT, save it and rebuild; returns the item."""
     data = load_inventory_yaml()
-
-    target_item = None
-    for item in data.get("items", []):
-        if item["id"] == item_id:
-            target_item = item
-            break
-
+    target_item = next((item for item in data.get("items", []) if item["id"] == item_id), None)
     if not target_item:
         print(f"Error: Item with ID '{item_id}' not found.")
         sys.exit(1)
-
-    target_item["status"] = "Sold"
-    if realized_price is not None:
-        target_item["realized_price"] = realized_price
-
+    target_item["status"] = status
     save_inventory_yaml(data)
-    print(
-        f"Item '{target_item['title']}' marked as SOLD (Price: ${realized_price or target_item.get('recommended_list_price')})."
-    )
-
-    # Rebuild
     build_all()
+    return target_item
+
+
+def cmd_pending(args):
+    item = set_status(args.id, "Pending")
+    print(f"Item '{item['title']}' reserved: shown as pending pickup; its bundles are off sale.")
+
+
+def cmd_available(args):
+    item = set_status(args.id, "Available")
+    print(f"Item '{item['title']}' is available again.")
+
+
+def cmd_sold(args):
+    data = load_inventory_yaml()
+    if not any(item["id"] == args.id for item in data.get("items", [])):
+        print(f"Error: Item with ID '{args.id}' not found.")
+        sys.exit(1)
+    # The repo is public: the price goes to the encrypted file first, or nothing changes.
+    if args.price is not None:
+        try:
+            record_sale(args.id, args.price)
+        except RuntimeError as err:
+            print(f"Error: could not record the price privately ({err}). Nothing changed.")
+            sys.exit(1)
+    target_item = set_status(args.id, "Sold")
+    print(
+        f"Item '{target_item['title']}' marked as SOLD (Price: ${args.price or target_item.get('recommended_list_price')})."
+    )
 
     print("\n" + "=" * 60)
     print("CROSS-POSTING TAKEDOWN CHECKLIST:")
@@ -177,6 +191,16 @@ def main():
     sold_p.add_argument("id", help="Item ID (e.g. sofa-sleeper)")
     sold_p.add_argument("price", nargs="?", type=int, help="Realized sale price in USD")
     sold_p.set_defaults(func=cmd_sold)
+
+    pending_p = subparsers.add_parser("pending", help="Reserve an item for a pickup and rebuild")
+    pending_p.add_argument("id", help="Item ID (e.g. sofa-sleeper)")
+    pending_p.set_defaults(func=cmd_pending)
+
+    available_p = subparsers.add_parser(
+        "available", help="Put an item back on sale (a pickup fell through) and rebuild"
+    )
+    available_p.add_argument("id", help="Item ID (e.g. sofa-sleeper)")
+    available_p.set_defaults(func=cmd_available)
 
     drops_p = subparsers.add_parser("drops", help="Calculate Hormozi 3-week staged pricing drops")
     drops_p.set_defaults(func=cmd_drops)

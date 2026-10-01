@@ -26,7 +26,44 @@ grep -q 'cdn.tailwindcss.com' <<<"$es_page" && fail "ES loads the Tailwind play 
 css=$(curl -fsS "$url/styles.css") || fail "compiled stylesheet missing"
 grep -Fq '.aspect-4\/3{' <<<"$css" || fail "Tailwind v4 utility missing"
 
-curl -fsS "$url/robots.txt" | grep -q 'Disallow: /' || fail "robots.txt missing or permissive"
+robots=$(curl -fsS "$url/robots.txt") || fail "robots.txt missing"
+# The catch-all group itself must disallow; a stray "Disallow: /" elsewhere proves nothing.
+grep -A1 -x 'User-agent: \*' <<<"$robots" | grep -qx 'Disallow: /' || fail "robots.txt is permissive"
+grep -q '^User-agent: facebookexternalhit' <<<"$robots" || fail "robots.txt shuts out link previews"
+
+# Link previews (FEAT-002). og:image is absolute on the production origin; fetch its path
+# here, so a preview deployment is checked against its own files.
+og() { sed -nE "s/.*<meta property=\"og:$1\" content=\"([^\"]+)\".*/\\1/p" | head -1; }
+check_image() {
+  [[ "$1" == https://* ]] || fail "$2 has no absolute og:image"
+  curl -fsSI "$url/${1#https://*/}" | grep -qi '^content-type: image/jpeg' \
+    || fail "$2 og:image ${1#https://*/} does not answer as a JPEG"
+}
+check_image "$(og image <<<"$page")" "catalog"
+share_page() {
+  local share
+  share=$(curl -fsS "$url/$1") || fail "/$1 unreachable"
+  # Unknown paths answer with index.html, so match the page's own og:url, not the status.
+  [[ "$(og url <<<"$share")" == */$1 ]] || fail "share page /$1 missing"
+  printf '%s' "$share"
+}
+# Every card has both share pages. An item with no photo has no og:image, which is content,
+# not a defect, so the images are checked, in both locales, on the first item that has one.
+items=$(grep -oE 'data-item="[^"]+"' <<<"$page" | cut -d'"' -f2)
+[ -n "$items" ] || fail "no item cards on the page"
+pictured=""
+for item in $items; do
+  for share_path in "i/$item/" "es/i/$item/"; do
+    share=$(share_page "$share_path") || exit 1
+    image=$(og image <<<"$share")
+    # The pick is made on the English page, so both of the picked item's pages are checked.
+    if [ "$pictured" = "$item" ] || { [ -z "$pictured" ] && [ "$share_path" = "i/$item/" ] && [ -n "$image" ]; }; then
+      pictured=$item
+      check_image "$image" "/$share_path"
+    fi
+  done
+done
+[ -n "$pictured" ] || fail "no share page has an og:image"
 curl -fsSI "$url/" | grep -qi '^x-content-type-options: nosniff' || fail "_headers not applied"
 
 # Pages answers unknown paths with index.html, so check content, not status.
