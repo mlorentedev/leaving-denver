@@ -17,6 +17,33 @@ to buyers. Confirm current listings and platform rules before posting.
 | **Nextdoor (DTC)** | Neighborhood buyers | **Include full catalog link** | No duplicate listings or delete/repost to bump; use For Sale & Free for items |
 | **Complex Portal (ActiveBuilding)** | High-trust local buyers | **Include full catalog link** | State the one-flight walk-up and no-elevator pickup facts before scheduling |
 
+### Listing copy: `/seller/`
+
+Write each listing at `/seller/` (behind Cloudflare Access, same page on a phone and on a
+computer; setup in [ops.md](ops.md)). Pick the item and the platform and copy the title,
+description, tags and price. It covers:
+
+- **Facebook Marketplace, Craigslist, OfferUp and Nextdoor in English, and Facebook and
+  Craigslist in Spanish.** Spanish copy comes from each item's `es` overlay in
+  `data/inventory.yaml`.
+- **The car.** Mileage, title status and VIN, and a payment line that is only the car's bank
+  payments from the data (cashier's check issued at the buyer's bank, or wire transfer). It
+  never offers cash, Venmo or Zelle; see [vehicle-sale.md](vehicle-sale.md).
+- **Flaws** from the item's `flaws:`, listed after the good points.
+- **Limits.** The page shows the counts: Facebook title 100 and description 5000, Craigslist
+  title 70, OfferUp title 60. A red count means the text is too long for that platform.
+- **No phone number.** Facebook and OfferUp take messages in the app and Craigslist replies
+  go through its email relay. The number stays out of every listing (#29 plans a Google Voice
+  number).
+- **The link.** The per-channel link (its `utm_source` says where the buyer came from) is for
+  **chat replies only**. Never paste it into a listing body; the per-item copy has none. The
+  full catalog link goes only in an umbrella post, as the table above says.
+- **The listing-creator link** per platform (the vehicle form for the car).
+
+Edit the item in `data/inventory.yaml` (or its `es:` overlay), publish as described in
+[ops.md](ops.md), and the copy follows; nothing is typed into the tool. Floors and
+negotiation are not in `/seller/`: they stay in the local assistant until FEAT-009 PR 2.
+
 Check each group's rules before posting an umbrella sale message. For
 Facebook/Nextdoor, use one local sale post rather than repeating identical
 item listings. Use factual titles (brand, model, size and condition), real
@@ -102,18 +129,14 @@ targets:
 > offer the backup buyer a time. After a no-show: "I missed you at [time].
 > Let me know if you can confirm a new pickup slot; it remains available."
 
-### Scam scripts
+### Scam replies
 
-- **Verification code:** "I do not share login or verification codes. We
-  can meet in person."
-- **Fake payment or 'business account upgrade':** "I only accept payment
-  that shows in my own app while you are here. I do not act on emails or
-  screenshots, and I will not pay a fee to receive money."
-- **Overpayment, courier or shipping:** "Exact amount at local pickup only;
-  no couriers, shipping, extra checks or refunds." For the car, use only the
-  bank payment methods in [vehicle-sale.md](vehicle-sale.md).
-- **Vehicle-report link:** "You can run a report through a service you
-  choose; I do not buy reports from links sent by buyers."
+`/seller/` has six replies, each in English and Spanish with its own copy button: a code
+sent to your phone (Google Voice or another), a payment email or screenshot, overpayment,
+couriers and shipping, a vehicle-report link, and deposits or holds. Their text lives in
+`data/seller-replies.yaml` (edit it there, not here); the car's payment methods in them come
+from the inventory. The rule behind all six: payment counts only when it shows in your own
+app, or at the bank for the car, and only for the exact price at local pickup.
 
 For household items, count cash when you receive it. Count in-person
 Venmo/Zelle only after the payment appears in **your own** app. Do not request

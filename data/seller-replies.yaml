@@ -1,0 +1,80 @@
+# Replies for the pressure and scams a listing attracts, copied from /seller/ (FEAT-009).
+# Public text: it ships to build/public/seller/, so nothing private belongs here. First person
+# singular, one reply per situation, English and Spanish for every entry (the build fails
+# without both). {vehicle_payment} becomes the car's payment methods from
+# seller.payment_methods.vehicle in the reply's language; no other placeholder is allowed.
+replies:
+- id: verification-code
+  en:
+    title: Asks for a code sent to my phone (Google Voice or other)
+    text: >-
+      I do not share login or verification codes, not even one that arrived by text.
+      If you want to buy it, I can meet you in person.
+  es:
+    title: Pide un código enviado a mi teléfono (Google Voice u otro)
+    text: >-
+      No comparto códigos de inicio de sesión ni de verificación, ni siquiera uno que
+      llegó por mensaje. Si quiere comprarlo, puedo reunirme con usted en persona.
+- id: fake-payment-email
+  en:
+    title: Shows a payment email or screenshot, or a business account upgrade
+    text: >-
+      I only count a payment that shows up in my own app while you are here. I do not
+      act on emails or screenshots, and I will not pay a fee to receive money.
+      The car is paid only by {vehicle_payment}.
+  es:
+    title: Muestra un correo o captura de pago, o una mejora de cuenta de negocio
+    text: >-
+      Solo cuento un pago que aparece en mi propia app mientras usted está aquí. No
+      actúo por correos ni capturas, y no pagaré una comisión para recibir dinero.
+      El auto se paga solo con {vehicle_payment}.
+- id: overpayment
+  en:
+    title: Offers to pay more than the price and have me send the difference
+    text: >-
+      I take the exact asking amount at pickup. I do not accept extra checks or
+      overpayments, and I do not send refunds or change back by transfer.
+      The car is paid only by {vehicle_payment}.
+  es:
+    title: Ofrece pagar de más y que yo devuelva la diferencia
+    text: >-
+      Recibo el monto exacto del precio al recoger. No acepto cheques de más ni pagos
+      excedentes, y no devuelvo diferencias por transferencia.
+      El auto se paga solo con {vehicle_payment}.
+- id: courier
+  en:
+    title: Wants a courier, a shipping company or a third party to pick it up
+    text: >-
+      I sell for local pickup only. No couriers, no shipping and no third-party
+      pickups: the buyer comes in person.
+  es:
+    title: Quiere mensajería, una empresa de envíos o que lo recoja un tercero
+    text: >-
+      Vendo solo para recoger en persona. No hay mensajería, ni envíos, ni recogidas
+      por terceros: el comprador viene en persona.
+- id: report-link
+  en:
+    title: Sends a link to buy a vehicle history report
+    text: >-
+      You can run a report through a service you choose. I do not open links or buy
+      reports through links sent by buyers. The VIN is public, and my catalog links
+      the official sites to check it.
+  es:
+    title: Envía un enlace para comprar un reporte del historial del vehículo
+    text: >-
+      Puede pedir un reporte en el servicio que usted elija. No abro enlaces ni compro
+      reportes mediante enlaces enviados por compradores. El VIN es público y mi
+      catálogo enlaza los sitios oficiales para comprobarlo.
+- id: deposit
+  en:
+    title: Asks me to hold it for a deposit
+    text: >-
+      I do not take deposits, and I cannot hold an item without a confirmed pickup
+      time. If it is still available when you can come, message me and I will share
+      the address once the time is set.
+  es:
+    title: Pide que se lo aparte con un depósito
+    text: >-
+      No recibo depósitos y no puedo apartar un artículo sin una hora de recogida
+      confirmada. Si sigue disponible cuando pueda venir, escríbame y le doy la
+      dirección una vez fijada la hora.

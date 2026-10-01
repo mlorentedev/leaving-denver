@@ -685,16 +685,150 @@ def verify_markers(html: str, inventory_json: str, contact_json: str) -> None:
             raise RuntimeError(f"Template index.html does not emit {marker}")
 
 
-def write_seller_poster(public_data: dict[str, Any]) -> None:
-    """The /seller/ listing generator, fed the items that can still be listed."""
+# The languages a listing can be written in; the Spanish copy is the catalog's `es` overlay.
+LISTING_LOCALES = ("en", "es")
+# What the listing copy reads from an item. Nothing else of the item reaches /seller/.
+SELLER_ITEM_FIELDS = (
+    "id",
+    "category",
+    "title",
+    "short_title",
+    "price",
+    "condition",
+    "flaws",
+    "dimensions",
+    "specs",
+    "included",
+    "note",
+    "pickup",
+    "images",
+    "year",
+    "odometer",
+    "title_status",
+    "vin",
+)
+# The fields the Spanish overlay replaces; the rest of the item reads the same in both.
+SELLER_COPY_FIELDS = (
+    "title",
+    "short_title",
+    "condition",
+    "flaws",
+    "dimensions",
+    "specs",
+    "included",
+    "note",
+    "pickup",
+    "title_status",
+)
+SELLER_REPLIES_YAML = BASE_DIR / "data" / "seller-replies.yaml"
+REPLY_PLACEHOLDER = "{vehicle_payment}"
+
+
+def seller_payment(methods: dict[str, list[str]], t: dict[str, Any], vehicle: bool) -> str:
+    """Payment terms in the catalog's own words: the car's bank payments, or the household
+    methods in person (see the pickup terms in index.html)."""
+    if vehicle:
+        return f" {t['or']} ".join(methods["vehicle"])
+    return f"{', '.join(methods['household'])} {t['in_person']}"
+
+
+def seller_replies(vehicle_payment: dict[str, str]) -> list[dict[str, Any]]:
+    """The scam replies from data/seller-replies.yaml, each in both languages with the car's
+    payment methods filled in. An entry without both languages, or with another placeholder
+    left in its text, fails the build."""
+    replies = []
+    for reply in yaml.safe_load(SELLER_REPLIES_YAML.read_text(encoding="utf-8"))["replies"]:
+        entry: dict[str, Any] = {"id": reply["id"], "title": {}, "text": {}}
+        for code in LISTING_LOCALES:
+            copy = reply.get(code) or {}
+            if not copy.get("title") or not copy.get("text"):
+                raise RuntimeError(f"Reply {reply['id']}: needs a {code} title and text")
+            text = " ".join(copy["text"].split()).replace(REPLY_PLACEHOLDER, vehicle_payment[code])
+            if "{" in text or "}" in text:
+                raise RuntimeError(f"Reply {reply['id']}: unknown placeholder in the {code} text")
+            entry["title"][code] = copy["title"].strip()
+            entry["text"][code] = text
+        replies.append(entry)
+    return replies
+
+
+def seller_item(
+    item: dict[str, Any],
+    spanish: dict[str, Any],
+    tags: list[str],
+    translations: dict[str, dict[str, Any]],
+    methods: dict[str, dict[str, list[str]]],
+) -> dict[str, Any]:
+    """One item as the copy generator reads it: its fields, its tags and payment terms, and
+    under `es` the Spanish overlay with the Spanish payment terms."""
+    car = item["category"] == "Vehicle"
+    payload = {field: item[field] for field in SELLER_ITEM_FIELDS if field in item}
+    payload["tags"] = list(tags)
+    payload["payment"] = seller_payment(methods["en"], translations["en"], car)
+    payload["es"] = {field: spanish[field] for field in SELLER_COPY_FIELDS}
+    payload["es"]["payment"] = seller_payment(methods["es"], translations["es"], car)
+    return payload
+
+
+def seller_items(
+    public_data: dict[str, Any],
+    full_data: dict[str, Any],
+    translations: dict[str, dict[str, Any]],
+    methods: dict[str, dict[str, list[str]]],
+) -> list[dict[str, Any]]:
+    """The items that can still be listed, English with a Spanish overlay (see seller_item)."""
+    localized = {
+        code: {
+            item["id"]: item
+            for item in localize_public_inventory(
+                public_data, full_data, code, translations[code], ""
+            )["items"]
+        }
+        for code in LISTING_LOCALES
+    }
+    tags = {item["id"]: item.get("tags", []) for item in full_data.get("items", [])}
+    return [
+        seller_item(
+            item, localized["es"][item["id"]], tags.get(item["id"], []), translations, methods
+        )
+        for item in localized["en"].values()
+        if item["status"] == "Available" and not item["free"]
+    ]
+
+
+def write_seller_poster(public_data: dict[str, Any], full_data: dict[str, Any]) -> None:
+    """The /seller/ listing generator: the items that can still be listed, the page's
+    settings and the scam replies. Public data only, and no phone (listings never carry it)."""
     poster_dir = DIST_DIR / "seller"
     poster_dir.mkdir(parents=True, exist_ok=True)
-    listable_items = [
-        item for item in public_data["items"] if item["status"] == "Available" and not item["free"]
-    ]
-    items_json = json.dumps(listable_items).replace("<", "\\u003c")
+    seller = sanitize_public_seller(full_data)
+    translations = {code: load_locale(code) for code in LISTING_LOCALES}
+    methods = {
+        code: localize_seller(seller, full_data, code, translations[code])["payment_methods"]
+        for code in LISTING_LOCALES
+    }
+    month = date.fromisoformat(seller["departure_date"]).month
+    config = {
+        "origin": site_url(),
+        "month": {code: translations[code]["months"][month] for code in LISTING_LOCALES},
+    }
+    car_payment = {
+        code: seller_payment(methods[code], translations[code], True) for code in LISTING_LOCALES
+    }
+    items = seller_items(public_data, full_data, translations, methods)
+
+    def script_json(value: Any) -> str:
+        # `<` escaped so item text cannot close the inline <script> ("</script>", "<!--").
+        return json.dumps(value, ensure_ascii=False).replace("<", "\\u003c")
+
     (poster_dir / "index.html").write_text(
-        render("seller.html", items_json=items_json), encoding="utf-8"
+        render(
+            "seller.html",
+            items_json=script_json(items),
+            config_json=script_json(config),
+            replies=seller_replies(car_payment),
+        ),
+        encoding="utf-8",
     )
     shutil.copy2(Path(__file__).parent / "assets" / "seller.mjs", poster_dir / "seller.mjs")
 
@@ -707,7 +841,7 @@ def build_public_site(full_data: dict[str, Any]) -> None:
     # The template sees the sanitized data only, never full_data.
     public_data = sanitize_public_inventory(full_data)
     seller = sanitize_public_seller(full_data)
-    write_seller_poster(public_data)
+    write_seller_poster(public_data, full_data)
     departure = date.fromisoformat(seller["departure_date"])
     contact_json = json.dumps(phone_parts(phone))
     origin = site_url()

@@ -13,7 +13,7 @@
     <nav><a class="underline text-sm" href="../">Back to catalog</a></nav>
     <header>
       <h1 class="text-2xl font-bold">Seller listing copy</h1>
-      <p class="text-sm text-neutral-600">Mobile copy from published items and asking prices only. Private reserve prices stay on your computer.</p>
+      <p class="text-sm text-neutral-600">Listing copy in English and Spanish from the published items and their asking prices, and replies to scams. Listings never carry my phone number.</p>
     </header>
     <label class="block font-semibold" for="item">Item
       <select id="item" class="block w-full p-3 mt-1 bg-white border border-neutral-300 rounded-lg"></select>
@@ -21,30 +21,63 @@
     <label class="block font-semibold" for="platform">Platform
       <select id="platform" class="block w-full p-3 mt-1 bg-white border border-neutral-300 rounded-lg">
         <option value="fb">Facebook Marketplace</option>
+        <option value="fb-es">Facebook Marketplace (Español)</option>
         <option value="cl">Craigslist</option>
+        <option value="cl-es">Craigslist (Español)</option>
         <option value="offerup">OfferUp</option>
         <option value="nextdoor">Nextdoor</option>
       </select>
     </label>
+    <a id="create" class="block text-center underline text-sm" href="https://www.facebook.com/marketplace/create/item" target="_blank" rel="noopener noreferrer">Open the listing creator (new tab)</a>
     <img id="photo" class="max-h-64 w-full object-contain bg-white rounded-lg" alt="" hidden>
+    <ol id="photos" class="grid grid-cols-4 gap-2" aria-label="Photos in the order to upload"></ol>
+    <template id="photo-template">
+      <li><img class="aspect-square w-full object-contain bg-white rounded-lg border border-neutral-300" alt=""></li>
+    </template>
     <div>
-      <label class="block font-semibold" for="title">Title</label>
+      <label class="block font-semibold" for="title">Title <span id="title-count" class="text-sm font-normal text-neutral-600"></span></label>
       <input id="title" class="w-full p-3 mt-1 bg-white border border-neutral-300 rounded-lg" type="text">
       <button type="button" data-copy="title" class="mt-2 px-4 py-3 bg-neutral-900 text-white rounded-lg">Copy title</button>
     </div>
     <div>
-      <label class="block font-semibold" for="description">Description</label>
+      <label class="block font-semibold" for="description">Description <span id="description-count" class="text-sm font-normal text-neutral-600"></span></label>
       <textarea id="description" rows="13" class="w-full p-3 mt-1 bg-white border border-neutral-300 rounded-lg"></textarea>
       <button type="button" data-copy="description" class="mt-2 px-4 py-3 bg-neutral-900 text-white rounded-lg">Copy description</button>
     </div>
     <div>
+      <label class="block font-semibold" for="tags">Search tags</label>
+      <input id="tags" class="w-full p-3 mt-1 bg-white border border-neutral-300 rounded-lg" type="text" readonly>
+      <button type="button" data-copy="tags" class="mt-2 px-4 py-3 bg-neutral-900 text-white rounded-lg">Copy tags</button>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <button type="button" id="copy-price" class="px-4 py-3 bg-neutral-900 text-white rounded-lg">Copy price</button>
+      <button type="button" id="copy-full" class="px-4 py-3 bg-neutral-900 text-white rounded-lg">Copy title, price and description</button>
+    </div>
+    <div>
       <label class="block font-semibold" for="link">Item link with platform attribution</label>
+      <p class="text-sm text-neutral-600">For chat replies only. Never paste it into a listing.</p>
       <input id="link" class="w-full p-3 mt-1 bg-white border border-neutral-300 rounded-lg" type="url" readonly>
       <button type="button" data-copy="link" class="mt-2 px-4 py-3 bg-neutral-900 text-white rounded-lg">Copy link</button>
     </div>
     <p id="status" role="status" aria-live="polite" class="text-sm"></p>
+    <section aria-labelledby="replies-heading" class="space-y-4">
+      <h2 id="replies-heading" class="text-xl font-bold">Replies to scams and pressure</h2>
+      {% for reply in replies %}
+      <div data-reply="{{ reply.id }}" class="space-y-2 p-3 bg-white border border-neutral-300 rounded-lg">
+        <h3 class="font-semibold">{{ reply.title.en }}</h3>
+        {% for code, label in (("en", "English"), ("es", "Español")) %}
+        <div>
+          <label class="block text-sm text-neutral-600" for="reply-{{ reply.id }}-{{ code }}">{{ label }}</label>
+          <textarea id="reply-{{ reply.id }}-{{ code }}" lang="{{ code }}" rows="4" readonly class="w-full p-3 mt-1 bg-neutral-50 border border-neutral-300 rounded-lg">{{ reply.text[code] }}</textarea>
+          <button type="button" data-copy="reply-{{ reply.id }}-{{ code }}" class="mt-2 px-4 py-3 bg-neutral-900 text-white rounded-lg">Copy {{ label }}</button>
+        </div>
+        {% endfor %}
+      </div>
+      {% endfor %}
+    </section>
   </main>
   <script>const ITEMS = {{ items_json | safe }}; window.posterItems = ITEMS;</script>
+  <script>const CONFIG = {{ config_json | safe }}; window.sellerConfig = CONFIG;</script>
   <script type="module" src="seller.mjs"></script>
 </body>
 </html>

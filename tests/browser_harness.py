@@ -170,9 +170,23 @@ class Page:
         self.mouse("mouseReleased", *end)
 
 
+MODULE_SCRIPT = re.compile(r'<script type="module" src="([^"]+)"></script>')
+
+
+def inline_modules(html, folder):
+    """A module script fetched from file:// is blocked as cross-origin, so the staged page
+    carries each one inline; nothing in them imports."""
+    return MODULE_SCRIPT.sub(
+        lambda found: (
+            f'<script type="module">{(folder / found.group(1)).read_text("utf-8")}</script>'
+        ),
+        html,
+    )
+
+
 @contextmanager
 def open_page(tmp_path, page, setup="", fragment=""):
-    html, _, _ = page_items(page)
+    html = inline_modules((PUBLIC / page).read_text(encoding="utf-8"), (PUBLIC / page).parent)
     first_script = html.index("<script>")
     staged = stage(
         page,

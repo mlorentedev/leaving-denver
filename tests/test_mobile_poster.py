@@ -7,6 +7,24 @@ import pytest
 from leaving_denver import site_builder
 
 ROOT = Path(__file__).resolve().parents[1]
+# Nothing the private tool owns may reach /seller/: floors, reserve, notes, the PIN, the phone.
+# The phone's digits come from the SELLER_PHONE the tests set; "floor" alone is not listed
+# because "First floor, one flight of stairs" is public pickup copy.
+PRIVATE_MARKERS = (
+    "private sentinel",
+    "firm_floor_price",
+    "recommended_list_price",
+    "internal_notes",
+    "pinGateModal",
+    "SELLER_PIN",
+    "sessionStorage",
+    "8011",
+    "5555550100",
+    "+1555",
+    "reserve",
+    "negotiat",
+    "SELLER_PHONE",
+)
 
 
 def test_mobile_poster_uses_only_published_sanitized_inventory(tmp_path, monkeypatch):
@@ -34,8 +52,10 @@ def test_mobile_poster_uses_only_published_sanitized_inventory(tmp_path, monkeyp
         and not item.get("free_with_purchase")
     }
     assert items and all("price" in item for item in items)
-    for forbidden in ("private sentinel", "firm_floor_price", "pinGateModal", "8011"):
-        assert forbidden not in poster
+    mjs = (public / "seller/seller.mjs").read_text(encoding="utf-8")
+    for forbidden in PRIVATE_MARKERS:
+        assert forbidden not in poster, f"{forbidden} reached /seller/"
+        assert forbidden not in mjs, f"{forbidden} reached seller.mjs"
     assert (public / "seller/seller.mjs").is_file()
     assert (public / "seller/index.html").is_file()
     assert (public / "index.html").is_file()
@@ -259,3 +279,19 @@ def test_mobile_access_setup_is_documented():
     assert "one-time" in ops
     assert "preview" in ops
     assert "anonymous" in ops
+
+
+def test_the_local_assistant_stays_out_of_the_public_build_until_it_moves(tmp_path, monkeypatch):
+    """FEAT-009 PR 1 keeps poster_assistant.html (floors, week plan): PR 2 moves it. Until
+    then it must not reach build/public, and the public tool must not borrow its PIN."""
+    assistant = site_builder.TEMPLATES_DIR / "poster_assistant.html"
+    assert assistant.is_file()
+    public = tmp_path / "public"
+    monkeypatch.setenv("SELLER_PHONE", "+15555550100")
+    monkeypatch.setattr(site_builder, "DIST_DIR", public)
+    monkeypatch.setattr(site_builder, "PUBLIC_INDEX_HTML", public / "index.html")
+    monkeypatch.setattr(site_builder, "PUBLIC_ROBOTS_TXT", public / "robots.txt")
+    monkeypatch.setattr(site_builder, "PUBLIC_HEADERS", public / "_headers")
+    site_builder.build_public_site(site_builder.load_inventory_yaml())
+    assert not [p for p in public.rglob("*") if "poster" in p.name.lower()]
+    site_builder.verify_security_guarantees()

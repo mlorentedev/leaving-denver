@@ -58,6 +58,9 @@ def test_the_car_takes_only_payments_that_cannot_be_clawed_back(inventory):
 # is the old car copy, wherever it is written by hand.
 CAR_COPY = [
     POSTER,
+    BASE_DIR / "src" / "leaving_denver" / "assets" / "seller.mjs",
+    BASE_DIR / "src" / "leaving_denver" / "templates" / "seller.html",
+    BASE_DIR / "data" / "seller-replies.yaml",
     BASE_DIR / "src" / "leaving_denver" / "templates" / "index.html",
     INVENTORY_YAML,
     BASE_DIR / "locales" / "en.yaml",
@@ -227,6 +230,9 @@ CLAIM_SOURCES = [
     INVENTORY_YAML,
     BASE_DIR / "src" / "leaving_denver" / "templates" / "index.html",
     BASE_DIR / "src" / "leaving_denver" / "templates" / "poster_assistant.html",
+    BASE_DIR / "src" / "leaving_denver" / "assets" / "seller.mjs",
+    BASE_DIR / "data" / "seller-replies.yaml",
+    BASE_DIR / "build" / "public" / "seller" / "index.html",
     BASE_DIR / "build" / "public" / "index.html",
     BASE_DIR / "build" / "public" / "es" / "index.html",
 ]
