@@ -16,6 +16,7 @@ import subprocess
 from datetime import date, timedelta
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlsplit
 
 import yaml
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
@@ -135,6 +136,53 @@ def unpublished_ids(full_data: dict[str, Any]) -> set[str]:
     return {i["id"] for i in full_data.get("items", []) if i.get("published", True) is False}
 
 
+# "Verify it yourself" links go to these sites and no others (FEAT-008): a buyer follows them to
+# check the VIN, so a reseller here would turn the section into the scam it warns about. Adding a
+# host (Carfax, once #28 lands) is a deliberate edit to this tuple, never a data-only change.
+OFFICIAL_CHECK_HOSTS = ("nhtsa.gov", "ford.com", "nicb.org")
+
+
+def official_check_url(url: str) -> bool:
+    """True for an https URL on an official host, with no userinfo and no characters a browser
+    would read differently from `urlsplit` (backslash, whitespace, control characters)."""
+    if not re.fullmatch(r"[\x21-\x7e]+", url) or "\\" in url:
+        return False
+    parts = urlsplit(url)
+    host = parts.hostname or ""
+    return (
+        parts.scheme == "https"
+        and parts.username is None
+        and any(host == domain or host.endswith("." + domain) for domain in OFFICIAL_CHECK_HOSTS)
+    )
+
+
+def public_verify(item: dict[str, Any]) -> dict[str, Any]:
+    """The item's `verify:` data, checked: each check is an official https URL, each piece of
+    evidence is one of the item's built photos, and the item has a VIN to check."""
+    verify = item["verify"]
+    if not item.get("vin"):
+        raise RuntimeError(f"{item['id']}: verify: needs the item's vin")
+    photos = {Path(image).name for image in item.get("images", [])}
+    checks, evidence = [], []
+    for check in verify.get("checks", []):
+        if not official_check_url(check["url"]):
+            raise RuntimeError(
+                f"{item['id']}: check {check['id']} must be https on an official host "
+                f"{OFFICIAL_CHECK_HOSTS}, got {check['url']!r}"
+            )
+        checks.append(
+            {key: check[key] for key in ("id", "url", "label", "note")} | {"href": check["url"]}
+        )
+    for proof in verify.get("evidence", []):
+        if synced_name(proof["photo"]) not in photos:
+            raise RuntimeError(
+                f"{item['id']}: evidence {proof['id']} names {proof['photo']}, "
+                "which is not one of its photos"
+            )
+        evidence.append({key: proof[key] for key in ("id", "photo", "label", "note")})
+    return {"checks": checks, "evidence": evidence}
+
+
 def apply_photos(item: dict[str, Any], synced: list[str]) -> None:
     """Order an item's synced photos by its `photos:` list; the first is the cover. Unlisted
     photos follow in name order, so a newly added one still builds until it is placed."""
@@ -232,6 +280,10 @@ def sanitize_public_inventory(full_data: dict[str, Any]) -> dict[str, Any]:
                 "pickup_note", "Pickup in Denver Tech Center (DTC). Buyer must self-load."
             ),
         }
+        if item.get("vin"):
+            pub["vin"] = item["vin"]
+        if item.get("verify"):
+            pub["verify"] = public_verify(item)
         public_items.append(pub)
 
     # Sold items stay visible but go last; sorted() is stable, so the rest keep their order.
@@ -423,6 +475,19 @@ def category_chips(
     return [(cat, label) for cat, label in labels.items() if cat in present]
 
 
+def localize_verify(
+    verify: dict[str, Any], copy: dict[str, Any], images: list[str], asset_prefix: str
+) -> None:
+    """Overlay one locale's labels by entry id and point each piece of evidence at its photo."""
+    by_name = {Path(image).name: image for image in images}
+    for entry in [*verify["checks"], *verify["evidence"]]:
+        for field in ("label", "note"):
+            if field in copy.get(entry["id"], {}):
+                entry[field] = copy[entry["id"]][field]
+        if "photo" in entry:
+            entry["href"] = asset_prefix + by_name[synced_name(entry["photo"])]
+
+
 def localize_public_inventory(
     public_data: dict[str, Any],
     full_data: dict[str, Any],
@@ -453,6 +518,8 @@ def localize_public_inventory(
         item["category_label"] = translations["categories"].get(item["category"], item["category"])
         item["status_label"] = translations["statuses"][item["status"]]
         item["photos"] = [photo_set(image, asset_prefix) for image in item["images"]]
+        if "verify" in item:
+            localize_verify(item["verify"], copy.get("verify", {}), item["images"], asset_prefix)
         item["images"] = [asset_prefix + image for image in item["images"]]
 
     source_bundles = {bundle["id"]: bundle for bundle in full_data.get("bundles", [])}

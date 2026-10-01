@@ -58,6 +58,12 @@ sms_bundle_prefix: Hi! I am interested in the
 sms_bundle_word: bundle
 sms_item_prefix: Hi! I am interested in inspecting the
 sms_in_dtc: in DTC.
+verify_heading: Verify it yourself
+verify_intro: "Check the car without taking my word for it: paste the VIN into these official sites."
+verify_vin: VIN
+verify_paperwork: My paperwork
+verify_new_tab: (opens in a new tab)
+verify_scam: Run your checks only on the official sites above. Never pay for a report through a link someone sends you.
 months:
   1: January
   2: February

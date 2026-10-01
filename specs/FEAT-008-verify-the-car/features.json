@@ -1,0 +1,44 @@
+[
+  {
+    "id": "FEAT-008-verify-the-car-f1",
+    "behavior": "`/` and `/es/` render a verify section for the car with the VIN and the three official hosts",
+    "verification": "uv run pytest -q tests/test_verify_the_car.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-008-verify-the-car-f2",
+    "behavior": "Every external link in the section is https on an official host, opens in a new tab with rel noopener noreferrer; the build rejects others",
+    "verification": "uv run pytest -q tests/test_verify_the_car.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-008-verify-the-car-f3",
+    "behavior": "Evidence links point to photos in the car's photos and in the build; the build rejects unknown photos",
+    "verification": "uv run pytest -q tests/test_verify_the_car.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-008-verify-the-car-f4",
+    "behavior": "The section states the fresh, unused emissions certificate at sale and the official-sites-only anti-scam line",
+    "verification": "uv run pytest -q tests/test_verify_the_car.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-008-verify-the-car-f5",
+    "behavior": "No 100k, Carfax, service-history, title, registration or plate content in the section",
+    "verification": "uv run pytest -q tests/test_verify_the_car.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-008-verify-the-car-f6",
+    "behavior": "Links and evidence are data with EN/ES labels; no section without verify data",
+    "verification": "uv run pytest -q tests/test_verify_the_car.py",
+    "state": "pending",
+    "evidence": ""
+  }
+]

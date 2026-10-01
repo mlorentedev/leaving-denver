@@ -801,6 +801,36 @@ items:
   - Standard Bill of Sale & Signed Clean Title
   pickup_note: Inspection in Denver Tech Center (DTC). Payment by cashier's check issued
     at the buyer's bank or by wire transfer, final before the title is signed.
+  # "Verify it yourself" (FEAT-008): official lookups for the public VIN, then my own papers.
+  # One list entry is one link; its Spanish copy is under es.verify, by id. A `url` must be
+  # https on an official host (OFFICIAL_CHECK_HOSTS in site_builder.py) and a `photo` must be
+  # one of this car's photos. Carfax and the dealer service-history printout are pending
+  # (#28, #34): they become one entry each here once they exist, and not before.
+  verify:
+    checks:
+    # NHTSA's VIN deep-link format could not be confirmed from NHTSA itself, so this links
+    # the page and the section shows the VIN to paste. A query parameter is never guessed.
+    - id: nhtsa
+      url: https://www.nhtsa.gov/recalls
+      label: NHTSA recalls
+      note: The federal recall lookup. Paste the VIN where it asks.
+    - id: ford
+      url: https://www.ford.com/support/recalls/
+      label: Ford recalls
+      note: Open recalls and customer satisfaction programs, straight from Ford.
+    - id: nicb
+      url: https://www.nicb.org/vincheck
+      label: NICB VINCheck
+      note: Theft and total-loss (salvage) records.
+    evidence:
+    - id: recall-invoice
+      photo: doc_1_recall_invoice.jpg
+      label: Recall closure invoice, 25 Sep 2026
+      note: Recall 22S43 closed at a Ford dealership. Personal details are blacked out.
+    - id: emissions-report
+      photo: doc_2_emissions_report.jpg
+      label: 'Emissions report, 12 May 2026: overall PASS'
+      note: That copy went to my renewal, so I hand over a fresh, unused certificate at sale.
   es:
     title: Ford Escape SEL AWD 2019, título limpio de Colorado e inspección de concesionario
     short_title: Ford Escape SEL AWD 2019
@@ -831,6 +861,22 @@ items:
     - Certificado vigente de emisiones de Colorado
     - Contrato de compraventa y título limpio firmado
     pickup_note: Inspección en Denver Tech Center. Pago con cheque de caja emitido en el banco del comprador o por transferencia bancaria, definitivo antes de firmar el título.
+    verify:
+      nhtsa:
+        label: Recalls de NHTSA
+        note: La búsqueda federal de recalls. Pega el VIN donde lo pida.
+      ford:
+        label: Recalls de Ford
+        note: Recalls abiertos y programas de satisfacción del cliente, directo de Ford.
+      nicb:
+        label: NICB VINCheck
+        note: Reportes de robo y de pérdida total (salvamento).
+      recall-invoice:
+        label: Factura del cierre del recall, 25 de septiembre de 2026
+        note: El recall 22S43 se cerró en un concesionario Ford. Los datos personales están tapados.
+      emissions-report:
+        label: 'Reporte de emisiones, 12 de mayo de 2026: resultado PASS'
+        note: Esa copia se usó en mi renovación, así que entrego un certificado nuevo y sin usar en la venta.
   tags:
   - ford escape
   - escape sel
