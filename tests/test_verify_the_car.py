@@ -268,6 +268,22 @@ def test_the_build_refuses_evidence_that_is_not_one_of_the_cars_photos(public_di
         site_builder.build_public_site(data)
 
 
+def test_the_build_refuses_evidence_that_is_synced_but_not_listed(public_dir):
+    car = car_with(
+        {
+            "checks": [],
+            "evidence": [
+                {"id": "unlisted", "photo": "doc_9_unlisted.jpg", "label": "x", "note": "y"}
+            ],
+        }
+    )
+    car["images"].append(f"catalog/{CAR_ID}/doc_9_unlisted.jpg")
+    data = inventory()
+    data["items"].append(car)
+    with pytest.raises(RuntimeError, match="doc_9_unlisted.jpg"):
+        site_builder.build_public_site(data)
+
+
 def test_the_build_refuses_verify_data_on_a_car_with_no_vin(public_dir):
     car = car_with(checks("https://www.nhtsa.gov/recalls"))
     car.pop("vin")

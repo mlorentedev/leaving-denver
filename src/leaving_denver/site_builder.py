@@ -158,11 +158,13 @@ def official_check_url(url: str) -> bool:
 
 def public_verify(item: dict[str, Any]) -> dict[str, Any]:
     """The item's `verify:` data, checked: each check is an official https URL, each piece of
-    evidence is one of the item's built photos, and the item has a VIN to check."""
+    evidence is listed in the item's `photos:` and built, and the item has a VIN to check."""
     verify = item["verify"]
     if not item.get("vin"):
         raise RuntimeError(f"{item['id']}: verify: needs the item's vin")
-    photos = {Path(image).name for image in item.get("images", [])}
+    # Listed, not merely synced: an unlisted photo builds too, but nobody chose to show it.
+    built = {Path(image).name for image in item.get("images", [])}
+    photos = {synced_name(name) for name in item.get("photos", [])} & built
     checks, evidence = [], []
     for check in verify.get("checks", []):
         if not official_check_url(check["url"]):
