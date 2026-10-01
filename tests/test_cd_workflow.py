@@ -97,6 +97,7 @@ def test_deploy_protection_removes_stale_policies_and_is_idempotent(tmp_path):
             """\
             import json
             import os
+            import subprocess
             import sys
             from pathlib import Path
 
@@ -111,15 +112,19 @@ def test_deploy_protection_removes_stale_policies_and_is_idempotent(tmp_path):
                 raise SystemExit("missing environment")
             operation = args[args.index("-X") + 1] if "-X" in args else "GET"
             if operation == "GET":
+                if "--paginate" not in args:
+                    raise SystemExit("branch policy listing must paginate")
                 query = args[args.index("--jq") + 1]
                 policies = data[environment]
-                selected = (
-                    (p for p in policies if p["name"] != "main" or p["type"] != "branch")
-                    if "!=" in query else
-                    (p for p in policies if p["name"] == "main" and p["type"] == "branch")
-                )
-                for policy in selected:
-                    print(policy["id"])
+                for page in (policies[:1], policies[1:]):
+                    result = subprocess.run(
+                        ["jq", "-r", query],
+                        input=json.dumps({"branch_policies": page}),
+                        text=True, capture_output=True,
+                    )
+                    if result.returncode:
+                        raise SystemExit(result.stderr)
+                    print(result.stdout, end="")
             elif operation == "PUT":
                 data["writes"].append(["PUT", environment])
             elif operation == "DELETE":
