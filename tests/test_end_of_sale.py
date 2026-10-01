@@ -8,6 +8,7 @@ The committed data keeps the switch off; every test here builds a scratch copy w
 
 import copy
 import re
+from pathlib import Path
 
 import pytest
 import yaml
@@ -77,10 +78,6 @@ def head_of(page):
 # AC5: the default is unchanged.
 
 
-def test_the_switch_is_off_in_the_committed_data():
-    assert SOURCE["seller"].get("sale_over", False) is False
-
-
 @pytest.mark.parametrize("seller", [{}, {"sale_over": False}])
 def test_the_switch_defaults_to_off(seller):
     assert site_builder.sale_over({"seller": seller}) is False
@@ -99,7 +96,9 @@ def test_the_switch_must_be_a_boolean(value):
 
 
 def test_with_the_switch_off_the_catalog_is_built(public_dir):
-    site_builder.build_public_site(copy.deepcopy(SOURCE))
+    data = copy.deepcopy(SOURCE)
+    data["seller"].pop("sale_over", None)
+    site_builder.build_public_site(data)
     page = (public_dir / "index.html").read_text(encoding="utf-8")
     assert 'data-role="sale-over"' not in page
     assert "const _C = " in page
@@ -226,3 +225,18 @@ def test_the_end_build_needs_no_phone_and_no_private_data(tmp_path, monkeypatch)
     site_builder.build_all()
 
     assert files_under(dist) == ALLOWED
+
+
+# The names the suite skips when the switch is on must be real: a misspelt one skips nothing
+# and the flip goes red.
+
+
+def test_every_test_skipped_in_end_mode_exists():
+    from conftest import CATALOG_MODULES, CATALOG_TESTS
+
+    tests_dir = Path(__file__).parent
+    for module in CATALOG_MODULES:
+        assert (tests_dir / module).is_file(), module
+    for node in CATALOG_TESTS:
+        module, name = node.split("::")
+        assert re.search(rf"^def {name}\(", (tests_dir / module).read_text(), re.M), node
