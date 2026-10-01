@@ -37,7 +37,12 @@ from leaving_denver.config import (
     STATUSES,
     VARIANT_WIDTHS,
 )
-from leaving_denver.image_processor import sync_all_photos, variant_path, write_share_image
+from leaving_denver.image_processor import (
+    sync_all_photos,
+    synced_name,
+    variant_path,
+    write_share_image,
+)
 from leaving_denver.private_data import floors, load_private, phone_parts, seller_phone
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
@@ -131,17 +136,23 @@ def unpublished_ids(full_data: dict[str, Any]) -> set[str]:
 
 
 def apply_photos(item: dict[str, Any], synced: list[str]) -> None:
-    """Set an item's synced photos, its `cover:` photo first when it names one."""
-    images = list(synced)
-    cover = item.get("cover")
-    if cover:
-        # Photo sync renames files this way (image_processor.sync_all_photos).
-        name = Path(cover).stem.lower().replace(" ", "_") + ".jpg"
-        match = [img for img in images if Path(img).name == name]
-        if not match:
-            raise RuntimeError(f"{item['id']}: cover {cover} is not among its photos")
-        images.remove(match[0])
-        images.insert(0, match[0])
+    """Order an item's synced photos by its `photos:` list; the first is the cover. Unlisted
+    photos follow in name order, so a newly added one still builds until it is placed."""
+    if "cover" in item:
+        raise RuntimeError(
+            f"{item['id']}: cover: was replaced by photos:, a list whose first is the cover"
+        )
+    by_name = {Path(img).name: img for img in synced}
+    ordered = []
+    for listed in item.get("photos", []):
+        name = synced_name(listed)
+        if name not in by_name:
+            raise RuntimeError(f"{item['id']}: photo {listed} is not among its photos")
+        if by_name[name] in ordered:
+            raise RuntimeError(f"{item['id']}: photo {listed} is listed twice")
+        ordered.append(by_name[name])
+    rest = sorted((img for img in synced if img not in ordered), key=lambda img: Path(img).name)
+    images = ordered + rest
     item["images"] = images
     item["primary_image"] = images[0]
 

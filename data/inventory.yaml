@@ -29,7 +29,15 @@ seller:
     - Puede ver y probar cualquier artículo antes de pagar.
 items:
 - id: sofa-sleeper
-  cover: sofa-1.jpg
+  # Own photos first, stock last; the first is the cover (FEAT-012).
+  photos:
+  - sofa-3.jpg
+  - sofa-1.jpg
+  - sofa-2.jpg
+  - afw_kent_sofa_front.jpg
+  - afw_kent_sofa_sleeper_open.jpg
+  - afw_kent_sofa_storage_open.jpg
+  - afw_kent_sofa_dimensions.jpg
   category: Living Room
   title: AFW Kent Reversible Sectional Sofa w/ Pull-Out Sleeper & Storage Chaise
   short_title: Kent Reversible Sleeper Sectional
@@ -91,6 +99,10 @@ items:
   - denver furniture
   - convertible sofa
 - id: dell-monitor-32
+  # Own photos first, stock last; the first is the cover (FEAT-012).
+  photos:
+  - monitor.jpg
+  - dell_s3222hn_front.jpg
   category: Home Office & Tech
   title: Dell 32" Curved 75Hz FHD Monitor (S3222HN) - Zero Dead Pixels
   short_title: Dell 32" Curved Monitor
@@ -145,6 +157,10 @@ items:
   - hdmi monitor
   - freesync
 - id: onn-43-4k-tv
+  # Own photos first, stock last; the first is the cover (FEAT-012).
+  photos:
+  - tv-2.jpg
+  - tv-1.jpg
   category: Living Room
   title: onn. 43" Class 4K UHD (2160P) Smart Roku TV w/ Remote & Stands
   short_title: onn. 43" 4K Smart Roku TV
@@ -200,6 +216,10 @@ items:
   - budget tv
   - streaming tv
 - id: convertible-desk
+  # Own photos first, stock last; the first is the cover (FEAT-012).
+  photos:
+  - desk-2.jpg
+  - desk-1.jpg
   category: Home Office & Tech
   title: Mainstays Two-Way Convertible L-Shaped / Long Computer Desk
   short_title: Convertible L-Shaped Desk
@@ -252,6 +272,10 @@ items:
   - industrial desk
   - walnut desk
 - id: coffee-table-lift-top
+  # Own photos first, stock last; the first is the cover (FEAT-012).
+  photos:
+  - coffee-table-1.jpg
+  - coffee-table-2.jpg
   category: Living Room
   title: Mainstays Lift-Top Coffee Table w/ Hidden Storage & Bottom Shelf
   short_title: Lift-Top Coffee Table
@@ -299,6 +323,10 @@ items:
   - work from couch table
   - blackwood table
 - id: ikea-mattress-topper
+  # Own photos first, stock last; the first is the cover (FEAT-012).
+  photos:
+  - topper-1.jpg
+  - topper-2.jpg
   category: Bedroom
   title: IKEA TANANGER Full Size Memory Foam Mattress Topper (Removable Washable Cover)
   short_title: IKEA Memory Foam Mattress Topper
@@ -439,6 +467,11 @@ items:
   - canyon walnut
   - living room console
 - id: office-chair-ergonomic
+  # Own photos first, stock last; the first is the cover (FEAT-012).
+  photos:
+  - chair-2.jpg
+  - chair-3.jpg
+  - chair-1.jpg
   category: Home Office & Tech
   title: Mainstays Ergonomic Breathable Mesh Office Chair w/ Flip-Up Arms
   short_title: Ergonomic Mesh Office Chair
@@ -639,6 +672,11 @@ items:
   - stoneware
   - apartment dishes
 - id: auxiliary-c-table
+  # Own photos first, stock last; the first is the cover (FEAT-012).
+  photos:
+  - aux-table-2.jpg
+  - aux-table-1.jpg
+  - aux-table-3.jpg
   category: Living Room
   title: Mainstays C-Shaped Over-Couch Side Table / Laptop Stand - Canyon Walnut
   short_title: C-Shaped Couch Side Table
@@ -687,7 +725,12 @@ items:
   - snack table
   - sofa arm table
 - id: 2019-ford-escape-sel-awd
-  cover: 2019_ford_escape_white_front.jpg
+  # Own photos first, stock last; the first is the cover (FEAT-012).
+  photos:
+  - 2019_ford_escape_white_front.jpg
+  - 2019_ford_escape_interior_dashboard.jpg
+  - doc_1_recall_invoice.jpg
+  - doc_2_emissions_report.jpg
   category: Vehicle
   title: 2019 Ford Escape SEL AWD – Clean Colorado Title, Dealer Inspected
   short_title: 2019 Ford Escape SEL AWD

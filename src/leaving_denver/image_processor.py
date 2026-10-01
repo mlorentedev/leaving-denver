@@ -270,6 +270,11 @@ def write_share_image(cover_jpg: Path) -> Path:
     return target
 
 
+def synced_name(name: str) -> str:
+    """The file name a source photo gets in the build; `photos:` lists are matched by it."""
+    return Path(name).stem.lower().replace(" ", "_") + ".jpg"
+
+
 def sync_all_photos() -> dict[str, list[str]]:
     """
     Scans all item subdirectories in content/photos/<item_id>/
@@ -298,7 +303,7 @@ def sync_all_photos() -> dict[str, list[str]]:
             if photo.suffix.lower() not in SUPPORTED_IMAGE_EXTS:
                 continue
 
-            target_name = photo.stem.lower().replace(" ", "_") + ".jpg"
+            target_name = synced_name(photo.name)
             target_path = dest_item_dir / target_name
 
             # Process / update image
