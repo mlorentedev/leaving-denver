@@ -1,29 +1,19 @@
 """
 The Share button's behaviour, run in headless Chrome over the built pages (FEAT-002 PR 2).
-The Web Share API and the clipboard are stubbed per case, the page's own openModal and
-click handler run unchanged, and the outcome is read back from the dumped DOM. Skipped
-where no Chrome is installed; GitHub's ubuntu runners have one.
+The Web Share API and the clipboard are stubbed per case, and the page's own openModal and
+click handler run unchanged (harness: browser_harness.py).
 """
 
 import json
-import re
-import shutil
-import subprocess
-from html import unescape
-from pathlib import Path
 
 import pytest
+from browser_harness import needs_chrome, page_items, run_page
 
-ROOT = Path(__file__).resolve().parents[1]
-PUBLIC = ROOT / "build" / "public"
-CHROME = next(
-    (p for p in map(shutil.which, ("google-chrome", "chromium", "chromium-browser")) if p), None
-)
-pytestmark = pytest.mark.skipif(CHROME is None, reason="no Chrome to run the page in")
+pytestmark = needs_chrome
 
-# Runs before the page script. navigator.share and navigator.clipboard become the case's
-# stubs; after the page's own DOMContentLoaded work, the sheet opens and Share is clicked.
-HARNESS = """<script>
+# navigator.share and navigator.clipboard become the case's stubs; the sheet opens and
+# Share is clicked, and the steps report what was shared or copied and what the sheet shows.
+STUBS = """
 const CASE = %s, LOG = [];
 const answer = outcome => outcome === 'ok' ? Promise.resolve()
   : Promise.reject(new DOMException('stubbed', outcome));
@@ -31,55 +21,25 @@ Object.defineProperty(navigator, 'share', { configurable: true, value: CASE.shar
   && (data => { LOG.push('share ' + data.url); return answer(CASE.share); }) });
 Object.defineProperty(navigator, 'clipboard', { configurable: true, value: CASE.clipboard
   && { writeText: text => { LOG.push('copy ' + text); return answer(CASE.clipboard); } } });
-document.addEventListener('DOMContentLoaded', () => setTimeout(async () => {
-  openModal(CASE.item);
-  document.getElementById('modalShare').click();
-  await new Promise(done => setTimeout(done, 50));
-  if (CASE.reopen) openModal(CASE.reopen);
-  const box = document.getElementById('modalShareUrl');
-  document.body.dataset.result = JSON.stringify({
-    log: LOG,
-    label: document.getElementById('modalShare').textContent.trim(),
-    box: box.hidden ? null : box.textContent,
-    selected: String(getSelection()),
-  });
-}));
-</script>
+"""
+
+STEPS = """
+openModal(CASE.item);
+document.getElementById('modalShare').click();
+await wait(50);
+if (CASE.reopen) openModal(CASE.reopen);
+const box = document.getElementById('modalShareUrl');
+return {
+  log: LOG,
+  label: document.getElementById('modalShare').textContent.trim(),
+  box: box.hidden ? null : box.textContent,
+  selected: String(getSelection()),
+};
 """
 
 
-def page_items(page):
-    html = (PUBLIC / page).read_text(encoding="utf-8")
-    og_url = re.search(r'<meta property="og:url" content="([^"]+)"', html).group(1)
-    return html, og_url, re.findall(r'data-item="([^"]+)"', html)
-
-
 def run(tmp_path, page, case):
-    html, _, _ = page_items(page)
-    first_script = html.index("<script>")
-    staged = tmp_path / page
-    staged.parent.mkdir(parents=True, exist_ok=True)
-    staged.write_text(
-        html[:first_script] + HARNESS % json.dumps(case) + html[first_script:], encoding="utf-8"
-    )
-    dom = subprocess.run(
-        [
-            CHROME,
-            "--headless=new",
-            "--disable-gpu",
-            "--no-sandbox",
-            "--virtual-time-budget=5000",
-            "--dump-dom",
-            staged.as_uri(),
-        ],
-        capture_output=True,
-        text=True,
-        timeout=60,
-        check=True,
-    ).stdout
-    found = re.search(r'data-result="([^"]*)"', dom)
-    assert found, "the harness never reported: the page script failed before Share ran"
-    return json.loads(unescape(found.group(1)))
+    return run_page(tmp_path, page, STEPS, setup=STUBS % json.dumps(case))
 
 
 @pytest.fixture(scope="module")
