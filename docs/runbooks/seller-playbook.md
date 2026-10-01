@@ -50,6 +50,36 @@ and reveal negotiation strategy. The owner sets asking prices; research
 estimates are not instructions to overwrite them. After editing public prices
 or marking an item sold, follow [site operations](ops.md) to publish.
 
+### The control panel
+
+`make panel` writes `build/private/panel.html` (open it in a browser, or `make serve` and visit
+`/private/panel.html` on loopback). One row per item: asking price, target, floor, status, days
+listed, channels posted, Facebook renew due, next drop date and the price to drop to, and the
+price log or sale. A yellow "Due now" box lists the renewals and the drops whose window has
+opened. It decrypts the private file in process and writes nothing else; it needs the age key
+and fails without writing if it cannot decrypt. It is never deployed (ADR-006).
+
+Record what happens as it happens; each command writes to `data/private.sops.yaml` through
+`sops set` (nothing is decrypted to disk). Commit the encrypted file afterwards.
+
+| When | Command |
+| :--- | :--- |
+| You post an item, or renew it | `make post ID=sofa-sleeper CHANNEL=facebook` (channels: facebook, craigslist, offerup, nextdoor, activebuilding; add `ON=2026-10-01` for a post made earlier) |
+| You change an asking price | edit `recommended_list_price` in `data/inventory.yaml`, then `make reprice ID=sofa-sleeper PRICE=195` (the panel flags a log that differs from the asking price) |
+| An item sells | `make sold ID=sofa-sleeper PRICE=180` records price and date and lists the channels to take it down from |
+
+The next drop is the first window the price log does not cover yet (first drop, second drop,
+clear floors). The first two step halfway to the floor from the asking price in force, to the
+nearest $5 ($100 for the car); the last is the floor. Afterwards, compare each item's price log
+with its sale in the panel to see whether a drop moved it.
+
+Targets are not recorded yet. Add them once with `make secrets` (it opens the editor):
+
+```yaml
+targets:
+  sofa-sleeper: 190   # researched expected close, USD, per item id
+```
+
 ---
 
 ## 3. Objection Handling & Fast Response Scripts

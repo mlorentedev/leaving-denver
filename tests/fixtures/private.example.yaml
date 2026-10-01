@@ -1,0 +1,38 @@
+# FAKE numbers in the shape of the decrypted data/private.sops.yaml. Safe to commit: nothing here
+# is the owner's. The values are unusual on purpose, so a leak test can search for them.
+seller:
+  phone: "+15555550100"
+floors:
+  sofa-sleeper: 173
+  dell-monitor-32: 61
+  onn-43-4k-tv: 47
+  convertible-desk: 33
+  air-mattress-twin-pump: 13
+  2019-ford-escape-sel-awd: 10650
+targets:
+  sofa-sleeper: 191
+  dell-monitor-32: 79
+  onn-43-4k-tv: 67
+  2019-ford-escape-sel-awd: 11350
+sales:
+  onn-43-4k-tv:
+    price: 59
+    at: "2026-10-12"
+tracking:
+  sofa-sleeper:
+    channels:
+      facebook: ["2026-09-29", "2026-10-06"]
+      craigslist: ["2026-09-29"]
+    price_log:
+      - {at: "2026-10-03", price: 205}
+  dell-monitor-32:
+    channels:
+      facebook: ["2026-09-30"]
+  onn-43-4k-tv:
+    channels:
+      facebook: ["2026-09-29"]
+      offerup: ["2026-10-01"]
+  2019-ford-escape-sel-awd:
+    channels:
+      facebook: ["2026-09-28"]
+      activebuilding: ["2026-09-28"]

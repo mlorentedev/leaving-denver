@@ -23,7 +23,7 @@ CF_ENV    = CLOUDFLARE_ACCOUNT_ID=$(CF_ACCOUNT_ID) CLOUDFLARE_API_TOKEN="$$(sops
 
 .DEFAULT_GOAL := help
 
-.PHONY: help install lint format build test check serve drops sold deploy cf-project ci-secrets protect-deploy protect-main audit-deploy secrets clean
+.PHONY: help install lint format build test check serve drops panel post reprice sold deploy cf-project ci-secrets protect-deploy protect-main audit-deploy secrets clean
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
@@ -65,6 +65,17 @@ serve: build ## Serve the catalog and the private tool on 127.0.0.1:$(PORT) (loo
 
 drops: ## Show the staged price-drop table (needs the sops key)
 	$(UV) run leaving-denver drops
+
+panel: ## Write the private control panel to build/private/panel.html (needs the sops key)
+	$(UV) run leaving-denver panel
+
+post: ## Record a posting or renewal: make post ID=sofa-sleeper CHANNEL=facebook [ON=2026-10-01]
+	@test -n "$(ID)" && test -n "$(CHANNEL)" || { echo "usage: make post ID=<item-id> CHANNEL=<facebook|craigslist|offerup|nextdoor|activebuilding> [ON=<YYYY-MM-DD>]"; exit 1; }
+	$(UV) run leaving-denver post $(ID) $(CHANNEL) $(if $(ON),--on $(ON))
+
+reprice: ## Record an asking-price change: make reprice ID=sofa-sleeper PRICE=190 [ON=2026-10-03]
+	@test -n "$(ID)" && test -n "$(PRICE)" || { echo "usage: make reprice ID=<item-id> PRICE=<usd> [ON=<YYYY-MM-DD>]"; exit 1; }
+	$(UV) run leaving-denver reprice $(ID) $(PRICE) $(if $(ON),--on $(ON))
 
 sold: ## Mark an item sold: make sold ID=sofa-sleeper PRICE=200
 	@test -n "$(ID)" || { echo "usage: make sold ID=<item-id> [PRICE=<usd>]"; exit 1; }
