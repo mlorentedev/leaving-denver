@@ -31,3 +31,4 @@ tags: [lessons, index, docs, leaving-denver]
 | [lesson-016](lesson-016-key-build-freshness-on-content-and-settings.md) | Key Build Freshness on Content and Settings | 2026-09-30 | [build, images, testing] |
 | [lesson-017](lesson-017-virtual-time-starves-dialog-close-events.md) | Virtual Time Starves Dialog Close Events | 2026-09-30 | [testing, browser, dialog] |
 | [lesson-018](lesson-018-defer-shell-token-substitution-in-make.md) | Keep Shell Token Substitution Out of Immediate Make Expansion | 2026-09-30 | [make, cloudflare, secrets, deploy] |
+| [lesson-020](lesson-020-unlayered-css-outranks-tailwind-utilities.md) | Unlayered CSS Outranks Tailwind Utilities | 2026-09-30 | [css, tailwind, testing, mobile] |

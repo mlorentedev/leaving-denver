@@ -71,7 +71,8 @@ def pointer(fine):
 def page_items(page):
     """The page's HTML, its og:url and its item ids, in catalog order."""
     html = (PUBLIC / page).read_text(encoding="utf-8")
-    og_url = re.search(r'<meta property="og:url" content="([^"]+)"', html).group(1)
+    og = re.search(r'<meta property="og:url" content="([^"]+)"', html)
+    og_url = og and og.group(1)  # the seller page is not shared, so it carries none
     return html, og_url, re.findall(r'data-item="([^"]+)"', html)
 
 
