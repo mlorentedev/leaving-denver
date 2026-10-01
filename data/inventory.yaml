@@ -9,7 +9,7 @@ seller:
     # The car takes only payments that cannot be clawed back (owner, 2026-09-30; runbook vehicle-sale).
     vehicle:
     - Cashier's check issued at the buyer's bank
-    - Wire transfer
+    - wire transfer
   pickup_policy: Buyer must self-load and bring appropriate transportation. Fully
     assembled, sold AS-IS.
   departure_date: '2026-11-09'
@@ -73,6 +73,7 @@ items:
     main modules in under 10 minutes for transport. Requires 2 people to carry. Fits
     in pickup truck, cargo van, or large SUV.
   es:
+    color: Tela gris
     title: Sofá seccional reversible AFW Kent con cama extraíble y chaise con almacenamiento
     short_title: Sofá seccional cama Kent
     condition: Buen estado
@@ -133,6 +134,7 @@ items:
   pickup_note: No original box. Bring a clean towel or blanket to protect screen during
     transport.
   es:
+    color: Plata platino y negro
     title: Monitor curvo Dell de 32 pulgadas, 75 Hz FHD (S3222HN), sin píxeles muertos
     short_title: Monitor curvo Dell de 32 pulgadas
     condition: Como nuevo
@@ -191,6 +193,7 @@ items:
   - Power cable
   pickup_note: No box. Bring a blanket to wrap the screen for pickup.
   es:
+    color: Negro
     title: Smart TV onn. de 43 pulgadas 4K UHD Roku con control y bases
     short_title: Smart TV Roku onn. de 43 pulgadas
     condition: Buen estado
@@ -249,6 +252,7 @@ items:
   pickup_note: Already assembled. Fits in midsize SUV with seats folded or truck bed.
     Tools available on site if you wish to disassemble.
   es:
+    color: Veta de nogal Canyon y metal negro
     title: Escritorio Mainstays convertible en L o recto
     short_title: Escritorio convertible en L
     condition: Buen estado
@@ -303,6 +307,7 @@ items:
   - Fully assembled lift-top coffee table
   pickup_note: Sturdy and relatively heavy. One flight of stairs down; I help you carry it.
   es:
+    color: Madera negra, acabado espresso
     title: Mesa de centro Mainstays con tapa elevable, almacenamiento y estante
     short_title: Mesa de centro con tapa elevable
     condition: Como nueva
@@ -355,6 +360,7 @@ items:
   pickup_note: Can be rolled up and secured with ties/tape to fit in any sedan trunk
     or back seat.
   es:
+    color: Blanco y gris claro
     title: Sobrecolchón IKEA TANANGER matrimonial de espuma viscoelástica con funda lavable
     short_title: Sobrecolchón IKEA de espuma viscoelástica
     condition: Muy buen estado
@@ -401,6 +407,7 @@ items:
   - Pair of 2 assembled VASAGLE stools
   pickup_note: Compact and lightweight. Easily fits in the back seat of any car.
   es:
+    color: Veta de madera marrón rústico y metal negro mate
     title: Bancos industriales VASAGLE, juego de 2, altura de barra de 28.7 pulgadas
     short_title: Bancos VASAGLE, par
     condition: Como nuevos
@@ -447,6 +454,7 @@ items:
   - Assembled TV stand (Electronics and cables pictured not included)
   pickup_note: Fully assembled. Bring an SUV or fit across the back seat of a sedan.
   es:
+    color: Veta de nogal Canyon
     title: Mueble para TV Mainstays Parsons, hasta 50 pulgadas, Canyon Walnut
     short_title: Mueble para TV Mainstays Parsons
     condition: Buen estado
@@ -500,6 +508,7 @@ items:
   - Fully assembled ergonomic desk chair
   pickup_note: Fits easily in any car back seat or trunk.
   es:
+    color: Malla y tela negras
     title: Silla ergonómica Mainstays de malla con brazos abatibles
     short_title: Silla ergonómica de malla
     condition: Buen estado
@@ -546,6 +555,7 @@ items:
   - Fully assembled nightstand
   pickup_note: Compact and easily fits in any vehicle.
   es:
+    color: Acabado espresso
     title: Mesa de noche Mainstays Hillside con cajón y espacio inferior, color espresso
     short_title: Mesa de noche Mainstays con cajón
     condition: Como nueva
@@ -596,6 +606,7 @@ items:
   - Original box and travel carry bag
   pickup_note: Folded inside compact carry bag. Easy to carry by hand.
   es:
+    color: Azul y gris, superficie aterciopelada
     title: Colchón inflable individual Intex Dura-Beam Plus con bomba eléctrica integrada
     short_title: Colchón inflable Intex con bomba
     condition: Como nuevo, usado una vez
@@ -650,6 +661,7 @@ items:
   pickup_note: No original box. Please bring your own box/tote and packing paper/towels
     for safe transport.
   es:
+    color: Gres en tonos neutros y vidrio transparente
     title: Juego de cocina de 20 piezas, vajilla de gres y vasos
     short_title: Vajilla y vasos, 20 piezas
     condition: Buen estado
@@ -704,6 +716,7 @@ items:
   - Fully assembled C-table
   pickup_note: Lightweight and compact. Fits in any vehicle.
   es:
+    color: Veta de nogal Canyon y metal negro
     title: Mesa auxiliar Mainstays en C para sofá o laptop, Canyon Walnut
     short_title: Mesa auxiliar en C
     condition: Como nueva
@@ -813,7 +826,7 @@ items:
     - Controles originales
     - Certificado vigente de emisiones de Colorado
     - Contrato de compraventa y título limpio firmado
-    pickup_note: Inspección en Denver Tech Center. Pago con cheque de caja emitido en el banco del comprador o por transferencia bancaria, firme antes de firmar el título.
+    pickup_note: Inspección en Denver Tech Center. Pago con cheque de caja emitido en el banco del comprador o por transferencia bancaria, definitivo antes de firmar el título.
   tags:
   - ford escape
   - escape sel

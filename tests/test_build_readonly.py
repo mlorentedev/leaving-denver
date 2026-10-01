@@ -12,7 +12,7 @@ INVENTORY = {
         "departure_date": "2026-11-09",
         "payment_methods": {
             "household": ["Cash", "Venmo", "Zelle"],
-            "vehicle": ["Cash", "Cashier's check verified at the buyer's bank"],
+            "vehicle": ["Cashier's check issued at the buyer's bank", "wire transfer"],
         },
     },
     "items": [

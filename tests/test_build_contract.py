@@ -31,7 +31,7 @@ def inventory(*, hidden_published=False):
             "departure_date": "2026-11-09",
             "payment_methods": {
                 "household": ["Cash", "Venmo", "Zelle"],
-                "vehicle": ["Cash", "Cashier's check verified at the buyer's bank"],
+                "vehicle": ["Cashier's check issued at the buyer's bank", "wire transfer"],
             },
         },
         "items": [
@@ -508,7 +508,7 @@ def test_spanish_bundle_copy_and_payment_terms(public_dir):
     assert not fallbacks, f"Spanish fallbacks: {fallbacks}"
     terms = text_for_role(html, "pickup-terms")
     assert "Efectivo, Venmo, Zelle en persona" in " ".join(terms.split())
-    assert "Cheque de caja emitido en el banco del comprador o Transferencia bancaria" in terms
+    assert "Cheque de caja emitido en el banco del comprador o transferencia bancaria" in terms
 
 
 def test_poster_assistant_has_spanish_marketplace_variants():
