@@ -182,14 +182,14 @@ created: "2026-09-30"
   that includes half cases.
 - **No inline script, because of the CSP.** Data moved into `application/json` blocks and code into
   `seller.mjs`, which `script-src 'self'` allows. A `file://` test cannot see a header, so
-  `tests/test_seller_csp.py` serves the page over HTTP (lesson-023).
+  `tests/test_seller_csp.py` serves the page over HTTP (lesson-024).
 - **The key is dropped after one decryption.** The ADR says a non-extractable key is held in
   memory; the page keeps only the plaintext payload and derives again on the next unlock. Stricter,
   and no longer needs a key to be tracked.
 - **Draft items** (private ids not in the public roster) show as id-only "unpublished" rows: their
   titles and prices are not public, and the sealed data does not carry them.
 - **Hyphenated EFF words removed** (7,772 words left; five words are still about 64.6 bits): a hyphen
-  is a separator, so those four words could not be typed back (lesson-022; ADR-007 notes it).
+  is a separator, so those four words could not be typed back (lesson-023; ADR-007 notes it).
 - **The update offer never generates a passphrase** (owner, 2026-10-01): it is a recording, not a
   rotation, so it asks for the existing passphrase twice, and an empty entry aborts with a hint.
 - **`SELLER_PASSPHRASE` is accepted from the environment** (owner, 2026-10-01; ADR-007 decision 3

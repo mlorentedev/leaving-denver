@@ -95,6 +95,12 @@ CATALOG_TESTS = {
         "test_sheet_keeps_a_native_sms_way_out",
         "test_sticky_bar_clears_the_home_indicator",
     ),
+    # Reads the live /flyer/, which an end build does not make (the scratch builds in test_flyer.py
+    # keep running).
+    "test_flyer_browser.py": (
+        "test_the_flyer_fits_the_letter_content_box",
+        "test_the_flyer_prints_on_exactly_one_letter_sheet",
+    ),
     "test_inventory_ssot.py": (
         "test_no_stale_or_unbacked_pickup_facts",
         "test_no_unbacked_vehicle_claims",

@@ -34,5 +34,6 @@ tags: [lessons, index, docs, leaving-denver]
 | [lesson-019](lesson-019-an-unreadable-file-is-not-an-empty-one.md) | An Unreadable File Is Not an Empty One | 2026-09-30 | [secrets, sops, testing] |
 | [lesson-020](lesson-020-unlayered-css-outranks-tailwind-utilities.md) | Unlayered CSS Outranks Tailwind Utilities | 2026-09-30 | [css, tailwind, testing, mobile] |
 | [lesson-021](lesson-021-a-switch-that-retires-a-feature-retires-its-tests.md) | A Switch That Retires a Feature Retires Its Tests | 2026-10-01 | [testing, build, ci] |
-| [lesson-022](lesson-022-a-wordlist-separator-must-not-be-in-a-word.md) | A Wordlist Separator Must Not Appear Inside a Word | 2026-10-01 | [crypto, passphrase, testing, ux] |
-| [lesson-023](lesson-023-csp-needs-an-http-served-test-and-no-inline-script.md) | A CSP Test Needs an HTTP Response, and the Page Needs No Inline Script | 2026-10-01 | [csp, testing, browser, cloudflare] |
+| [lesson-022](lesson-022-a-printed-page-inherits-the-catalogs-body-padding.md) | A Printed Page Inherits the Catalog's Body Padding | 2026-10-01 | [css, print, testing, qr] |
+| [lesson-023](lesson-023-a-wordlist-separator-must-not-be-in-a-word.md) | A Wordlist Separator Must Not Appear Inside a Word | 2026-10-01 | [crypto, passphrase, testing, ux] |
+| [lesson-024](lesson-024-csp-needs-an-http-served-test-and-no-inline-script.md) | A CSP Test Needs an HTTP Response, and the Page Needs No Inline Script | 2026-10-01 | [csp, testing, browser, cloudflare] |

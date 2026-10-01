@@ -195,8 +195,10 @@ def open_page(tmp_path, page, setup="", fragment="", public=PUBLIC, url=None):
     staged = None
     if url is None:
         html = inline_modules((public / page).read_text(encoding="utf-8"), (public / page).parent)
-        # Before the first script of any kind: a page may open with data blocks, not code.
-        first_script = re.search(r"<script[ >]", html).start()
+        # Before the first script of any kind: a page may open with data blocks, not code. A
+        # page with no script of its own (the flyer) takes the setup at the end of its head.
+        first = re.search(r"<script[ >]", html)
+        first_script = first.start() if first else html.index("</head>")
         staged = stage(
             page,
             html[:first_script] + f"<script>{setup}</script>\n" + html[first_script:],
