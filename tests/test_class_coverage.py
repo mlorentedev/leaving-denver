@@ -19,6 +19,7 @@ PUBLIC_CSS = ROOT / "build" / "public" / "styles.css"
 PAGES = {
     "index.html": PUBLIC_CSS,
     "seller.html": PUBLIC_CSS,
+    "sale_over.html": PUBLIC_CSS,
     # Script-only classes: the page's module is a Tailwind source too (public.css).
     "seller.mjs": PUBLIC_CSS,
     "poster_assistant.html": ROOT / "build" / "private" / "styles.css",
