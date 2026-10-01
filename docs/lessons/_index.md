@@ -33,3 +33,4 @@ tags: [lessons, index, docs, leaving-denver]
 | [lesson-018](lesson-018-defer-shell-token-substitution-in-make.md) | Keep Shell Token Substitution Out of Immediate Make Expansion | 2026-09-30 | [make, cloudflare, secrets, deploy] |
 | [lesson-019](lesson-019-an-unreadable-file-is-not-an-empty-one.md) | An Unreadable File Is Not an Empty One | 2026-09-30 | [secrets, sops, testing] |
 | [lesson-020](lesson-020-unlayered-css-outranks-tailwind-utilities.md) | Unlayered CSS Outranks Tailwind Utilities | 2026-09-30 | [css, tailwind, testing, mobile] |
+| [lesson-021](lesson-021-a-switch-that-retires-a-feature-retires-its-tests.md) | A Switch That Retires a Feature Retires Its Tests | 2026-10-01 | [testing, build, ci] |
