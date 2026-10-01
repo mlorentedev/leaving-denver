@@ -30,3 +30,4 @@ tags: [lessons, index, docs, leaving-denver]
 | [lesson-015](lesson-015-check-classes-against-the-compiled-css.md) | Check Classes Against the Compiled CSS | 2026-09-30 | [testing, css, tailwind] |
 | [lesson-016](lesson-016-key-build-freshness-on-content-and-settings.md) | Key Build Freshness on Content and Settings | 2026-09-30 | [build, images, testing] |
 | [lesson-017](lesson-017-virtual-time-starves-dialog-close-events.md) | Virtual Time Starves Dialog Close Events | 2026-09-30 | [testing, browser, dialog] |
+| [lesson-018](lesson-018-defer-shell-token-substitution-in-make.md) | Keep Shell Token Substitution Out of Immediate Make Expansion | 2026-09-30 | [make, cloudflare, secrets, deploy] |
