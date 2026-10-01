@@ -16,6 +16,7 @@ Map every acceptance criterion from `proposal.md` to concrete proof (commit hash
 - [x] AC5 -> `test_every_category_has_a_chip`
 - [x] AC6 -> `test_no_unbacked_vehicle_claims`, `test_sale_schedule_comes_from_departure_date`, `test_drops_prints_windows_from_departure_date`, `test_vehicle_card_claims_are_in_data`
 - [x] AC7 -> `test_payment_terms_by_kind`
+  - Changed by the owner on 2026-09-30 (#123): the car takes only a cashier's check issued at the buyer's bank or a wire transfer, never cash. `test_the_car_takes_only_payments_that_cannot_be_clawed_back` and `test_no_copy_offers_cash_next_to_a_cashiers_check` guard it.
 - [x] AC8 -> PR 5 preview measurement: `clientWidth`, document `scrollWidth`, and body `scrollWidth` all 390 px
 - [x] AC9 -> PR 6 localized build and Spanish copy/SMS/poster/claim-guard contract tests
 - [x] AC10 -> PR 4 copy budget plus PR 5 `test_mobile_shell`; preview showed four facts and no visible tap target below 40 px

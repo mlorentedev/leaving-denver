@@ -37,6 +37,17 @@ def test_every_item_publishes_all_its_specs_and_what_is_included(locale):
         assert item["included"] == copy.get("included", source.get("included", [])), item_id
 
 
+def test_the_spanish_sheet_has_spanish_details():
+    # The summary line shows these three; with no overlay the Spanish sheet shows English.
+    _, items = inventory(PAGES["es"])
+    for item_id, item in items.items():
+        overlay = SOURCE[item_id].get("es", {})
+        for field in ("condition", "dimensions", "color"):
+            if SOURCE[item_id].get(field):
+                assert overlay.get(field), f"{item_id}: no Spanish {field}"
+                assert item[field] == overlay[field], f"{item_id}: {field}"
+
+
 def test_the_car_has_more_specs_than_its_card_shows():
     html, items = inventory("index.html")
     car = items["2019-ford-escape-sel-awd"]
@@ -53,6 +64,9 @@ def test_the_sheet_renders_every_spec_the_details_and_the_included_list(locale):
     assert "bullets(document.getElementById('modalIncluded'), item.included || [])" in script
     # Data goes in as text, never as markup.
     assert "innerHTML = `" not in script.split("modalThumbStrip")[1]
+    bullets = script[script.index("const bullets") : script.index("bullets(document")]
+    assert "innerHTML" not in bullets
+    assert "text.textContent = line" in bullets
     for element in ('id="itemFacts"', 'id="modalSummary"', 'id="modalIncluded"'):
         assert element in html
 

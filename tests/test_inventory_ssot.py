@@ -37,7 +37,7 @@ def test_the_car_takes_only_payments_that_cannot_be_clawed_back(inventory):
     """Cashier's check or wire, nothing else (owner, 2026-09-30; docs/runbooks/vehicle-sale.md)."""
     assert inventory["seller"]["payment_methods"]["vehicle"] == [
         "Cashier's check issued at the buyer's bank",
-        "Wire transfer",
+        "wire transfer",
     ]
     for code in ("en", "es"):
         labels = yaml.safe_load((BASE_DIR / "locales" / f"{code}.yaml").read_text(encoding="utf-8"))
@@ -52,6 +52,26 @@ def test_the_car_takes_only_payments_that_cannot_be_clawed_back(inventory):
         assert not re.search(rf"\b{banned}\b", copy), f"the car's payment copy mentions {banned}"
     assert "wire" in car["pickup_note"].lower()
     assert "transferencia" in car["es"]["pickup_note"].lower()
+
+
+# Only the car is paid by cashier's check, so a line that offers cash next to a cashier's check
+# is the old car copy, wherever it is written by hand.
+CAR_COPY = [
+    POSTER,
+    BASE_DIR / "src" / "leaving_denver" / "templates" / "index.html",
+    INVENTORY_YAML,
+    BASE_DIR / "locales" / "en.yaml",
+    BASE_DIR / "locales" / "es.yaml",
+]
+
+
+@pytest.mark.parametrize("path", CAR_COPY, ids=lambda p: p.name)
+def test_no_copy_offers_cash_next_to_a_cashiers_check(path):
+    for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+        lower = line.lower()
+        cheque = "cashier" in lower or "cheque de caja" in lower
+        cash = re.search(r"\bcash\b|efectivo", lower)
+        assert not (cheque and cash), f"{path.name}:{number}: {line.strip()}"
 
 
 def test_items_integrity(inventory):
@@ -140,7 +160,10 @@ UNBACKED_CLAIMS = re.compile(
     r"ready for immediate transfer|new, unused certificate is handed over|"
     r"servicio (de )?100k|millas de autopista|arranque remoto|mecánicamente perfecto|"
     r"en 3 semanas|dentro de 2 semanas|todo debe irse|todo se compró nuevo|"
-    r"listo para transferencia inmediata",
+    r"listo para transferencia inmediata|"
+    # The car warns but does not brake by itself (owner, 2026-09-30).
+    r"emergency braking|pre-collision assist|frenado (automático )?de emergencia|"
+    r"frenado automático|automatic braking|autonomous braking|auto[- ]?brak|\bAEB\b",
     re.IGNORECASE,
 )
 CLAIM_SOURCES = [
@@ -154,6 +177,11 @@ CLAIM_SOURCES = [
 
 def test_claim_guard_recognizes_spanish():
     assert UNBACKED_CLAIMS.search("Incluye arranque remoto")
+    assert UNBACKED_CLAIMS.search("Safety: Automatic Emergency Braking")
+    assert UNBACKED_CLAIMS.search("Seguridad: frenado automático de emergencia")
+    for claim in ("Automatic braking", "AEB", "autonomous braking", "auto-brake"):
+        assert UNBACKED_CLAIMS.search(claim), claim
+    assert not UNBACKED_CLAIMS.search("Safety: Brake Assist, forward collision warning")
 
 
 @pytest.mark.parametrize("path", CLAIM_SOURCES, ids=lambda p: p.name)

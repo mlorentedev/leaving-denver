@@ -445,7 +445,7 @@
       summary.textContent = [item.condition, item.dimensions, item.color].filter(Boolean).join(' · ');
       summary.hidden = !summary.textContent;
       const bullets = (list, lines) => {
-        list.innerHTML = '';
+        list.replaceChildren();
         lines.forEach(line => {
           const li = document.createElement('li');
           li.className = 'flex items-start gap-1.5';
