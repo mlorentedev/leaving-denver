@@ -17,8 +17,9 @@ Map every acceptance criterion from `proposal.md` to concrete proof (commit hash
   `test_access_middleware_rejects_missing_jwt_when_configured`,
   `test_access_middleware_requires_signed_jwt_audience_and_expiration`;
   a signed token is admitted only with matching audience, issuer and expiration.
-  Local Wrangler served `/seller`, `/seller/`, `/seller/index.html`,
-  `/seller/seller.mjs` and encoded/normalized paths as `503`, while `/` returned `200`.
+  Local Wrangler and the real Pages preview alias and deployment hostname
+  served `/seller`, `/seller/`, `/seller/index.html`, `/seller/seller.mjs` and
+  encoded paths as `503`, while `/` and `/es/` returned `200`.
 - [x] AC3 -> `make check` plus `tests/test_security_isolation.py`
 - [x] AC4 -> `test_mobile_access_setup_is_documented`; owner login smoke is
   pending Zero Trust configuration.
@@ -26,11 +27,11 @@ Map every acceptance criterion from `proposal.md` to concrete proof (commit hash
 ## Test status
 
 - Test suite after merging `origin/main` including #122, #125 and #126:
-  `make check` -> 286 passed, 24 browser tests skipped on Windows.
-  Wrangler Pages dev compiled the root Functions route.
-- Manual smoke test: local anonymous Pages catalog `/` and `/es/` returned
-  `200`; `/seller/`, its HTML and JS, and an encoded seller path returned
-  `503`. Production
+  `make deploy BRANCH=seller-access-smoke` -> 287 passed, 24 browser tests
+  skipped on Windows, then a Pages preview Functions bundle deployed.
+- Manual smoke test: both `seller-access-smoke.leaving-denver.pages.dev` and
+  the immutable `7ab46028.leaving-denver.pages.dev` returned `200` for
+  `/` and `/es/`; every seller path above returned `503`. Production
   owner/anonymous Access check remains pending external account configuration.
 - No regressions in existing test suite: yes.
 

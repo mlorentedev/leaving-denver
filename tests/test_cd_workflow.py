@@ -165,3 +165,16 @@ def test_deploy_protection_removes_stale_policies_and_is_idempotent(tmp_path):
         ["PUT", "production"],
         ["PUT", "preview"],
     ]
+
+
+def test_local_pages_commands_preserve_sops_shell_substitution():
+    result = subprocess.run(
+        ["make", "-n", "cf-project"],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    assert 'CLOUDFLARE_API_TOKEN="$(sops -d --extract' in result.stdout
+    assert 'CLOUDFLARE_API_TOKEN=""' not in result.stdout
