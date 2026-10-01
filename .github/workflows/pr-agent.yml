@@ -142,8 +142,8 @@ jobs:
           # the key. The workflow file IS read from the PR head, so the model travels
           # here and the toml keeps every other setting. Env wins over the file in
           # PR-Agent's settings order; keep the two in step.
-          CONFIG__MODEL: openai/mimo-v2.5
-          CONFIG__FALLBACK_MODELS: '["openai/deepseek-v4-flash"]'
+          CONFIG__MODEL: openai/glm5.3-flash
+          CONFIG__FALLBACK_MODELS: '["openai/mimo-v2.6-flash", "openai/deepseek-v4-flash"]'
           CONFIG__CUSTOM_MODEL_MAX_TOKENS: "200000"
           CONFIG__PUBLISH_OUTPUT_PROGRESS: false
           # Stated rather than defaulted, so the event lists are visible. `synchronize`
@@ -179,7 +179,7 @@ jobs:
       # already forbids it — the top tier "queues or escalates, NEVER degrades
       # silently" — so this makes the degrade loud and does nothing else.
       #
-      # `fallback_models` names mimo-v2.5 for CONCURRENCY (per-model limit,
+      # `fallback_models` names other models for CONCURRENCY (per-model limit,
       # measured), never to soften the quality bar. The marker comes from the
       # registry, over the API since this job has no checkout, at the BASE ref
       # since a PR supplying it could redefine it. Two more bindings, both
