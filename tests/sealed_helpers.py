@@ -1,0 +1,139 @@
+"""
+Shared fixtures for the sealed-data tests (ADR-007, FEAT-009 PR 2): a throwaway passphrase,
+the fixture private data with sentinels planted in every allow-listed key, and Node-side
+helpers that open an envelope with the same code the page uses.
+
+Nothing here reads data/private.sops.yaml: every value is the fixture's or a sentinel.
+"""
+
+import json
+import subprocess
+from pathlib import Path
+
+import yaml
+
+ROOT = Path(__file__).resolve().parents[1]
+FIXTURE = ROOT / "tests" / "fixtures" / "private.example.yaml"
+
+# Five words from the EFF list, used by no real data: a test passphrase only.
+PASSPHRASE = "abacus abide abiding ability abdomen"
+
+# Values that cannot occur in public content, one per allow-listed key. The fixture's small
+# integers (13, 33, ...) also appear in dates, sizes and prices, so a search for them would fail
+# on public content (the approach of test_template_sees_only_sanitized_data).
+SENTINEL_FLOOR = 7310987
+SENTINEL_TARGET = 7320987
+SENTINEL_SALE = 7330987
+SENTINEL_PRICE_LOG = 7340987
+SENTINEL_POSTED = "2031-04-17"
+SENTINEL_NOTE = "sentinel-note-kestrel-4471"
+SENTINEL_SEALED_AT = "2031-05-06T07:08:09Z"
+SENTINELS = (
+    str(SENTINEL_FLOOR),
+    str(SENTINEL_TARGET),
+    str(SENTINEL_SALE),
+    str(SENTINEL_PRICE_LOG),
+    SENTINEL_POSTED,
+    SENTINEL_NOTE,
+)
+SENTINEL_ITEM = "sofa-sleeper"
+
+
+def fixture_private():
+    """The fixture's private data, with a sentinel planted in every allow-listed key."""
+    private = yaml.safe_load(FIXTURE.read_text(encoding="utf-8"))
+    private["floors"][SENTINEL_ITEM] = SENTINEL_FLOOR
+    private["targets"][SENTINEL_ITEM] = SENTINEL_TARGET
+    private["sales"][SENTINEL_ITEM] = {"price": SENTINEL_SALE, "at": "2026-10-13"}
+    tracking = private["tracking"][SENTINEL_ITEM]
+    tracking["price_log"].append({"at": "2026-10-04", "price": SENTINEL_PRICE_LOG})
+    tracking["channels"]["facebook"].append(SENTINEL_POSTED)
+    private["notes"] = {SENTINEL_ITEM: SENTINEL_NOTE}
+    return private
+
+
+def node(script, stdin=""):
+    """Run an ES-module script in Node from the repo root; returns the completed process."""
+    return subprocess.run(
+        ["node", "--input-type=module", "-e", script],
+        cwd=ROOT,
+        input=stdin,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+
+OPEN_SCRIPT = """
+import { openEnvelope } from './src/leaving_denver/assets/seller.mjs';
+let raw = '';
+for await (const chunk of process.stdin) raw += chunk;
+const { envelope, passphrase } = JSON.parse(raw);
+try {
+  process.stdout.write(JSON.stringify({ ok: true, plaintext: await openEnvelope(envelope, passphrase) }));
+} catch (error) {
+  process.stdout.write(JSON.stringify({ ok: false }));
+}
+"""
+
+
+def open_in_node(envelope, passphrase):
+    """The plaintext the page's own code gets from the envelope, or None when it will not open."""
+    if isinstance(envelope, str):
+        envelope = json.loads(envelope)
+    result = node(OPEN_SCRIPT, json.dumps({"envelope": envelope, "passphrase": passphrase}))
+    assert result.returncode == 0, result.stderr
+    answer = json.loads(result.stdout)
+    return answer["plaintext"] if answer["ok"] else None
+
+
+def json_block(html, block_id):
+    """The parsed content of a <script type="application/json" id=...> block, or None."""
+    import re
+
+    found = re.search(
+        rf'<script type="application/json" id="{re.escape(block_id)}">(.*?)</script>',
+        html,
+        flags=re.DOTALL,
+    )
+    return json.loads(found.group(1)) if found else None
+
+
+def build_site(dist, monkeypatch, sealed=None):
+    """Build the public site into dist, with SELLER_SEALED set to `sealed` (None: unset).
+
+    Public files only: the page is built without the Tailwind step (see build_with_styles)."""
+    from leaving_denver import site_builder
+
+    monkeypatch.setenv("SELLER_PHONE", "+15555550100")
+    if sealed is None:
+        monkeypatch.delenv("SELLER_SEALED", raising=False)
+    else:
+        monkeypatch.setenv("SELLER_SEALED", sealed)
+    monkeypatch.setattr(site_builder, "DIST_DIR", dist)
+    monkeypatch.setattr(site_builder, "PUBLIC_INDEX_HTML", dist / "index.html")
+    monkeypatch.setattr(site_builder, "PUBLIC_ROBOTS_TXT", dist / "robots.txt")
+    monkeypatch.setattr(site_builder, "PUBLIC_HEADERS", dist / "_headers")
+    site_builder.build_public_site(site_builder.load_inventory_yaml())
+
+
+def dom_forms(*numbers_and_text):
+    """Every way the page may show a value: as written, and a number with thousands commas."""
+    forms = []
+    for value in numbers_and_text:
+        forms.append(str(value))
+        if isinstance(value, int):
+            forms.append(f"{value:,}")
+    return forms
+
+
+def seal_fixture(passphrase=PASSPHRASE):
+    """The fixture private data (sentinels planted), sealed: the envelope as JSON text."""
+    from datetime import UTC, datetime
+
+    from leaving_denver import seal
+
+    payload = seal.allowlisted_payload(
+        fixture_private(), datetime(2031, 5, 6, 7, 8, 9, tzinfo=UTC)
+    )
+    return seal.seal_with_node(payload, passphrase)

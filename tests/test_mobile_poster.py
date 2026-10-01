@@ -1,8 +1,8 @@
-import json
 import subprocess
 from pathlib import Path
 
 import pytest
+from sealed_helpers import json_block
 
 from leaving_denver import site_builder
 
@@ -42,8 +42,7 @@ def test_mobile_poster_uses_only_published_sanitized_inventory(tmp_path, monkeyp
     site_builder.build_public_site(inventory)
 
     poster = (public / "seller/index.html").read_text(encoding="utf-8")
-    payload = poster.split("const ITEMS = ", 1)[1].split("; window.posterItems", 1)[0]
-    items = json.loads(payload)
+    items = json_block(poster, "seller-items")
     assert {item["id"] for item in items} == {
         item["id"]
         for item in inventory["items"]
@@ -79,8 +78,7 @@ def test_mobile_poster_does_not_offer_sold_pending_or_free_items(tmp_path, monke
     site_builder.build_public_site(inventory)
 
     poster = (public / "seller/index.html").read_text(encoding="utf-8")
-    payload = poster.split("const ITEMS = ", 1)[1].split("; window.posterItems", 1)[0]
-    ids = {item["id"] for item in json.loads(payload)}
+    ids = {item["id"] for item in json_block(poster, "seller-items")}
     assert not ids.intersection({item["id"] for item in candidates[:3]})
     assert candidates[3]["id"] in ids
 

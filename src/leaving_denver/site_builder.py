@@ -22,6 +22,7 @@ import yaml
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 from PIL import Image
 
+from leaving_denver.channels import RENEW_AFTER_DAYS
 from leaving_denver.config import (
     BASE_DIR,
     DIST_DIR,
@@ -45,7 +46,9 @@ from leaving_denver.image_processor import (
     variant_path,
     write_share_image,
 )
+from leaving_denver.pricing import DROP_WINDOWS
 from leaving_denver.private_data import floors, load_private, phone_parts, seller_phone
+from leaving_denver.seal import validate_envelope
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
 # The theme font (theme.css @font-face), copied next to each stylesheet.
@@ -77,10 +80,7 @@ def build_stylesheets() -> None:
         raise RuntimeError("Tailwind CLI missing; run npm ci before leaving-denver build")
     if not FONT_FILE.is_file():
         raise RuntimeError("Theme font missing; run npm ci before leaving-denver build")
-    for source, output in (
-        ("public", DIST_DIR / "styles.css"),
-        ("private", DIST_PRIVATE_DIR / "styles.css"),
-    ):
+    for source, output in (("public", DIST_DIR / "styles.css"),):
         output.parent.mkdir(parents=True, exist_ok=True)
         staged = output.with_suffix(".css.new")
         try:
@@ -796,6 +796,42 @@ def seller_items(
     ]
 
 
+def seller_roster(public_data: dict[str, Any]) -> list[dict[str, Any]]:
+    """Every published item as the private views know it: id, title, category, status, the
+    public price and whether it is free. Public facts only (the catalog shows all of them)."""
+    return [
+        {
+            "id": item["id"],
+            "title": item["short_title"] or item["title"] or item["id"],
+            "category": item["category"],
+            "status": item["status"],
+            "price": item["price"],
+            "free": item["free"],
+        }
+        for item in public_data["items"]
+    ]
+
+
+def seller_drops(departure_date: str) -> dict[str, str]:
+    """The day each price-drop window opens, from the departure date."""
+    schedule = sale_schedule(departure_date)
+    return {window: schedule[window][0].isoformat() for window in DROP_WINDOWS}
+
+
+def sealed_envelope() -> str | None:
+    """The SELLER_SEALED envelope as compact JSON, or None when the build has none.
+
+    An unset or blank secret is "no private data in this build" (every PR and the test job).
+    A set one that is malformed fails the build, and the message never repeats it."""
+    raw = (os.environ.get("SELLER_SEALED") or "").strip()
+    if not raw:
+        return None
+    try:
+        return json.dumps(validate_envelope(raw), separators=(",", ":"))
+    except ValueError as err:
+        raise RuntimeError(f"SELLER_SEALED is not a valid sealed envelope: {err}") from err
+
+
 def write_seller_poster(public_data: dict[str, Any], full_data: dict[str, Any]) -> None:
     """The /seller/ listing generator: the items that can still be listed, the page's
     settings and the scam replies. Public data only, and no phone (listings never carry it)."""
@@ -811,6 +847,10 @@ def write_seller_poster(public_data: dict[str, Any], full_data: dict[str, Any]) 
     config = {
         "origin": site_url(),
         "month": {code: translations[code]["months"][month] for code in LISTING_LOCALES},
+        # For the private views, computed in the page once the data is open (ADR-007).
+        "roster": seller_roster(public_data),
+        "drops": seller_drops(seller["departure_date"]),
+        "renew_after_days": RENEW_AFTER_DAYS,
     }
     car_payment = {
         code: seller_payment(methods[code], translations[code], True) for code in LISTING_LOCALES
@@ -827,6 +867,7 @@ def write_seller_poster(public_data: dict[str, Any], full_data: dict[str, Any]) 
             items_json=script_json(items),
             config_json=script_json(config),
             replies=seller_replies(car_payment),
+            sealed_json=sealed_envelope(),
         ),
         encoding="utf-8",
     )

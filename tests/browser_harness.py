@@ -76,10 +76,10 @@ def page_items(page):
     return html, og_url, re.findall(r'data-item="([^"]+)"', html)
 
 
-def stage(page, html, root):
+def stage(page, html, root, public=PUBLIC):
     """Writes the page under root, with every other file of the build linked around it, so
     its relative links (styles.css, fonts, photos) resolve and the sheets have their layout."""
-    source, target = PUBLIC, root
+    source, target = public, root
     for part in Path(page).parts:
         target.mkdir(parents=True, exist_ok=True)
         for entry in source.iterdir():
@@ -185,13 +185,17 @@ def inline_modules(html, folder):
 
 
 @contextmanager
-def open_page(tmp_path, page, setup="", fragment=""):
-    html = inline_modules((PUBLIC / page).read_text(encoding="utf-8"), (PUBLIC / page).parent)
-    first_script = html.index("<script>")
+def open_page(tmp_path, page, setup="", fragment="", public=PUBLIC):
+    """Opens a page of `public` (the real build by default; a test may pass a build of its own,
+    such as one sealed with a fixture envelope)."""
+    html = inline_modules((public / page).read_text(encoding="utf-8"), (public / page).parent)
+    # Before the first script of any kind: a page may open with data blocks, not code.
+    first_script = re.search(r"<script[ >]", html).start()
     staged = stage(
         page,
         html[:first_script] + f"<script>{setup}</script>\n" + html[first_script:],
         tmp_path / "site",
+        public,
     )
     # Every end is moved above fd 4 first, so the dup2 calls below never meet themselves: a
     # dup2 onto its own fd keeps close-on-exec and Chrome would start without its pipe.
@@ -253,6 +257,6 @@ def open_page(tmp_path, page, setup="", fragment=""):
         os.close(from_chrome_r)
 
 
-def run_page(tmp_path, page, steps, setup="", fragment=""):
-    with open_page(tmp_path, page, setup, fragment) as browser:
+def run_page(tmp_path, page, steps, setup="", fragment="", public=PUBLIC):
+    with open_page(tmp_path, page, setup, fragment, public) as browser:
         return browser.run(steps)

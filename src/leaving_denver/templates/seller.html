@@ -10,7 +10,10 @@
 </head>
 <body class="bg-neutral-50 text-neutral-900 min-h-screen">
   <main class="mx-auto max-w-xl space-y-5 p-4 sm:p-8">
-    <nav><a class="underline text-sm" href="../">Back to catalog</a></nav>
+    <nav class="flex justify-between text-sm">
+      <a class="underline" href="../">Back to catalog</a>
+      <a class="underline" href="#private">Private data</a>
+    </nav>
     <header>
       <h1 class="text-2xl font-bold">Seller listing copy</h1>
       <p class="text-sm text-neutral-600">Listing copy in English and Spanish from the published items and their asking prices, and replies to scams. Listings never carry my phone number.</p>
@@ -18,6 +21,7 @@
     <label class="block font-semibold" for="item">Item
       <select id="item" class="block w-full p-3 mt-1 bg-white border border-neutral-300 rounded-lg"></select>
     </label>
+    <p id="item-private" aria-live="polite" class="text-sm"></p>
     <label class="block font-semibold" for="platform">Platform
       <select id="platform" class="block w-full p-3 mt-1 bg-white border border-neutral-300 rounded-lg">
         <option value="fb">Facebook Marketplace</option>
@@ -75,9 +79,71 @@
       </div>
       {% endfor %}
     </section>
+    <section id="private" aria-labelledby="private-heading" class="space-y-4">
+      <h2 id="private-heading" class="text-xl font-bold">Private: floors, notes and tracking</h2>
+      {% if sealed_json %}
+      <form id="unlock" class="space-y-2 p-3 bg-white border border-neutral-300 rounded-lg">
+        <label class="block font-semibold" for="passphrase">Passphrase</label>
+        <p class="text-sm text-neutral-600">Five words. They open the data in this tab only: nothing is stored or sent.</p>
+        <input id="passphrase" name="passphrase" type="password" autocomplete="current-password" autocapitalize="none" autocorrect="off" spellcheck="false" required class="block w-full p-3 bg-white border border-neutral-300 rounded-lg">
+        <button type="submit" id="unlock-button" class="px-4 py-3 bg-neutral-900 text-white rounded-lg">Unlock</button>
+        <p id="unlock-message" role="alert" class="text-sm"></p>
+      </form>
+      <div id="private-views" class="space-y-4"></div>
+      {% else %}
+      <p id="no-private" class="text-sm text-neutral-600">No private data in this build.</p>
+      {% endif %}
+    </section>
   </main>
-  <script>const ITEMS = {{ items_json | safe }}; window.posterItems = ITEMS;</script>
-  <script>const CONFIG = {{ config_json | safe }}; window.sellerConfig = CONFIG;</script>
+  {% if sealed_json %}
+  <template id="private-template">
+    <div class="flex items-center justify-between gap-3">
+      <p id="as-of" class="text-sm text-neutral-600"></p>
+      <button type="button" id="lock" class="px-4 py-3 bg-neutral-900 text-white rounded-lg">Lock</button>
+    </div>
+    <section aria-labelledby="due-heading" class="space-y-2">
+      <h3 id="due-heading" class="text-lg font-bold">Due now</h3>
+      <ul id="due" class="list-disc pl-5 space-y-1 text-sm"></ul>
+    </section>
+    <section aria-labelledby="plan-heading" class="space-y-2">
+      <h3 id="plan-heading" class="text-lg font-bold">Three-week plan</h3>
+      <p id="plan-windows" class="text-sm text-neutral-600"></p>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm bg-white border border-neutral-300">
+          <thead><tr class="text-left"><th class="p-2">Item</th><th class="p-2">List</th><th class="p-2">Drop</th><th class="p-2">Floor</th></tr></thead>
+          <tbody id="plan"></tbody>
+          <tfoot id="plan-total"></tfoot>
+        </table>
+      </div>
+      <p class="text-sm text-neutral-600">An item with no floor on file keeps its list price in every column.</p>
+    </section>
+    <section aria-labelledby="rows-heading" class="space-y-3">
+      <h3 id="rows-heading" class="text-lg font-bold">Items</h3>
+      <div id="rows" class="space-y-3"></div>
+    </section>
+  </template>
+  <template id="row-template">
+    <article class="p-3 bg-white border border-neutral-300 rounded-lg space-y-2">
+      <h4 class="font-semibold"><span data-field="title"></span> <span data-field="flags" class="text-sm font-normal text-neutral-600"></span></h4>
+      <dl class="grid grid-cols-2 gap-x-3 gap-y-1 text-sm">
+        <dt class="text-neutral-600">Status</dt><dd data-field="status"></dd>
+        <dt class="text-neutral-600">Asking</dt><dd data-field="asking"></dd>
+        <dt class="text-neutral-600">Target</dt><dd data-field="target"></dd>
+        <dt class="text-neutral-600">Floor</dt><dd data-field="floor"></dd>
+        <dt class="text-neutral-600">Days listed</dt><dd data-field="days"></dd>
+        <dt class="text-neutral-600">Channels</dt><dd data-field="channels"></dd>
+        <dt class="text-neutral-600">Renew due</dt><dd data-field="renew"></dd>
+        <dt class="text-neutral-600">Next drop</dt><dd data-field="drop"></dd>
+        <dt class="text-neutral-600">Price log</dt><dd data-field="log"></dd>
+        <dt class="text-neutral-600">Sale</dt><dd data-field="sale"></dd>
+      </dl>
+      <p data-field="note" class="text-sm"></p>
+    </article>
+  </template>
+  <script type="application/json" id="sealed">{{ sealed_json | safe }}</script>
+  {% endif %}
+  <script type="application/json" id="seller-items">{{ items_json | safe }}</script>
+  <script type="application/json" id="seller-config">{{ config_json | safe }}</script>
   <script type="module" src="seller.mjs"></script>
 </body>
 </html>
