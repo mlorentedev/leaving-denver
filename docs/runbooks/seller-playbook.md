@@ -79,7 +79,8 @@ or marking an item sold, follow [site operations](ops.md) to publish.
 
 ### The private views
 
-Open `/seller/` on the phone and type the five-word passphrase under "Private data". The
+Open `/seller/` on the phone and type the five-word passphrase under "Private data" (or let
+Bitwarden fill it: the passphrase lives in the `leaving-denver-seller` item). The
 page decrypts the sealed envelope in the browser (nothing leaves the phone) and shows one row
 per item: asking price, target, floor, status, days listed, channels posted, Facebook renew due,
 next drop date and the price to drop to, and the price log or sale. A yellow "Due now" box lists
@@ -90,6 +91,8 @@ message and nothing else.
 The phone shows the data as of the last `make ci-secrets` and deploy. A recording made with the
 commands below reaches it only after the update they offer (answer yes) or a later
 `make ci-secrets` and deploy. See the sealed private data section in [site operations](ops.md).
+To skip typing the passphrase when the update asks for it, run the command under dotf:
+`dotf secrets run --only SELLER_PASSPHRASE -- make sold ID=sofa-sleeper PRICE=180`.
 
 Record what happens as it happens; each command writes to `data/private.sops.yaml` through
 `sops set` (nothing is decrypted to disk). Commit the encrypted file afterwards.

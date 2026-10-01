@@ -87,21 +87,42 @@ seller phone and the Pages token are never in it.
 
 **Seal.** `make ci-secrets` (a terminal is required; the seal refuses without one) scopes the
 deploy secrets, then seals: it decrypts `data/private.sops.yaml` in process, takes the allow-listed
-keys, asks for a passphrase (or generates five words and shows them on the terminal only), seals
+keys, asks "Passphrase (Enter to generate one):", seals
 with Node WebCrypto, and writes `SELLER_SEALED` to both environments with `gh secret set`. To
 re-seal without the rest, run `uv run leaving-denver seal`. The envelope has to be under 40,000
 bytes (the worst case measures about 33,000). Nothing is written to disk.
 After sealing, redeploy: `gh workflow run ci.yml --ref main -f branch=main`.
 
+**The passphrase and Bitwarden.** Press Enter at the prompt to have five words generated. With
+`dotf` on `PATH` they are saved to the Bitwarden login item `leaving-denver-seller` (field
+`password`, secret id `SELLER_PASSPHRASE`, registered in dotfiles) with
+`dotf secrets set SELLER_PASSPHRASE`, and the command prints only "Saved to Bitwarden as
+SELLER_PASSPHRASE", never the words. Without `dotf`, or if the save fails, the words are shown on
+the terminal only, with "Write this down now. It is not stored anywhere.", and you type them back
+once to confirm; a wrong confirmation seals nothing. A passphrase you type yourself is asked for
+twice, and with `dotf` the target offers "Save it to Bitwarden? [y/N]". For autofill on the
+phone, open the item in the Bitwarden app and add the URI
+`https://leaving-denver.pages.dev/seller/`: the unlock form carries a hidden username field,
+`seller`, so Bitwarden offers the saved entry. Check it without printing it:
+`dotf secrets verify`.
+
 **After `make post`, `make sold` or `make reprice`** the command asks once whether to update
-`/seller/` now. Yes seals, sets both secrets and dispatches that deploy. No, the default, does
-nothing more.
+`/seller/` now. Yes asks for your current passphrase, seals, sets both secrets and dispatches
+that deploy; Enter alone does not make a new passphrase (it aborts and says to run
+`make ci-secrets`). No, the default, does nothing more. To skip the typing, run the command
+under dotf, which puts the passphrase in the environment of that one command:
+`dotf secrets run --only SELLER_PASSPHRASE -- make sold ID=sofa-sleeper PRICE=180`. The target
+reads the environment under that name only, checks it like a typed passphrase, never prints it and
+removes it from the environment of the programs it starts. It cannot tell dotf from a variable you
+set by hand, so it still requires a terminal.
 
 **Staleness.** The phone shows the data as of the last `make ci-secrets` and deploy (it says
 when it was sealed). A recording made on the laptop does not reach the phone until the next seal
 and deploy. Check the "as of" line before trusting a floor.
 
-**Rotation.** To change the passphrase, run `make ci-secrets` again with a new one. A Pages
+**Rotation.** To change the passphrase, run `make ci-secrets` again (without `dotf secrets run`)
+and press Enter: it generates a new one and overwrites both the `SELLER_SEALED` secret and the
+Bitwarden field `SELLER_PASSPHRASE`. A Pages
 deployment keeps the envelope it was built with, and an old envelope still opens with the old
 passphrase, so after a rotation or a passphrase you believe is known: delete the earlier Pages
 deployments in the dashboard (Workers & Pages > `leaving-denver` > Deployments), and keep only

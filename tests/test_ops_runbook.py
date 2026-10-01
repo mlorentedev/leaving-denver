@@ -110,6 +110,14 @@ def test_the_runbook_covers_the_sealed_private_data():
         "frame-ancestors 'none'",
         "3 s or less",
         "update `/seller/` now",
+        "Write this down now. It is not stored anywhere.",
+        "Enter alone does not make a new passphrase",
+        "Passphrase (Enter to generate one):",
+        "leaving-denver-seller",
+        "dotf secrets set SELLER_PASSPHRASE",
+        "https://leaving-denver.pages.dev/seller/",
+        "dotf secrets run --only SELLER_PASSPHRASE -- make sold",
+        "overwrites both the `SELLER_SEALED` secret and the Bitwarden field",
     ):
         assert needle in flat, f"the sealed-data section no longer says {needle!r}"
     departure = (ROOT / "data/inventory.yaml").read_text(encoding="utf-8")

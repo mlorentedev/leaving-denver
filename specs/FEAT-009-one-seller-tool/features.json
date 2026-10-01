@@ -92,7 +92,7 @@
   },
   {
     "id": "FEAT-009-one-seller-tool-f15",
-    "behavior": "PR 2, AC4: the seal refuses a weak or mismatched passphrase and a run with no TTY, ignores argv and the environment, and sets both environments with the envelope on stdin",
+    "behavior": "PR 2, AC4: the seal refuses a weak or mismatched passphrase and a run with no TTY, refuses argv, sets both environments with the envelope on stdin; Enter generates five hyphenated words and saves them with dotf secrets set SELLER_PASSPHRASE (printing only 'Saved to Bitwarden'), or without dotf shows them on the TTY only to be typed back; a typed passphrase can be saved on request",
     "verification": "uv run pytest -q tests/test_seal_command.py",
     "state": "pending",
     "evidence": ""
@@ -162,8 +162,22 @@
   },
   {
     "id": "FEAT-009-one-seller-tool-f25",
-    "behavior": "PR 2, AC14: after a successful make post, sold or reprice the command offers to update /seller/; no is the default and non-TTY means no; yes seals, sets both secrets and dispatches the deploy",
+    "behavior": "PR 2, AC14: after a successful make post, sold or reprice the command offers to update /seller/; no is the default and non-TTY means no; yes seals (an empty passphrase aborts, never generates), sets both secrets and dispatches the deploy",
     "verification": "uv run pytest -q tests/test_update_offer.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-009-one-seller-tool-f26",
+    "behavior": "PR 2, AC15: the unlock form has a password field with autocomplete current-password and a visually hidden read-only username field 'seller' in one JS-handled form, so a password manager (Bitwarden) can save and fill it",
+    "verification": "uv run pytest -q tests/test_sealed_build.py -k 'unlock_form or hidden_username'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-009-one-seller-tool-f27",
+    "behavior": "PR 2, AC16: SELLER_PASSPHRASE (that name only) is used without a prompt, validated and never printed, and removed from the environment of the Node, gh and dotf children; the terminal rule still holds",
+    "verification": "uv run pytest -q tests/test_seal_command.py -k 'environment or children'",
     "state": "pending",
     "evidence": ""
   }

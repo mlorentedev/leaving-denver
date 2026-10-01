@@ -14,6 +14,11 @@ from sealed_helpers import PASSPHRASE, fixture_private, install_fakes
 
 from leaving_denver import cli, seal
 
+INVENTORY_OF_ONE = {
+    "seller": {"departure_date": "2026-11-09"},
+    "items": [{"id": "sofa-sleeper", "title": "Sofa", "status": "Available"}],
+}
+
 
 @pytest.fixture
 def commands(monkeypatch):
@@ -164,3 +169,29 @@ def test_yes_end_to_end_sets_both_environments_then_dispatches_the_deploy(tmp_pa
     assert argv[-1] == ["workflow", "run", "ci.yml", "--ref", "main", "-f", "branch=main"]
     assert secrets == [], "the passphrase was asked for exactly twice"
     assert json.loads(gh_calls()[0]["stdin"])["v"] == 1
+
+
+@pytest.mark.parametrize("command", RECORDS)
+def test_an_empty_passphrase_on_a_resealing_aborts_with_the_hint_and_rotates_nothing(
+    command, tmp_path, monkeypatch, capsys
+):
+    """Yes, then Enter at the passphrase: a routine sale must not make a new passphrase.
+    The real seal runs here, over the fakes."""
+    monkeypatch.setattr(cli, "load_inventory_yaml", lambda: INVENTORY_OF_ONE)
+    monkeypatch.setattr(cli, "save_inventory_yaml", lambda data: None)
+    monkeypatch.setattr(cli, "build_all", lambda: None)
+    monkeypatch.setattr(cli, "load_private", fixture_private)
+    for name in ("record_post", "record_price", "record_sale"):
+        monkeypatch.setattr(cli, name, lambda *a: None)
+    monkeypatch.setattr(seal, "decrypt_private", fixture_private)
+    monkeypatch.chdir(tmp_path)
+    gh_calls = install_fakes(tmp_path, monkeypatch)
+    monkeypatch.setattr(seal, "has_tty", lambda: True)
+    monkeypatch.setattr(seal, "prompt_line", lambda prompt: "y")
+    monkeypatch.setattr(seal, "prompt_secret", lambda prompt: "")
+    monkeypatch.setattr(seal, "tell", lambda text: pytest.fail("a re-seal showed a passphrase"))
+    with pytest.raises(SystemExit) as failed:
+        RECORDS[command]()
+    assert failed.value.code == 1
+    assert "make ci-secrets to make a new one" in capsys.readouterr().out
+    assert gh_calls() == []

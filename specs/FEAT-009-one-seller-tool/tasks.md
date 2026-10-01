@@ -53,6 +53,9 @@ created: "2026-09-30"
 - [x] [AC2] The deploy job requires `SELLER_SEALED`; `tests/test_cd_workflow.py`.
 - [x] [AC9] The CSP in `functions/_middleware.js`, inline code out of `seller.html`;
   `tests/test_seller_csp.py`; `test_no_csp_stops_the_cloudflare_beacon` narrowed.
+- [x] [AC4] [AC14] [AC15] [AC16] Owner's passphrase decisions: Enter generates (ci-secrets only) and
+  saves to Bitwarden through dotf, else a TTY print and a typed-back confirmation; no generation on
+  re-seal; `SELLER_PASSPHRASE` from the environment; the hidden username field.
 - [x] [AC14] `cli.offer_seller_update` after post, reprice and sold; `tests/test_update_offer.py`.
 - [x] [AC12] Remove the panel, the poster assistant, its PIN, `build/private/` and `make panel`;
   the row logic moves to `seller.mjs` (`tests/test_seller_private_logic.py`);

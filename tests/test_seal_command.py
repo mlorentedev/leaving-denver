@@ -8,6 +8,7 @@ a test says otherwise. Nothing here reads the real data/private.sops.yaml.
 
 import json
 import os
+import re
 import subprocess
 import sys
 
@@ -58,6 +59,15 @@ def machine(tmp_path, monkeypatch, fixture_data):
     work.mkdir()
     monkeypatch.chdir(work)
     return install_fakes(tmp_path, monkeypatch), work
+
+
+@pytest.fixture
+def machine_with_dotf(tmp_path, monkeypatch, fixture_data):
+    """As `machine`, with a fake `dotf` on PATH that records its argv, stdin and environment."""
+    work = tmp_path / "work"
+    work.mkdir()
+    monkeypatch.chdir(work)
+    return install_fakes(tmp_path, monkeypatch, dotf=True), work
 
 
 def sets(calls):
@@ -116,8 +126,9 @@ def test_hyphens_and_spaces_give_the_same_passphrase():
 def test_a_generated_passphrase_is_five_distinct_listed_words():
     for _ in range(50):
         phrase = seal.generate_passphrase()
-        assert seal.validate_passphrase(phrase) == phrase
-        assert len(phrase.split()) == 5
+        assert seal.validate_passphrase(phrase) == phrase.replace("-", " ")
+        assert len(phrase.split("-")) == 5, "hyphens between the words"
+        assert " " not in phrase
 
 
 WEAK_ENTRIES = {
@@ -125,7 +136,6 @@ WEAK_ENTRIES = {
     "a repeated word": ("abacus abide abiding ability abacus",) * 2,
     "a word not on the list": ("abacus abide abiding ability zzzzzz",) * 2,
     "two entries that do not match": (PASSPHRASE, "abacus abide abiding ability abdomen zoom"),
-    "an empty entry": ("", ""),
 }
 
 
@@ -170,14 +180,14 @@ def test_the_command_without_a_terminal_exits_non_zero_and_touches_nothing(tmp_p
     assert calls() == []
 
 
-def test_a_passphrase_in_the_environment_or_argv_is_ignored(machine, monkeypatch):
+def test_a_passphrase_in_any_other_variable_or_in_argv_is_ignored(machine, monkeypatch):
     calls, _ = machine
     other = " ".join(WORDS[-5:])
-    for name in ("PASSPHRASE", "SELLER_PASSPHRASE", "SELLER_SEALED_PASSPHRASE"):
+    for name in ("PASSPHRASE", "SELLER_SEALED_PASSPHRASE", "SELLER_PASSWORD"):
         monkeypatch.setenv(name, other)
     terminal = Terminal(monkeypatch)
     seal.run_seal()
-    assert len(terminal.asked) == 3  # the offer, then the entry twice
+    assert len(terminal.asked) == 2  # the entry twice
     envelope = json.loads(sets(calls())[0]["stdin"])
     assert open_in_node(envelope, PASSPHRASE) is not None
     assert open_in_node(envelope, other) is None
@@ -244,25 +254,89 @@ def test_a_failed_upload_is_an_error_not_a_success(tmp_path, monkeypatch, fixtur
     assert len(sets(calls())) == 2
 
 
-def test_the_generated_passphrase_goes_to_the_terminal_only(machine, monkeypatch, capsys):
-    """Offered on yes, shown through `tell`, then typed twice like any other entry."""
-    calls, _ = machine
-    phrase = " ".join(WORDS[-5:])
-    monkeypatch.setattr(seal, "generate_passphrase", lambda: phrase)
-    terminal = Terminal(monkeypatch, secrets=(phrase, phrase), lines=("y",))
+FIRST_PROMPT = "Passphrase (Enter to generate one): "
+
+
+def test_the_first_prompt_offers_to_generate_one(machine, monkeypatch):
+    terminal = Terminal(monkeypatch)
     seal.run_seal()
-    assert any(phrase in text for text in terminal.shown)
+    assert terminal.asked[0] == FIRST_PROMPT
+
+
+def test_enter_generates_five_hyphenated_words_shown_on_the_terminal_only(
+    machine, monkeypatch, capsys
+):
+    calls, work = machine
+    phrase = "-".join(WORDS[-5:])
+    monkeypatch.setattr(seal, "generate_passphrase", lambda: phrase)
+    terminal = Terminal(monkeypatch, secrets=("", phrase))
+    seal.run_seal()
+    shown = "".join(terminal.shown)
+    assert phrase in shown
+    assert "Write this down now. It is not stored anywhere." in shown
     out = capsys.readouterr()
     assert phrase not in out.out + out.err
     assert phrase not in json.dumps(calls())
+    assert not list(work.iterdir())
+    assert len(terminal.asked) == 2, "the empty entry, then the one typed-back confirmation"
     assert open_in_node(sets(calls())[0]["stdin"], phrase) is not None
 
 
-def test_declining_the_offer_asks_for_the_passphrase_without_showing_one(machine, monkeypatch):
+def test_the_generated_phrase_is_drawn_from_the_list_and_printed_once(machine, monkeypatch):
     calls, _ = machine
-    terminal = Terminal(monkeypatch, lines=("",))
+    terminal = Terminal(monkeypatch, secrets=("", ""))
+    with pytest.raises(seal.SealError):
+        seal.run_seal()  # the confirmation is blank, so this only reads what was shown
+    shown = "".join(terminal.shown)
+    phrase = next(
+        word_run
+        for word_run in re.findall(r"[a-z]+(?:-[a-z]+){4}", shown)
+        if seal.validate_passphrase(word_run)
+    )
+    assert shown.count(phrase) == 1
+    assert calls() == []
+
+
+def test_a_confirmation_that_does_not_match_the_generated_phrase_aborts(machine, monkeypatch):
+    calls, work = machine
+    terminal = Terminal(monkeypatch, secrets=("", PASSPHRASE))
+    with pytest.raises(seal.SealError, match="nothing was sealed"):
+        seal.run_seal()
+    assert calls() == [], "nothing set, no gh call at all"
+    assert not list(work.iterdir())
+    assert PASSPHRASE not in "".join(terminal.shown)
+
+
+def test_a_typed_passphrase_still_needs_both_entries_to_match(machine, monkeypatch):
+    calls, _ = machine
+    terminal = Terminal(monkeypatch, secrets=(PASSPHRASE, PASSPHRASE))
     seal.run_seal()
-    assert terminal.shown == [] or all(PASSPHRASE not in text for text in terminal.shown)
+    assert terminal.shown == [], "nothing is generated or shown for a typed passphrase"
+    assert len(sets(calls())) == 2
+
+
+def test_a_resealing_never_generates_and_an_empty_entry_aborts(machine, monkeypatch):
+    calls, work = machine
+    terminal = Terminal(monkeypatch, secrets=("",))
+    monkeypatch.setattr(
+        seal, "generate_passphrase", lambda: pytest.fail("a routine sale rotated the passphrase")
+    )
+    with pytest.raises(seal.SealError) as refused:
+        seal.run_seal(offer_generation=False)
+    assert str(refused.value) == (
+        "Type your current passphrase (or run make ci-secrets to make a new one)"
+    )
+    assert "generate" not in terminal.asked[0].lower()
+    assert terminal.shown == []
+    assert calls() == []
+    assert not list(work.iterdir())
+
+
+def test_a_resealing_with_the_passphrase_typed_twice_seals(machine, monkeypatch):
+    calls, _ = machine
+    terminal = Terminal(monkeypatch)
+    seal.run_seal(offer_generation=False)
+    assert len(terminal.asked) == 2
     assert len(sets(calls())) == 2
 
 
@@ -403,7 +477,7 @@ def test_the_python_side_hands_the_node_child_stdin_and_nothing_else(
     assert PASSPHRASE not in " ".join(seen["argv"])
     assert str(SENTINEL_FLOOR) not in " ".join(seen["argv"])
     assert PASSPHRASE in seen["input"] and str(SENTINEL_FLOOR) in seen["input"]
-    assert seen["env"] is None, "the child inherits the environment and gets nothing added"
+    assert seen["env"] is not None and seal.PASSPHRASE_ENV not in seen["env"]
     assert not list(work.iterdir())
     assert not list(tmp_path.glob("*.json"))
 
@@ -458,3 +532,230 @@ def test_gh_never_inherits_the_terminal_and_gets_a_secret_on_stdin_only(stdin, k
     seal.gh("secret", "list", stdin=stdin)
     assert seen[key] == (subprocess.DEVNULL if stdin is None else stdin)
     assert stdin is None or stdin not in seen["argv"]
+
+
+def test_tell_writes_to_the_controlling_terminal_never_stdout_or_stderr(monkeypatch, capsys):
+    """The real `tell`: its only sink is /dev/tty, so a redirect or a log cannot hold a phrase."""
+    import io
+
+    opened = []
+
+    class Sink(io.StringIO):
+        def close(self):  # keep the text readable after the `with` block
+            pass
+
+    sink = Sink()
+
+    def fake_open(path, mode="r", **kwargs):
+        opened.append((path, mode))
+        return sink
+
+    monkeypatch.setattr("builtins.open", fake_open)
+    seal.tell("-".join(WORDS[:5]))
+    assert opened == [("/dev/tty", "w")]
+    assert sink.getvalue() == "-".join(WORDS[:5])
+    out = capsys.readouterr()
+    assert out.out == "" and out.err == ""
+
+
+def test_tell_refuses_when_there_is_no_terminal_to_write_to(monkeypatch):
+    def no_tty(*args, **kwargs):
+        raise OSError(6, "No such device or address")
+
+    monkeypatch.setattr("builtins.open", no_tty)
+    with pytest.raises(seal.SealError, match="terminal"):
+        seal.tell("secret words")
+
+
+# The owner keeps the passphrase in Bitwarden through `dotf` (ADR-007 decision 3, amended)
+
+
+def written(path):
+    return open(path, encoding="utf-8").read()
+
+
+def test_enter_with_dotf_saves_the_phrase_to_bitwarden_and_prints_no_value(
+    machine_with_dotf, monkeypatch, capfd
+):
+    calls, work = machine_with_dotf
+    phrase = "-".join(WORDS[-5:])
+    monkeypatch.setattr(seal, "generate_passphrase", lambda: phrase)
+    monkeypatch.setenv("FAKE_DOTF_ECHO", "1")  # even a tool that echoes it must not reach us
+    terminal = Terminal(monkeypatch, secrets=("",))
+    seal.run_seal()
+    saved = calls.dotf()
+    assert [c["argv"] for c in saved] == [["secrets", "set", "SELLER_PASSPHRASE"]]
+    assert saved[0]["stdin"] == phrase, "the value goes on stdin, exactly, never in argv"
+    assert phrase not in " ".join(saved[0]["argv"])
+    assert terminal.shown == [], "nothing is shown on the terminal when it was saved"
+    assert len(terminal.asked) == 1, "no type-back: Bitwarden holds it"
+    seen = capfd.readouterr()
+    assert phrase not in seen.out + seen.err
+    assert not any(word in seen.out + seen.err for word in phrase.split("-"))
+    assert "Saved to Bitwarden as SELLER_PASSPHRASE" in seen.out
+    assert phrase not in json.dumps(calls())
+    assert open_in_node(sets(calls())[0]["stdin"], phrase) is not None
+    assert not list(work.iterdir())
+
+
+def test_the_save_is_announced_without_the_value(machine_with_dotf, monkeypatch, capsys):
+    calls, _ = machine_with_dotf
+    phrase = "-".join(WORDS[-5:])
+    monkeypatch.setattr(seal, "generate_passphrase", lambda: phrase)
+    Terminal(monkeypatch, secrets=("",))
+    seal.run_seal()
+    out = capsys.readouterr().out
+    assert "Saved to Bitwarden as SELLER_PASSPHRASE" in out
+    assert phrase not in out
+
+
+def test_a_failed_save_falls_back_to_the_terminal_and_the_typed_back_confirmation(
+    machine_with_dotf, monkeypatch, capsys
+):
+    calls, _ = machine_with_dotf
+    phrase = "-".join(WORDS[-5:])
+    monkeypatch.setattr(seal, "generate_passphrase", lambda: phrase)
+    monkeypatch.setenv("FAKE_DOTF_FAIL", "1")
+    terminal = Terminal(monkeypatch, secrets=("", phrase))
+    seal.run_seal()
+    assert phrase in "".join(terminal.shown)
+    assert "Write this down now. It is not stored anywhere." in "".join(terminal.shown)
+    out = capsys.readouterr()
+    assert "Saved to Bitwarden" not in out.out
+    assert phrase not in out.out + out.err
+    assert len(sets(calls())) == 2
+
+
+def test_a_failed_save_and_a_wrong_confirmation_seal_nothing(machine_with_dotf, monkeypatch):
+    calls, _ = machine_with_dotf
+    monkeypatch.setenv("FAKE_DOTF_FAIL", "1")
+    Terminal(monkeypatch, secrets=("", PASSPHRASE))
+    with pytest.raises(seal.SealError, match="nothing was sealed"):
+        seal.run_seal()
+    assert calls() == []
+
+
+def test_enter_without_dotf_falls_back_to_the_terminal(machine, monkeypatch, capsys):
+    """No dotf on PATH (the plain `machine` has none): the TTY print and the type-back."""
+    calls, _ = machine
+    phrase = "-".join(WORDS[-5:])
+    monkeypatch.setattr(seal, "generate_passphrase", lambda: phrase)
+    terminal = Terminal(monkeypatch, secrets=("", phrase))
+    seal.run_seal()
+    assert phrase in "".join(terminal.shown)
+    assert phrase not in capsys.readouterr().out
+    assert len(sets(calls())) == 2
+
+
+def test_a_typed_passphrase_with_dotf_is_offered_a_save(machine_with_dotf, monkeypatch):
+    calls, _ = machine_with_dotf
+    terminal = Terminal(monkeypatch, lines=("y",))
+    seal.run_seal()
+    assert any("Save it to Bitwarden? [y/N]" in prompt for prompt in terminal.asked)
+    saved = calls.dotf()
+    assert [c["argv"] for c in saved] == [["secrets", "set", "SELLER_PASSPHRASE"]]
+    assert saved[0]["stdin"] == PASSPHRASE.replace(" ", "-")
+    assert len(sets(calls())) == 2
+
+
+def test_a_typed_passphrase_is_not_saved_unless_the_owner_says_yes(machine_with_dotf, monkeypatch):
+    calls, _ = machine_with_dotf
+    Terminal(monkeypatch, lines=("",))
+    seal.run_seal()
+    assert calls.dotf() == []
+    assert len(sets(calls())) == 2
+
+
+def test_a_typed_passphrase_without_dotf_is_not_offered_a_save(machine, monkeypatch):
+    terminal = Terminal(monkeypatch)
+    seal.run_seal()
+    assert not any("Bitwarden" in prompt for prompt in terminal.asked)
+
+
+def test_a_save_the_owner_asked_for_that_fails_seals_nothing(machine_with_dotf, monkeypatch):
+    calls, _ = machine_with_dotf
+    monkeypatch.setenv("FAKE_DOTF_FAIL", "1")
+    Terminal(monkeypatch, lines=("y",))
+    with pytest.raises(seal.SealError, match="nothing was sealed"):
+        seal.run_seal()
+    assert calls() == []
+
+
+@pytest.mark.parametrize("offer_generation", [True, False])
+def test_the_passphrase_in_the_environment_is_used_without_a_prompt(
+    offer_generation, machine, monkeypatch, capsys
+):
+    """What `dotf secrets run --only SELLER_PASSPHRASE -- make ...` gives the target."""
+    calls, _ = machine
+    monkeypatch.setenv("SELLER_PASSPHRASE", "-".join(PASSPHRASE.split()))
+    terminal = Terminal(monkeypatch, secrets=())
+    monkeypatch.setattr(
+        seal, "generate_passphrase", lambda: pytest.fail("generated with one in the environment")
+    )
+    seal.run_seal(offer_generation=offer_generation)
+    assert terminal.asked == []
+    assert open_in_node(sets(calls())[0]["stdin"], PASSPHRASE) is not None
+    out = capsys.readouterr()
+    assert not any(word in out.out + out.err for word in PASSPHRASE.split())
+
+
+@pytest.mark.parametrize(
+    ("value", "reason"),
+    [
+        ("abacus abide abiding ability", "at least 5"),
+        ("abacus abide abiding ability abacus", "repeat"),
+        ("abacus abide abiding ability zzzzzz", "not on the EFF"),
+    ],
+)
+def test_a_weak_passphrase_in_the_environment_is_refused_without_echoing_it(
+    value, reason, machine, monkeypatch, capsys
+):
+    calls, _ = machine
+    monkeypatch.setenv("SELLER_PASSPHRASE", value)
+    terminal = Terminal(monkeypatch, secrets=())
+    with pytest.raises(seal.SealError, match=reason) as refused:
+        seal.run_seal(offer_generation=False)
+    assert "SELLER_PASSPHRASE" in str(refused.value)
+    assert value not in str(refused.value)
+    assert terminal.asked == [] and calls() == []
+
+
+@pytest.mark.parametrize("blank", ["", "   "])
+def test_a_blank_environment_value_means_none_and_the_prompt_runs(blank, machine, monkeypatch):
+    calls, _ = machine
+    monkeypatch.setenv("SELLER_PASSPHRASE", blank)
+    terminal = Terminal(monkeypatch)
+    seal.run_seal()
+    assert len(terminal.asked) == 2
+    assert len(sets(calls())) == 2
+
+
+def test_the_environment_passphrase_does_not_lift_the_terminal_rule(machine, monkeypatch):
+    calls, _ = machine
+    monkeypatch.setenv("SELLER_PASSPHRASE", PASSPHRASE)
+    Terminal(monkeypatch, tty=False)
+    with pytest.raises(seal.SealError, match="terminal"):
+        seal.run_seal()
+    assert calls() == []
+
+
+def test_the_children_do_not_inherit_the_passphrase_from_the_environment(
+    machine_with_dotf, monkeypatch
+):
+    """Node and gh run with SELLER_PASSPHRASE removed from their environment."""
+    calls, _ = machine_with_dotf
+    seen = {}
+    real_run = subprocess.run
+
+    def spy(cmd, *args, **kwargs):
+        seen[cmd[0]] = kwargs.get("env")
+        return real_run(cmd, *args, **kwargs)
+
+    monkeypatch.setattr(seal.subprocess, "run", spy)
+    monkeypatch.setenv("SELLER_PASSPHRASE", PASSPHRASE)
+    Terminal(monkeypatch, secrets=())
+    seal.run_seal()
+    assert {"node", "gh"} <= set(seen)
+    for name, env in seen.items():
+        assert env is not None and "SELLER_PASSPHRASE" not in env, name
+    assert len(sets(calls())) == 2

@@ -75,9 +75,16 @@ Sealing happens inside `make ci-secrets`, on the owner's machine:
 2. **Build the payload from an allow-list**: `floors`, `targets`, `sales`, `tracking`, `notes`,
    and `sealed_at` (the date and time of the seal). `seller.phone` and `cloudflare_pages_token`
    are never in it; the phone keeps its own secret (`SELLER_PHONE`, ADR-002).
-3. **Read the passphrase from the terminal**, twice, with echo off. Never from argv, the
-   environment or a pipe. With no TTY, the target refuses. An agent shell has no TTY, so an
-   agent cannot run it.
+3. **Read the passphrase from the terminal**, twice, with echo off. Never from argv or a pipe.
+   With no TTY, the target refuses. An agent shell has no TTY, so an agent cannot run it.
+   *Amended 2026-10-01 (owner):* the environment is read under one name only,
+   `SELLER_PASSPHRASE`, meant for `dotf secrets run --only SELLER_PASSPHRASE -- make ...`: dotf
+   keeps the passphrase in Bitwarden, injects it into that child only and keeps it out of the shell
+   history. Nothing can tell a variable dotf injected from one set by hand, so it is validated
+   like a typed one (five or more distinct EFF words), never printed, and removed from the
+   environment of every child the target starts (Node, gh, dotf). The terminal rule stands: with
+   no TTY the target still refuses, so an agent that somehow had the variable still could not seal.
+   Any other variable, and argv, are ignored or refused.
 4. **Encrypt with WebCrypto in Node** (`crypto.subtle`). It is the same API the page decrypts
    with, and Node 24 is already required for Tailwind, so there is no new dependency. The
    payload and the passphrase reach the Node child on stdin.
@@ -118,8 +125,19 @@ thousands of years.
 
 **The rule the target enforces.** The target cannot tell whether words were chosen at random, so
 it checks only what it can measure: the word count, the words are on the list, no word repeats,
-and both entries match. It offers to generate a passphrase with `secrets.choice` and writes it to
-the TTY only.
+and both entries match. Enter at the first prompt ("Passphrase (Enter to generate one):")
+generates five distinct words with `secrets.choice`, joined by hyphens. They are written to the
+TTY only, with "Write this down now. It is not stored anywhere.", and the owner types them back
+once; a mismatch aborts with nothing sealed and nothing set. When `dotf` is on `PATH` the
+generated words are saved instead, with `dotf secrets set SELLER_PASSPHRASE` (the value on its
+stdin, its output never relayed), the target prints only "Saved to Bitwarden as
+SELLER_PASSPHRASE", and the terminal print is the fallback if the save fails. A typed passphrase
+is entered twice, and with `dotf` the owner is offered "Save it to Bitwarden? [y/N]" (a save they
+asked for that fails aborts the seal). `make ci-secrets` with Enter overwrites both the secret and
+the Bitwarden field: that is the rotation.
+A re-seal after `make post|sold|reprice` never generates: an empty entry aborts with "Type your
+current passphrase (or run make ci-secrets to make a new one)", so a routine sale cannot rotate
+the passphrase silently (owner, 2026-10-01).
 
 ### 5. The page
 
@@ -174,8 +192,8 @@ input is mixed into the payload, so compressing before encrypting leaks only the
 
 - **One tool.** `make panel` and `build/private/panel.html` are retired in PR 2. `/seller/`
   shows the same data. Recording stays `make post|sold|reprice`.
-- **Passphrase.** It is generated: 5 words from the EFF list, offered by the target, as in
-  decision 4. There is no owner-chosen phrase and no strength-estimator dependency.
+- **Passphrase.** It is generated: 5 words from the EFF list, offered by the target (Enter at
+  the prompt, `make ci-secrets` only), as in decision 4. There is no owner-chosen phrase and no strength-estimator dependency.
 - **Re-seal on record.** After `make post|sold|reprice` succeeds, the target asks whether to
   update `/seller/` now. On yes, it asks for the passphrase, seals, sets the secret and
   dispatches the deploy. On no, nothing else happens.

@@ -27,7 +27,7 @@ def never_write_the_owners_private_file(monkeypatch):
 @pytest.fixture(autouse=True)
 def no_test_asks_a_terminal_or_reaches_the_real_gh(monkeypatch):
     """`pytest -s` in a terminal must not hang on a prompt, and no test may set a secret or
-    dispatch a deploy on the real repository.
+    dispatch a deploy on the real repository, or write to the owner's Bitwarden.
 
     The terminal is off unless a test turns it on, and `gh` runs only when PATH resolves it to
     a fake (tests/sealed_helpers.install_fakes puts one in a `fake-bin` directory)."""
@@ -39,5 +39,15 @@ def no_test_asks_a_terminal_or_reaches_the_real_gh(monkeypatch):
             pytest.fail(f"a test reached the real gh: gh {' '.join(args[:2])}")
         return real(*args, **kwargs)
 
+    real_dotf = seal.run_dotf
+
+    def guarded_dotf(*args, **kwargs):
+        if "fake-bin" not in (shutil.which("dotf") or ""):
+            pytest.fail("a test reached the real dotf")
+        return real_dotf(*args, **kwargs)
+
     monkeypatch.setattr(seal, "has_tty", lambda: False)
     monkeypatch.setattr(seal, "gh", guarded)
+    # The owner's real dotf (and so their Bitwarden) is never seen: only a fake in fake-bin is.
+    monkeypatch.setattr(seal, "have_dotf", lambda: "fake-bin" in (shutil.which("dotf") or ""))
+    monkeypatch.setattr(seal, "run_dotf", guarded_dotf)

@@ -14,6 +14,7 @@ import json
 import os
 import re
 from datetime import UTC, datetime
+from html.parser import HTMLParser
 from pathlib import Path
 
 import pytest
@@ -29,6 +30,9 @@ from sealed_helpers import (
 
 from leaving_denver import seal
 
+SELLER_SCRIPT = (
+    Path(__file__).resolve().parents[1] / "src" / "leaving_denver" / "assets" / "seller.mjs"
+)
 ALLOW_LIST = {"floors", "targets", "sales", "tracking", "notes", "sealed_at"}
 NEVER_SEALED = ("5555550100", "cf-token-sentinel")
 
@@ -172,3 +176,50 @@ def test_the_real_envelope_passes_validation_and_is_only_in_the_seller_page():
         if p.is_file() and envelope["ct"] in p.read_text(encoding="utf-8", errors="ignore")
     ]
     assert holders == ["seller/index.html"]
+
+
+class FormFields(HTMLParser):
+    """The unlock form's tags in document order, as (tag, attributes)."""
+
+    def __init__(self):
+        super().__init__()
+        self.inside = False
+        self.fields = []
+        self.form = None
+
+    def handle_starttag(self, tag, attrs):
+        if tag == "form" and dict(attrs).get("id") == "unlock":
+            self.inside, self.form = True, dict(attrs)
+        elif self.inside and tag == "input":
+            self.fields.append(dict(attrs))
+
+    def handle_endtag(self, tag):
+        if tag == "form":
+            self.inside = False
+
+
+def test_the_unlock_form_lets_a_password_manager_save_and_fill_the_passphrase(sealed_build):
+    """A fixed username next to the password field, in one form that JavaScript submits: the
+    phone's manager then keeps one entry. Nothing is stored by the page itself."""
+    page = (sealed_build["dist"] / "seller" / "index.html").read_text(encoding="utf-8")
+    parsed = FormFields()
+    parsed.feed(page)
+    assert parsed.form is not None
+    assert "action" not in parsed.form and "method" not in parsed.form, "JavaScript handles it"
+    username, password = parsed.fields
+    assert password["type"] == "password"
+    assert password["autocomplete"] == "current-password"
+    assert username["autocomplete"] == "username"
+    assert username["value"] == "seller"
+    assert username["type"] == "text", "managers skip type=hidden"
+    classes = username["class"].split()
+    assert "sr-only" in classes, "visually hidden, still in the page"
+    assert "hidden" not in classes and "style" not in username and "hidden" not in username
+    assert username.get("tabindex") == "-1" and username.get("aria-hidden") == "true"
+    assert "readonly" in username
+
+
+def test_the_hidden_username_reaches_neither_the_passphrase_nor_the_payload():
+    """The field only names the saved entry; the page script must never read it."""
+    script = (SELLER_SCRIPT).read_text(encoding="utf-8")
+    assert "username" not in script

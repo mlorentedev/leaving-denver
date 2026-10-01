@@ -164,14 +164,32 @@ sys.exit(1)
 """
 
 
-def install_fakes(tmp_path, monkeypatch, *, list_output="", fail_on=""):
+FAKE_DOTF = """#!{python}
+import json
+import os
+import sys
+
+stdin = sys.stdin.read()
+with open(os.environ["FAKE_DOTF_LOG"], "a", encoding="utf-8") as log:
+    log.write(json.dumps({{"argv": sys.argv[1:], "stdin": stdin, "env": sorted(os.environ)}}) + "\\n")
+if os.environ.get("FAKE_DOTF_ECHO"):
+    # A careless tool: the value on both streams. Nothing of it may reach the owner's screen.
+    sys.stdout.write(stdin)
+    sys.stderr.write(stdin)
+if os.environ.get("FAKE_DOTF_FAIL"):
+    sys.exit(3)
+"""
+
+
+def install_fakes(tmp_path, monkeypatch, *, list_output="", fail_on="", dotf=False):
     """A fake `gh` (and a `sops` that only records it was called) ahead of the real ones on PATH.
 
     Returns a function giving the calls the fake `gh` has seen, as {argv, stdin} dicts."""
     bin_dir = tmp_path / "fake-bin"
     bin_dir.mkdir()
     log = tmp_path / "gh-calls.jsonl"
-    for name, body in (("gh", FAKE_GH), ("sops", FAKE_SOPS)):
+    fakes = [("gh", FAKE_GH), ("sops", FAKE_SOPS)] + ([("dotf", FAKE_DOTF)] if dotf else [])
+    for name, body in fakes:
         script = bin_dir / name
         script.write_text(body.format(python=sys.executable), encoding="utf-8")
         script.chmod(0o755)
@@ -179,10 +197,20 @@ def install_fakes(tmp_path, monkeypatch, *, list_output="", fail_on=""):
     monkeypatch.setenv("FAKE_GH_LOG", str(log))
     monkeypatch.setenv("FAKE_GH_LIST", list_output)
     monkeypatch.setenv("FAKE_GH_FAIL", fail_on)
+    dotf_log = tmp_path / "dotf-calls.jsonl"
+    monkeypatch.setenv("FAKE_DOTF_LOG", str(dotf_log))
+    monkeypatch.delenv("FAKE_DOTF_FAIL", raising=False)
+    monkeypatch.delenv("FAKE_DOTF_ECHO", raising=False)
 
     def calls():
         if not log.exists():
             return []
         return [json.loads(line) for line in log.read_text(encoding="utf-8").splitlines()]
 
+    def dotf_calls():
+        if not dotf_log.exists():
+            return []
+        return [json.loads(line) for line in dotf_log.read_text(encoding="utf-8").splitlines()]
+
+    calls.dotf = dotf_calls
     return calls

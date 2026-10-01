@@ -85,6 +85,7 @@
       <form id="unlock" class="space-y-2 p-3 bg-white border border-neutral-300 rounded-lg">
         <label class="block font-semibold" for="passphrase">Passphrase</label>
         <p class="text-sm text-neutral-600">Five words. They open the data in this tab only: nothing is stored or sent.</p>
+        <input id="username" name="username" type="text" value="seller" autocomplete="username" readonly tabindex="-1" aria-hidden="true" class="sr-only">
         <input id="passphrase" name="passphrase" type="password" autocomplete="current-password" autocapitalize="none" autocorrect="off" spellcheck="false" required class="block w-full p-3 bg-white border border-neutral-300 rounded-lg">
         <button type="submit" id="unlock-button" class="px-4 py-3 bg-neutral-900 text-white rounded-lg">Unlock</button>
         <p id="unlock-message" role="alert" class="text-sm"></p>

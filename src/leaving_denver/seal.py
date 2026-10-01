@@ -11,8 +11,10 @@ import binascii
 import functools
 import getpass
 import json
+import os
 import re
 import secrets
+import shutil
 import subprocess
 import sys
 from datetime import UTC, datetime
@@ -42,11 +44,20 @@ SIZE_BUDGET = 40_000
 ENVIRONMENTS = ("production", "preview")
 SECRET_NAME = "SELLER_SEALED"
 PASSPHRASE_WORDS = 5
+# The one variable the target reads a passphrase from: `dotf secrets run --only SELLER_PASSPHRASE
+# -- make ...` injects it into that child alone. The bitwarden id is the dotfiles secret's name.
+PASSPHRASE_ENV = "SELLER_PASSPHRASE"
+BITWARDEN_ID = "SELLER_PASSPHRASE"
 DEPLOY_DISPATCH = ["workflow", "run", "ci.yml", "--ref", "main", "-f", "branch=main"]
 
 
 class SealError(RuntimeError):
     """The seal cannot go on. The message never holds a passphrase or a payload value."""
+
+
+def child_env() -> dict[str, str]:
+    """The environment a child process gets: ours without the passphrase, which no child needs."""
+    return {name: value for name, value in os.environ.items() if name != PASSPHRASE_ENV}
 
 
 def seal_with_node(payload: dict[str, Any] | str, passphrase: str) -> str:
@@ -60,6 +71,7 @@ def seal_with_node(payload: dict[str, Any] | str, passphrase: str) -> str:
             input=json.dumps({"payload": plaintext, "passphrase": passphrase}),
             capture_output=True,
             text=True,
+            env=child_env(),
         )
     except OSError as err:
         raise SealError(f"node could not run ({err.strerror})") from err
@@ -155,14 +167,15 @@ def validate_passphrase(text: str) -> str:
 
 
 def generate_passphrase(count: int = PASSPHRASE_WORDS) -> str:
-    """`count` distinct words drawn uniformly from the list with the OS's random source."""
+    """`count` distinct words drawn uniformly from the list with the OS's random source, joined
+    by hyphens (one token to write down; the page reads hyphens and spaces alike)."""
     words = load_wordlist()
     chosen: list[str] = []
     while len(chosen) < count:
         word = secrets.choice(words)
         if word not in chosen:
             chosen.append(word)
-    return " ".join(chosen)
+    return "-".join(chosen)
 
 
 # The terminal. Each is a module attribute so a test can stand in for the owner.
@@ -191,25 +204,91 @@ def tell(text: str) -> None:
         raise SealError("cannot write to the terminal") from err
 
 
+FIRST_PROMPT = "Passphrase (Enter to generate one): "
+RESEAL_PROMPT = "Passphrase: "
+CURRENT_PASSPHRASE_HINT = "Type your current passphrase (or run make ci-secrets to make a new one)"
+SAVED = f"Saved to Bitwarden as {BITWARDEN_ID}"
+
+
+def passphrase_from_environment() -> str | None:
+    """The passphrase `dotf secrets run` put in SELLER_PASSPHRASE, validated like a typed one.
+
+    There is no telling a variable injected by dotf from one set by hand, so the check is the
+    same either way: five or more distinct EFF words. A blank value is none. The message never
+    holds the value."""
+    raw = os.environ.get(PASSPHRASE_ENV, "")
+    if not raw.strip():
+        return None
+    try:
+        return validate_passphrase(raw)
+    except ValueError as err:
+        raise SealError(f"{PASSPHRASE_ENV} is refused: {err}") from err
+
+
+def hyphenated(passphrase: str) -> str:
+    return "-".join(passphrase_words(passphrase))
+
+
 def ask_passphrase(offer_generation: bool = True) -> str:
-    """The passphrase, typed twice. It can first be generated and shown on the terminal only:
-    it is still typed back, which is how the owner proves it was written down."""
-    if offer_generation and prompt_line("Generate a new passphrase? [y/N] ").strip().lower() in (
-        "y",
-        "yes",
-    ):
-        tell(
-            "\nNew passphrase (keep it in your password manager; it is not stored anywhere):\n\n"
-            f"    {generate_passphrase()}\n\nType it twice below.\n"
-        )
-    first = prompt_secret("Passphrase: ")
-    second = prompt_secret("Again: ")
-    if passphrase_words(first) != passphrase_words(second):
+    """The passphrase for this seal: from SELLER_PASSPHRASE, typed, or generated.
+
+    - SELLER_PASSPHRASE, when set, is used without a prompt.
+    - Otherwise the owner types it twice. Where `offer_generation` (`make ci-secrets` only) Enter
+      instead generates a new one, and a typed one can be saved to Bitwarden.
+    - A routine re-seal after a sale never generates: an empty entry aborts, so a sale cannot
+      rotate the passphrase silently."""
+    from_environment = passphrase_from_environment()
+    if from_environment:
+        print(f"Using the passphrase in {PASSPHRASE_ENV}.")
+        return from_environment
+    first = prompt_secret(FIRST_PROMPT if offer_generation else RESEAL_PROMPT)
+    if not first.strip():
+        if not offer_generation:
+            raise SealError(CURRENT_PASSPHRASE_HINT)
+        return generate_new_passphrase()
+    if passphrase_words(first) != passphrase_words(prompt_secret("Again: ")):
         raise SealError("the two entries do not match")
     try:
-        return validate_passphrase(first)
+        passphrase = validate_passphrase(first)
     except ValueError as err:
         raise SealError(f"that passphrase is refused: {err}") from err
+    if offer_generation and offer_save():
+        save_or_abort(passphrase)
+    return passphrase
+
+
+def offer_save() -> bool:
+    return have_dotf() and prompt_line("Save it to Bitwarden? [y/N] ").strip().lower() in (
+        "y",
+        "yes",
+    )
+
+
+def save_or_abort(passphrase: str) -> None:
+    if not save_to_bitwarden(hyphenated(passphrase)):
+        raise SealError(
+            f"dotf could not save {BITWARDEN_ID} to Bitwarden: nothing was sealed "
+            "and nothing was set"
+        )
+    print(SAVED)
+
+
+def generate_new_passphrase() -> str:
+    """Five new words. Saved to Bitwarden through dotf when it is there: then nothing is
+    shown. If it is missing or the save fails, they are shown on the terminal only and typed
+    back once, which is how the owner proves they were written down."""
+    phrase = generate_passphrase()
+    if have_dotf():
+        if save_to_bitwarden(phrase):
+            print(SAVED)
+            return phrase
+        print(f"dotf could not save {BITWARDEN_ID} to Bitwarden.", file=sys.stderr)
+    tell(
+        f"\nNew passphrase:\n\n    {phrase}\n\nWrite this down now. It is not stored anywhere.\n\n"
+    )
+    if passphrase_words(prompt_secret("Type it back to confirm: ")) != passphrase_words(phrase):
+        raise SealError("the confirmation does not match: nothing was sealed and nothing was set")
+    return phrase
 
 
 # The payload and the envelope
@@ -245,9 +324,34 @@ def gh(*args: str, stdin: str | None = None) -> subprocess.CompletedProcess[str]
     """Run gh. With no `stdin` it gets none (never the terminal: a prompt would hang a recording)."""
     feed = {"input": stdin} if stdin is not None else {"stdin": subprocess.DEVNULL}
     try:
-        return subprocess.run(["gh", *args], capture_output=True, text=True, **feed)
+        return subprocess.run(
+            ["gh", *args], capture_output=True, text=True, env=child_env(), **feed
+        )
     except OSError as err:
         raise SealError(f"gh could not run ({err.strerror})") from err
+
+
+def have_dotf() -> bool:
+    return shutil.which("dotf") is not None
+
+
+def run_dotf(*args: str, stdin: str) -> subprocess.CompletedProcess[str]:
+    """Run dotf with `stdin` as the value. Its output is captured and never shown: it is not
+    ours to relay, and the value must reach no screen or log."""
+    try:
+        return subprocess.run(
+            ["dotf", *args], input=stdin, capture_output=True, text=True, env=child_env()
+        )
+    except OSError as err:
+        raise SealError(f"dotf could not run ({err.strerror})") from err
+
+
+def save_to_bitwarden(passphrase: str) -> bool:
+    """Store the passphrase as the SELLER_PASSPHRASE secret (stdin only). True when it took."""
+    try:
+        return run_dotf("secrets", "set", BITWARDEN_ID, stdin=passphrase).returncode == 0
+    except SealError:
+        return False
 
 
 def upload_secret(envelope: str) -> None:
