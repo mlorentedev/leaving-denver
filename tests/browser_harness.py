@@ -42,6 +42,8 @@ CHROME = (
 )
 needs_chrome = pytest.mark.skipif(CHROME is None, reason="Chrome CDP pipe needs POSIX and Chrome")
 DEADLINE = 30
+# A cold start on a fresh CI runner outlasted DEADLINE before its first answer (lesson-017).
+STARTUP = 120
 
 # Stubs the page's pointer check: True is a desktop mouse, False a phone or a tablet.
 POINTER = """
@@ -103,8 +105,8 @@ class Page:
         message, self._buffer = self._buffer.split(b"\0", 1)
         return json.loads(message)
 
-    def send(self, method, **params):
-        end = time.monotonic() + DEADLINE
+    def send(self, method, deadline=DEADLINE, **params):
+        end = time.monotonic() + deadline
         self._next += 1
         message = {"id": self._next, "method": method, "params": params}
         if self.session:
@@ -197,6 +199,8 @@ def open_page(tmp_path, page, setup="", fragment=""):
                 "--disable-gpu",
                 "--no-sandbox",
                 "--remote-debugging-pipe",
+                "--no-first-run",
+                "--no-default-browser-check",
                 f"--user-data-dir={tmp_path / 'profile'}",
                 "about:blank",
             ],
@@ -209,7 +213,10 @@ def open_page(tmp_path, page, setup="", fragment=""):
     os.close(from_chrome_w)
     browser = Page(to_chrome_w, from_chrome_r, log)
     try:
-        target = browser.send("Target.createTarget", url="about:blank")["targetId"]
+        # The first answer waits for Chrome to start, which a fresh runner makes slow.
+        target = browser.send("Target.createTarget", deadline=STARTUP, url="about:blank")[
+            "targetId"
+        ]
         attached = browser.send("Target.attachToTarget", targetId=target, flatten=True)
         browser.session = attached["sessionId"]
         browser.send("Page.enable")
