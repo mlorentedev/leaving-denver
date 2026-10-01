@@ -40,6 +40,7 @@ copy_number: Copiar número
 share: Compartir
 link_copied: Enlace copiado
 copied: Copiado
+copy_vin: Copiar VIN
 results: "{n} artículos visibles"
 results_one: "1 artículo visible"
 copy_fallback: "Seleccionado: pulse Ctrl+C o ⌘C"

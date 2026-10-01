@@ -300,7 +300,11 @@
     <section data-role="verify-car" class="bg-white rounded-t-3xl max-w-2xl w-full min-w-0 p-6 sm:p-7 relative shadow-xl max-h-[90vh] overflow-y-auto">
       <button type="button" data-close-sheet class="absolute top-4 right-4 w-10 h-10 rounded-full bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center text-neutral-600 text-sm" aria-label="{{ t.close }}">✕</button>
       <h3 id="verify-car-heading" class="pr-12 text-xl font-extrabold text-neutral-900">{{ t.verify_heading }}</h3>
-      <p class="mt-1 text-xs text-neutral-600">{{ t.verify_vin }}: <code data-role="vin" class="select-all font-mono text-sm font-bold text-neutral-900">{{ vehicle.vin }}</code></p>
+      <p class="mt-1 flex flex-wrap items-center gap-x-1 text-xs text-neutral-600">{{ t.verify_vin }}: <code id="vinValue" data-role="vin" class="select-all font-mono text-sm font-bold text-neutral-900">{{ vehicle.vin }}</code>
+        <button type="button" id="copyVin" aria-label="{{ t.copy_vin }}" class="w-10 h-10 -my-2 rounded-lg flex items-center justify-center text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100">
+          <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>
+        </button>
+        <span id="copyVinStatus" role="status" aria-live="polite" class="text-xs font-semibold text-emerald-700"></span></p>
       <p class="mt-2 text-sm text-neutral-600">{{ t.verify_intro }}</p>
       {% macro verify_link(entry) %}
       <a href="{{ entry.href }}" target="_blank" rel="noopener noreferrer" class="block h-full min-h-10 rounded-xl border border-neutral-200 px-3 py-2 hover:bg-neutral-50 transition-colors">
@@ -633,6 +637,18 @@
       else select();
     }
 
+    function copyVin() {
+      const status = document.getElementById('copyVinStatus');
+      const vin = document.getElementById('vinValue');
+      // No clipboard (plain http, permission denied): select the VIN and say how to copy it.
+      const select = () => {
+        window.getSelection().selectAllChildren(vin);
+        status.textContent = UI.copy_fallback;
+      };
+      if (!navigator.clipboard) return select();
+      navigator.clipboard.writeText(vin.textContent.trim()).then(() => { status.textContent = UI.copied; }, select);
+    }
+
     function applyFilter(cat) {
       document.querySelectorAll('.filter-btn').forEach(b => {
         const on = b.dataset.cat === cat;
@@ -662,6 +678,7 @@
         openContactSheet(link);
       });
       document.getElementById('contactCopy').addEventListener('click', copyNumber);
+      document.getElementById('copyVin')?.addEventListener('click', copyVin);
       document.getElementById('modalShare').addEventListener('click', shareItem);
       document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', () => applyFilter(btn.dataset.cat));
