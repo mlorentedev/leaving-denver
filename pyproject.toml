@@ -36,6 +36,12 @@ line-length = 100
 target-version = "py312"
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "UP", "B"]
+select = ["E", "F", "I", "UP", "B", "C90"]
 # The formatter owns line length; long strings and URLs are left alone.
 ignore = ["E501"]
+
+# A ceiling, so no function grows past the most complex one today (10). Ruff counts fewer
+# paths than radon, which skips comprehensions and conditional expressions: build_public_site
+# was 9 here and 24 in radon (REFACTOR-001), so radon stays the measure for a refactor.
+[tool.ruff.lint.mccabe]
+max-complexity = 10

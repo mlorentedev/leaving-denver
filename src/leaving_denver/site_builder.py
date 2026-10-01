@@ -464,9 +464,8 @@ def localize_public_inventory(
     return localized
 
 
-def build_public_site(full_data: dict[str, Any]) -> None:
-    DIST_DIR.mkdir(parents=True, exist_ok=True)
-
+def build_identity() -> tuple[str | None, str]:
+    """The commit the footer links to and the seller's phone; a build without a phone fails."""
     build_sha = os.environ.get("GITHUB_SHA")
     if build_sha and not re.fullmatch(r"[0-9a-fA-F]{40}", build_sha):
         raise ValueError("GITHUB_SHA must be a 40-character commit hash")
@@ -475,10 +474,53 @@ def build_public_site(full_data: dict[str, Any]) -> None:
         raise RuntimeError(
             "No seller phone: set SELLER_PHONE or make data/private.sops.yaml decryptable"
         )
-    shutil.copy2(Path(__file__).parent / "assets" / "favicon.svg", DIST_DIR / "favicon.svg")
-    # The template sees the sanitized data only, never full_data.
-    public_data = sanitize_public_inventory(full_data)
-    seller = sanitize_public_seller(full_data)
+    return build_sha, phone
+
+
+def localize_seller(
+    seller: dict[str, Any], full_data: dict[str, Any], locale: str, translations: dict[str, Any]
+) -> dict[str, Any]:
+    """The sanitized seller with the locale's pickup copy and payment labels."""
+    localized = json.loads(json.dumps(seller))
+    seller_copy = full_data["seller"].get(locale, {}) if locale != "en" else {}
+    for field in ("pickup", "pickup_summary"):
+        if field in seller_copy:
+            localized[field] = seller_copy[field]
+    localized["payment_methods"] = {
+        kind: [translations["payment_methods"].get(method, method) for method in methods]
+        for kind, methods in seller["payment_methods"].items()
+    }
+    return localized
+
+
+def catalog_sections(localized_data: dict[str, Any]) -> dict[str, Any]:
+    """The page's car, other items and bundles, with the everything bundle apart."""
+    items = localized_data["items"]
+    bundles = localized_data["bundles"]
+    return {
+        "vehicle": next((i for i in items if i["category"] == "Vehicle"), None),
+        "items": [i for i in items if i["category"] != "Vehicle"],
+        "bundles": [b for b in bundles if not b["everything"]],
+        "everything": next((b for b in bundles if b["everything"]), None),
+    }
+
+
+def verify_markers(html: str, inventory_json: str, contact_json: str) -> None:
+    """Fail closed: a template that stops emitting either one would ship a page
+    with no items or no way to reach the seller."""
+    for emitted, marker in (
+        (
+            f"const INVENTORY = {inventory_json};",
+            "const INVENTORY = {{ inventory_json | safe }};",
+        ),
+        (f"const _C = {contact_json};", "const _C = {{ contact_json | safe }};"),
+    ):
+        if emitted not in html:
+            raise RuntimeError(f"Template index.html does not emit {marker}")
+
+
+def write_seller_poster(public_data: dict[str, Any]) -> None:
+    """The /seller/ listing generator, fed the items that can still be listed."""
     poster_dir = DIST_DIR / "seller"
     poster_dir.mkdir(parents=True, exist_ok=True)
     listable_items = [
@@ -489,6 +531,17 @@ def build_public_site(full_data: dict[str, Any]) -> None:
         render("seller.html", items_json=items_json), encoding="utf-8"
     )
     shutil.copy2(Path(__file__).parent / "assets" / "seller.mjs", poster_dir / "seller.mjs")
+
+
+def build_public_site(full_data: dict[str, Any]) -> None:
+    DIST_DIR.mkdir(parents=True, exist_ok=True)
+
+    build_sha, phone = build_identity()
+    shutil.copy2(Path(__file__).parent / "assets" / "favicon.svg", DIST_DIR / "favicon.svg")
+    # The template sees the sanitized data only, never full_data.
+    public_data = sanitize_public_inventory(full_data)
+    seller = sanitize_public_seller(full_data)
+    write_seller_poster(public_data)
     departure = date.fromisoformat(seller["departure_date"])
     contact_json = json.dumps(phone_parts(phone))
     origin = site_url()
@@ -499,19 +552,16 @@ def build_public_site(full_data: dict[str, Any]) -> None:
         localized_data = localize_public_inventory(
             public_data, full_data, locale, translations, asset_prefix
         )
-        localized_seller = json.loads(json.dumps(seller))
-        seller_copy = full_data["seller"].get(locale, {}) if locale != "en" else {}
-        for field in ("pickup", "pickup_summary"):
-            if field in seller_copy:
-                localized_seller[field] = seller_copy[field]
-        localized_seller["payment_methods"] = {
-            kind: [translations["payment_methods"].get(method, method) for method in methods]
-            for kind, methods in seller["payment_methods"].items()
-        }
-        vehicle = next((i for i in localized_data["items"] if i["category"] == "Vehicle"), None)
-        items = [i for i in localized_data["items"] if i["category"] != "Vehicle"]
-        bundles = localized_data["bundles"]
-        og = catalog_og(locale, translations, vehicle, items, previews, origin, departure)
+        sections = catalog_sections(localized_data)
+        og = catalog_og(
+            locale,
+            translations,
+            sections["vehicle"],
+            sections["items"],
+            previews,
+            origin,
+            departure,
+        )
         # `<` escaped so item text cannot close the inline <script> ("</script>", "<!--").
         inventory_json = json.dumps(localized_data, indent=2).replace("<", "\\u003c")
         html = render(
@@ -523,30 +573,16 @@ def build_public_site(full_data: dict[str, Any]) -> None:
             build_sha=build_sha,
             inventory_json=inventory_json,
             contact_json=contact_json,
-            seller=localized_seller,
+            seller=localize_seller(seller, full_data, locale, translations),
             og=og,
             departure_month=translations["months"][departure.month],
-            vehicle=vehicle,
-            items=items,
-            chips=category_chips(items, translations["categories"]),
-            bundles=[b for b in bundles if not b["everything"]],
-            everything=next((b for b in bundles if b["everything"]), None),
+            chips=category_chips(sections["items"], translations["categories"]),
             language_links=(
                 {"en": "index.html", "es": "es/"} if locale == "en" else {"en": "../", "es": "./"}
             ),
+            **sections,
         )
-
-        # Fail closed: a template that stops emitting either one would ship a page
-        # with no items or no way to reach the seller.
-        for emitted, marker in (
-            (
-                f"const INVENTORY = {inventory_json};",
-                "const INVENTORY = {{ inventory_json | safe }};",
-            ),
-            (f"const _C = {contact_json};", "const _C = {{ contact_json | safe }};"),
-        ):
-            if emitted not in html:
-                raise RuntimeError(f"Template index.html does not emit {marker}")
+        verify_markers(html, inventory_json, contact_json)
 
         target = PUBLIC_INDEX_HTML if locale == "en" else DIST_DIR / locale / "index.html"
         target.parent.mkdir(parents=True, exist_ok=True)
