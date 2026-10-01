@@ -22,6 +22,41 @@ done
 [ "$code" = 200 ] || fail "$url/ returned $code"
 
 page=$(get "$url/")
+# The end-of-sale build (OPS-011) has no catalog: tell it by what is served, since smoke runs
+# against a URL and not against the repo. It must stay a page with no way to reach the seller.
+if grep -Fq 'data-role="sale-over"' <<<"$page"; then
+  es_page=$(get "$url/es/")
+  grep -Fq 'data-role="sale-over"' <<<"$es_page" || fail "ES is not the end page"
+  for served in "$page" "$es_page"; do
+    grep -qiE '\b(sms|tel):' <<<"$served" && fail "the end page links to sms: or tel:"
+    grep -qE 'const _C = |data-item=' <<<"$served" && fail "the end page carries contact or item data"
+  done
+  for served in "$page" "$es_page"; do
+    grep -qE '[0-9]{3}[^0-9]{0,3}[0-9]{3}[^0-9]{0,3}[0-9]{4}' <<<"$(sed 's/<[^>]*>/ /g' <<<"$served")" \
+      && fail "the end page writes out a phone number"
+  done
+  [ "$(curl -s -o /dev/null -w '%{http_code}' "$url/seller/")" = 200 ] && fail "/seller/ answers 200 on the end page"
+  get "$url/styles.css" >/dev/null || fail "compiled stylesheet missing"
+  # Old share links redirect to the end page of their language; a fresh deployment can lag.
+  redirected() {
+    local got
+    for _ in $(seq 0 "${SMOKE_RETRIES:-6}"); do
+      got=$(curl -sS -o /dev/null -w '%{http_code} %{redirect_url}' "$url$1") || got="unreachable"
+      [ "$got" = "302 $url$2" ] && return 0
+      sleep "${SMOKE_RETRY_DELAY:-5}"
+    done
+    fail "old share link $1 does not redirect to $2 (got: $got)"
+  }
+  redirected /i/anything/ /
+  redirected /es/i/anything/ /es/
+  get -I "$url/" | grep -qi '^x-content-type-options: nosniff' || fail "_headers not applied"
+  grep -A1 -x 'User-agent: \*' <<<"$(get "$url/robots.txt")" | grep -qx 'Disallow: /' || fail "robots.txt is permissive"
+  for path in /inventory.json /poster_assistant.html /private/inventory.json; do
+    grep -qE 'firm_floor_price|pinGateModal' <<<"$(curl -sS "$url$path")" && fail "$path serves private content"
+  done
+  echo "smoke OK (sale over): $url"
+  exit 0
+fi
 grep -q 'const _C = {"cc"' <<<"$page" || fail "contact fragments missing from the page"
 grep -q '__SELLER_CONTACT__' <<<"$page" && fail "contact placeholder was not replaced"
 grep -qE 'floor_price|"floors"' <<<"$page" && fail "the page carries reserve floor data"

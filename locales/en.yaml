@@ -102,3 +102,6 @@ payment_methods:
   Zelle: Zelle
   Cashier's check issued at the buyer's bank: Cashier's check issued at the buyer's bank
   wire transfer: wire transfer
+sale_over_title: The sale is over
+sale_over_heading: The sale is over.
+sale_over_thanks: Thank you to everyone who came by.

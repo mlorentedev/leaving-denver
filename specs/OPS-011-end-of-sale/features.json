@@ -1,0 +1,51 @@
+[
+  {
+    "id": "OPS-011-end-of-sale-f1",
+    "behavior": "AC1: an end build with a sentinel SELLER_PHONE publishes no phone, no sms:/tel:, no item id and no data-item=",
+    "verification": "uv run pytest -q tests/test_end_of_sale.py -k 'phone_in_any_form or names_an_item or nothing_but'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "OPS-011-end-of-sale-f2",
+    "behavior": "AC2: `/` and `/es/` carry the end message, a title and og:title saying the sale is over, and link to each other",
+    "verification": "uv run pytest -q tests/test_end_of_sale.py -k 'end_page'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "OPS-011-end-of-sale-f3",
+    "behavior": "AC3: no i/, es/i/, seller/ or catalog/ is served and _redirects sends /i/* and /es/i/* to the home pages with a 302",
+    "verification": "uv run pytest -q tests/test_end_of_sale.py -k 'old_share_links or stale'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "OPS-011-end-of-sale-f4",
+    "behavior": "AC4: the end build succeeds with no SELLER_PHONE and no private data, and never reaches for either",
+    "verification": "uv run pytest -q tests/test_end_of_sale.py -k 'needs_no_phone'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "OPS-011-end-of-sale-f5",
+    "behavior": "AC5: the switch defaults to off, only a boolean is accepted, and the default build is the catalog",
+    "verification": "uv run pytest -q tests/test_end_of_sale.py -k 'switch'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "OPS-011-end-of-sale-f6",
+    "behavior": "AC6: smoke.sh follows the mode of the served page: it passes an end build and fails on a tel:/sms: link, a missing redirect or a missing stylesheet",
+    "verification": "uv run pytest -q tests/test_smoke_end_of_sale.py tests/test_smoke_script.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "OPS-011-end-of-sale-f7",
+    "behavior": "AC7: decommission.md has Nov 8 and By Nov 15 sections of commands and dashboard paths, and ADR-008 records keep-over-delete with the subdomain reason",
+    "verification": "uv run pytest -q tests/test_decommission_runbook.py tests/test_ops_runbook.py",
+    "state": "pending",
+    "evidence": ""
+  }
+]
