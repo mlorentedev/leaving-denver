@@ -519,14 +519,8 @@ def verify_markers(html: str, inventory_json: str, contact_json: str) -> None:
             raise RuntimeError(f"Template index.html does not emit {marker}")
 
 
-def build_public_site(full_data: dict[str, Any]) -> None:
-    DIST_DIR.mkdir(parents=True, exist_ok=True)
-
-    build_sha, phone = build_identity()
-    shutil.copy2(Path(__file__).parent / "assets" / "favicon.svg", DIST_DIR / "favicon.svg")
-    # The template sees the sanitized data only, never full_data.
-    public_data = sanitize_public_inventory(full_data)
-    seller = sanitize_public_seller(full_data)
+def write_seller_poster(public_data: dict[str, Any]) -> None:
+    """The /seller/ listing generator, fed the items that can still be listed."""
     poster_dir = DIST_DIR / "seller"
     poster_dir.mkdir(parents=True, exist_ok=True)
     listable_items = [
@@ -537,6 +531,17 @@ def build_public_site(full_data: dict[str, Any]) -> None:
         render("seller.html", items_json=items_json), encoding="utf-8"
     )
     shutil.copy2(Path(__file__).parent / "assets" / "seller.mjs", poster_dir / "seller.mjs")
+
+
+def build_public_site(full_data: dict[str, Any]) -> None:
+    DIST_DIR.mkdir(parents=True, exist_ok=True)
+
+    build_sha, phone = build_identity()
+    shutil.copy2(Path(__file__).parent / "assets" / "favicon.svg", DIST_DIR / "favicon.svg")
+    # The template sees the sanitized data only, never full_data.
+    public_data = sanitize_public_inventory(full_data)
+    seller = sanitize_public_seller(full_data)
+    write_seller_poster(public_data)
     departure = date.fromisoformat(seller["departure_date"])
     contact_json = json.dumps(phone_parts(phone))
     origin = site_url()
