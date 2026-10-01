@@ -29,6 +29,7 @@ from leaving_denver.config import (
     INVENTORY_JSON_PRIVATE,
     INVENTORY_YAML,
     LOCALES_DIR,
+    PANEL_MARKER,
     PRIVATE_POSTER_HTML,
     PUBLIC_HEADERS,
     PUBLIC_INDEX_HTML,
@@ -705,7 +706,9 @@ def verify_security_guarantees() -> None:
     """Verifies that no private files or floor prices leaked into build/public/"""
     dist_files = [f.name for f in DIST_DIR.glob("**/*") if f.is_file()]
     for fname in dist_files:
-        if "poster" in fname.lower() or fname.lower() == "inventory.json":
+        if any(word in fname.lower() for word in ("poster", "panel")) or (
+            fname.lower() == "inventory.json"
+        ):
             raise RuntimeError(f"SECURITY LEAK: {fname} found in public dist directory!")
 
     # Check every localized public page for floor price leaks.
@@ -713,6 +716,8 @@ def verify_security_guarantees() -> None:
         content = path.read_text(encoding="utf-8")
         if "firm_floor_price" in content:
             raise RuntimeError(f"SECURITY LEAK: firm_floor_price found in {path}!")
+        if PANEL_MARKER in content:
+            raise RuntimeError(f"SECURITY LEAK: the private control panel is in {path}!")
 
 
 def build_all() -> None:

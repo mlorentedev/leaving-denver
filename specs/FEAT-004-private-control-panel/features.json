@@ -1,0 +1,65 @@
+[
+  {
+    "id": "FEAT-004-private-control-panel-f1",
+    "behavior": "One panel row per item with asking, target, floor, status, days listed, channels, renew due, next drop and suggested price; missing data renders empty",
+    "verification": "uv run pytest -q tests/test_panel.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-004-private-control-panel-f2",
+    "behavior": "drops and the panel share one price-tier function; drops output unchanged",
+    "verification": "uv run pytest -q tests/test_panel.py tests/test_sale_timeline.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-004-private-control-panel-f3",
+    "behavior": "Next drop is the first tier below asking with its window start; overdue flag; empty at floor, free or not Available",
+    "verification": "uv run pytest -q tests/test_panel.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-004-private-control-panel-f4",
+    "behavior": "Facebook renew due is 7 days after the latest posting; days listed from the earliest posting to today or the sale",
+    "verification": "uv run pytest -q tests/test_panel.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-004-private-control-panel-f5",
+    "behavior": "post, reprice and sold write only to the sops file via sops set on stdin; a failed write changes nothing",
+    "verification": "uv run pytest -q tests/test_panel_records.py tests/test_private_sales.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-004-private-control-panel-f6",
+    "behavior": "sold records price and date and lists the take-down steps for the channels posted",
+    "verification": "uv run pytest -q tests/test_panel_records.py tests/test_private_sales.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-004-private-control-panel-f7",
+    "behavior": "The panel never lands under build/public; the build fails on a panel file there; no fixture value appears in a public build",
+    "verification": "uv run pytest -q tests/test_panel_isolation.py tests/test_security_isolation.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-004-private-control-panel-f8",
+    "behavior": "make panel reads the sops file in process and fails closed; --private-file renders from plain YAML",
+    "verification": "uv run pytest -q tests/test_panel.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-004-private-control-panel-f9",
+    "behavior": "Commands, schema and owner steps documented in the runbooks",
+    "verification": "uv run pytest -q tests/test_panel.py",
+    "state": "pending",
+    "evidence": ""
+  }
+]

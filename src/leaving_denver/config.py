@@ -45,3 +45,8 @@ SUPPORTED_IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".heic"}
 
 # Item lifecycle (FEAT-006). "Free" is a price attribute (free_with_purchase), not a status.
 STATUSES = ("Available", "Pending", "Sold")
+
+# The seller's control panel (FEAT-004): beside the private tool, never under DIST_DIR.
+PRIVATE_PANEL_HTML = DIST_PRIVATE_DIR / "panel.html"
+# Marks the panel's <html>; the build fails if a public page carries it.
+PANEL_MARKER = "data-private-panel"

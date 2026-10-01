@@ -1,0 +1,72 @@
+{# The seller's control panel (FEAT-004). Local only: it holds floors and targets, so it is
+   written under build/private/ and has no script, no remote asset and no link out. #}
+{% macro day(d) %}{% if d %}{{ d.strftime('%b') }} {{ d.day }}{% else %}&mdash;{% endif %}{% endmacro %}
+{% macro usd(v) %}{% if v is not none %}${{ v }}{% else %}&mdash;{% endif %}{% endmacro %}
+<!doctype html>
+<html lang="en" data-private-panel>
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Control panel (private)</title>
+<style>
+  body { font: 14px/1.4 system-ui, sans-serif; margin: 1.5rem; color: #1c1c1c; background: #fbfbfb; }
+  h1 { font-size: 1.25rem; margin: 0 0 .25rem; }
+  .note { color: #555; margin: 0 0 1rem; }
+  .due { background: #fff4d6; border: 1px solid #e0c36a; padding: .5rem .9rem; margin-bottom: 1rem; }
+  .due ul { margin: .25rem 0 0; padding-left: 1.2rem; }
+  table { border-collapse: collapse; width: 100%; background: #fff; }
+  th, td { border: 1px solid #ddd; padding: .35rem .5rem; text-align: left; vertical-align: top; }
+  th { background: #f0f0f0; position: sticky; top: 0; }
+  td.n { text-align: right; font-variant-numeric: tabular-nums; }
+  tr.sold td { color: #777; }
+  .flag { font-weight: 700; color: #9a2a00; }
+  .tag { color: #555; font-size: .85em; }
+</style>
+</head>
+<body>
+<h1>Control panel</h1>
+<p class="note">Private: floors, targets and sale prices. Local file, never deployed. Generated {{ day(today) }} {{ today.year }} by <code>make panel</code>.</p>
+
+{% if actions.renewals or actions.drops %}
+<div class="due">
+  <strong>Due now</strong>
+  <ul>
+  {% for r in actions.renewals %}
+    <li>Renew {{ r.id }} on Facebook (due {{ day(r.renew_due) }})</li>
+  {% endfor %}
+  {% for r in actions.drops %}
+    <li>Drop {{ r.id }} to {{ usd(r.next_drop.price) }} (window opened {{ day(r.next_drop.on) }})</li>
+  {% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+<table>
+<thead>
+<tr><th>Item</th><th>Status</th><th>Asking</th><th>Target</th><th>Floor</th><th>Days listed</th><th>Channels</th><th>Renew due</th><th>Next drop</th><th>Suggested</th><th>Price log / sale</th></tr>
+</thead>
+<tbody>
+{% for r in rows %}
+<tr{% if r.status == 'Sold' %} class="sold"{% endif %}>
+  <td>{{ r.id }}<br><span class="tag">{{ r.title }}{% if r.draft %} (draft, not published){% endif %}{% if r.free %} (free with purchase){% endif %}</span></td>
+  <td>{{ r.status }}</td>
+  <td class="n">{{ usd(r.asking) }}</td>
+  <td class="n">{{ usd(r.target) }}</td>
+  <td class="n">{{ usd(r.floor) }}</td>
+  <td class="n">{% if r.days_listed is not none %}{{ r.days_listed }}{% else %}not listed{% endif %}</td>
+  <td>{% for c in r.channels %}{{ c.name }} ({{ day(c.last) }}{% if c.posts > 1 %}, {{ c.posts }}x{% endif %}){% if not loop.last %}<br>{% endif %}{% else %}&mdash;{% endfor %}</td>
+  <td>{{ day(r.renew_due) }}{% if r.renew_overdue %} <span class="flag">DUE</span>{% endif %}</td>
+  <td>{% if r.next_drop %}{{ day(r.next_drop.on) }}{% if r.next_drop.overdue %} <span class="flag">OPEN</span>{% endif %}{% else %}&mdash;{% endif %}</td>
+  <td class="n">{{ usd(r.next_drop.price if r.next_drop else None) }}</td>
+  <td>
+    {% for e in r.price_log %}{{ day(e.at) }}: {{ usd(e.price) }}{% if not loop.last %}<br>{% endif %}{% endfor %}
+    {% if r.log_mismatch %}<br><span class="flag">log differs from asking</span>{% endif %}
+    {% if r.sale %}<br>Sold {{ usd(r.sale.price) }}{% if r.sale.at %} on {{ day(r.sale.at) }}{% endif %}{% endif %}
+  </td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</body>
+</html>

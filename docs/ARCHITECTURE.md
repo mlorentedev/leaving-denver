@@ -40,6 +40,7 @@ leaving-denver/
 │   │   └── catalog/               <-- Optimized, EXIF-scrubbed images (<300KB each)
 │   └── private/                   <-- Private Local Seller Workspace (gitignored)
 │       ├── poster_assistant.html  <-- Multi-portal copy generator (FB/CL/OfferUp/Nextdoor)
+│       ├── panel.html             <-- Control panel: floors, targets, tracking (make panel)
 │       └── inventory.json         <-- Private inventory with floor prices
 ├── integrations/
 │   └── n8n/                       <-- Kubelab integration workflows

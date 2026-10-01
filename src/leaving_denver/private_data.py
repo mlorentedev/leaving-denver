@@ -12,23 +12,37 @@ import os
 import re
 import shutil
 import subprocess
+from datetime import date
 from typing import Any
 
 from leaving_denver.config import PRIVATE_SOPS_YAML
 
 
-def load_private() -> dict[str, Any]:
-    """Decrypt the private file. Returns {} when it is absent or not decryptable."""
-    if not PRIVATE_SOPS_YAML.exists() or not shutil.which("sops"):
-        return {}
+def decrypt_private() -> dict[str, Any]:
+    """Decrypt the private file in process. Raises when it cannot be read.
+
+    For anything that must not mistake "unreadable" for "empty": a write built on {} would
+    replace what the file holds."""
+    if not PRIVATE_SOPS_YAML.exists():
+        raise RuntimeError(f"{PRIVATE_SOPS_YAML} does not exist")
+    if not shutil.which("sops"):
+        raise RuntimeError("sops is not installed")
     res = subprocess.run(
         ["sops", "--decrypt", "--output-type", "json", str(PRIVATE_SOPS_YAML)],
         capture_output=True,
         text=True,
     )
     if res.returncode != 0:
-        return {}
+        raise RuntimeError("data/private.sops.yaml is not decryptable (sops + age key required)")
     return json.loads(res.stdout)
+
+
+def load_private() -> dict[str, Any]:
+    """Decrypt the private file. Returns {} when it is absent or not decryptable."""
+    try:
+        return decrypt_private()
+    except RuntimeError:
+        return {}
 
 
 def seller_phone(private: dict[str, Any] | None = None) -> str | None:
@@ -56,16 +70,48 @@ def floors(private: dict[str, Any] | None = None) -> dict[str, int]:
     return private.get("floors", {})
 
 
-def record_sale(item_id: str, price: int) -> None:
-    """Keep what an item actually sold for in the encrypted file, never in the public repo."""
+def set_private(keys: list[str | int], value: Any) -> None:
+    """Set one key of the encrypted file with `sops set`, creating the path when it is new.
+
+    The value goes on stdin as JSON, not argv, so it never shows in the process table. `sops set`
+    rejects a bare JSON list as the value, so a list grows by setting its next index."""
     if not shutil.which("sops"):
         raise RuntimeError("sops is not installed")
-    # The price goes on stdin, not argv, so it never shows in the process table.
+    index = "".join(f"[{json.dumps(key)}]" for key in keys)
     res = subprocess.run(
-        ["sops", "set", "--value-stdin", str(PRIVATE_SOPS_YAML), f'["sales"]["{item_id}"]'],
-        input=str(int(price)),
+        ["sops", "set", "--value-stdin", str(PRIVATE_SOPS_YAML), index],
+        input=json.dumps(value),
         capture_output=True,
         text=True,
     )
     if res.returncode != 0:
         raise RuntimeError(f"sops set failed: {res.stderr.strip()}")
+
+
+def record_sale(item_id: str, price: int | None, on: date) -> None:
+    """Keep what an item sold for, and when, in the encrypted file, never in the public repo."""
+    sale: dict[str, Any] = {"at": on.isoformat()}
+    if price is not None:
+        sale = {"price": int(price), **sale}
+    set_private(["sales", item_id], sale)
+
+
+def append_tracking(item_id: str, path: list[str], entry: Any) -> None:
+    """Append to a list kept under tracking.<item>: set the entry at the list's next index.
+
+    Reads the file first and refuses to write if it cannot be read: an index counted on an
+    unreadable file would overwrite an entry already there."""
+    node: Any = decrypt_private().get("tracking", {}).get(item_id, {})
+    for key in path:
+        node = (node or {}).get(key)
+    set_private(["tracking", item_id, *path, len(node or [])], entry)
+
+
+def record_post(item_id: str, channel: str, on: date) -> None:
+    """A posting, or a renewal, of the item on a channel."""
+    append_tracking(item_id, ["channels", channel], on.isoformat())
+
+
+def record_price(item_id: str, price: int, on: date) -> None:
+    """A change of the asking price, for judging afterwards whether the drops worked."""
+    append_tracking(item_id, ["price_log"], {"at": on.isoformat(), "price": int(price)})
