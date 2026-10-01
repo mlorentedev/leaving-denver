@@ -71,9 +71,11 @@ To enable it, an administrator of the Cloudflare Zero Trust account must:
    policy, Pages hostname, or deployment-route change.
 
 The seller workspace at `build/private/` is **never** uploaded. Never put
-floors, private drafts, or a plaintext PIN under `build/public/`, even behind
-Access: disabling an edge policy must not disclose them. The buyer catalog
-must stay reachable anonymously.
+floors, notes, tracking, private drafts, or a PIN under `build/public/` as
+plaintext, even behind Access: disabling an edge policy must not disclose them.
+The one exception is ADR-007's sealed ciphertext, made on the owner's machine
+under a passphrase only the owner knows, and only inside `/seller/`. The buyer
+catalog must stay reachable anonymously.
 
 ## Inventory and contact
 

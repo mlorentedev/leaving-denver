@@ -16,6 +16,10 @@ created: "2026-09-30"
 Accepted. It extends ADR-002 (output isolation) from floors to everything the owner records
 while selling.
 
+Amended by ADR-007: private means the plaintext never leaves the owner's machine. The sealed
+ciphertext may be served inside `/seller/`, behind Access, so decision 3 no longer confines the
+panel's data to a local file. Decisions 1, 2 and 4 are unchanged.
+
 ## Date
 
 2026-09-30
