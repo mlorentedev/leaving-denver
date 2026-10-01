@@ -32,9 +32,17 @@ created: "2026-09-29"
   root Pages middleware protecting all seller assets, run targeted tests.
 - [x] [AC4] Document exact owner-only Access setup, aliases and smoke gate in
   `docs/runbooks/ops.md` and `README.md`. Run `make check`.
-- [ ] [AC2] [AC4] Configure Access application and Pages variables on Cloudflare
+- [x] [AC2] [AC4] Configure Access application and Pages variables on Cloudflare
   once authorized; verify anonymous denial and owner login on production and
   preview before advertising the URL. Do not publish private workspace.
+  Done 2026-09-30 by the owner. The Access app covers `seller` and `seller/*` on
+  `leaving-denver.pages.dev` and `*.leaving-denver.pages.dev`, allowing One-time PIN
+  for the owner's email only. `ACCESS_TEAM_DOMAIN` and `ACCESS_AUD` are set for
+  Production and Preview. Anonymous `/seller`, `/seller/`, `/seller/index.html` and
+  `/seller/seller.mjs` return 302 to `mlorentedev.cloudflareaccess.com` on
+  production and on `candidate.leaving-denver.pages.dev`, while `/` stays 200. The
+  owner signed in on a phone and a computer and the tool works. Still open: the
+  unlisted-identity denial check (owner).
 
 ## Closing
 

@@ -32,3 +32,4 @@ tags: [lessons, index, docs, leaving-denver]
 | [lesson-017](lesson-017-virtual-time-starves-dialog-close-events.md) | Virtual Time Starves Dialog Close Events | 2026-09-30 | [testing, browser, dialog] |
 | [lesson-018](lesson-018-defer-shell-token-substitution-in-make.md) | Keep Shell Token Substitution Out of Immediate Make Expansion | 2026-09-30 | [make, cloudflare, secrets, deploy] |
 | [lesson-019](lesson-019-an-unreadable-file-is-not-an-empty-one.md) | An Unreadable File Is Not an Empty One | 2026-09-30 | [secrets, sops, testing] |
+| [lesson-020](lesson-020-unlayered-css-outranks-tailwind-utilities.md) | Unlayered CSS Outranks Tailwind Utilities | 2026-09-30 | [css, tailwind, testing, mobile] |
