@@ -35,3 +35,4 @@ tags: [lessons, index, docs, leaving-denver]
 | [lesson-020](lesson-020-unlayered-css-outranks-tailwind-utilities.md) | Unlayered CSS Outranks Tailwind Utilities | 2026-09-30 | [css, tailwind, testing, mobile] |
 | [lesson-021](lesson-021-a-switch-that-retires-a-feature-retires-its-tests.md) | A Switch That Retires a Feature Retires Its Tests | 2026-10-01 | [testing, build, ci] |
 | [lesson-022](lesson-022-a-printed-page-inherits-the-catalogs-body-padding.md) | A Printed Page Inherits the Catalog's Body Padding | 2026-10-01 | [css, print, testing, qr] |
+| [lesson-026](lesson-026-one-404-page-is-served-at-every-missing-url.md) | One 404 Page Is Served at Every Missing URL | 2026-10-01 | [cloudflare, html, testing, i18n] |

@@ -1,0 +1,13 @@
+# The not-found page's own copy (BUG-013). Kept out of en.yaml and es.yaml, whose keys all
+# travel to the catalog page as inline JSON: the 404 is not part of it. One page serves every
+# missing path, so both languages sit on it.
+en:
+  title: Page not found
+  heading: That page isn't here.
+  body: The link may be old or mistyped.
+  home: Go to the home page
+es:
+  title: Página no encontrada
+  heading: Esa página no existe.
+  body: Puede que el enlace sea antiguo o tenga un error.
+  home: Ir a la página principal

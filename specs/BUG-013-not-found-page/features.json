@@ -1,0 +1,51 @@
+[
+  {
+    "id": "BUG-013-not-found-page-f1",
+    "behavior": "AC1: the 404 page is written by the catalog build and by the end build, and the end build publishes exactly the old set plus it",
+    "verification": "uv run pytest -q tests/test_not_found.py tests/test_end_of_sale.py -k 'top_level_404 or nothing_but'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "BUG-013-not-found-page-f2",
+    "behavior": "AC2: both languages, links to / and /es/, noindex",
+    "verification": "uv run pytest -q tests/test_not_found.py -k 'both_languages or own_home_page or out_of_search'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "BUG-013-not-found-page-f3",
+    "behavior": "AC3: no phone, sms:/tel:, const _C, script, item id or price in either mode",
+    "verification": "uv run pytest -q tests/test_not_found.py -k 'no_phone or no_item'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "BUG-013-not-found-page-f4",
+    "behavior": "AC4: every reference is root-absolute, resolves the same from any depth and is a file of the site",
+    "verification": "uv run pytest -q tests/test_not_found.py -k 'any_depth or file_of_the_site or compiled_stylesheet'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "BUG-013-not-found-page-f5",
+    "behavior": "AC5: the end build keeps the page through the sweep and its redirects do not catch it",
+    "verification": "uv run pytest -q tests/test_not_found.py -k 'sweeps or swallow'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "BUG-013-not-found-page-f6",
+    "behavior": "AC6: smoke.sh asserts a 404 with the not-found body in both modes, and fails on a 200 or a foreign 404",
+    "verification": "uv run pytest -q tests/test_smoke_script.py tests/test_smoke_end_of_sale.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "BUG-013-not-found-page-f7",
+    "behavior": "AC7: every class of not_found.html has a rule in the compiled CSS",
+    "verification": "uv run pytest -q tests/test_class_coverage.py",
+    "state": "pending",
+    "evidence": ""
+  }
+]
