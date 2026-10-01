@@ -114,6 +114,19 @@ def test_vehicle_specifics(inventory):
     assert "open recall" in specs_text.lower() or "recall" in specs_text.lower()
 
 
+def test_the_car_says_it_passed_emissions_and_shows_the_report(inventory):
+    """The May 2026 report reads overall PASS (owner, 2026-09-30); it went to the owner's
+    renewal, so the buyer gets a fresh certificate (docs/runbooks/vehicle-sale.md §6)."""
+    car = next(i for i in inventory["items"] if i["category"] == "Vehicle")
+    assert any(p.endswith("doc_2_emissions_report.jpg") for p in car["photos"])
+    for specs, passed, fresh in (
+        (car["specs"], "passed the colorado emissions test", "fresh, unused certificate"),
+        (car["es"]["specs"], "pasó la prueba de emisiones", "uno nuevo y sin usar"),
+    ):
+        line = next(s.lower() for s in specs if "emis" in s.lower())
+        assert passed in line and fresh in line, line
+
+
 def test_bundles_integrity(inventory):
     prices = {
         i["id"]: 0 if i.get("free_with_purchase") else i["recommended_list_price"]
