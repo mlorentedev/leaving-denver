@@ -26,8 +26,7 @@ unlayered and beats Tailwind's layered utilities (lesson-020).
 
 The flyer resets `body { padding: 0 }` in its own `<style>`, after the stylesheet link.
 `tests/test_flyer_browser.py` prints the page to PDF in headless Chrome with its own `@page`
-size and counts the sheets; it fails with the reset removed, and it also keeps the content
-under 95% of the box so a longer car title or one more category does not tip it over.
+size and counts the sheets; it fails with the reset removed.
 `tests/test_flyer.py` checks the QR by reading its module matrix back out of the SVG and
 comparing it with `segno`'s for the literal URL. A decode of the PDF's raster by OpenCV, run
 once by hand while building it, returned the same URL.

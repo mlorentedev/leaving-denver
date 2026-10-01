@@ -67,7 +67,7 @@ CATALOG_TESTS = {
     # Reads the live /flyer/, which an end build does not make (the scratch builds in test_flyer.py
     # keep running).
     "test_flyer_browser.py": (
-        "test_the_flyer_fits_the_letter_content_box_with_room_to_spare",
+        "test_the_flyer_fits_the_letter_content_box",
         "test_the_flyer_prints_on_exactly_one_letter_sheet",
     ),
     "test_inventory_ssot.py": (

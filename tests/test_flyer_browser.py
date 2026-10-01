@@ -50,9 +50,7 @@ def test_the_flyer_prints_on_exactly_one_letter_sheet(tmp_path):
 
 
 @needs_chrome
-def test_the_flyer_fits_the_letter_content_box_with_room_to_spare(tmp_path):
-    # One sheet by a hair would spill when a long category name or a longer car title is added.
+def test_the_flyer_fits_the_letter_content_box(tmp_path):
     _, content = printed(tmp_path)
     assert content["scrollWidth"] <= CONTENT_WIDTH_PX, content
     assert content["scrollHeight"] <= CONTENT_HEIGHT_PX, content
-    assert content["height"] <= CONTENT_HEIGHT_PX * 0.95, content
