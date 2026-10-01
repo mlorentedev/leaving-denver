@@ -1,60 +1,39 @@
 ---
-tags: [spec, tasks, templates]
+tags: [spec, tasks]
 created: "2026-10-01"
 ---
 
 # Tasks - OPS-011-end-of-sale
 
-> TDD order. One task = one focused commit. Tick as you go. Reorder freely while spec is in `draft` state; freeze once you start `implementing`.
->
-> **Inline markers** (optional, additive — borrowed from `github/spec-kit`, adapt-not-adopt per #141):
-> - `[P]` — this task has **no dependency on another unchecked task**, so it is safe to run in parallel (fan out to a `Workflow`, or just batch). TDD chains (test → implement → refactor of the *same* behavior) are sequential and must NOT carry `[P]`; independent behaviors can.
-> - `[AC<n>]` — this task helps satisfy **acceptance criterion #`<n>`** from `proposal.md`. Lets `/spec check` map coverage deterministically; omit it and the check falls back to semantic judgment.
+> TDD order. One task = one focused commit. Tick as you go.
 
 ## Setup
 
-- [ ] Branch created from main: `feat/OPS-011-end-of-sale`
-- [ ] `proposal.md` is complete and acceptance criteria are testable
-- [ ] No open questions left in `proposal.md` "Risks / open questions"
+- [x] Branch `feat/end-of-sale-page` created from main
+- [x] `proposal.md` states testable acceptance criteria
+- [x] No open questions left in `proposal.md` (the `_redirects` check on a real deploy is a smoke check, not a blocker)
 
 ## Implementation
 
-> Replace these with the actual steps for this feature. Keep them small (one commit each) and in TDD order.
-> The `[P]` / `[AC<n>]` markers are optional — see the legend above. Behaviors 1 and 2 below are independent, so their *first* test task carries `[P]`.
-
-- [ ] [P] [AC1] Write failing test for <behavior 1>
-- [ ] [AC1] Implement <module/function> to make it pass
-- [ ] Refactor for clarity (extract, rename, dedupe)
-- [ ] [P] [AC2] Write failing test for <behavior 2>
-- [ ] [AC2] Implement to make it pass
-- [ ] ...
+- [ ] [AC5] Write `tests/test_end_of_sale.py`: `seller.sale_over` defaults to off, accepts only a boolean,
+  and the committed `data/inventory.yaml` leaves it off. Run it (expected FAIL: no helper).
+- [ ] [AC5] Add `sale_over()` to `site_builder.py`.
+- [ ] [AC1] [AC2] [AC3] [AC4] Extend the tests with scratch end builds: no phone and no item anywhere, the
+  end page in both languages, no `i/`, `es/i/`, `seller/`, `catalog/`, and `_redirects`; a build with no
+  `SELLER_PHONE` and no private data; stale files from an earlier build are removed. Run (expected FAIL).
+- [ ] [AC1] [AC2] [AC3] [AC4] Add `templates/sale_over.html`, the `sale_over` copy in `locales/*.yaml`, and the
+  end-build branch of `build_public_site` / `build_all`.
+- [ ] [AC6] Write `tests/test_smoke_script.py` cases: smoke passes on a served end build, fails when the end
+  page carries `tel:`/`sms:` or its redirects do not answer (expected FAIL), then add the end-mode block to
+  `scripts/smoke.sh`.
+- [ ] [AC7] Write `docs/runbooks/decommission.md`, link it from `ops.md`, and write ADR-008.
+- [ ] Run `make check`.
 
 ## Closing
 
 - [ ] Every acceptance criterion from `proposal.md` is covered by at least one test
-- [ ] Every acceptance criterion has a matching entry in `features.json` (see below) with a non-vacuous verification command
-- [ ] Type checks pass
+- [ ] Every acceptance criterion has a matching entry in `features.json`
 - [ ] Lint passes
 - [ ] No unrelated changes in the diff (no scope creep)
 - [ ] `verification.md` filled in
 - [ ] PR opened referencing this spec folder
-
-## Machine-readable features
-
-This spec emits a sibling `features.json` (alongside this file) following [[pattern-feature-list-as-primitive]]. The JSON is the harness-facing contract: each acceptance criterion maps to ≥1 feature with `id`, `behavior`, `verification` (executable command), `state` (lifecycle), and `evidence` (harness-captured output).
-
-**Pass-state gating:** the agent CANNOT write `"state": "passing"` — only the harness, after running `verification` and capturing exit code 0, may set that terminal state. Reviewers must reject PRs where features.json contains `passing` entries with empty `evidence`.
-
-Minimal `features.json` skeleton (drop into `<repo>/specs/OPS-011-end-of-sale/features.json`):
-
-```json
-[
-  {
-    "id": "OPS-011-end-of-sale-f1",
-    "behavior": "<one-line copy of an acceptance criterion>",
-    "verification": "<single shell command; exit 0 means pass>",
-    "state": "pending",
-    "evidence": ""
-  }
-]
-```
