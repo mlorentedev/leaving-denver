@@ -114,17 +114,61 @@ def test_vehicle_specifics(inventory):
     assert "open recall" in specs_text.lower() or "recall" in specs_text.lower()
 
 
+# What the car says about emissions, once per language: the May 2026 test passed, that
+# certificate is already used (registration renewal), and a new test comes before handover.
+EMISSIONS_MEANING = {
+    "en": {
+        "passed": r"passed",
+        "result": r"overall pass",
+        "used": r"already used for my registration renewal",
+        "new test": r"before handover.{0,20}new emissions test.{0,40}new certificate",
+    },
+    "es": {
+        "passed": r"pasó",
+        "result": r"resultado pass",
+        "used": r"ya se usó (para|en) (renovar|la renovación de) mi registro",
+        "new test": r"antes de la entrega.{0,30}nueva prueba de emisiones.{0,40}certificado nuevo",
+    },
+}
+
+
+def emissions_lines(car, lang):
+    """Every line the car states about emissions: the spec, the included certificate and the
+    verify evidence note, in the given language."""
+    source = car if lang == "en" else car["es"]
+    if lang == "en":
+        note = next(e["note"] for e in car["verify"]["evidence"] if e["id"] == "emissions-report")
+    else:
+        note = car["es"]["verify"]["emissions-report"]["note"]
+    spec = next(s for s in source["specs"] if "emis" in s.lower())
+    included = next(i for i in source["included"] if "emis" in i.lower())
+    return {"spec": spec, "included": included, "note": note}
+
+
 def test_the_car_says_it_passed_emissions_and_shows_the_report(inventory):
-    """The May 2026 report reads overall PASS (owner, 2026-09-30); it went to the owner's
-    renewal, so the buyer gets a fresh certificate (docs/runbooks/vehicle-sale.md §6)."""
+    """The May 2026 report reads overall PASS (owner, 2026-09-30) but went to the owner's
+    registration renewal, so a new test before handover gives the buyer a new certificate
+    (docs/runbooks/vehicle-sale.md section 6; C.R.S. 42-4-310)."""
     car = next(i for i in inventory["items"] if i["category"] == "Vehicle")
     assert any(p.endswith("doc_2_emissions_report.jpg") for p in car["photos"])
-    for specs, passed, fresh in (
-        (car["specs"], "passed the colorado emissions test", "fresh, unused certificate"),
-        (car["es"]["specs"], "pasó la prueba de emisiones", "uno nuevo y sin usar"),
-    ):
-        line = next(s.lower() for s in specs if "emis" in s.lower())
-        assert passed in line and fresh in line, line
+    for lang, meaning in EMISSIONS_MEANING.items():
+        lines = emissions_lines(car, lang)
+        spec = lines["spec"].lower()
+        assert re.search(meaning["passed"], spec) and re.search(meaning["result"], spec), spec
+        assert "no trouble codes" in spec or "sin códigos de falla" in spec, spec
+        for where in ("spec", "note"):
+            text = lines[where].lower()
+            for what in ("used", "new test"):
+                assert re.search(meaning[what], text), f"{lang} {where} lacks {what}: {text}"
+        assert re.search(meaning["passed"], lines["note"].lower()), lines["note"]
+        # The included line promises the new certificate, never a "valid" one in hand.
+        included = lines["included"].lower()
+        assert re.search(r"new|nuevo", included), included
+        assert re.search(r"before handover|antes de la entrega", included), included
+        for line in lines.values():
+            assert not re.search(r"fresh, unused|sin usar|valid, unused|vigente", line.lower()), (
+                line
+            )
 
 
 def test_bundles_integrity(inventory):

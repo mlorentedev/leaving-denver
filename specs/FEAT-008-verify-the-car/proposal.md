@@ -31,7 +31,9 @@ On the catalog page (`/` and `/es/`), under the car's card, a "Verify it yoursel
 - links to official sources only: NHTSA recalls, Ford recalls, NICB VINCheck;
 - my own evidence, each linking to a photo of the car's own `photos:` list: the
   recall-closure invoice and the May 2026 emissions report (overall PASS), with the
-  note that a fresh, unused emissions certificate is handed over at sale;
+  note that the May test passed but that certificate is already used for my registration
+  renewal, so I take a new emissions test before handover and give the buyer that new
+  certificate;
 - (dropped 2026-10-01, owner: the "official sites only, never pay through a link" line
   was superfluous.)
 
@@ -63,17 +65,20 @@ and shows the VIN to paste. A VIN query parameter is never guessed.
 
 ## Acceptance criteria
 
-- [ ] AC1: `/` and `/es/` each render a "verify" section for the car with the VIN and
-  links to the three official hosts (nhtsa.gov, ford.com, nicb.org), in the page's
-  language.
+- [ ] AC1: `/` and `/es/` each put a "Verify it yourself" button on the car's card (its
+  action row) that opens a sheet, like the item and bundle sheets (one history entry;
+  closed by its button, Escape, the backdrop and Back). The sheet shows the VIN and links
+  to the three official hosts (nhtsa.gov, ford.com, nicb.org), in the page's language.
+  The content is no longer a section on the page (owner, 2026-10-01).
 - [ ] AC2: Every external link in the section is https on an allow-listed official
   host and opens in a new tab with `rel="noopener noreferrer"`; the build fails on a
   check outside the allow-list.
 - [ ] AC3: The section shows the recall-closure invoice and the emissions report as
   links to photos that exist in the car's `photos:` and in the build; the build fails
   on evidence that names a photo the car does not have.
-- [ ] AC4: The section says a fresh, unused emissions certificate is handed over at
-  sale. (The anti-scam line was dropped on 2026-10-01: the owner found it superfluous.)
+- [ ] AC4: The section says the May 2026 test passed, that certificate is already used for
+  the owner's registration renewal, and a new emissions test is taken before handover with
+  the new certificate given to the buyer. (The anti-scam line was dropped on 2026-10-01: the owner found it superfluous.)
 - [ ] AC5: The section makes no 100k-service, Carfax or service-history claim and
   names no title, registration, plate, owner or address.
 - [ ] AC6: The links and evidence are data with English and Spanish labels; the

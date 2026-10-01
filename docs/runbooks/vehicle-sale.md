@@ -117,7 +117,7 @@ Plan it at least two banking days before departure, so a problem still has time 
 3. **DR 2173 bill of sale:** two copies, both sign both, one each. It must show the year, make, VIN, the date and time of sale, and both signatures. The buyer needs it to drive home.
 4. **Hand over:**
    - keys and fobs;
-   - the new, unused emissions certificate (§6);
+   - the new emissions certificate from the pre-handover test (§6);
    - the recall invoice.
 5. **Photograph** the signed title (both sides), both bills of sale, the buyer's license, and the dashboard odometer.
 6. **Remove the plates.** In Colorado they belong to the seller.
@@ -135,7 +135,7 @@ Plan it at least two banking days before departure, so a problem still has time 
 
 ## 6. Emissions
 
-The May 2026 certificate was used for the seller's own renewal, so it does not count for the sale (CO DMV). Test at AirCare in the days before handover and give the buyer the new certificate.
+The May 2026 test passed (overall PASS, no trouble codes), but that certificate is already used for the seller's own registration renewal, so it does not count for the sale: a sale of a car seven or more model years old needs a new certificate (C.R.S. 42-4-310; AirCare Colorado FAQ: https://aircarecolorado.com/need-know/faq). Test at AirCare in the days before handover and give the buyer the new certificate. The listing says exactly this (car specs, `included:` and the verify evidence note in `data/inventory.yaml`).
 
 A car that fails emissions within 5 business days of sale can be returned by the buyer. A fresh passing test at sale closes that risk while the seller is abroad.
 

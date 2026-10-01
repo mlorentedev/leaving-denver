@@ -11,6 +11,7 @@ so the sheet renders only what exists. Those tests flip on purpose when the entr
 
 import copy
 import re
+from html import unescape
 from urllib.parse import urlsplit
 
 import pytest
@@ -37,6 +38,7 @@ FORBIDDEN = re.compile(
     r"\b(title|registration|plate|owner|address)\b|\b(título|registro|placa|propietario|dirección)\b",
     re.IGNORECASE,
 )
+RENEWAL = re.compile(r"my registration renewal|(la renovación de|renovar) mi registro")
 
 
 @pytest.fixture
@@ -149,19 +151,45 @@ def test_evidence_links_to_photos_the_car_has_and_the_build_ships(locale):
         assert (PUBLIC / "catalog" / CAR_ID / name).is_file(), f"{href} is not in the build"
 
 
-@pytest.mark.parametrize(("locale", "certificate"), [("en", "fresh, unused"), ("es", "sin usar")])
-def test_the_section_hands_over_a_fresh_certificate(locale, certificate):
-    text = text_of(section(PAGES[locale])).lower()
-    assert certificate in text
-    assert "PASS" in text_of(section(PAGES[locale]))
+@pytest.mark.parametrize(
+    ("locale", "passed", "used", "new_test"),
+    [
+        (
+            "en",
+            "Passed",
+            "already used for my registration renewal",
+            "Before handover I'll take a new emissions test and give you that new certificate",
+        ),
+        (
+            "es",
+            "Pasó",
+            "ya se usó en la renovación de mi registro",
+            "Antes de la entrega haré una nueva prueba de emisiones y te daré ese certificado nuevo",
+        ),
+    ],
+)
+def test_the_emissions_note_says_passed_already_used_and_a_new_test_is_coming(
+    locale, passed, used, new_test
+):
+    html = section(PAGES[locale])
+    text = unescape(text_of(html))
+    # The note under the report link carries all three meanings: (a) passed, (b) the May
+    # certificate is already used, (c) a new test is taken before handover.
+    note = text[text.index(passed) :]
+    assert used in note and new_test in note, note
+    assert "PASS" in text
+    # The old promise read as if the owner's current certificate were clean.
+    assert not re.search(r"fresh, unused|sin usar", text, re.IGNORECASE)
     # No anti-scam line: the owner found it superfluous (2026-10-01).
-    assert "official sites above" not in text and "sitios oficiales de arriba" not in text
+    assert "official sites above" not in text.lower() and "sitios oficiales de arriba" not in text
 
 
 @pytest.mark.parametrize("locale", PAGES)
 def test_the_section_claims_no_service_history_and_shows_no_personal_data(locale):
     # Link targets are checked too: a Carfax or dealer URL would show up in an href.
-    html = section(PAGES[locale])
+    # The emissions note may name the renewal the May certificate went to (owner, 2026-10-01);
+    # that is the only place "registration" may appear, and it carries no registration data.
+    html = RENEWAL.sub("", section(PAGES[locale]))
     hits = FORBIDDEN.findall(html)
     assert not hits, f"{locale}: {hits}"
 
