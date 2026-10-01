@@ -16,6 +16,18 @@ floors:
     dinnerware-glassware-set: ENC[AES256_GCM,data:QMU=,iv:xJ52J61jg3t5PmF+UtdVl1sBJ9wZ8zO3ujjOlItzvd0=,tag:0v38OZeeUX+9PIFjvWHyiQ==,type:int]
     auxiliary-c-table: ENC[AES256_GCM,data:yKY=,iv:oChgMiW6hR3zqWVPN4GgzdIdBpfjGmWVfl+lgV0YfjE=,tag:JuSJ/ek2iXIvFOgoEdGw8A==,type:int]
     2019-ford-escape-sel-awd: ENC[AES256_GCM,data:2Y5AUwk=,iv:2vLK6Cs7yPtmrrhv6vjBSNfZLe89xq+OioNrzm5Lqws=,tag:61CssPPytzXWsCvnfD5gtQ==,type:int]
+targets:
+    sofa-sleeper: ENC[AES256_GCM,data:eDMP,iv:BqIBlhGvi0FW/pZpaflLpIkqhWR47WVWDPFzsvgOq70=,tag:B7Kbu6Gy7UR2hfsi1WvKBA==,type:float]
+    dell-monitor-32: ENC[AES256_GCM,data:Zzc=,iv:R6yoSX7lomA2IIWsiPEqfWUXqJeAYs35Y5rrkepEOpU=,tag:Rk6XFLERI2rOC/GKvybXhw==,type:float]
+    onn-43-4k-tv: ENC[AES256_GCM,data:/FA=,iv:29C1TXvB8kqmWLBn6qrsh8D+htjlYxcfnxBuf/Edi6M=,tag:rn/AlV8Oqp7R9MTXPrG8lA==,type:float]
+    convertible-desk: ENC[AES256_GCM,data:fGM=,iv:19M5cLwYjCWGMo/z+qmwF8i1soxz9D+CcQGu61CI2gU=,tag:ROWYXdUA2fhNf80ttf2P/g==,type:float]
+    coffee-table-lift-top: ENC[AES256_GCM,data:l0U=,iv:wMO36FAIRiLgBU7f5Auw5AYqw81xZuwLzTyA20ujgWk=,tag:h76Aqmp1bOEggdnuAD7cpg==,type:float]
+    bar-stools-pair: ENC[AES256_GCM,data:pQs=,iv:oZeiG63cxmJD2iJCd8cQ+9hX6hfxtytVeXa+OuzsJjU=,tag:5dRafyXvaqVN7cn/+4T5hA==,type:float]
+    tv-stand-canyon-walnut: ENC[AES256_GCM,data:fwU=,iv:Kg46AJkcVT8pPEhQuZ3mV9kduFiHUhbAAwqhmvhBYq4=,tag:eT0aTT/I6nj8qxlTOlvLsA==,type:float]
+    office-chair-ergonomic: ENC[AES256_GCM,data:J1c=,iv:weJLEGgm2WORdGrY7qri48fVu5bG0OZAr4y/Ur5hD3w=,tag:4q54dae2lMGUkRJMCu6JYA==,type:float]
+    nightstand-espresso: ENC[AES256_GCM,data:1XI=,iv:MT/T+UVVOsHw3U47cq9CnDD85jTLeqLOwLyN4hSxIJQ=,tag:D22GALuJTeJCKdUXsSreYw==,type:float]
+    dinnerware-glassware-set: ENC[AES256_GCM,data:BoE=,iv:uxLWFoxbv5ai0MGDhS2HuW8UfebZ2YY3nhAISDF5l1w=,tag:4pdCMxpt2qiXF7p3II2J7w==,type:float]
+    auxiliary-c-table: ENC[AES256_GCM,data:9Z4=,iv:Z0K1Cx9xDDXZT6JTzBFCdlRKo8mFPKQClwgQaYGptLk=,tag:MNAPSkEq4rZ7dxHEoOK4JA==,type:float]
 sops:
     age:
         - enc: |
@@ -27,7 +39,7 @@ sops:
             N5S0b6gn+J7t3Lg9zTalfJK5VHCwzBcjg5kbjsk7dea2bNSxWE/NQA==
             -----END AGE ENCRYPTED FILE-----
           recipient: age166v8efpskctmxxes5lcqpxkj0ny3q74l3v0pswpdpa63wlkqmc8q35fkdw
-    lastmodified: "2026-09-27T00:14:49Z"
-    mac: ENC[AES256_GCM,data:kkK+ztXhHaVVNE6qFav09vVj1WTW27OblO1qwSS9wRGhq0MW38lY/V6LTABhynPIk7Tn5o+aL/YAXgmra+eDwwT36idX6SaBsDw1pg4Zk/+fsO/U7fz55hjqJSCMILhOWNFJsyxWnisgVp2B4HViHmZKYtr4cTVo2rb3yzbaeGc=,iv:L6nF9Zq4RJ+AdpnuszC9M6vKRwlpEffFbdxhRDNpKbM=,tag:xGdvZ4qaKEXdgJvIp4H1BQ==,type:str]
+    lastmodified: "2026-10-01T08:13:22Z"
+    mac: ENC[AES256_GCM,data:vyJuIIK2sc7ghji/519hNbQisushcABvV1XfDAMQOjdshixIj9mm9QCTMGBZyv4SjT9OnBpZFaIQmRrzn+aN0A7HzsX429t9zWN55W9vs3Z2RQz5X+sAZctkqL4yBNdui9T8YATL4GP+RHkRSdffa4hyt/u4by9YXAFNhe0zzxg=,iv:sM6AncceImaO7MRVfHmj/I9zL2/wAvbnGPv5+U9csoo=,tag:onIabCtVgxebXs07zJFTXA==,type:str]
     unencrypted_suffix: _unencrypted
     version: 3.13.1

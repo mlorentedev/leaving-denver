@@ -100,7 +100,7 @@ clear floors). The first two step halfway to the floor from the asking price in 
 nearest $5 ($100 for the car); the last is the floor. Afterwards, compare each item's price log
 with its sale in the panel to see whether a drop moved it.
 
-Targets are not recorded yet. Add them once with `make secrets` (it opens the editor):
+Targets are recorded for each household item except the topper (2026-10-01, #32). They are the expected-close prices from the 2026-09-25 pricing research. Research says the topper goes with the sofa, not alone, so it has none. Change any of them with `make secrets` (it opens the editor):
 
 ```yaml
 targets:
