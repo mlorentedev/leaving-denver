@@ -207,6 +207,18 @@ def test_production_smokes_a_candidate_before_it_deploys():
     assert steps[candidate]["if"] == PRODUCTION_ONLY
     assert steps[candidate_smoke]["if"] == PRODUCTION_ONLY
     assert "if" not in steps[production]
+    assert steps[candidate_smoke]["run"] == 'scripts/smoke.sh "$DEPLOYMENT_URL"'
+
+
+def test_no_deploy_step_can_fail_without_failing_the_job():
+    # continue-on-error on the candidate smoke would publish a build that failed it.
+    loose = [
+        s.get("name", s.get("id", s.get("uses")))
+        for s in DEPLOY["steps"]
+        if "continue-on-error" in s
+    ]
+    assert not loose
+    assert "continue-on-error" not in DEPLOY
 
 
 def test_the_canonical_site_is_smoked_after_the_production_deploy():
@@ -237,6 +249,8 @@ def test_the_deploy_gate_refuses_the_test_placeholder():
     ]["test"]["env"]["SELLER_PHONE"]
     assert run_contact_gate(placeholder).returncode != 0
     assert run_contact_gate("").returncode != 0
+    assert run_contact_gate("(555) 555-0100").returncode != 0
+    assert run_contact_gate("+1 555-555-0100").returncode != 0
     assert run_contact_gate("+13035550123").returncode == 0
 
 
@@ -247,6 +261,8 @@ def test_seller_phone_is_environment_scoped_by_ci_secrets():
     removed = recipe.index("gh secret delete SELLER_PHONE")
     # The repository-level secret goes only once every environment has its own.
     assert scoped < removed
+    # A failed listing must stop the recipe, not read as "no such secret" and skip the delete.
+    assert "gh secret list |" not in recipe
     assert "gh secret set SELLER_PHONE\n" not in recipe
     assert "gh secret set SELLER_PHONE;" not in recipe
 

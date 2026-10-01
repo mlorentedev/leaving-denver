@@ -101,7 +101,8 @@ ci-secrets: protect-deploy ## Scope the deploy token and the contact to the prot
 		printf '%s' "$$token" | gh secret set CLOUDFLARE_API_TOKEN --env "$$environment"; \
 	done; \
 	unset token; \
-	if gh secret list | grep -q '^CLOUDFLARE_API_TOKEN[[:space:]]'; then \
+	secrets="$$(gh secret list)"; \
+	if printf '%s\n' "$$secrets" | grep -q '^CLOUDFLARE_API_TOKEN[[:space:]]'; then \
 		gh secret delete CLOUDFLARE_API_TOKEN; \
 	fi; \
 	phone="$$(sops -d --extract '["seller"]["phone"]' $(SOPS_FILE))"; \
@@ -110,7 +111,8 @@ ci-secrets: protect-deploy ## Scope the deploy token and the contact to the prot
 		printf '%s' "$$phone" | gh secret set SELLER_PHONE --env "$$environment"; \
 	done; \
 	unset phone; \
-	if gh secret list | grep -q '^SELLER_PHONE[[:space:]]'; then \
+	secrets="$$(gh secret list)"; \
+	if printf '%s\n' "$$secrets" | grep -q '^SELLER_PHONE[[:space:]]'; then \
 		gh secret delete SELLER_PHONE; \
 	fi
 

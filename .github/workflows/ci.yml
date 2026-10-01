@@ -75,7 +75,9 @@ jobs:
       # The test job's placeholder must never reach a deployed page.
       - name: Require production contact
         run: |
-          if [ -z "$SELLER_PHONE" ] || [ "$SELLER_PHONE" = "+15555550100" ]; then
+          # Digits only, so a reformatted placeholder ("(555) 555-0100") is refused too.
+          digits="${SELLER_PHONE//[^0-9]/}"
+          if [ -z "$digits" ] || [ "${digits#1}" = "5555550100" ]; then
             echo "::error::SELLER_PHONE secret is required for deployment"
             exit 1
           fi
