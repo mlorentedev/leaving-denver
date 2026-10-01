@@ -36,6 +36,7 @@ Owner decisions are marked **[OWNER]**. Everything else is procedure. Sources ar
 
 - [ ] Listing copy states only what the documents back (`test_no_unbacked_vehicle_claims`). There is no 100k service receipt, so the listing never claims that service.
 - [x] The listing says 103,500 mi on purpose (owner, 2026-09-27): it covers the miles driven until handover, so the buyer never finds more miles than advertised. The recall invoice shows 102,692 mi on 2026-09-25. The title and DR 2173 get the real dashboard reading on handover day (§5). That leaves about 800 miles of headroom: read the dashboard when the listing photos are taken and again a week before handover, and raise the listed figure if it is within 200 miles.
+- [ ] When the Carfax report (OPS-003 #28) or the dealer service-history printout (OPS-009 #34) exists, add it to the car's `verify:` in `data/inventory.yaml` (one `evidence` entry plus its `es.verify` copy; a Carfax link also needs its host added to `OFFICIAL_CHECK_HOSTS`, on purpose). The page shows only what exists (FEAT-008).
 - [ ] Instant offers pulled (CarMax, Carvana, KBB ICO, Peddle) to know the floor. They expire in 7 days, so pull them again around Nov 1–2 (OPS-002 #27).
 - [ ] Title in hand, no lienholder. Keep it at home; it only leaves home on handover day.
 - [ ] AirCare test booked for the days just before handover, not now (OPS-008 #33). See §6.
