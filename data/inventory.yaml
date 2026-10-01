@@ -785,7 +785,7 @@ items:
     roof rails'
   - Remote keyless entry, push-button start, hands-free foot-activated power liftgate,
     dual-zone automatic climate control
-  # Warnings only, no automatic braking (owner, 2026-09-30).
+  # Warnings only: the car never brakes by itself (owner, 2026-09-30).
   - 'Safety: Brake Assist, AdvanceTrac with Roll Stability Control, rear-view camera,
     rear parking sensors, forward collision warning (light and chime), and blind-spot
     and rear cross-traffic alerts'
