@@ -7,6 +7,24 @@ in this order. Spec: `specs/OPS-011-end-of-sale/`. The Pages project stays (ADR-
 Run every command from a clone of the repository, in a shell where `gh` is logged in as the
 owner. Nothing here prints a secret.
 
+## Before Nov 8: rehearse the end deploy on a preview
+
+The candidate smoke runs before production moves, and it fails if Cloudflare Pages does not
+answer `/i/*` with the 302 while `functions/_middleware.js` is present. Find that out a week
+early, not on the day. A dispatched preview builds `main`, where the switch is off, so rehearse
+from this machine. It needs the age key, and it must happen before the token is revoked:
+
+```
+sed -i '0,/^seller:/s//seller:\n  sale_over: true/' data/inventory.yaml   # not committed
+make deploy                                               # BRANCH=preview: the live site is untouched
+scripts/smoke.sh https://preview.leaving-denver.pages.dev # smoke OK (sale over)
+git checkout data/inventory.yaml
+```
+
+If the smoke reports an old share link that does not redirect, `_redirects` is not applied
+there: fix that before Nov 8 (a redirect in the middleware, or a `functions/i` route). Do not
+flip the switch on a failing rehearsal.
+
 ## Nov 8: turn the sale off
 
 The deploy job refuses to run without the `SELLER_PHONE` secret, so the secrets stay in place

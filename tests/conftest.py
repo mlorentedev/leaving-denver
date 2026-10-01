@@ -54,6 +54,7 @@ CATALOG_MODULES = frozenset(
 )
 CATALOG_TESTS = frozenset(
     {
+        "test_end_of_sale.py::test_the_switch_is_off_until_the_owner_ends_the_sale",
         "test_browser_harness_portability.py::test_the_first_command_waits_for_chrome_to_start",
         "test_ops_runbook.py::test_the_uptime_keyword_is_on_the_page_the_monitor_fetches",
         "test_security_isolation.py::test_template_sees_only_sanitized_data",

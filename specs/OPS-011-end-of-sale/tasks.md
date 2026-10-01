@@ -27,7 +27,7 @@ created: "2026-10-01"
   page carries `tel:`/`sms:` or its redirects do not answer (expected FAIL), then add the end-mode block to
   `scripts/smoke.sh`.
 - [x] [AC7] Write `docs/runbooks/decommission.md`, link it from `ops.md`, and write ADR-008.
-- [ ] Run `make check`.
+- [x] Run `make check`.
 
 ## Closing
 
@@ -36,4 +36,4 @@ created: "2026-10-01"
 - [x] Lint passes
 - [x] No unrelated changes in the diff (no scope creep)
 - [x] `verification.md` filled in
-- [ ] PR opened referencing this spec folder
+- [x] PR opened referencing this spec folder

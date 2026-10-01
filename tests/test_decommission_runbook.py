@@ -32,6 +32,14 @@ def test_nov_8_flips_the_switch_and_takes_the_listings_down():
     assert "Delete deployment" in nov_8
 
 
+def test_the_end_deploy_is_rehearsed_on_a_preview_before_the_day():
+    before = section("Before Nov 8")
+    assert "make deploy" in before
+    assert "preview.leaving-denver.pages.dev" in before
+    assert "scripts/smoke.sh" in before
+    assert "git checkout data/inventory.yaml" in before  # the rehearsal flip is never committed
+
+
 def test_the_switch_is_flipped_before_the_secrets_go():
     # The deploy job refuses to run without SELLER_PHONE: delete it first and the deploy that
     # replaces the catalog fails.

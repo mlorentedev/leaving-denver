@@ -78,6 +78,12 @@ def head_of(page):
 # AC5: the default is unchanged.
 
 
+def test_the_switch_is_off_until_the_owner_ends_the_sale():
+    # A guard against flipping it in an ordinary change. Skipped once it is on, by conftest, so
+    # the flip itself passes.
+    assert SOURCE["seller"].get("sale_over", False) is False
+
+
 @pytest.mark.parametrize("seller", [{}, {"sale_over": False}])
 def test_the_switch_defaults_to_off(seller):
     assert site_builder.sale_over({"seller": seller}) is False

@@ -1,7 +1,7 @@
 ---
 id: "OPS-011-end-of-sale"
 type: spec
-status: implementing # draft | implementing | verifying | archived
+status: verifying # draft | implementing | verifying | archived
 created: "2026-10-01"
 issue: "mlorentedev/leaving-denver#38"   # repo#NNN — GitHub issue / Project item that tracks this spec
 tags: [spec, proposal]

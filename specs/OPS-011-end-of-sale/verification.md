@@ -19,7 +19,7 @@ created: "2026-10-01"
 
 - `SELLER_PHONE=+15555550100 make check` -> `653 passed, 1 skipped in 62.15s`, ruff clean.
 - The same gate with `seller.sale_over: true` committed in a scratch edit (reverted), and no `SELLER_PHONE`: `292 passed, 362 skipped in 15.77s`. Before the conftest skip list it was 141 failed and 27 errors (lesson-021).
-- Not verifiable here: that Cloudflare Pages applies `_redirects` for `/i/*` while `functions/_middleware.js` is present (the proposal's open risk). The candidate smoke in CI checks it on the first end deploy, against the real Pages; `scripts/smoke.sh` fails the deploy if the 302 is missing. Run `gh workflow run ci.yml --ref main -f branch=preview` after merge to see it on a preview before the Nov 8 flip.
+- Not verifiable here: that Cloudflare Pages applies `_redirects` for `/i/*` while `functions/_middleware.js` is present, and what `redirect_url` it reports (the proposal's open risk). `scripts/smoke.sh` fails the deploy if the 302 is not there, which would block the Nov 8 deploy, so the runbook has the owner rehearse it first: "Before Nov 8" flips the switch in the working tree, `make deploy` to the preview branch (needs the sops key) and smokes the preview URL. A dispatched preview would not do: it builds `main`, where the switch is off.
 - The runbook's commands were read against the repository (secret names from the workflows, Make targets); none was run, since each changes the owner's accounts.
 
 ## Decisions made during implementation
