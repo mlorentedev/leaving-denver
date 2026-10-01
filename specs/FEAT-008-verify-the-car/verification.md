@@ -52,8 +52,9 @@ All tests are in `tests/test_verify_the_car.py` unless noted.
   rest of the overlay; the test requires it complete for the car.
 - **Emissions wording.** "fresh, unused certificate" (the existing spec line), not the
   phrase `UNBACKED_CLAIMS` bans.
-- **NICB note** says "theft and total-loss (salvage) records", not flood: that is what the
-  tool documents, and the page claims nothing it cannot back.
+- **NICB note** says "theft and total-loss (salvage) records" and leaves flood out: nicb.org
+  was not reachable from the build host (403), so flood is unconfirmed. The issue lists it;
+  the owner can add it once checked on the site.
 
 ## Promotion candidates
 
