@@ -61,10 +61,11 @@ Decisions:
 - Asking price is `recommended_list_price`: that is what the public build publishes and what
   `drops` starts from.
 - Drop tiers (list, drop, floor) come from one function that `drops` and the panel share.
-  The panel's next step is the first tier strictly below the current asking price, dated at
-  the start of its window: tier "drop" at the first drop window, tier "floor" at the clear
-  floors window. The second drop window has no tier of its own in `drops`, so it is not a
-  step here.
+  The panel's next drop is the first drop window (first drop, second drop, clear floors) that
+  the price log does not cover yet; a window is covered once a reprice is logged on or after
+  the day it opens. The first two windows step halfway from the asking price in force to the
+  floor (to the nearest $5, $100 for the car); clear floors steps to the floor. Fixed week
+  tiers would stop being below asking after the first repricing.
 - Facebook renews every 7 days; the per-channel rule is a small map, not a scheduler.
 
 ## Out of scope
@@ -90,9 +91,11 @@ Decisions:
   price; a field the private data does not hold is empty, never a crash or a guess.
 - [ ] AC2: `leaving-denver drops` and the panel compute the price tiers with the same
   function, and `drops` prints the same table as before.
-- [ ] AC3: The next drop is the first tier below the current asking price with its window's
-  start date, flagged overdue once that date has passed, and empty for an item at its floor,
-  free with purchase, or no longer Available.
+- [ ] AC3: The next drop is the first drop window the price log does not cover yet, dated at
+  its opening day and flagged overdue once that day has passed, with the price to move to
+  (halfway to the floor for the first two windows, the floor for clear floors). It is empty
+  for an item at its floor, with no floor on file, free with purchase, not Available, or with
+  every window covered.
 - [ ] AC4: Renew due is seven days after the latest Facebook posting and is flagged when it
   is today or past; days listed counts from the earliest posting and stops at the sale date.
 - [ ] AC5: `post`, `reprice` and `sold` write only to `data/private.sops.yaml`, through

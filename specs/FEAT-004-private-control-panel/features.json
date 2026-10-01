@@ -15,7 +15,7 @@
   },
   {
     "id": "FEAT-004-private-control-panel-f3",
-    "behavior": "Next drop is the first tier below asking with its window start; overdue flag; empty at floor, free or not Available",
+    "behavior": "Next drop is the first drop window the price log does not cover, with the halfway-to-floor or floor price; overdue flag; empty at floor, no floor, free, not Available or all windows covered",
     "verification": "uv run pytest -q tests/test_panel.py",
     "state": "pending",
     "evidence": ""
