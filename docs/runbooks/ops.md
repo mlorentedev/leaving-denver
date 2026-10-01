@@ -10,15 +10,10 @@ and run `npm ci` rather than publishing old assets. Verify `/styles.css` loads
 for both `/` and `/es/`; the private assistant's stylesheet remains under
 `build/private/` and is never uploaded to Pages.
 
-Before merging CD, run `make protect-main` and `make ci-secrets` from a machine
-with the age key. This restricts both GitHub deployment environments to the
-`main` workflow ref, moves the Cloudflare token out of repository-wide secrets,
-and moves the contact secret into both environments too, so a workflow outside
-them cannot read the phone. Verify the environments still allow only
-`main` after changing deployment settings. A branch workflow must never receive
-a production-capable Pages token, even for a preview. `make protect-deploy`
-removes any stale extra branch or tag policies as well as ensuring the `main`
-branch policy exists.
+One-time setup (`make cf-project`, `make protect-main`, `make ci-secrets`) is in the
+README, section 3. Deploy tokens and the contact reach CI only through the `production`
+and `preview` environments, which allow the `main` workflow ref alone: a branch workflow
+must never get a production-capable Pages token. `make audit-deploy` checks that.
 
 ## Deploy and roll back
 
@@ -81,13 +76,12 @@ must stay reachable anonymously.
 
 ## Inventory and contact
 
-- **Sold:** `uv run leaving-denver sold <item-id> <realized-usd>` records the
-  price in `data/private.sops.yaml` (`sales.<item-id>`, needs sops and the age
-  key; nothing changes if that fails), marks the item Sold in the YAML and
-  rebuilds locally. The repository is public: a realized price never goes in
-  `data/inventory.yaml`. Inspect the diff, commit and merge both
-  `data/inventory.yaml` and `data/private.sops.yaml`, then verify the automatic deployment. Take down marketplace listings
-  separately.
+- **Sold:** `make sold ID=<item-id> PRICE=<realized-usd>` records the price in
+  `data/private.sops.yaml` (`sales.<item-id>`, needs sops and the age key; nothing
+  changes if that fails), marks the item Sold in the YAML and rebuilds locally. The
+  repository is public: a realized price never goes in `data/inventory.yaml`. Inspect
+  the diff, commit and merge both `data/inventory.yaml` and `data/private.sops.yaml`,
+  then verify the automatic deployment. Take down marketplace listings separately.
 - **Reserved:** `uv run leaving-denver pending <item-id>` when a buyer agrees a
   pickup: the card shows "Pending pickup" and its bundles go off sale. If the
   pickup falls through, `uv run leaving-denver available <item-id>` puts it
@@ -105,20 +99,24 @@ must stay reachable anonymously.
   the owner's own numbers from `dimensions` (as the buyer carries it: omit it for
   things that roll or fold), and `weight_lb` plus `weight_source` only for a weighed
   item. Over 48 in or 50 lb shows "Needs truck/SUV"; over 75 lb also "2-person lift".
-- **Phone spam:** obtain and test a Google Voice number first. Run
-  `make secrets` to update `seller.phone` in `data/private.sops.yaml`. On a
-  machine with the age key, run `make ci-secrets` **before** merging to refresh
-  the `SELLER_PHONE` Actions secret; otherwise the automatic deployment uses
-  the old phone. Commit only the encrypted file, merge, then verify the
-  automatic deployment and test the SMS CTA. Update marketplace listings
-  separately. Push CI uses a placeholder phone, so its green check alone
-  does not validate the production contact.
-- **New machine:** restore the canonical dotfiles age identity using dotfiles
-  `docs/runbooks/guide-secrets-governance.md`. Install `sops`, `uv` and Git
-  LFS; confirm access without printing the phone:
-  `sops -d --extract '["seller"]["phone"]' data/private.sops.yaml >/dev/null`.
-  If decryption fails, stop; never replace the encrypted file or publish with
-  an unverified phone. Run `make ci-secrets` only if CI secrets need refreshing.
+- **Phone spam:** get a Google Voice number (#29) and test it first. Run
+  `make secrets` to change `seller.phone` in `data/private.sops.yaml`, then
+  `make ci-secrets` from a machine with the age key and an admin `gh`: it copies the
+  phone into the `SELLER_PHONE` secret of both environments. Commit only the encrypted
+  file and merge. If `make ci-secrets` ran after the merge, redeploy with
+  `gh workflow run ci.yml --ref main -f branch=main`: a deploy uses the secret as it
+  was when it started. Then test the SMS CTA on the live site and update marketplace
+  listings. Push CI uses a placeholder phone, so its green check does not validate the
+  production contact.
+- **New machine:** install `sops`, `uv`, Git LFS and `gh`, then restore the age key from
+  its offline backup: dotfiles `docs/runbooks/guide-secrets-governance.md`, RECOVER
+  step 1. `.sops.yaml` names the recipient the key must match. sops does not look where
+  that guide puts the key unless `SOPS_AGE_KEY_FILE` points at it (the dotfiles
+  setup persists it; otherwise export it yourself). Confirm access without printing the
+  phone: `sops -d --extract '["seller"]["phone"]' data/private.sops.yaml >/dev/null`.
+  If decryption fails, stop; never replace the encrypted file or publish with an
+  unverified phone. Then `gh auth login`, and run `make ci-secrets` only if the CI
+  secrets need refreshing.
 
 ## Link previews
 
@@ -133,20 +131,34 @@ must stay reachable anonymously.
   check that the share page's `og:url` is its own address and that nothing
   redirects it on the server.
 
-## Minimal monitoring (owner setup)
+## Minimal monitoring
 
+Repo side, nothing to do:
+
+- `scripts/smoke.sh` runs in CI after every deploy: against the `candidate` deployment
+  before production moves, then against the canonical site. A red deploy job means
+  production did not move, or is wrong: read the run, fix forward or roll back (above).
 - `make audit-deploy` reads the live settings: both environments, their single `main`
   branch policy, and (with the owner's `gh`) no deploy secret left at the repository
   level. The `deploy-audit` workflow runs the settings part weekly.
 
-- Configure one free external HTTP monitor for
-  `https://leaving-denver.pages.dev/`, alerting the owner's phone. Test the
-  alert. On failure check Pages and run the smoke script; roll back if needed.
-- Enable Cloudflare Web Analytics for the Pages project and verify a test visit
-  appears. Share distinct campaign links, e.g.
-  `?utm_source=nextdoor&utm_campaign=moving-sale`, and check whether the
-  dashboard actually reports channel attribution before relying on UTMs;
+Owner setup (dashboards; this repository cannot enable either):
+
+- **Uptime.** A free HTTP keyword monitor, for example UptimeRobot's free plan (5-minute
+  checks, push alerts through its phone app). URL: `https://leaving-denver.pages.dev/`.
+  Keyword: `Denver Tech Center Relocation Sale` (the page title; an error page or a
+  Pages 5xx does not carry it). Alert the phone, then test the alert by pausing the
+  check or pointing it at a keyword that is not there. On an alert, run
+  `scripts/smoke.sh https://leaving-denver.pages.dev`, check Cloudflare Pages status,
+  and roll back if a deploy caused it.
+- **Web Analytics.** Enable it in Workers & Pages > `leaving-denver` > Metrics > Web
+  Analytics (ADR-005: the repo ships no beacon, and no CSP blocks it). Verify with
+  `curl -s https://leaving-denver.pages.dev/ | grep -c cloudflareinsights`
+  and a test visit that shows in the dashboard; if the beacon is missing, redeploy
+  production once. Share distinct campaign links, e.g.
+  `?utm_source=nextdoor&utm_campaign=moving-sale` (the seller tool builds them), and
+  check whether the dashboard reports channel attribution before relying on UTMs;
   otherwise use its referrer data. Do not put personal data in URL parameters.
 
-Neither the external monitor nor Analytics is enabled by this repository or
-its CI; both dashboard steps require the owner to complete and verify them.
+Neither is enabled by this repository or its CI; each needs the owner to finish and
+verify it.
