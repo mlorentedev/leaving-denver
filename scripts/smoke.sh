@@ -14,6 +14,20 @@ get() {
     --retry-all-errors "$@"
 }
 
+# Pages answers any path it has no file for with index.html and a 200, so a fresh deployment
+# can serve the catalog for robots.txt before the real file is up (CI run 36847628465 failed
+# "permissive" that way, and the same deployment passed minutes later). Fetch it until it
+# reads as robots rules.
+robots_txt() {
+  local body
+  for _ in $(seq 0 "${SMOKE_RETRIES:-6}"); do
+    body=$(get "$url/robots.txt") || fail "robots.txt missing"
+    grep -q '^User-agent:' <<<"$body" && { printf '%s\n' "$body"; return 0; }
+    sleep "${SMOKE_RETRY_DELAY:-5}"
+  done
+  fail "robots.txt is served as a page, not as robots rules"
+}
+
 # A fresh deployment can take a few seconds to answer everywhere.
 for _ in 1 2 3 4 5 6; do
   code=$(curl -s -o /dev/null -w '%{http_code}' "$url/") && [ "$code" = 200 ] && break
@@ -50,7 +64,8 @@ if grep -Fq 'data-role="sale-over"' <<<"$page"; then
   redirected /i/anything/ /
   redirected /es/i/anything/ /es/
   get -I "$url/" | grep -qi '^x-content-type-options: nosniff' || fail "_headers not applied"
-  grep -A1 -x 'User-agent: \*' <<<"$(get "$url/robots.txt")" | grep -qx 'Disallow: /' || fail "robots.txt is permissive"
+  robots=$(robots_txt) || exit 1  # robots_txt has said why; do not lean on set -e
+  grep -A1 -x 'User-agent: \*' <<<"$robots" | grep -qx 'Disallow: /' || fail "robots.txt is permissive"
   for path in /inventory.json /poster_assistant.html /private/inventory.json; do
     grep -qE 'firm_floor_price|pinGateModal' <<<"$(curl -sS "$url$path")" && fail "$path serves private content"
   done
@@ -68,7 +83,7 @@ grep -q 'cdn.tailwindcss.com' <<<"$es_page" && fail "ES loads the Tailwind play 
 css=$(get "$url/styles.css") || fail "compiled stylesheet missing"
 grep -Fq '.aspect-4\/3{' <<<"$css" || fail "Tailwind v4 utility missing"
 
-robots=$(get "$url/robots.txt") || fail "robots.txt missing"
+robots=$(robots_txt) || exit 1  # robots_txt has said why; do not lean on set -e
 # The catch-all group itself must disallow; a stray "Disallow: /" elsewhere proves nothing.
 grep -A1 -x 'User-agent: \*' <<<"$robots" | grep -qx 'Disallow: /' || fail "robots.txt is permissive"
 grep -q '^User-agent: facebookexternalhit' <<<"$robots" || fail "robots.txt shuts out link previews"
