@@ -85,4 +85,5 @@ payment_methods:
   Cash: Efectivo
   Venmo: Venmo
   Zelle: Zelle
-  Cashier's check verified at the buyer's bank: Cheque de caja verificado en el banco del comprador
+  Cashier's check issued at the buyer's bank: Cheque de caja emitido en el banco del comprador
+  Wire transfer: Transferencia bancaria

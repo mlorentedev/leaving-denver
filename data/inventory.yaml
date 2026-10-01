@@ -6,9 +6,10 @@ seller:
     - Cash
     - Venmo
     - Zelle
+    # The car takes only payments that cannot be clawed back (owner, 2026-09-30; runbook vehicle-sale).
     vehicle:
-    - Cash
-    - Cashier's check verified at the buyer's bank
+    - Cashier's check issued at the buyer's bank
+    - Wire transfer
   pickup_policy: Buyer must self-load and bring appropriate transportation. Fully
     assembled, sold AS-IS.
   departure_date: '2026-11-09'
@@ -782,8 +783,8 @@ items:
   - Original Key Fobs
   - Valid, unused Colorado emissions certificate
   - Standard Bill of Sale & Signed Clean Title
-  pickup_note: Inspection in Denver Tech Center (DTC). Payment via Cash or Cashier's
-    Check verified at buyer's bank branch window before title release.
+  pickup_note: Inspection in Denver Tech Center (DTC). Payment by cashier's check issued
+    at the buyer's bank or by wire transfer, final before the title is signed.
   es:
     title: Ford Escape SEL AWD 2019, título limpio de Colorado e inspección de concesionario
     short_title: Ford Escape SEL AWD 2019
@@ -812,7 +813,7 @@ items:
     - Controles originales
     - Certificado vigente de emisiones de Colorado
     - Contrato de compraventa y título limpio firmado
-    pickup_note: Inspección en Denver Tech Center. Pago en efectivo o cheque de caja verificado en la sucursal bancaria antes de entregar el título.
+    pickup_note: Inspección en Denver Tech Center. Pago con cheque de caja emitido en el banco del comprador o por transferencia bancaria, firme antes de firmar el título.
   tags:
   - ford escape
   - escape sel

@@ -508,7 +508,7 @@ def test_spanish_bundle_copy_and_payment_terms(public_dir):
     assert not fallbacks, f"Spanish fallbacks: {fallbacks}"
     terms = text_for_role(html, "pickup-terms")
     assert "Efectivo, Venmo, Zelle en persona" in " ".join(terms.split())
-    assert "Cheque de caja verificado en el banco del comprador" in terms
+    assert "Cheque de caja emitido en el banco del comprador o Transferencia bancaria" in terms
 
 
 def test_poster_assistant_has_spanish_marketplace_variants():

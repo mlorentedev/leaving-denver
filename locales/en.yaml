@@ -85,4 +85,5 @@ payment_methods:
   Cash: Cash
   Venmo: Venmo
   Zelle: Zelle
-  Cashier's check verified at the buyer's bank: Cashier's check verified at the buyer's bank
+  Cashier's check issued at the buyer's bank: Cashier's check issued at the buyer's bank
+  Wire transfer: Wire transfer

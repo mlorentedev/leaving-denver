@@ -10,6 +10,7 @@ import yaml
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 INVENTORY_YAML = BASE_DIR / "data" / "inventory.yaml"
+POSTER = BASE_DIR / "src" / "leaving_denver" / "templates" / "poster_assistant.html"
 
 
 @pytest.fixture
@@ -30,6 +31,27 @@ def test_seller_metadata(inventory):
     assert set(seller["payment_methods"]) == {"household", "vehicle"}
     assert "Venmo" in " ".join(seller["payment_methods"]["household"])
     assert "Venmo" not in " ".join(seller["payment_methods"]["vehicle"])
+
+
+def test_the_car_takes_only_payments_that_cannot_be_clawed_back(inventory):
+    """Cashier's check or wire, nothing else (owner, 2026-09-30; docs/runbooks/vehicle-sale.md)."""
+    assert inventory["seller"]["payment_methods"]["vehicle"] == [
+        "Cashier's check issued at the buyer's bank",
+        "Wire transfer",
+    ]
+    for code in ("en", "es"):
+        labels = yaml.safe_load((BASE_DIR / "locales" / f"{code}.yaml").read_text(encoding="utf-8"))
+        for method in inventory["seller"]["payment_methods"]["vehicle"]:
+            assert method in labels["payment_methods"], f"{code}: no label for {method}"
+    car = next(i for i in inventory["items"] if i["category"] == "Vehicle")
+    copy = " ".join(
+        [car["pickup_note"], car["es"]["pickup_note"]]
+        + re.findall(r"VEHICLE_PAYMENT_ES = '([^']+)'", POSTER.read_text(encoding="utf-8"))
+    ).lower()
+    for banned in ("cash", "efectivo", "venmo", "zelle"):
+        assert not re.search(rf"\b{banned}\b", copy), f"the car's payment copy mentions {banned}"
+    assert "wire" in car["pickup_note"].lower()
+    assert "transferencia" in car["es"]["pickup_note"].lower()
 
 
 def test_items_integrity(inventory):

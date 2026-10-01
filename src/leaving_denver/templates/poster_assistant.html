@@ -487,6 +487,8 @@
       const specs = (item.specs || []).map(s => `- ${s}`).join('\n');
       const inc = (item.included || []).join(', ');
       const vehiclePayment = (seller.payment_methods?.vehicle || []).join(' or ');
+      // Matches locales/es.yaml payment_methods; the poster reads the untranslated inventory.
+      const VEHICLE_PAYMENT_ES = 'cheque de caja emitido en el banco del comprador o transferencia bancaria';
       const departureMonth = seller.departure_date
         ? new Date(`${seller.departure_date}T00:00:00Z`).toLocaleString('en-US', {
             month: 'long',
@@ -522,7 +524,7 @@ ${spanishIncluded}
 
 Recogida e inspección:
 ${copy.pickup_note}
-Pago: Efectivo o cheque de caja verificado en el banco del comprador.
+Pago: ${VEHICLE_PAYMENT_ES}.
 
 Escríbame para programar una inspección y prueba de manejo.`
           : `Me mudo fuera de Estados Unidos en noviembre y vendo ${copy.short_title}.
@@ -562,7 +564,7 @@ ${spanishIncluded}
 
 RECOGIDA Y PAGO:
 ${copy.pickup_note}
-${isVehicle ? 'Pago en efectivo o con cheque de caja verificado en el banco del comprador.' : 'Pago en persona con efectivo, Venmo o Zelle.'}
+${isVehicle ? `Pago: ${VEHICLE_PAYMENT_ES}.` : 'Pago en persona con efectivo, Venmo o Zelle.'}
 
 Contacto: mensaje de texto al ${sellerPhone} o respuesta por el correo anónimo de Craigslist.`;
       }
