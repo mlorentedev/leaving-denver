@@ -26,9 +26,10 @@ Map every acceptance criterion from `proposal.md` to concrete proof (commit hash
 
 ## Test status
 
-- Test suite after merging `origin/main` including #122, #125 and #126:
-  `make deploy BRANCH=seller-access-smoke` -> 287 passed, 24 browser tests
-  skipped on Windows, then a Pages preview Functions bundle deployed.
+- Test suite after merging `origin/main` including #122, #123, #125 and #126:
+  `make check` -> 297 passed, 24 browser tests skipped on Windows.
+  The preceding `make deploy BRANCH=seller-access-smoke` passed 287 tests
+  before #123 merged, then deployed a Pages preview Functions bundle.
 - Manual smoke test: both `seller-access-smoke.leaving-denver.pages.dev` and
   the immutable `7ab46028.leaving-denver.pages.dev` returned `200` for
   `/` and `/es/`; every seller path above returned `503`. Production
