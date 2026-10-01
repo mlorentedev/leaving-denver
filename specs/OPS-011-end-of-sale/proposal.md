@@ -45,7 +45,7 @@ With the switch absent or `false`, the build is unchanged.
 - [ ] **AC2: the end page.** `/index.html` and `/es/index.html` each contain the end message in their language, and `<title>` and `og:title` say the sale is over. The EN and ES pages link to each other.
 - [ ] **AC3: nothing else is served.** No `i/` or `es/i/` directory and no `seller/` directory exist in the end build. `_redirects` contains a 302 from `/i/*` to `/` and from `/es/i/*` to `/es/`.
 - [ ] **AC4: builds with no secrets.** The end build succeeds with no `SELLER_PHONE` and no decryptable private data.
-- [ ] **AC5: the default is unchanged.** With the switch absent, the full existing suite passes, and a test asserts the flag defaults to off.
+- [ ] **AC5: the default build is the catalog.** With the switch absent, the full existing suite passes, and a test asserts the flag defaults to off. The default build gains three `sale_over_*` UI strings in the locale files (carried in the page's inline `ui_json`) and two CSS utilities from the end page's template; it is otherwise unchanged.
 - [ ] **AC6: smoke follows the mode.** `scripts/smoke.sh` passes against a served end build and fails against it when the end page carries a `tel:`/`sms:` link. It still passes against the normal build.
 - [ ] **AC7: runbook and ADR.** `docs/runbooks/decommission.md` has a Nov 8 section and a by-Nov-15 section, and every step is a command or a named dashboard path. ADR-008 records keep-the-project-over-delete with the subdomain-reuse reason.
 

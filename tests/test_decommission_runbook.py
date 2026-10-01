@@ -42,8 +42,13 @@ def test_the_end_deploy_is_rehearsed_on_a_preview_before_the_day():
 
 def test_the_switch_is_flipped_before_the_secrets_go():
     # The deploy job refuses to run without SELLER_PHONE: delete it first and the deploy that
-    # replaces the catalog fails.
-    assert RUNBOOK.index("sale_over: true") < RUNBOOK.index("gh secret delete")
+    # replaces the catalog fails. The rehearsal flips the switch too, so the order is read from
+    # the dated sections: the flip in Nov 8, the deletion in By Nov 15, and Nov 8 comes first.
+    assert "sale_over: true" in section("Nov 8")
+    assert "gh secret delete" in section("By Nov 15")
+    assert "gh secret delete" not in section("Nov 8")
+    assert "gh secret delete" not in section("Before Nov 8")
+    assert RUNBOOK.index("\n## Nov 8") < RUNBOOK.index("\n## By Nov 15")
 
 
 def test_every_secret_a_workflow_reads_is_deleted_in_both_environments():
@@ -63,6 +68,8 @@ def test_by_nov_15_names_every_account_and_the_repository():
         "Google Voice",
         "leaving-denver-seller",
         "bw delete item",
+        "SELLER_PASSPHRASE",
+        "dotfiles",
         "git update-ref -d refs/backup/pre-public-main",
         "gh repo archive",
     ):

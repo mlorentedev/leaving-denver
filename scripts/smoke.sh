@@ -31,6 +31,11 @@ if grep -Fq 'data-role="sale-over"' <<<"$page"; then
     grep -qiE '\b(sms|tel):' <<<"$served" && fail "the end page links to sms: or tel:"
     grep -qE 'const _C = |data-item=' <<<"$served" && fail "the end page carries contact or item data"
   done
+  for served in "$page" "$es_page"; do
+    grep -qE '[0-9]{3}[^0-9]{0,3}[0-9]{3}[^0-9]{0,3}[0-9]{4}' <<<"$(sed 's/<[^>]*>/ /g' <<<"$served")" \
+      && fail "the end page writes out a phone number"
+  done
+  [ "$(curl -s -o /dev/null -w '%{http_code}' "$url/seller/")" = 200 ] && fail "/seller/ answers 200 on the end page"
   get "$url/styles.css" >/dev/null || fail "compiled stylesheet missing"
   # Old share links redirect to the end page of their language; a fresh deployment can lag.
   redirected() {

@@ -130,3 +130,24 @@ def test_smoke_fails_when_the_end_page_loses_its_stylesheet(end_site):
     result = smoke(end_site)
     assert result.returncode != 0
     assert "stylesheet" in result.stderr
+
+
+@pytest.mark.parametrize("page", ["index.html", "es/index.html"])
+@pytest.mark.parametrize("number", ["(303) 555-0100", "303-555-0100", "303.555.0100", "3035550100"])
+def test_smoke_fails_when_a_phone_number_is_written_out_on_the_end_page(end_site, page, number):
+    path = end_site / page
+    html = path.read_text(encoding="utf-8")
+    path.write_text(html.replace("</main>", f"<p>Call {number}</p></main>"), encoding="utf-8")
+    result = smoke(end_site)
+    assert result.returncode != 0
+    assert "phone number" in result.stderr
+
+
+def test_smoke_fails_when_the_seller_tool_is_served(end_site):
+    # An end deploy that still answers 200 at /seller/ left the tool, or a page standing in for
+    # it, reachable by anyone: behind Access it is a redirect or a refusal, never a 200.
+    (end_site / "seller").mkdir()
+    (end_site / "seller" / "index.html").write_text("<html>tool</html>")
+    result = smoke(end_site)
+    assert result.returncode != 0
+    assert "/seller/" in result.stderr

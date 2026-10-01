@@ -233,16 +233,42 @@ def test_the_end_build_needs_no_phone_and_no_private_data(tmp_path, monkeypatch)
     assert files_under(dist) == ALLOWED
 
 
-# The names the suite skips when the switch is on must be real: a misspelt one skips nothing
-# and the flip goes red.
+# What the suite skips when the switch is on is listed by test, and the list must stay honest: a
+# misspelt name skips nothing and the flip goes red; a security test on it would stop guarding.
+
+SECURITY_NAME = re.compile(r"phone|private|isolation|access|secret")
+
+
+def skipped_in_end_mode():
+    from conftest import CATALOG_TESTS
+
+    return [f"{module}::{name}" for module, names in CATALOG_TESTS.items() for name in names]
 
 
 def test_every_test_skipped_in_end_mode_exists():
-    from conftest import CATALOG_MODULES, CATALOG_TESTS
+    from conftest import CATALOG_TESTS
 
     tests_dir = Path(__file__).parent
-    for module in CATALOG_MODULES:
-        assert (tests_dir / module).is_file(), module
-    for node in CATALOG_TESTS:
-        module, name = node.split("::")
-        assert re.search(rf"^def {name}\(", (tests_dir / module).read_text(), re.M), node
+    for module, names in CATALOG_TESTS.items():
+        text = (tests_dir / module).read_text(encoding="utf-8")
+        for name in names:
+            assert re.search(rf"^def {name}\(", text, re.M), f"{module}::{name}"
+
+
+def test_no_security_test_is_skipped_in_end_mode():
+    from conftest import SKIPPED_DESPITE_ITS_NAME
+
+    skipped = skipped_in_end_mode()
+    flagged = {node for node in skipped if SECURITY_NAME.search(node)}
+    assert flagged <= set(SKIPPED_DESPITE_ITS_NAME), sorted(flagged - set(SKIPPED_DESPITE_ITS_NAME))
+    # An exemption for a test that is no longer skipped is stale.
+    assert set(SKIPPED_DESPITE_ITS_NAME) <= set(skipped)
+
+
+def test_a_tests_own_inventory_keeps_its_switch(tmp_path, monkeypatch):
+    # conftest lets tests that build from the committed inventory mean the catalog; a test with
+    # its own file, like the end-build ones, must still get what it wrote.
+    own = tmp_path / "inventory.yaml"
+    own.write_text(yaml.safe_dump(end_inventory()), encoding="utf-8")
+    monkeypatch.setattr(site_builder, "INVENTORY_YAML", own)
+    assert site_builder.load_inventory_yaml()["seller"]["sale_over"] is True

@@ -21,9 +21,15 @@ scripts/smoke.sh https://preview.leaving-denver.pages.dev # smoke OK (sale over)
 git checkout data/inventory.yaml
 ```
 
+This was proven once, on 2026-10-01: an end build deployed with `make deploy
+BRANCH=endsale-rehearsal` answered `/` and `/es/` with 200, `/i/sofa-sleeper/` with a 302 to `/`,
+`/es/i/sofa-sleeper/` with a 302 to `/es/` and `/seller/` with a 302 to the Access login, and
+the smoke printed `smoke OK (sale over)`. The deployment was deleted afterwards. Repeat it a
+week before Nov 8 anyway: Pages, the middleware or the Access app may have changed since.
+
 If the smoke reports an old share link that does not redirect, `_redirects` is not applied
 there: fix that before Nov 8 (a redirect in the middleware, or a `functions/i` route). Do not
-flip the switch on a failing rehearsal.
+flip the switch on a failing rehearsal. Delete the rehearsal deployment when done (Nov 8, step 4).
 
 ## Nov 8: turn the sale off
 
@@ -126,7 +132,10 @@ new token (ADR-008).
 5. Release the Google Voice number. voice.google.com > Settings > Account > the Google Voice
    number > Delete. Do it after the listings are gone, so no reply lands on a dead number.
 
-6. Delete the Bitwarden item `leaving-denver-seller`, which holds `SELLER_PASSPHRASE`:
+6. Delete the Bitwarden item `leaving-denver-seller`, which holds `SELLER_PASSPHRASE`, and
+   remove the `SELLER_PASSPHRASE` entry from the dotfiles secrets registry with a dotfiles pull
+   request (the registry is described in dotfiles `docs/runbooks/guide-secrets-governance.md`),
+   so nothing keeps asking for a secret that no longer exists:
 
    ```
    bw unlock

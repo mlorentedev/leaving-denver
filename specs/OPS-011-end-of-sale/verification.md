@@ -19,7 +19,7 @@ created: "2026-10-01"
 
 - `SELLER_PHONE=+15555550100 make check` -> `653 passed, 1 skipped in 62.15s`, ruff clean.
 - The same gate with `seller.sale_over: true` committed in a scratch edit (reverted), and no `SELLER_PHONE`: `292 passed, 362 skipped in 15.77s`. Before the conftest skip list it was 141 failed and 27 errors (lesson-021).
-- Not verifiable here: that Cloudflare Pages applies `_redirects` for `/i/*` while `functions/_middleware.js` is present, and what `redirect_url` it reports (the proposal's open risk). `scripts/smoke.sh` fails the deploy if the 302 is not there, which would block the Nov 8 deploy, so the runbook has the owner rehearse it first: "Before Nov 8" flips the switch in the working tree, `make deploy` to the preview branch (needs the sops key) and smokes the preview URL. A dispatched preview would not do: it builds `main`, where the switch is off.
+- The `_redirects` risk (Pages with `functions/_middleware.js` present) is closed by a real rehearsal on 2026-10-01: an end-mode build deployed with `make deploy BRANCH=endsale-rehearsal` gave `/` 200, `/es/` 200, `/i/sofa-sleeper/` 302 to `/`, `/es/i/sofa-sleeper/` 302 to `/es/`, `/seller/` 302 to the Access login, and `scripts/smoke.sh` printed "smoke OK (sale over)". The deployment was deleted afterwards (404). A dispatched preview would not do, since it builds `main` with the switch off. The runbook's "Before Nov 8" repeats it a week ahead.
 - The runbook's commands were read against the repository (secret names from the workflows, Make targets); none was run, since each changes the owner's accounts.
 
 ## Decisions made during implementation
@@ -27,7 +27,7 @@ created: "2026-10-01"
 - The end build sweeps the output root down to its own files: `build_all` runs the photo sync and the stylesheet step before the page build, and an earlier catalog build leaves `catalog/`, `i/` and `seller/` behind.
 - The end build skips the local private workspace as well as the photos, so nothing private is read.
 - The smoke's end-mode block exits early and repeats the robots, nosniff and private-path checks, so the catalog block of the shared script is not re-indented.
-- `tests/conftest.py` skips the catalog tests by name when the switch is committed on, because `make check` is the gate of the PR that flips it.
+- `tests/conftest.py` skips the catalog tests one by one when the switch is committed on, because `make check` is the gate of the PR that flips it. Not by module: the Access guard, the phone and realized-price isolation tests stay on. Tests that build a scratch site from the committed inventory get the switch stripped (an autouse fixture), so they keep testing the catalog; a guard fails if a phone, private, isolation, access or secret test is on the skip list.
 - The runbook sequences Nov 8 (flip, deploy, delete old deployments) before Nov 15 (secrets): the deploy job refuses to run without `SELLER_PHONE`.
 
 ## Promotion candidates
