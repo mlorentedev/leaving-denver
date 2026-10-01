@@ -755,9 +755,9 @@ items:
   - Ford Intelligent AWD system with high-performance all-weather tires (Colorado
     winter-ready)
   - Clean Colorado Title in hand with zero liens
-  - 'Passed the Colorado emissions test on 12 May 2026: overall PASS, no trouble codes
-    (report in the photos). That one went to my registration renewal, so I hand over
-    a fresh, unused certificate at sale'
+  - "Passed the Colorado emissions test on 12 May 2026: overall PASS, no trouble codes
+    (report in the photos). That certificate is already used for my registration renewal:
+    before handover I'll take a new emissions test and give you that new certificate"
   - Zero open recalls (recall 22S43 closed at a Ford dealership on 25 Sep 2026; invoice
     in the photos). Pre-purchase inspection welcome
   - 'Ford dealer inspection on 25 Sep 2026: battery good, brakes OK, tires good (on
@@ -779,7 +779,7 @@ items:
   included:
   - 2019 Ford Escape SEL AWD
   - Original Key Fobs
-  - Valid, unused Colorado emissions certificate
+  - New Colorado emissions certificate, from a test taken before handover
   - Standard Bill of Sale & Signed Clean Title
   pickup_note: Inspection in Denver Tech Center (DTC). Payment by cashier's check issued
     at the buyer's bank or by wire transfer, final before the title is signed.
@@ -812,7 +812,7 @@ items:
     - id: emissions-report
       photo: doc_2_emissions_report.jpg
       label: 'Emissions report, 12 May 2026: overall PASS'
-      note: That copy went to my renewal, so I hand over a fresh, unused certificate at sale.
+      note: "Passed, but that certificate is already used for my registration renewal. Before handover I'll take a new emissions test and give you that new certificate."
   es:
     title: Ford Escape SEL AWD 2019, título limpio de Colorado e inspección de concesionario
     short_title: Ford Escape SEL AWD 2019
@@ -824,7 +824,7 @@ items:
     - Motor EcoBoost de 1.5 L y 4 cilindros, 179 HP, transmisión automática de 6 velocidades
     - Tracción integral inteligente Ford y llantas para todo clima
     - Título limpio de Colorado en mano y sin gravámenes
-    - 'Pasó la prueba de emisiones de Colorado el 12 de mayo de 2026: resultado PASS, sin códigos de falla (reporte en las fotos). Ese certificado se usó para renovar mi registro, así que entrego uno nuevo y sin usar en la venta'
+    - 'Pasó la prueba de emisiones de Colorado el 12 de mayo de 2026: resultado PASS, sin códigos de falla (reporte en las fotos). Ese certificado ya se usó para renovar mi registro: antes de la entrega haré una nueva prueba de emisiones y te daré ese certificado nuevo'
     - Sin recalls abiertos; el recall 22S43 se cerró en concesionario Ford el 25 de septiembre de 2026
     - Inspección Ford del 25 de septiembre de 2026 con batería, frenos y llantas en buen estado
     - Ford SYNC 3, pantalla de 8 pulgadas, Apple CarPlay, Android Auto, Bluetooth y Wi-Fi
@@ -840,7 +840,7 @@ items:
     included:
     - Ford Escape SEL AWD 2019
     - Controles originales
-    - Certificado vigente de emisiones de Colorado
+    - Certificado de emisiones de Colorado nuevo, de una prueba hecha antes de la entrega
     - Contrato de compraventa y título limpio firmado
     pickup_note: Inspección en Denver Tech Center. Pago con cheque de caja emitido en el banco del comprador o por transferencia bancaria, definitivo antes de firmar el título.
     verify:
@@ -858,7 +858,7 @@ items:
         note: El recall 22S43 se cerró en un concesionario Ford. Los datos personales están tapados.
       emissions-report:
         label: 'Reporte de emisiones, 12 de mayo de 2026: resultado PASS'
-        note: Esa copia se usó en mi renovación, así que entrego un certificado nuevo y sin usar en la venta.
+        note: Pasó, pero ese certificado ya se usó en la renovación de mi registro. Antes de la entrega haré una nueva prueba de emisiones y te daré ese certificado nuevo.
   tags:
   - ford escape
   - escape sel

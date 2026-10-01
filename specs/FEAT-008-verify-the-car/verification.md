@@ -10,14 +10,19 @@ created: "2026-09-30"
 All tests are in `tests/test_verify_the_car.py` unless noted.
 
 - [x] AC1 -> `test_the_section_shows_the_vin_and_the_three_official_hosts[en|es]`,
-  `test_the_section_sits_under_the_car_and_not_in_the_footer`
+  `test_the_checks_open_from_a_button_on_the_car_card_and_are_not_inline[en|es]`,
+  `tests/test_verify_sheet_browser.py` (the button opens the sheet with the VIN and the three
+  official links; the close button, Escape, the backdrop and Back close it and its history
+  entry; the `#<car-id>` deep link still opens the item sheet);
+  `test_the_share_page_still_sends_buyers_to_the_car`
 - [x] AC2 -> `test_every_link_is_https_on_an_official_host_or_one_of_the_cars_photos[en|es]`,
   `test_the_allow_list_rejects_look_alike_hosts`,
   `test_the_build_refuses_a_check_that_is_not_https_on_an_official_host` (http, a reseller,
   suffix look-alikes, userinfo, protocol-relative, `javascript:`)
 - [x] AC3 -> `test_evidence_links_to_photos_the_car_has_and_the_build_ships[en|es]`,
   `test_the_build_refuses_evidence_that_is_not_one_of_the_cars_photos`
-- [x] AC4 -> `test_the_section_hands_over_a_fresh_certificate_and_warns_about_paid_report_links[en|es]`
+- [x] AC4 -> `test_the_emissions_note_says_passed_already_used_and_a_new_test_is_coming[en|es]`,
+  `tests/test_inventory_ssot.py::test_the_car_says_it_passed_emissions_and_shows_the_report`
 - [x] AC5 -> `test_the_section_claims_no_service_history_and_shows_no_personal_data[en|es]`
   (the Carfax and service-history assertions flip on purpose when #28 and #34 land);
   `tests/test_inventory_ssot.py::test_no_unbacked_vehicle_claims` still covers the new
@@ -25,7 +30,7 @@ All tests are in `tests/test_verify_the_car.py` unless noted.
 - [x] AC6 -> `test_the_data_carries_both_languages_for_every_entry`,
   `test_the_template_hardcodes_no_check_and_no_evidence`,
   `test_a_car_with_verify_data_renders_it_from_the_data`,
-  `test_a_car_without_verify_data_renders_no_section`,
+  `test_a_car_without_verify_data_renders_no_button_and_no_sheet`,
   `test_the_build_refuses_verify_data_on_a_car_with_no_vin`
 
 ## Test status
@@ -50,8 +55,9 @@ All tests are in `tests/test_verify_the_car.py` unless noted.
   to the built JPEG. The photo must be among the item's built photos or the build fails.
 - **Spanish copy by entry id** under `es.verify`, falling back to English per field like the
   rest of the overlay; the test requires it complete for the car.
-- **Emissions wording.** "fresh, unused certificate" (the existing spec line), not the
-  phrase `UNBACKED_CLAIMS` bans.
+- **Emissions wording.** The May certificate is already used for the registration renewal,
+  so the copy says a new test is taken before handover (owner, 2026-10-01; C.R.S. 42-4-310),
+  not the phrase `UNBACKED_CLAIMS` bans.
 - **NICB note** says "theft and total-loss (salvage) records" and leaves flood out: nicb.org
   was not reachable from the build host (403), so flood is unconfirmed. The issue lists it;
   the owner can add it once checked on the site.
