@@ -195,3 +195,30 @@ def test_an_empty_passphrase_on_a_resealing_aborts_with_the_hint_and_rotates_not
     assert failed.value.code == 1
     assert "make ci-secrets to make a new one" in capsys.readouterr().out
     assert gh_calls() == []
+
+
+# OPS-011: with the sale over /seller/ is not built, so there is nothing to update.
+
+
+@pytest.mark.parametrize("command", RECORDS)
+@pytest.mark.parametrize("tty", [True, False])
+def test_with_the_sale_over_it_says_so_instead_of_asking(
+    command, tty, commands, monkeypatch, capsys
+):
+    monkeypatch.setattr(
+        cli,
+        "load_inventory_yaml",
+        lambda: {**INVENTORY_OF_ONE, "seller": {**INVENTORY_OF_ONE["seller"], "sale_over": True}},
+    )
+    asked = terminal(monkeypatch, [], tty=tty)
+    RECORDS[command]()
+    assert asked == [], "no question about a page that is not built"
+    assert commands == [RECORDED[command]]
+    assert capsys.readouterr().out.count("The sale is over: /seller/ is not built.") == 1
+
+
+@pytest.mark.parametrize("command", RECORDS)
+def test_with_the_sale_still_on_the_end_line_is_not_printed(command, commands, monkeypatch, capsys):
+    terminal(monkeypatch, ["n"])
+    RECORDS[command]()
+    assert "The sale is over" not in capsys.readouterr().out

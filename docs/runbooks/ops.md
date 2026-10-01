@@ -237,3 +237,7 @@ Owner setup (dashboards; this repository cannot enable either):
 
 Neither is enabled by this repository or its CI; each needs the owner to finish and
 verify it.
+
+## End of the sale
+
+On Nov 8 the sale ends and the site becomes one "the sale is over" page; the steps, and what to remove by Nov 15, are in the [decommission runbook](decommission.md).

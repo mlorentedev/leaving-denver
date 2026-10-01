@@ -7,6 +7,9 @@ Compiles Single Source of Truth (data/inventory.yaml) into:
    build/public/_headers - Cloudflare Pages response headers.
    build/public/seller/index.html - The seller tool: listing copy, plus the private data as an
    encrypted envelope that only the owner's passphrase opens in the browser (ADR-007).
+
+With `seller.sale_over: true` the public build is one "the sale is over" page per language
+instead (OPS-011), and the seller tool is not built.
 """
 
 import json
@@ -122,6 +125,17 @@ def load_locale(locale: str) -> dict[str, Any]:
         raise FileNotFoundError(f"Locale not found at {path}")
     with open(path, encoding="utf-8") as f:
         return yaml.safe_load(f)
+
+
+def sale_over(full_data: dict[str, Any]) -> bool:
+    """The end-of-sale switch, `seller.sale_over` (OPS-011): off when absent. Only a boolean
+    counts: YAML reads `yes` and "true" as other types, and a build that took them as off
+    would keep the catalog and the phone up on the day the owner meant to close the sale."""
+    seller = full_data.get("seller") or {}
+    value = seller.get("sale_over", False)
+    if not isinstance(value, bool):
+        raise ValueError(f"seller.sale_over must be true or false, got {value!r}")
+    return value
 
 
 def render(template: str, **ctx: Any) -> str:
@@ -429,6 +443,20 @@ ROBOTS_TXT = (
     + "User-agent: *\nDisallow: /\n"
 )
 OG_LOCALES = {"en": "en_US", "es": "es_ES"}
+
+# The end-of-sale build (OPS-011): shared links to an item land on the end page, not a 404.
+END_REDIRECTS = "/i/* / 302\n/es/i/* /es/ 302\n"
+# What an end build leaves in the output root. The stylesheet step runs before the page build,
+# so `styles.css` and `fonts/` are already there.
+END_SITE_FILES = {
+    "index.html",
+    "es/index.html",
+    "robots.txt",
+    "_headers",
+    "_redirects",
+    "favicon.svg",
+    "styles.css",
+}
 
 
 def site_url() -> str:
@@ -871,7 +899,59 @@ def write_seller_poster(public_data: dict[str, Any], full_data: dict[str, Any]) 
     shutil.copy2(Path(__file__).parent / "assets" / "seller.mjs", poster_dir / "seller.mjs")
 
 
+def sweep_to_end_site() -> None:
+    """Remove everything an earlier catalog build left in the output root: photos, share pages
+    and the seller tool outlive the build that wrote them."""
+    for path in sorted(DIST_DIR.rglob("*"), reverse=True):
+        rel = path.relative_to(DIST_DIR).as_posix()
+        if rel in END_SITE_FILES or rel == "fonts" or rel.startswith("fonts/"):
+            continue
+        if path.is_dir():
+            if not any(path.iterdir()):
+                path.rmdir()
+        else:
+            path.unlink()
+
+
+def build_end_site() -> None:
+    """The sale is over: one page per language, from the locale files and nothing else. No
+    phone, no item and no photo goes in, so none of them needs to be at hand."""
+    DIST_DIR.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(Path(__file__).parent / "assets" / "favicon.svg", DIST_DIR / "favicon.svg")
+    origin = site_url()
+    for locale in ("en", "es"):
+        translations = load_locale(locale)
+        og = {
+            **og_common(locale),
+            "title": translations["sale_over_title"],
+            "description": translations["sale_over_thanks"],
+            "url": f"{origin}/{locale_path(locale)}",
+            "image": None,
+            "image_alt": "",
+        }
+        html = render(
+            "sale_over.html",
+            locale=locale,
+            t=translations,
+            og=og,
+            asset_prefix="" if locale == "en" else "../",
+            language_links=(
+                {"en": "index.html", "es": "es/"} if locale == "en" else {"en": "../", "es": "./"}
+            ),
+        )
+        target = PUBLIC_INDEX_HTML if locale == "en" else DIST_DIR / locale / "index.html"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(html, encoding="utf-8")
+    PUBLIC_ROBOTS_TXT.write_text(ROBOTS_TXT, encoding="utf-8")
+    PUBLIC_HEADERS.write_text(PAGES_HEADERS, encoding="utf-8")
+    (DIST_DIR / "_redirects").write_text(END_REDIRECTS, encoding="utf-8")
+    sweep_to_end_site()
+
+
 def build_public_site(full_data: dict[str, Any]) -> None:
+    if sale_over(full_data):
+        build_end_site()
+        return
     DIST_DIR.mkdir(parents=True, exist_ok=True)
 
     build_sha, phone = build_identity()
@@ -978,17 +1058,20 @@ def verify_security_guarantees() -> None:
 def build_all() -> None:
     """Full compilation pipeline."""
     build_stylesheets()
-    print("1. Syncing and optimizing photos from content/photos/...")
-    photo_map = sync_all_photos()
-
-    print("2. Loading Single Source of Truth (data/inventory.yaml)...")
+    print("1. Loading Single Source of Truth (data/inventory.yaml)...")
     data = load_inventory_yaml()
+    over = sale_over(data)
 
-    # Update item photos if found
-    for item in data.get("items", []):
-        item_id = item.get("id")
-        if photo_map.get(item_id):
-            apply_photos(item, photo_map[item_id])
+    if over:
+        print("2. The sale is over: skipping photos (the end page has none).")
+    else:
+        print("2. Syncing and optimizing photos from content/photos/...")
+        photo_map = sync_all_photos()
+        # Update item photos if found
+        for item in data.get("items", []):
+            item_id = item.get("id")
+            if photo_map.get(item_id):
+                apply_photos(item, photo_map[item_id])
 
     # The build only reads the YAML; `leaving-denver sync` persists photo paths.
 

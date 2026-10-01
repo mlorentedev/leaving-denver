@@ -130,6 +130,16 @@ created: "2026-09-30"
   terminal rule still holds, a spy on `subprocess.run` shows Node and gh get no
   `SELLER_PASSPHRASE`, and the stub dotf logs the names in its own environment (none is it). Mutation-checked: a `child_env` that keeps it, and a `save_to_bitwarden` that
   prints dotf's output, each fail a test.
+- [x] End of the sale (OPS-011, merged from main) -> `tests/test_sealed_end_of_sale.py`: an end build
+  with `SELLER_SEALED` set emits no `seller/` and no envelope, sweeps one an earlier build left,
+  `verify_security_guarantees` still validates a provided envelope and still finds one in any file;
+  `tests/test_cd_workflow.py`: the deploy gate does not require `SELLER_SEALED` when
+  `seller.sale_over` is true, requires it otherwise, and fails closed on an unreadable flag;
+  `tests/test_update_offer.py`: with the sale over `post`/`sold`/`reprice` print "The sale is
+  over: /seller/ is not built." and ask nothing. The sealed builds in `tests/sealed_helpers.py`
+  build the catalog whatever the committed switch says; the isolation, stylesheet and smoke
+  leak tests assert the end-mode guarantee instead of being skipped. `make check` passes in both
+  modes (switch on, no `SELLER_PHONE`).
 - [x] Review round 2 (F1-F9) -> `--yes` on the save (`tests/test_seal_command.py`, the fake dotf
   refuses a create without it); the order seal, save, set and the Bitwarden line when the upload
   fails; a fixed save-failure line and a Node failure that names only its exit code (canary and
@@ -172,14 +182,14 @@ created: "2026-09-30"
   that includes half cases.
 - **No inline script, because of the CSP.** Data moved into `application/json` blocks and code into
   `seller.mjs`, which `script-src 'self'` allows. A `file://` test cannot see a header, so
-  `tests/test_seller_csp.py` serves the page over HTTP (lesson-022).
+  `tests/test_seller_csp.py` serves the page over HTTP (lesson-023).
 - **The key is dropped after one decryption.** The ADR says a non-extractable key is held in
   memory; the page keeps only the plaintext payload and derives again on the next unlock. Stricter,
   and no longer needs a key to be tracked.
 - **Draft items** (private ids not in the public roster) show as id-only "unpublished" rows: their
   titles and prices are not public, and the sealed data does not carry them.
 - **Hyphenated EFF words removed** (7,772 words left; five words are still about 64.6 bits): a hyphen
-  is a separator, so those four words could not be typed back (lesson-021; ADR-007 notes it).
+  is a separator, so those four words could not be typed back (lesson-022; ADR-007 notes it).
 - **The update offer never generates a passphrase** (owner, 2026-10-01): it is a recording, not a
   rotation, so it asks for the existing passphrase twice, and an empty entry aborts with a hint.
 - **`SELLER_PASSPHRASE` is accepted from the environment** (owner, 2026-10-01; ADR-007 decision 3

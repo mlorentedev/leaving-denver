@@ -175,7 +175,12 @@ def build_site(dist, monkeypatch, sealed=None):
     monkeypatch.setattr(site_builder, "PUBLIC_INDEX_HTML", dist / "index.html")
     monkeypatch.setattr(site_builder, "PUBLIC_ROBOTS_TXT", dist / "robots.txt")
     monkeypatch.setattr(site_builder, "PUBLIC_HEADERS", dist / "_headers")
-    site_builder.build_public_site(site_builder.load_inventory_yaml())
+    # The catalog, whatever `seller.sale_over` says in the committed file: these builds exist to
+    # test /seller/, and module-scoped fixtures run outside conftest's per-test switch. The end
+    # build's own guarantees are in tests/test_sealed_end_of_sale.py.
+    data = site_builder.load_inventory_yaml()
+    data["seller"].pop("sale_over", None)
+    site_builder.build_public_site(data)
 
 
 def dom_forms(*numbers_and_text):

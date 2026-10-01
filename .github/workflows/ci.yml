@@ -86,15 +86,6 @@ jobs:
             exit 1
           fi
 
-      # A deploy without the sealed data would publish /seller/ saying "No private data in
-      # this build". Only its presence is checked here; the build validates the envelope.
-      - name: Require sealed private data
-        run: |
-          if [ -z "${SELLER_SEALED//[[:space:]]/}" ]; then
-            echo "::error::SELLER_SEALED secret is required for deployment (run make ci-secrets)"
-            exit 1
-          fi
-
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Hash LFS object list
@@ -111,6 +102,25 @@ jobs:
           node-version: '24'
           cache: npm
       - run: make install
+
+      # A deploy without the sealed data would publish /seller/ saying "No private data in
+      # this build". Only its presence is checked here; the build validates the envelope. With
+      # the sale over (`seller.sale_over: true`, OPS-011) /seller/ is not built, so the secret
+      # is not needed: ADR-008 deploys the end page first and deletes the secrets after. An
+      # unreadable flag stops the job rather than waving it through.
+      - name: Require sealed private data
+        run: |
+          over=$(uv run python -c 'import yaml; from leaving_denver.site_builder import sale_over; print("true" if sale_over(yaml.safe_load(open("data/inventory.yaml"))) else "false")') || {
+            echo "::error::cannot read seller.sale_over from data/inventory.yaml"
+            exit 1
+          }
+          if [ "$over" = true ]; then
+            echo "The sale is over: SELLER_SEALED is not required."
+          elif [ -z "${SELLER_SEALED//[[:space:]]/}" ]; then
+            echo "::error::SELLER_SEALED secret is required for deployment (run make ci-secrets)"
+            exit 1
+          fi
+
       # Same gate as the test job, now against the build with the real number.
       - run: make check
 

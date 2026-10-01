@@ -7,6 +7,8 @@ import json
 import re
 from pathlib import Path
 
+from conftest import sale_is_over
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 DIST_DIR = BASE_DIR / "build" / "public"
 
@@ -56,7 +58,12 @@ def test_pages_headers():
 def test_no_pin_gate_and_no_private_workspace_remain():
     """The PIN-gated workspace is retired (ADR-007): the pin, the page and its folder are gone."""
     assert not (BASE_DIR / "build" / "private").exists()
-    seller = (DIST_DIR / "seller" / "index.html").read_text(encoding="utf-8")
+    page = DIST_DIR / "seller" / "index.html"
+    if sale_is_over():
+        # The end build has no seller tool at all, so no PIN gate can be in it (OPS-011).
+        assert not page.exists()
+        return
+    seller = page.read_text(encoding="utf-8")
     for gone in ("pinGateModal", "checkPin", "8011"):
         assert gone not in seller
 

@@ -64,6 +64,8 @@ created: "2026-09-30"
 - [x] Guards for the defects found: every wordlist word survives being typed back; `gh` never
   inherits the terminal; the autouse guards in `tests/conftest.py` (no real `gh`, no TTY).
 - [x] Review round 2 (F1-F9): see `verification.md`.
+- [x] End of the sale (OPS-011) absorbed: no `/seller/` or envelope in an end build, the deploy gate
+  and the update offer follow the switch, `decommission.md` and ADR-007 agree on the order.
 - [ ] [AC9] [AC11] Owner: the served header after an Access login, and the unlock time on the
   phone (`verification.md`).
 

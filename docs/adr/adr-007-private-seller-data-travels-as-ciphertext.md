@@ -116,7 +116,7 @@ The age key never goes to CI. CI never sees plaintext.
 | IV | 12 random bytes, new on every seal |
 | Additional data | the envelope header (`v`, `kdf`, `iter`, `salt`), so a header that was edited fails decryption |
 | Envelope | `{"v":1,"kdf":"PBKDF2-SHA256","iter":1000000,"salt":"<b64>","iv":"<b64>","ct":"<b64>"}` |
-| Passphrase | at least 5 distinct words from the EFF large wordlist, separated by spaces or hyphens. A random 5-word phrase is about 64.6 bits. The bundled list has 7,772 words, not 7,776: the four hyphenated entries (`drop-down`, `felt-tip`, `t-shirt`, `yo-yo`) are removed, because a hyphen is a separator and those words could not be typed back (lesson-021). Five words from 7,772 are 64.6 bits still. |
+| Passphrase | at least 5 distinct words from the EFF large wordlist, separated by spaces or hyphens. A random 5-word phrase is about 64.6 bits. The bundled list has 7,772 words, not 7,776: the four hyphenated entries (`drop-down`, `felt-tip`, `t-shirt`, `yo-yo`) are removed, because a hyphen is a separator and those words could not be typed back (lesson-022). Five words from 7,772 are 64.6 bits still. |
 
 **Salt and IV are per seal, not per build.** CI holds no key, so it cannot re-encrypt. Every build
 of one secret embeds the same bytes. That is safe: GCM is broken by reusing an IV with *different*
@@ -292,10 +292,12 @@ input is mixed into the payload, so compressing before encrypting leaks only the
 - **Writes on the phone become necessary:** if staleness makes the owner quote or record a wrong
   price more than once, the KV backend is reopened.
 - **The envelope passes 32 KB:** compress (`v: 2`) before the 40,000-byte refusal is reached.
-- **The sale ends** (2026-11-09):
-  - delete `SELLER_SEALED` from both environments;
-  - redeploy;
-  - delete the deployments that carry an envelope.
+- **The sale ends** (2026-11-09): follow `docs/runbooks/decommission.md` and ADR-008. In that
+  order: deploy the end page first (`seller.sale_over: true` builds no `/seller/` and no sealed
+  block, and the deploy no longer requires `SELLER_SEALED`), delete the old deployments that carry
+  an envelope, and only then delete `SELLER_SEALED` from both environments with the other secrets.
+  Deleting the secret first would only make the deploy that replaces the page fail, since a
+  deploy without it is refused until the switch is on.
 
   This ADR then describes nothing live.
 

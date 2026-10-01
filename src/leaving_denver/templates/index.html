@@ -123,11 +123,6 @@
             <button onclick="openModal('2019-ford-escape-sel-awd')" class="flex-1 py-2.5 px-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-semibold text-xs transition-colors">
               {{ t.view_specs }}
             </button>
-            {% if vehicle.status != "Sold" %}
-            <a href="#" data-sms-intent="{{ t.sms_item_prefix }} {{ vehicle.short_title }} (${{ vehicle.price }}) {{ t.sms_in_dtc }}" class="min-h-10 py-2.5 px-3 rounded-xl border border-neutral-200 hover:bg-neutral-50 text-neutral-800 font-semibold text-xs transition-colors">
-              {{ t.schedule_test_drive }}
-            </a>
-            {% endif %}
             {% if vehicle.verify is defined %}
             <button type="button" data-open-sheet="verifySheet" class="min-h-10 py-2.5 px-3 rounded-xl border border-neutral-200 hover:bg-neutral-50 text-neutral-800 font-semibold text-xs transition-colors">
               {{ t.verify_heading }}

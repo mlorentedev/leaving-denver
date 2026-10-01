@@ -27,6 +27,7 @@ from leaving_denver.site_builder import (
     apply_photos,
     build_all,
     load_inventory_yaml,
+    sale_over,
     sale_schedule,
     save_inventory_yaml,
 )
@@ -101,8 +102,16 @@ def record_privately(recorder, *record_args):
         sys.exit(1)
 
 
+SALE_OVER_NOTE = "The sale is over: /seller/ is not built."
+
+
 def offer_seller_update():
-    """After a record: ask whether to update /seller/ now. A failure is the command's own."""
+    """After a record: ask whether to update /seller/ now. A failure is the command's own.
+
+    With the sale over there is no /seller/ to update (OPS-011): say so, ask nothing."""
+    if sale_over(load_inventory_yaml()):
+        print(SALE_OVER_NOTE)
+        return
     try:
         seal.offer_update()
     except RuntimeError as err:

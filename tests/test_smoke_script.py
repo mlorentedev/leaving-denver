@@ -9,6 +9,7 @@ import threading
 from pathlib import Path
 
 import pytest
+from conftest import sale_is_over
 
 ROOT = Path(__file__).resolve().parents[1]
 PUBLIC = ROOT / "build" / "public"
@@ -83,11 +84,16 @@ def test_without_retries_the_same_deployment_fails():
     ],
 )
 def test_an_anonymous_seller_page_carrying_the_envelope_fails_the_smoke(body):
+    """In catalog mode the envelope check refuses it; with the sale over, the end smoke refuses
+    any page at all there. Either way a deployment serving the envelope anonymously fails."""
     result = smoke(retries=3, seller=(200, body))
     assert result.returncode != 0
-    assert "/seller/ serves the sealed envelope anonymously" in result.stderr
+    if sale_is_over():
+        assert "/seller/ answers 200 on the end page" in result.stderr
+    else:
+        assert "/seller/ serves the sealed envelope anonymously" in result.stderr
 
 
-def test_an_access_wall_in_front_of_the_seller_page_passes_the_smoke():
+def test_a_redirect_in_front_of_the_seller_page_passes_the_smoke():
     result = smoke(retries=3, seller=(302, b""))
     assert result.returncode == 0, result.stderr

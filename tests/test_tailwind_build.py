@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 import pytest
+from conftest import sale_is_over
 from test_class_coverage import css_classes
 
 from leaving_denver import site_builder
@@ -24,9 +25,13 @@ def test_public_pages_ship_local_css(page, href):
 
 
 def test_the_seller_page_uses_the_local_css_and_no_private_stylesheet_ships():
-    html = PUBLIC.joinpath("seller", "index.html").read_text(encoding="utf-8")
-    assert '<link rel="stylesheet" href="../styles.css">' in html
-    assert "cdn.tailwindcss.com" not in html
+    page = PUBLIC.joinpath("seller", "index.html")
+    if sale_is_over():
+        assert not page.exists(), "the end build has no seller tool (OPS-011)"
+    else:
+        html = page.read_text(encoding="utf-8")
+        assert '<link rel="stylesheet" href="../styles.css">' in html
+        assert "cdn.tailwindcss.com" not in html
     assert not (ROOT / "build" / "private").exists()
     assert not PUBLIC.joinpath("poster_assistant.html").exists()
     assert not PUBLIC.joinpath("inventory.json").exists()

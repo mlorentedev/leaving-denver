@@ -11,7 +11,6 @@ vehicle: Auto
 winter_ready: AWD listo para invierno
 miles: millas
 view_specs: Ver especificaciones y fotos
-schedule_test_drive: Programar prueba de manejo
 or: o
 all: Todos
 save_with_bundle: Ahorre con un paquete
@@ -103,3 +102,6 @@ payment_methods:
   Zelle: Zelle
   Cashier's check issued at the buyer's bank: Cheque de caja emitido en el banco del comprador
   wire transfer: transferencia bancaria
+sale_over_title: La venta terminó
+sale_over_heading: La venta terminó.
+sale_over_thanks: Gracias a todos los que pasaron por aquí.

@@ -287,33 +287,98 @@ def test_the_runbook_numbers_the_deploy_steps_and_names_the_candidate():
 
 # FEAT-009 PR 2 (ADR-007): the deploy carries the sealed private data, and refuses to go out
 # without it, the way it refuses to go out without the real phone.
-def test_deploy_requires_the_sealed_private_data_before_building():
-    assert DEPLOY["env"]["SELLER_SEALED"] == "${{ secrets.SELLER_SEALED }}"
+def sealed_gate():
+    """The gate's script, run as the runner would but with this interpreter for `uv run python`
+    (which only launches an interpreter that can import the project: callers set PYTHONPATH)."""
     gate = step_index(
         lambda s: "SELLER_SEALED" in s.get("run", "") and "exit 1" in s.get("run", "")
     )
     first_build = step_index(lambda s: s.get("run") == "make check")
     assert gate < first_build, "the gate must stop the job before it builds anything"
     script = DEPLOY["steps"][gate]["run"]
-    # An empty secret (the one that was never set arrives empty) must fail the step. The gate
-    # is run here, as the runner would, against an empty and a set value.
-    for value, expected in (("", 1), ("   ", 1), ('{"v":1}', 0)):
-        result = subprocess.run(
-            ["bash", "-c", script],
-            env={**os.environ, "SELLER_SEALED": value},
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-        assert result.returncode == expected, (value, result.stdout, result.stderr)
-    refused = subprocess.run(
-        ["bash", "-c", script],
-        env={**os.environ, "SELLER_SEALED": ""},
+    assert "uv run python" in script
+    return script.replace("uv run python", sys.executable)
+
+
+def run_gate(tmp_path, secret, over):
+    """Exit status and stdout of the gate against an inventory with the switch on or off."""
+    (tmp_path / "data").mkdir(exist_ok=True)
+    (tmp_path / "data" / "inventory.yaml").write_text(
+        yaml.safe_dump({"seller": {"sale_over": over}} if over is not None else {"seller": {}}),
+        encoding="utf-8",
+    )
+    result = subprocess.run(
+        ["bash", "-c", sealed_gate()],
+        cwd=tmp_path,
+        env={**os.environ, "SELLER_SEALED": secret, "PYTHONPATH": str(ROOT / "src")},
         capture_output=True,
         text=True,
         check=False,
     )
-    assert "SELLER_SEALED" in refused.stdout
+    return result.returncode, result.stdout
+
+
+# FEAT-009 PR 2 (ADR-007): the deploy carries the sealed private data, and refuses to go out
+# without it, the way it refuses to go out without the real phone. OPS-011: not once the sale
+# is over, when /seller/ is not built.
+def test_deploy_requires_the_sealed_private_data_before_building(tmp_path):
+    assert DEPLOY["env"]["SELLER_SEALED"] == "${{ secrets.SELLER_SEALED }}"
+    # An empty secret (the one that was never set arrives empty) must fail the step.
+    for over in (False, None):
+        for value, expected in (("", 1), ("   ", 1), ('{"v":1}', 0)):
+            status, out = run_gate(tmp_path, value, over)
+            assert status == expected, (over, value, out)
+    status, out = run_gate(tmp_path, "", False)
+    assert "SELLER_SEALED" in out
+
+
+def test_deploy_does_not_require_the_sealed_secret_once_the_sale_is_over(tmp_path):
+    for value in ("", "   ", '{"v":1}'):
+        status, out = run_gate(tmp_path, value, True)
+        assert status == 0, (value, out)
+        assert "sale is over" in out
+
+
+def test_the_gate_fails_closed_when_it_cannot_read_the_switch(tmp_path):
+    """A flag that is not a boolean, or no inventory at all, must not wave a deploy through."""
+    for inventory in ("seller: {sale_over: 'yes'}\n", "not: [valid"):
+        (tmp_path / "data").mkdir(exist_ok=True)
+        (tmp_path / "data" / "inventory.yaml").write_text(inventory, encoding="utf-8")
+        result = subprocess.run(
+            ["bash", "-c", sealed_gate()],
+            cwd=tmp_path,
+            env={**os.environ, "SELLER_SEALED": "", "PYTHONPATH": str(ROOT / "src")},
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert result.returncode == 1, inventory
+    (tmp_path / "data" / "inventory.yaml").unlink()
+    missing = subprocess.run(
+        ["bash", "-c", sealed_gate()],
+        cwd=tmp_path,
+        env={**os.environ, "SELLER_SEALED": '{"v":1}', "PYTHONPATH": str(ROOT / "src")},
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert missing.returncode == 1
+
+
+def test_the_committed_inventory_is_read_by_the_same_gate():
+    """The gate reads data/inventory.yaml of the checkout: with the committed file and an empty
+    secret it must agree with the switch as committed."""
+    committed = yaml.safe_load((ROOT / "data" / "inventory.yaml").read_text(encoding="utf-8"))
+    over = committed["seller"].get("sale_over") is True
+    result = subprocess.run(
+        ["bash", "-c", sealed_gate()],
+        cwd=ROOT,
+        env={**os.environ, "SELLER_SEALED": "", "PYTHONPATH": str(ROOT / "src")},
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == (0 if over else 1)
 
 
 def test_the_test_job_builds_without_the_sealed_secret():
