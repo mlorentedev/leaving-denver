@@ -11,29 +11,31 @@
 # `openai/` selects LiteLLM's OpenAI-compatible transport; the endpoint is NaN's, set
 # as OPENAI__API_BASE in the workflow. Nothing here talks to OpenAI.
 #
-# mimo-v2.5 leads and deepseek-v4-flash follows because the order is the only one that
-# can fail loudly. deepseek's characteristic failure is a 200 with an empty body (it
-# spends the output budget on the reasoning chain and never writes an answer), which
-# raises no exception, so LiteLLM never consults a fallback behind it. kubelab measured
-# that shape on run 32440498259 (#1205): step `success` after 4m15s, no RateLimitError,
-# the second model never attempted. mimo fails by saturation (429), which DOES raise.
+# glm5.3-flash leads, mimo-v2.6-flash follows, deepseek-v4-flash goes last.
 #
-# This is not a quality ranking. harness/reviewer-pool.json says of mimo, in its own
-# words, that no ranking against deepseek was established; both are reasoning-class by
-# profile (1M context, mandatory chain) and both are admitted there, which is the line
-# this file draws. The excluded models stay excluded by name: qwen3.6/gemma4 are the
-# latency tier, and a reviewer that PASSes cheaply converts a gate into a green
-# checkmark. tests/pr-agent-config.bats holds that at dotfiles.
-model = "openai/mimo-v2.5"
+# NaN retired mimo-v2.5 on 2026-09-30: it hung, then answered 401 (dotfiles AI-045,
+# #1763), so every review here fell through to deepseek and shared its bucket with the
+# rest of NaN's traffic. glm5.3-flash is a member of harness/reviewer-pool.json
+# (reasoning-class, 1M context; not calibrated against a known-outcome review, and the
+# pool says so) and has its own PER-MODEL concurrency bucket (kubelab #1107/#1203), so
+# leading with it spreads load instead of queuing behind the other consumers.
+#
+# deepseek stays LAST because its characteristic failure is a 200 with an empty body
+# (it spends the output budget on the reasoning chain and never writes an answer), which
+# raises no exception, so LiteLLM never consults a fallback behind it. kubelab measured
+# that shape on run 32440498259 (#1205). A 429 or a 401 DOES raise, so the models that
+# fail that way go first.
+#
+# This is not a quality ranking. The excluded models stay excluded by name: qwen3.6/
+# gemma4 are the latency tier, and a reviewer that PASSes cheaply converts a gate into a
+# green checkmark. tests/pr-agent-config.bats holds that at dotfiles.
+model = "openai/glm5.3-flash"
 
-# ONE fallback, and lane separation is why it is deepseek rather than a sibling of the
-# primary. NaN's limit is PER MODEL (kubelab #1107/#1203: 8 concurrent to deepseek
-# gives 5x200 + 3x429 while mimo answers 200 during the same saturation), so the second
-# bucket is a real fallback and not a re-name of the same wall. It does share a bucket
-# with this repo's adversarial-review pool, where deepseek is a member; the trade was
-# made at dotfiles #1149 in the same direction (CI yields to the gate, because the gate
-# blocks and CI review advises), and it is recorded here rather than rediscovered.
-fallback_models = ["openai/deepseek-v4-flash"]
+# Two fallbacks, each a separate NaN bucket. mimo-v2.6-flash is the pool's re-admitted
+# successor of mimo-v2.5 (planted-defect test, 2026-09-30). deepseek shares a bucket with
+# the adversarial-review pool; the trade was made at dotfiles #1149 (CI yields to the
+# gate, because the gate blocks and CI review advises).
+fallback_models = ["openai/mimo-v2.6-flash", "openai/deepseek-v4-flash"]
 
 # `model_weak` deliberately absent. Upstream defaults it to a flash tier for
 # descriptions and commit summaries; `auto_describe` is off below so it would do
