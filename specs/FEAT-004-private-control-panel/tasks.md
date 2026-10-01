@@ -25,7 +25,7 @@ created: "2026-09-30"
   `cmd_reprice`, `cmd_sold` with take-down steps; `make post`, `make reprice`.
 - [x] [AC7] Write `tests/test_panel_isolation.py` (expected FAIL: the build tolerates a panel
   file in the public dist); add the guard to `verify_security_guarantees`.
-- [x] [AC9] Runbooks (seller playbook, ops, architecture), ADR-005, lesson-019.
+- [x] [AC9] Runbooks (seller playbook, ops, architecture), ADR-006, lesson-019.
 - [x] Run `make check`.
 
 ## Closing

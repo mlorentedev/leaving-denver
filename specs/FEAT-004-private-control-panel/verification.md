@@ -54,7 +54,7 @@ All tests run against `tests/fixtures/private.example.yaml` (fake numbers); none
 
 ## Decisions made during implementation
 
-- **Tracking is private** (ADR-005): days listed with no sale is buyer leverage, and public
+- **Tracking is private** (ADR-006): days listed with no sale is buyer leverage, and public
   tracking costs a commit and a deploy per post.
 - **Drop steps follow the log, not fixed tiers.** The tiers start from the live asking price,
   so after a repricing the old "week 2" price would no longer be below asking. A window is
@@ -71,7 +71,7 @@ All tests run against `tests/fixtures/private.example.yaml` (fake numbers); none
 ## Promotion candidates
 
 - [x] Lesson for the repo's `docs/lessons/`? yes: lesson-019.
-- [x] ADR-worthy decision? yes: ADR-005.
+- [x] ADR-worthy decision? yes: ADR-006.
 - [ ] New pattern candidate for `00_meta/patterns/`? no: single project.
 
 ## Archive checklist

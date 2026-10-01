@@ -1,5 +1,5 @@
 ---
-id: "ADR-005-seller-tracking-stays-private"
+id: "ADR-006-seller-tracking-stays-private"
 type: adr
 status: accepted
 owner: manu
@@ -9,7 +9,7 @@ tags: [architecture, decision, privacy, secrets]
 created: "2026-09-30"
 ---
 
-# ADR-005: Seller Tracking Stays in the Encrypted File
+# ADR-006: Seller Tracking Stays in the Encrypted File
 
 ## Status
 

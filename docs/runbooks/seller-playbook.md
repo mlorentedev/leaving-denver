@@ -57,7 +57,7 @@ or marking an item sold, follow [site operations](ops.md) to publish.
 listed, channels posted, Facebook renew due, next drop date and the price to drop to, and the
 price log or sale. A yellow "Due now" box lists the renewals and the drops whose window has
 opened. It decrypts the private file in process and writes nothing else; it needs the age key
-and fails without writing if it cannot decrypt. It is never deployed (ADR-005).
+and fails without writing if it cannot decrypt. It is never deployed (ADR-006).
 
 Record what happens as it happens; each command writes to `data/private.sops.yaml` through
 `sops set` (nothing is decrypted to disk). Commit the encrypted file afterwards.
