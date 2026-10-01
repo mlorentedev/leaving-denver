@@ -83,9 +83,7 @@ def sealed_dist(tmp_path_factory):
 
 
 def run(tmp_path, sealed_dist, steps):
-    return run_page(
-        tmp_path, "seller/index.html", HELPERS + steps, setup=SPY, public=sealed_dist
-    )
+    return run_page(tmp_path, "seller/index.html", HELPERS + steps, setup=SPY, public=sealed_dist)
 
 
 def test_before_unlocking_the_page_holds_no_private_value(tmp_path, sealed_dist):

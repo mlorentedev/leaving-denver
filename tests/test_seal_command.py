@@ -308,7 +308,9 @@ def test_a_note_over_500_characters_is_refused(machine, monkeypatch):
     assert calls() == []
 
 
-@pytest.mark.parametrize("notes", [{"sofa-sleeper": 5}, ["not", "a", "map"], {"sofa-sleeper": None}])
+@pytest.mark.parametrize(
+    "notes", [{"sofa-sleeper": 5}, ["not", "a", "map"], {"sofa-sleeper": None}]
+)
 def test_a_note_that_is_not_text_is_refused(notes, machine, monkeypatch):
     calls, _ = machine
     private = fixture_private()

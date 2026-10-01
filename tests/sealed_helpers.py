@@ -135,9 +135,7 @@ def seal_fixture(passphrase=PASSPHRASE):
 
     from leaving_denver import seal
 
-    payload = seal.allowlisted_payload(
-        fixture_private(), datetime(2031, 5, 6, 7, 8, 9, tzinfo=UTC)
-    )
+    payload = seal.allowlisted_payload(fixture_private(), datetime(2031, 5, 6, 7, 8, 9, tzinfo=UTC))
     return seal.seal_with_node(payload, passphrase)
 
 

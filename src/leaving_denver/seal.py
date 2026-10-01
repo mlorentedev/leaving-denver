@@ -281,7 +281,9 @@ def run_seal(offer_generation: bool = True) -> None:
 
     The terminal is checked first, before anything is decrypted: an agent shell has none."""
     if not has_tty():
-        raise SealError("sealing needs a terminal: it asks for the passphrase there, and only there")
+        raise SealError(
+            "sealing needs a terminal: it asks for the passphrase there, and only there"
+        )
     try:
         payload = allowlisted_payload(decrypt_private())
     except RuntimeError as err:

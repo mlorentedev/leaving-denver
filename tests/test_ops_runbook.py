@@ -5,6 +5,7 @@ time exactly then, so every `make` target, CLI subcommand, workflow and script i
 checked against the file that defines it.
 """
 
+import json
 import os
 import re
 import subprocess
@@ -172,7 +173,10 @@ def test_the_csp_scan_reads_meta_tags_however_they_are_written():
 
 def test_no_csp_stops_the_cloudflare_beacon():
     """ADR-005: Web Analytics is enabled in the Pages dashboard and Cloudflare injects the
-    beacon at the edge. A CSP added later would silently break it, so it must allow it."""
+    beacon at the edge. A CSP added later would silently break it, so it must allow it.
+
+    Every path but /seller/* (ADR-007): the static headers and the page templates may carry no
+    policy that blocks it, and the middleware sends none outside /seller/."""
     from leaving_denver.site_builder import PAGES_HEADERS
 
     policies = re.findall(r"Content-Security-Policy:\s*(.+)", PAGES_HEADERS, flags=re.IGNORECASE)
@@ -180,6 +184,46 @@ def test_no_csp_stops_the_cloudflare_beacon():
         policies += csp_meta_policies(template.read_text(encoding="utf-8"))
     for policy in policies:
         assert not csp_blocks_beacon(policy), policy
+
+
+def middleware_policy(path: str) -> str | None:
+    """The Content-Security-Policy functions/_middleware.js puts on a response for this path."""
+    script = f"""
+import {{ onRequest }} from './functions/_middleware.js';
+const response = await onRequest({{
+  env: {{}}, request: new Request('https://leaving-denver.pages.dev{path}'),
+  next: () => new Response('page')
+}});
+console.log(JSON.stringify(response.headers.get('Content-Security-Policy')));
+"""
+    done = subprocess.run(
+        ["node", "--input-type=module", "-e", script],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert done.returncode == 0, done.stderr
+    return json.loads(done.stdout)
+
+
+@pytest.mark.parametrize(
+    "path", ["/", "/es/", "/i/sofa-sleeper/", "/es/i/sofa-sleeper/", "/robots.txt", "/sellers/"]
+)
+def test_the_middleware_sets_no_policy_outside_seller(path):
+    """ADR-005 holds on every other path: a policy would stop the beacon for buyers."""
+    assert middleware_policy(path) is None
+
+
+def test_the_one_exception_is_seller_and_it_does_block_the_beacon():
+    """ADR-007: the page that holds decrypted floors takes no third-party script, so the
+    beacon is deliberately blocked there. This pins the exception to /seller/*."""
+    policy = middleware_policy("/seller/")
+    assert policy
+    assert csp_blocks_beacon(policy) == [
+        f"script-src needs {BEACON_SCRIPT_HOST}",
+        f"connect-src needs {BEACON_REPORT_HOST}",
+    ]
 
 
 def test_the_repo_ships_no_analytics_beacon():

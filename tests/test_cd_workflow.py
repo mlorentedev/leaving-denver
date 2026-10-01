@@ -326,6 +326,6 @@ def test_the_workflow_never_prints_the_sealed_secret():
     for step in DEPLOY["steps"]:
         run = step.get("run", "")
         if "SELLER_SEALED" in run:
-            assert "echo \"$SELLER_SEALED" not in run
+            assert 'echo "$SELLER_SEALED' not in run
             assert "echo $SELLER_SEALED" not in run
             assert "cat" not in run.split()

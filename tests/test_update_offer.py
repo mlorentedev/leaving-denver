@@ -47,9 +47,7 @@ def terminal(monkeypatch, answers, tty=True):
 
 
 RECORDS = {
-    "post": lambda: cli.cmd_post(
-        SimpleNamespace(id="sofa-sleeper", channel="facebook", on=None)
-    ),
+    "post": lambda: cli.cmd_post(SimpleNamespace(id="sofa-sleeper", channel="facebook", on=None)),
     "reprice": lambda: cli.cmd_reprice(SimpleNamespace(id="sofa-sleeper", price=190, on=None)),
     "sold": lambda: cli.cmd_sold(SimpleNamespace(id="sofa-sleeper", price=180)),
 }
@@ -88,7 +86,9 @@ def test_yes_seals_then_dispatches_after_the_record(command, answer, commands, m
 
 def test_yes_does_not_offer_to_generate_a_new_passphrase(commands, monkeypatch):
     seen = []
-    monkeypatch.setattr(seal, "run_seal", lambda offer_generation=True: seen.append(offer_generation))
+    monkeypatch.setattr(
+        seal, "run_seal", lambda offer_generation=True: seen.append(offer_generation)
+    )
     terminal(monkeypatch, ["y"])
     RECORDS["post"]()
     assert seen == [False]
@@ -142,9 +142,7 @@ def test_an_unknown_item_never_asks(commands, monkeypatch):
     assert asked == []
 
 
-def test_yes_end_to_end_sets_both_environments_then_dispatches_the_deploy(
-    tmp_path, monkeypatch
-):
+def test_yes_end_to_end_sets_both_environments_then_dispatches_the_deploy(tmp_path, monkeypatch):
     """The real seal and the real `gh` call sequence, with the terminal and `gh` stubbed."""
     inventory = {
         "seller": {"departure_date": "2026-11-09"},
@@ -166,4 +164,3 @@ def test_yes_end_to_end_sets_both_environments_then_dispatches_the_deploy(
     assert argv[-1] == ["workflow", "run", "ci.yml", "--ref", "main", "-f", "branch=main"]
     assert secrets == [], "the passphrase was asked for exactly twice"
     assert json.loads(gh_calls()[0]["stdin"])["v"] == 1
-
