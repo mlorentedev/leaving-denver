@@ -137,6 +137,8 @@ owner's machine under a passphrase only the owner knows.
 - [ ] **AC12: the old workspace is gone.**
   - `poster_assistant.html`, the PIN `8011` and any reference to them are absent from `src/`
     and the build.
+  - `make panel`, `src/leaving_denver/panel.py`, `templates/panel.html` and `build/private/`
+    are gone (owner, 2026-10-01). The panel's row logic moves to the `/seller/` views.
   - `verify_security_guarantees` accepts the sealed block in `/seller/` and still fails a build
     whose `build/public/` contains a plaintext fixture value.
 - [ ] **AC13: the runbook covers the operation.** `docs/runbooks/ops.md` names:
@@ -152,15 +154,20 @@ owner's machine under a passphrase only the owner knows.
 - Compression and envelope `v: 2`, until the envelope passes 32 KB.
 - An attempt counter or lockout in the browser. It is meaningless against an offline attacker.
 
-## Open questions for the owner
+## Owner answers (2026-10-01)
 
-- **`build/private/panel.html`** (merged in #138). Delete it with the rest of `build/private/`,
-  or keep it as the offline view?
-- **Shape of `notes`.** Proposed: `notes.<item-id>`, free text of 500 characters or fewer. Is
-  that the negotiation content the owner means?
-- **Confirm the deploy job requiring `SELLER_SEALED`.** ADR-007 decides it, mirroring
-  `SELLER_PHONE`. It means `make ci-secrets` runs before PR 2 merges.
-- **A passphrase that is not 5 list words.** If the owner wants one, the word rule would have to
-  become an estimator (a new dependency).
-- **Re-sealing after each `make post`, `make sold` or `make reprice`.** Should these offer to run
-  `make ci-secrets` and a deploy right away, at the cost of a passphrase prompt each time?
+- **The panel is retired.** `make panel` and `build/private/panel.html` go, with the rest of
+  `build/private/`. AC12 covers it.
+- **Notes** are `notes.<item-id>`, free text of 500 characters or fewer.
+- **The passphrase** is 5 words from the EFF list, as ADR-007 decision 4 says. There is no
+  estimator.
+- **`make post|sold|reprice` offer to re-seal.** After the write succeeds, they ask whether to
+  update `/seller/` now. On yes: passphrase prompt, seal, `gh secret set` for both
+  environments, and a deploy dispatch. On no, nothing else happens. AC14 covers it.
+- **Deploy requires `SELLER_SEALED`,** as it requires `SELLER_PHONE`, so `make ci-secrets` runs
+  before PR 2 merges.
+
+- [ ] **AC14: recording offers to update `/seller/`.** After a successful `make post`, `make sold`
+  or `make reprice`, the command asks once whether to update `/seller/`. "No" (the default, and
+  any non-TTY run) changes nothing more. "Yes" runs the seal and the dispatch, and the command's
+  exit status reflects them. Tests stub the prompt, the seal and `gh`.

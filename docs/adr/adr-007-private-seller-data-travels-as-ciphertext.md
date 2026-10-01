@@ -1,7 +1,7 @@
 ---
 id: "ADR-007-private-seller-data-travels-as-ciphertext"
 type: adr
-status: proposed
+status: accepted
 owner: manu
 date: "2026-10-01"
 issue: "mlorentedev/leaving-denver#140"
@@ -13,7 +13,7 @@ created: "2026-10-01"
 
 ## Status
 
-Proposed. The owner made the core decisions on 2026-09-30; the open questions in the PR wait on the owner. It amends:
+Accepted (owner decisions of 2026-09-30, open questions answered 2026-10-01). It amends:
 
 - **ADR-006**, decision 3 and the meaning of "private";
 - **ADR-002**, decision 2 ("`build/public/` holds public artifacts only");
@@ -169,6 +169,17 @@ input is mixed into the payload, so compressing before encrypting leaks only the
 - **Writes** stay `make post`, `make sold` and `make reprice` on the computer. They change only
   `data/private.sops.yaml`.
 - There is no backend.
+
+### 8. Owner answers (2026-10-01)
+
+- **One tool.** `make panel` and `build/private/panel.html` are retired in PR 2. `/seller/`
+  shows the same data. Recording stays `make post|sold|reprice`.
+- **Passphrase.** It is generated: 5 words from the EFF list, offered by the target, as in
+  decision 4. There is no owner-chosen phrase and no strength-estimator dependency.
+- **Re-seal on record.** After `make post|sold|reprice` succeeds, the target asks whether to
+  update `/seller/` now. On yes, it asks for the passphrase, seals, sets the secret and
+  dispatches the deploy. On no, nothing else happens.
+- **Notes.** Free text, one note per item, up to 500 characters, edited with `make secrets`.
 
 ## Consequences
 
