@@ -37,7 +37,12 @@ from leaving_denver.config import (
     STATUSES,
     VARIANT_WIDTHS,
 )
-from leaving_denver.image_processor import sync_all_photos, variant_path, write_share_image
+from leaving_denver.image_processor import (
+    sync_all_photos,
+    synced_name,
+    variant_path,
+    write_share_image,
+)
 from leaving_denver.private_data import floors, load_private, phone_parts, seller_phone
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
@@ -140,14 +145,14 @@ def apply_photos(item: dict[str, Any], synced: list[str]) -> None:
     by_name = {Path(img).name: img for img in synced}
     ordered = []
     for listed in item.get("photos", []):
-        # Photo sync renames files this way (image_processor.sync_all_photos).
-        name = Path(listed).stem.lower().replace(" ", "_") + ".jpg"
+        name = synced_name(listed)
         if name not in by_name:
             raise RuntimeError(f"{item['id']}: photo {listed} is not among its photos")
         if by_name[name] in ordered:
             raise RuntimeError(f"{item['id']}: photo {listed} is listed twice")
         ordered.append(by_name[name])
-    images = ordered + [img for img in synced if img not in ordered]
+    rest = sorted((img for img in synced if img not in ordered), key=lambda img: Path(img).name)
+    images = ordered + rest
     item["images"] = images
     item["primary_image"] = images[0]
 

@@ -8,6 +8,7 @@ import pytest
 import yaml
 
 from leaving_denver.config import DATA_DIR
+from leaving_denver.image_processor import synced_name
 from leaving_denver.site_builder import apply_photos
 
 SYNCED = ["catalog/sofa/a_dimensions.jpg", "catalog/sofa/b_front.jpg", "catalog/sofa/c_open.jpg"]
@@ -24,15 +25,23 @@ def test_listed_photos_go_first_in_their_order():
     assert item["primary_image"] == "catalog/sofa/c_open.jpg"
 
 
+def test_the_completeness_check_names_photos_the_way_the_build_does():
+    assert synced_name("B Front.HEIC") == synced_name("b_front.jpg") == "b_front.jpg"
+
+
 def test_names_are_matched_the_way_photo_sync_renames_them():
     item = {"id": "sofa", "photos": ["B Front.HEIC"]}
     apply_photos(item, SYNCED)
     assert item["images"][0] == "catalog/sofa/b_front.jpg"
 
 
-def test_without_a_list_the_name_order_is_kept():
+def test_unlisted_photos_follow_in_name_order():
+    # The synced list may come in file system order; the leftovers are sorted by name.
+    item = {"id": "sofa", "photos": ["b_front.jpg"]}
+    apply_photos(item, list(reversed(SYNCED)))
+    assert item["images"] == [SYNCED[1], SYNCED[0], SYNCED[2]]
     item = {"id": "sofa"}
-    apply_photos(item, SYNCED)
+    apply_photos(item, list(reversed(SYNCED)))
     assert item["images"] == SYNCED
 
 
@@ -57,7 +66,7 @@ def test_every_item_with_several_photos_lists_them_all():
     photos_dir = DATA_DIR.parent / "content" / "photos"
     for item in items:
         folder = photos_dir / item["id"]
-        own = sorted(p.stem.lower() for p in folder.iterdir()) if folder.is_dir() else []
+        own = sorted(synced_name(p.name) for p in folder.iterdir()) if folder.is_dir() else []
         if len(own) > 1:
-            listed = sorted(name.rsplit(".", 1)[0].lower() for name in item.get("photos", []))
+            listed = sorted(synced_name(name) for name in item.get("photos", []))
             assert listed == own, f"{item['id']}: photos: must list every photo in order"
