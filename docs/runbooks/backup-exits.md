@@ -7,10 +7,10 @@ What to do with whatever has not sold, before the 2026-11-09 departure. These ar
 | By | Do |
 |---|---|
 | **Oct 22** | If the sectional is unsold, text The Good Couch its photos. |
-| **Oct 26** | Book every pickup: Good Couch, ARC, Habitat. None of them publishes a lead time that covers the last week. |
+| **Oct 26** | Book every pickup: Good Couch, ARC, Habitat. Habitat books 2–3 business days out; Good Couch and ARC publish no lead time, so book early. |
 | **Nov 2** | Last drop-off and recycling runs: Goodwill, ARC, Best Buy, Blue Star. |
 | **Nov 3–5** | Give the rest away: Buy Nothing, Craigslist free. |
-| **Nov 8** | Anything left goes in the trash, then follow [decommission.md](decommission.md). |
+| **Nov 8** | Anything left goes in the trash, except electronics: Colorado bans TVs and monitors from landfill, so an unsold TV or monitor goes to Blue Star or At Your Door, or is left with a neighbour to recycle. Then follow [decommission.md](decommission.md). |
 
 ## Per item
 
