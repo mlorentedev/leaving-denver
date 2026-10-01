@@ -332,8 +332,9 @@ def test_mobile_shell(public_dir):
     sheet = re.search(r'<dialog id="itemSheet"[^>]* class="([^"]+)"', html)
     if not sheet or "sheet" not in sheet.group(1).split():
         failures.append("item detail is not a bottom sheet")
-    if 'id="itemFacts" data-max-facts="4"' not in html or ".slice(0, 4)" not in html:
-        failures.append("item sheet is not capped at four facts")
+    # BUG-001 capped the sheet at four facts; the owner wants every spec (FEAT-011).
+    if "data-max-facts" in html or "specs || []).slice(" in html:
+        failures.append("item sheet still caps its facts")
 
     body = re.search(r'<body class="([^"]+)"', html)
     hero = re.search(r'<section class="([^"]+)"', html)
@@ -507,7 +508,7 @@ def test_spanish_bundle_copy_and_payment_terms(public_dir):
     assert not fallbacks, f"Spanish fallbacks: {fallbacks}"
     terms = text_for_role(html, "pickup-terms")
     assert "Efectivo, Venmo, Zelle en persona" in " ".join(terms.split())
-    assert "Cheque de caja verificado en el banco del comprador" in terms
+    assert "Cheque de caja emitido en el banco del comprador o Transferencia bancaria" in terms
 
 
 def test_poster_assistant_has_spanish_marketplace_variants():

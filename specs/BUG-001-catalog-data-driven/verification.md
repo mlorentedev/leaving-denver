@@ -19,6 +19,7 @@ Map every acceptance criterion from `proposal.md` to concrete proof (commit hash
 - [x] AC8 -> PR 5 preview measurement: `clientWidth`, document `scrollWidth`, and body `scrollWidth` all 390 px
 - [x] AC9 -> PR 6 localized build and Spanish copy/SMS/poster/claim-guard contract tests
 - [x] AC10 -> PR 4 copy budget plus PR 5 `test_mobile_shell`; preview showed four facts and no visible tap target below 40 px
+  - Superseded in part by FEAT-011 (#120, owner 2026-09-30): the item sheet now lists every spec, plus the condition, dimensions, colour and what is included. The card keeps four. `test_mobile_shell` asserts that the cap is gone.
 
 ## Test status
 
