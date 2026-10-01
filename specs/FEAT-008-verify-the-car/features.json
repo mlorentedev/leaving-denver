@@ -1,7 +1,7 @@
 [
   {
     "id": "FEAT-008-verify-the-car-f1",
-    "behavior": "`/` and `/es/` render a verify section for the car with the VIN and the three official hosts",
+    "behavior": "`/` and `/es/` put a verify button on the car card that opens a sheet with the VIN and the three official hosts",
     "verification": "uv run pytest -q tests/test_verify_the_car.py",
     "state": "pending",
     "evidence": ""
@@ -22,7 +22,7 @@
   },
   {
     "id": "FEAT-008-verify-the-car-f4",
-    "behavior": "The section states the fresh, unused emissions certificate at sale and the official-sites-only anti-scam line",
+    "behavior": "The sheet says the May test passed, that certificate is already used for the renewal, and a new test comes before handover (no anti-scam line, owner 2026-10-01)",
     "verification": "uv run pytest -q tests/test_verify_the_car.py",
     "state": "pending",
     "evidence": ""
@@ -36,7 +36,7 @@
   },
   {
     "id": "FEAT-008-verify-the-car-f6",
-    "behavior": "Links and evidence are data with EN/ES labels; no section without verify data",
+    "behavior": "Links and evidence are data with EN/ES labels; no button and no sheet without verify data",
     "verification": "uv run pytest -q tests/test_verify_the_car.py",
     "state": "pending",
     "evidence": ""

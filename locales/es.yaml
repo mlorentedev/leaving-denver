@@ -63,7 +63,8 @@ verify_intro: "Revisa el auto sin fiarte de mi palabra: pega el VIN en estos sit
 verify_vin: VIN
 verify_paperwork: Mis documentos
 verify_new_tab: (se abre en otra pestaña)
-verify_scam: Haz tus consultas solo en los sitios oficiales de arriba. Nunca pagues un reporte a través de un enlace que alguien te envíe.
+percent_off: "{n}% de descuento"
+flaws_heading: Defectos conocidos
 months:
   1: enero
   2: febrero
@@ -83,6 +84,14 @@ categories:
   Home Office & Tech: Oficina y tecnología
   Dining & Kitchen: Cocina
   Vehicle: Auto
+conditions:
+  New: Nuevo
+  Used - Like New: Usado - Como nuevo
+  Used - Good: Usado - Buen estado
+  Used - Fair: Usado - Aceptable
+size_badges:
+  truck: Necesita camioneta o SUV
+  lift: Levantar entre 2 personas
 statuses:
   Available: Disponible
   Pending: Reservado

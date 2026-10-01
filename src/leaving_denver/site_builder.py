@@ -62,6 +62,15 @@ CSS_CLI = (
 )
 
 
+# Facebook Marketplace's condition scale; the Spanish labels live in locales/*.yaml (`conditions`).
+# The car is graded on Facebook's vehicle scale instead and keeps its own wording.
+CONDITIONS = ("New", "Used - Like New", "Used - Good", "Used - Fair")
+# Over any of these a buyer needs a bigger car, or a second pair of hands (clearlist's thresholds).
+TRUCK_SIDE_IN = 48
+TRUCK_WEIGHT_LB = 50
+LIFT_WEIGHT_LB = 75
+
+
 def build_stylesheets() -> None:
     """Compile separate explicit template sources; never publish private template styles."""
     if not CSS_CLI.is_file():
@@ -233,6 +242,57 @@ def photo_set(image: str, asset_prefix: str) -> dict[str, Any]:
     return photo
 
 
+def list_price(item: dict[str, Any]) -> int:
+    """The item's one asking price. A second price would be ambiguous and public: refused."""
+    if "current_asking" in item:
+        raise RuntimeError(
+            f"Item {item['id']}: current_asking is gone; recommended_list_price is the one price"
+        )
+    if "recommended_list_price" not in item:
+        raise RuntimeError(f"Item {item['id']}: recommended_list_price is required")
+    return item["recommended_list_price"]
+
+
+def check_condition(item: dict[str, Any]) -> str:
+    """The condition, on Facebook's scale unless it is the car's."""
+    condition = item.get("condition", "")
+    if condition and item.get("category") != "Vehicle" and condition not in CONDITIONS:
+        raise RuntimeError(
+            f"Item {item['id']}: condition {condition!r} is off the scale {CONDITIONS}"
+        )
+    return condition
+
+
+def discount_pct(item: dict[str, Any], price: int) -> int:
+    """Whole percent below the retail figure, rounded down; 0 when there is nothing to claim."""
+    retail = item.get("original_price", 0)
+    # A used car priced against its new sticker is not a comparable; a free item has no price.
+    if item.get("category") == "Vehicle" or item.get("free_with_purchase") or retail <= price:
+        return 0
+    return (retail - price) * 100 // retail
+
+
+def positive_number(value: Any) -> bool:
+    return isinstance(value, (int, float)) and not isinstance(value, bool) and value > 0
+
+
+def size_flags(item: dict[str, Any]) -> list[str]:
+    """Size badges from explicit numbers in the data; the dimensions text is never parsed."""
+    size, weight = item.get("size_in"), item.get("weight_lb")
+    if size is not None and not (
+        isinstance(size, list) and len(size) == 3 and all(positive_number(side) for side in size)
+    ):
+        raise RuntimeError(f"Item {item['id']}: size_in must be [w, d, h], three positive numbers")
+    if weight is not None and not positive_number(weight):
+        raise RuntimeError(f"Item {item['id']}: weight_lb must be a positive number")
+    flags = []
+    if max(size or [0]) > TRUCK_SIDE_IN or (weight or 0) > TRUCK_WEIGHT_LB:
+        flags.append("truck")
+    if (weight or 0) > LIFT_WEIGHT_LB:
+        flags.append("lift")
+    return flags
+
+
 def public_item(item: dict[str, Any]) -> dict[str, Any]:
     """One published item: its id and status checked, its private fields left out."""
     # Ids become paths (i/<id>/, catalog/<id>/) and URL fragments: slugs only.
@@ -241,6 +301,7 @@ def public_item(item: dict[str, Any]) -> dict[str, Any]:
     status = item.get("status", "Available")
     if status not in STATUSES:
         raise RuntimeError(f"Item {item['id']}: status {status!r} is not one of {STATUSES}")
+    price = list_price(item)
     pub = {
         "id": item.get("id"),
         "category": item.get("category"),
@@ -251,11 +312,12 @@ def public_item(item: dict[str, Any]) -> dict[str, Any]:
         "year": item.get("year"),
         "odometer": item.get("odometer"),
         "title_status": item.get("title_status", ""),
-        "condition": item.get("condition", ""),
+        "condition": check_condition(item),
+        "flaws": list(item.get("flaws", [])),
         # A free item keeps its list price in the data (the floors need it) but shows none.
-        "price": 0
-        if item.get("free_with_purchase")
-        else item.get("recommended_list_price", item.get("current_asking", 0)),
+        "price": 0 if item.get("free_with_purchase") else price,
+        "discount_pct": discount_pct(item, price),
+        "size_flags": size_flags(item),
         "free": bool(item.get("free_with_purchase")),
         "note": item.get("note", ""),
         "retail": item.get("original_price", 0),
@@ -288,14 +350,13 @@ def sanitize_public_inventory(full_data: dict[str, Any]) -> dict[str, Any]:
         # A string would be compared character by character and never match a hidden id.
         if not isinstance(bundle.get("items"), list):
             raise RuntimeError(f"Bundle {bundle.get('id')}: items must be a list of item ids")
-    public_items = []
-    for item in full_data.get("items", []):
-        if item["id"] in hidden:
-            continue
-        public_items.append(public_item(item))
-
-    # Sold items stay visible but go last; sorted() is stable, so the rest keep their order.
-    public_items = sorted(public_items, key=lambda item: item["status"] == "Sold")
+    # Cheapest first, Sold last; sorted() is stable, so equal prices keep the data's order. A free
+    # item sorts by its list price (it is free only with a purchase) so it does not lead the grid.
+    shown = sorted(
+        (item for item in full_data.get("items", []) if item["id"] not in hidden),
+        key=lambda item: (item.get("status", "Available") == "Sold", list_price(item)),
+    )
+    public_items = [public_item(item) for item in shown]
     prices = {item["id"]: item["price"] for item in public_items}
     statuses = {item["id"]: item["status"] for item in public_items}
     public_bundles = []
@@ -496,6 +557,57 @@ def localize_verify(
             entry["href"] = asset_prefix + by_name[synced_name(entry["photo"])]
 
 
+LOCALIZED_FIELDS = (
+    ("title", "title"),
+    ("short_title", "short_title"),
+    ("specs", "specs"),
+    ("included", "included"),
+    ("pickup_note", "pickup"),
+    ("condition", "condition"),
+    ("dimensions", "dimensions"),
+    ("note", "note"),
+    ("title_status", "title_status"),
+    ("color", "color"),
+)
+
+
+def localized_flaws(item: dict[str, Any], copy: dict[str, Any], locale: str) -> list[str]:
+    """The flaws in the page's language; a flaw with no Spanish line would ship in English."""
+    flaws = item["flaws"]
+    if locale == "en" or not flaws:
+        return flaws
+    spanish = copy.get("flaws", [])
+    if len(spanish) != len(flaws):
+        raise RuntimeError(
+            f"Item {item['id']}: its {len(flaws)} flaws need the same number under es.flaws"
+        )
+    return spanish
+
+
+def localize_item(
+    item: dict[str, Any],
+    source: dict[str, Any],
+    locale: str,
+    translations: dict[str, Any],
+    asset_prefix: str,
+) -> None:
+    """Overlay one locale's copy and labels onto a published item, in place."""
+    copy = source.get(locale, {}) if locale != "en" else {}
+    if item["condition"] and item["category"] != "Vehicle":
+        item["condition"] = translations["conditions"][item["condition"]]
+    for source_field, public_field in LOCALIZED_FIELDS:
+        if source_field in copy:
+            item[public_field] = copy[source_field]
+    item["flaws"] = localized_flaws(item, copy, locale)
+    item["size_badges"] = [translations["size_badges"][flag] for flag in item["size_flags"]]
+    item["category_label"] = translations["categories"].get(item["category"], item["category"])
+    item["status_label"] = translations["statuses"][item["status"]]
+    item["photos"] = [photo_set(image, asset_prefix) for image in item["images"]]
+    if "verify" in item:
+        localize_verify(item["verify"], copy.get("verify", {}), item["images"], asset_prefix)
+    item["images"] = [asset_prefix + image for image in item["images"]]
+
+
 def localize_public_inventory(
     public_data: dict[str, Any],
     full_data: dict[str, Any],
@@ -507,28 +619,7 @@ def localize_public_inventory(
     localized = json.loads(json.dumps(public_data))
     source_items = {item["id"]: item for item in full_data.get("items", [])}
     for item in localized["items"]:
-        source = source_items[item["id"]]
-        copy = source.get(locale, {}) if locale != "en" else {}
-        for source_field, public_field in (
-            ("title", "title"),
-            ("short_title", "short_title"),
-            ("specs", "specs"),
-            ("included", "included"),
-            ("pickup_note", "pickup"),
-            ("condition", "condition"),
-            ("dimensions", "dimensions"),
-            ("note", "note"),
-            ("title_status", "title_status"),
-            ("color", "color"),
-        ):
-            if source_field in copy:
-                item[public_field] = copy[source_field]
-        item["category_label"] = translations["categories"].get(item["category"], item["category"])
-        item["status_label"] = translations["statuses"][item["status"]]
-        item["photos"] = [photo_set(image, asset_prefix) for image in item["images"]]
-        if "verify" in item:
-            localize_verify(item["verify"], copy.get("verify", {}), item["images"], asset_prefix)
-        item["images"] = [asset_prefix + image for image in item["images"]]
+        localize_item(item, source_items[item["id"]], locale, translations, asset_prefix)
 
     source_bundles = {bundle["id"]: bundle for bundle in full_data.get("bundles", [])}
     for bundle in localized["bundles"]:
@@ -675,6 +766,12 @@ def build_public_site(full_data: dict[str, Any]) -> None:
         shutil.rmtree(DIST_DIR / "catalog" / item_id, ignore_errors=True)
 
 
+def with_spanish_condition(item: dict[str, Any], labels: dict[str, str]) -> None:
+    """The private poster reads `es.condition` from the raw data; the label lives in the locale."""
+    if item.get("category") != "Vehicle" and item.get("condition") in labels:
+        item.setdefault("es", {}).setdefault("condition", labels[item["condition"]])
+
+
 def build_private_workspace(full_data: dict[str, Any]) -> None:
     private = load_private()
     if not private:
@@ -687,8 +784,10 @@ def build_private_workspace(full_data: dict[str, Any]) -> None:
     full_data = json.loads(json.dumps(full_data))
     reserve = floors(private)
     hidden = unpublished_ids(full_data)
+    spanish_conditions = load_locale("es")["conditions"]
     for item in full_data.get("items", []):
         item["draft"] = item["id"] in hidden
+        with_spanish_condition(item, spanish_conditions)
         if item["id"] in reserve:
             item["firm_floor_price"] = reserve[item["id"]]
     full_data.setdefault("seller", {})["phone"] = seller_phone(private)

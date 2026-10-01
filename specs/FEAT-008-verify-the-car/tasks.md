@@ -21,7 +21,7 @@ created: "2026-09-30"
 - [x] [AC2] [AC3] Pass `vin` and `verify` through `sanitize_public_inventory`; localize and
   validate them in `localize_public_inventory` (official hosts, existing photos).
 - [x] [AC1] [AC4] Add the section strings to `locales/en.yaml` and `locales/es.yaml`.
-- [x] [AC1] Render the section under the car's card in `templates/index.html`.
+- [x] [AC1] Render the content in a `dialog.sheet` opened by a button in the car card's action row in `templates/index.html`; add `tests/test_verify_sheet_browser.py` (headless Chrome).
 - [x] Run `make check`.
 
 ## Closing

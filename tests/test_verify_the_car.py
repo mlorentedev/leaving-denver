@@ -1,16 +1,17 @@
 """
-The car's "verify it yourself" section (FEAT-008): the public VIN, links to official sources
+The car's "verify it yourself" sheet (FEAT-008): the public VIN, links to official sources
 only, and the seller's own evidence, which is a photo the car already carries. The links and
 the evidence are data under the car (`verify:`), so a check or an evidence item added later is
 one list entry; the builder refuses a check that is not https on an official host and evidence
 that is not one of the car's photos.
 
 No Carfax and no dealer service-history printout yet: they are pending owner tasks (#28, #34),
-so the section renders only what exists. Those tests flip on purpose when the entries land.
+so the sheet renders only what exists. Those tests flip on purpose when the entries land.
 """
 
 import copy
 import re
+from html import unescape
 from urllib.parse import urlsplit
 
 import pytest
@@ -37,6 +38,7 @@ FORBIDDEN = re.compile(
     r"\b(title|registration|plate|owner|address)\b|\b(título|registro|placa|propietario|dirección)\b",
     re.IGNORECASE,
 )
+RENEWAL = re.compile(r"my registration renewal|(la renovación de|renovar) mi registro")
 
 
 @pytest.fixture
@@ -81,10 +83,34 @@ def test_the_section_shows_the_vin_and_the_three_official_hosts(locale):
     assert heading in text_of(html)
 
 
-def test_the_section_sits_under_the_car_and_not_in_the_footer():
-    html = (PUBLIC / "index.html").read_text(encoding="utf-8")
-    assert html.index('data-role="vehicle-payment"') < html.index('data-role="verify-car"')
-    assert html.index('data-role="verify-car"') < html.index("<footer")
+@pytest.mark.parametrize("locale", PAGES)
+def test_the_checks_open_from_a_button_on_the_car_card_and_are_not_inline(locale):
+    html = (PUBLIC / PAGES[locale]).read_text(encoding="utf-8")
+    heading = {"en": "Verify it yourself", "es": "Compruébalo tú mismo"}[locale]
+    button = re.search(
+        r'<button[^>]*data-open-sheet="verifySheet"[^>]*>(.*?)</button>', html, re.DOTALL
+    )
+    assert button, f"{locale}: no button opens the verify sheet"
+    assert heading in text_of(button.group(1))
+    # On the car card's action row: after its specs button (always there, unlike the text link
+    # a Sold car drops), before its payment line.
+    assert (
+        html.index("openModal('" + CAR_ID + "')")
+        < button.start()
+        < html.index('data-role="vehicle-payment"')
+    )
+    # The content lives in a closed sheet, after the page body, never as a section on the page.
+    sheet = html.index('<dialog id="verifySheet"')
+    assert sheet > html.index("<footer")
+    assert html.index('data-role="verify-car"') > sheet
+    assert html.count('data-role="verify-car"') == 1
+    assert "data-close-sheet" in html[sheet : html.index("</dialog>", sheet)]
+
+
+def test_the_share_page_still_sends_buyers_to_the_car():
+    html = (PUBLIC / "i" / CAR_ID / "index.html").read_text(encoding="utf-8")
+    assert f"#{CAR_ID}" in html
+    assert 'data-role="verify-car"' not in html
 
 
 @pytest.mark.parametrize("locale", PAGES)
@@ -129,26 +155,44 @@ def test_evidence_links_to_photos_the_car_has_and_the_build_ships(locale):
 
 
 @pytest.mark.parametrize(
-    ("locale", "certificate", "scam"),
+    ("locale", "passed", "used", "new_test"),
     [
-        ("en", "fresh, unused", "official sites"),
-        ("es", "sin usar", "sitios oficiales"),
+        (
+            "en",
+            "Passed",
+            "already used for my registration renewal",
+            "Before handover I'll take a new emissions test and give you that new certificate",
+        ),
+        (
+            "es",
+            "Pasó",
+            "ya se usó en la renovación de mi registro",
+            "Antes de la entrega haré una nueva prueba de emisiones y te daré ese certificado nuevo",
+        ),
     ],
 )
-def test_the_section_hands_over_a_fresh_certificate_and_warns_about_paid_report_links(
-    locale, certificate, scam
+def test_the_emissions_note_says_passed_already_used_and_a_new_test_is_coming(
+    locale, passed, used, new_test
 ):
-    text = text_of(section(PAGES[locale])).lower()
-    assert certificate in text
-    assert scam in text
-    assert ("never pay" if locale == "en" else "nunca pagues") in text
-    assert "PASS" in text_of(section(PAGES[locale]))
+    html = section(PAGES[locale])
+    text = unescape(text_of(html))
+    # The note under the report link carries all three meanings: (a) passed, (b) the May
+    # certificate is already used, (c) a new test is taken before handover.
+    note = text[text.index(passed) :]
+    assert used in note and new_test in note, note
+    assert "PASS" in text
+    # The old promise read as if the owner's current certificate were clean.
+    assert not re.search(r"fresh, unused|sin usar", text, re.IGNORECASE)
+    # No anti-scam line: the owner found it superfluous (2026-10-01).
+    assert "official sites above" not in text.lower() and "sitios oficiales de arriba" not in text
 
 
 @pytest.mark.parametrize("locale", PAGES)
 def test_the_section_claims_no_service_history_and_shows_no_personal_data(locale):
     # Link targets are checked too: a Carfax or dealer URL would show up in an href.
-    html = section(PAGES[locale])
+    # The emissions note may name the renewal the May certificate went to (owner, 2026-10-01);
+    # that is the only place "registration" may appear, and it carries no registration data.
+    html = RENEWAL.sub("", section(PAGES[locale]))
     hits = FORBIDDEN.findall(html)
     assert not hits, f"{locale}: {hits}"
 
@@ -204,10 +248,12 @@ def built_page(public_dir, car):
     return (public_dir / "index.html").read_text(encoding="utf-8")
 
 
-def test_a_car_without_verify_data_renders_no_section(public_dir):
+def test_a_car_without_verify_data_renders_no_button_and_no_sheet(public_dir):
     car = copy.deepcopy(CAR)
     car.pop("verify", None)
-    assert 'data-role="verify-car"' not in built_page(public_dir, car)
+    html = built_page(public_dir, car)
+    for absent in ('data-role="verify-car"', "verifySheet", 'data-open-sheet="'):
+        assert absent not in html, absent
 
 
 def test_a_car_with_verify_data_renders_it_from_the_data(public_dir):
