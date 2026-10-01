@@ -9,6 +9,7 @@ import os
 import re
 import subprocess
 import sys
+from html.parser import HTMLParser
 from pathlib import Path
 
 import pytest
@@ -139,17 +140,31 @@ def test_csp_check_notices_a_policy_that_would_stop_the_beacon(policy, blocked):
     assert len(csp_blocks_beacon(policy)) == blocked
 
 
+class _CspMeta(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.policies = []
+
+    def handle_starttag(self, tag, attrs):
+        attrs = {name: value or "" for name, value in attrs}
+        if tag == "meta" and attrs.get("http-equiv", "").lower() == "content-security-policy":
+            self.policies.append(attrs.get("content", ""))
+
+
 def csp_meta_policies(html):
-    """The content of every CSP <meta>, whatever order its attributes come in."""
-    tags = re.findall(r"<meta\b[^>]*>", html, flags=re.IGNORECASE)
-    csp = [t for t in tags if re.search(r"http-equiv=[\"']?content-security-policy", t, re.I)]
-    return [m.group(1) for t in csp if (m := re.search(r'content="([^"]+)"', t, re.I))]
+    """The content of every CSP <meta>, read by an HTML parser so attribute order,
+    quoting and spacing cannot hide one."""
+    parser = _CspMeta()
+    parser.feed(html)
+    return parser.policies
 
 
-def test_the_csp_scan_reads_meta_tags_in_any_attribute_order():
+def test_the_csp_scan_reads_meta_tags_however_they_are_written():
     for tag in (
         '<meta http-equiv="Content-Security-Policy" content="script-src \'self\'">',
         '<meta content="script-src \'self\'" http-equiv="Content-Security-Policy">',
+        "<meta http-equiv = 'content-security-policy' content = \"script-src 'self'\">",
+        "<META HTTP-EQUIV=Content-Security-Policy CONTENT=\"script-src 'self'\">",
     ):
         assert csp_meta_policies(tag) == ["script-src 'self'"], tag
     assert csp_meta_policies('<meta name="viewport" content="width=device-width">') == []
