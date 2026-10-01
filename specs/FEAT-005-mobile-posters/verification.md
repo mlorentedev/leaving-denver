@@ -25,10 +25,9 @@ Map every acceptance criterion from `proposal.md` to concrete proof (commit hash
 
 ## Test status
 
-- Test suite after merging `origin/main`: 280 non-browser tests passed on
-  Windows; `make lint` and `make build` passed. The new browser harness from
-  #119 cannot collect on Windows until #126 merges; CI runs the full suite on
-  Linux. Wrangler Pages dev compiled the root Functions route.
+- Test suite after merging `origin/main` including #122, #125 and #126:
+  `make check` -> 286 passed, 24 browser tests skipped on Windows.
+  Wrangler Pages dev compiled the root Functions route.
 - Manual smoke test: local anonymous Pages catalog `/` and `/es/` returned
   `200`; `/seller/`, its HTML and JS, and an encoded seller path returned
   `503`. Production
