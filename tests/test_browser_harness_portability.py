@@ -54,3 +54,32 @@ def test_send_waits_for_an_answer_up_to_its_deadline(tmp_path):
     with pytest.raises(AssertionError, match="Chrome stopped answering"):
         page_answering_after(1).send("Target.createTarget", deadline=0.2)
     assert page_answering_after(0.3).send("Target.createTarget", deadline=5) == {"targetId": "t"}
+
+
+@pytest.mark.skipif(os.name != "posix", reason="the harness reads Chrome over a POSIX pipe")
+@pytest.mark.skipif(not (ROOT / "build/public/index.html").exists(), reason="site not built")
+def test_the_first_command_waits_for_chrome_to_start(tmp_path, monkeypatch):
+    # The longer budget only helps if open_page passes it: a stubbed Chrome records it.
+    import browser_harness
+
+    calls = []
+
+    class Stop(Exception):
+        pass
+
+    class Chrome:
+        def kill(self):
+            pass
+
+        def wait(self, timeout):
+            pass
+
+    def send(self, method, deadline=browser_harness.DEADLINE, **params):
+        calls.append((method, deadline))
+        raise Stop
+
+    monkeypatch.setattr(browser_harness.Page, "send", send)
+    monkeypatch.setattr(browser_harness.subprocess, "Popen", lambda *args, **kwargs: Chrome())
+    with pytest.raises(Stop), browser_harness.open_page(tmp_path, "index.html"):
+        pass
+    assert calls == [("Target.createTarget", browser_harness.STARTUP)]
