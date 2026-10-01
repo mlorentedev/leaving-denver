@@ -23,7 +23,7 @@ CF_ENV    = CLOUDFLARE_ACCOUNT_ID=$(CF_ACCOUNT_ID) CLOUDFLARE_API_TOKEN="$$(sops
 
 .DEFAULT_GOAL := help
 
-.PHONY: help install lint format build test check serve drops sold deploy cf-project ci-secrets protect-deploy protect-main secrets clean
+.PHONY: help install lint format build test check serve drops sold deploy cf-project ci-secrets protect-deploy protect-main audit-deploy secrets clean
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
@@ -94,19 +94,30 @@ protect-deploy: ## Allow deploy secrets only from main, including manual preview
 		fi; \
 	done
 
-ci-secrets: protect-deploy ## Scope deploy token to protected environments; push contact from sops
+ci-secrets: protect-deploy ## Scope the deploy token and the contact to the protected environments
 	@set -e; token="$$(sops -d --extract '["cloudflare_pages_token"]' $(SOPS_FILE))"; \
 	test -n "$$token" || { echo "empty Cloudflare token" >&2; exit 1; }; \
 	for environment in production preview; do \
 		printf '%s' "$$token" | gh secret set CLOUDFLARE_API_TOKEN --env "$$environment"; \
 	done; \
 	unset token; \
-	if gh secret list | grep -q '^CLOUDFLARE_API_TOKEN[[:space:]]'; then \
+	secrets="$$(gh secret list)"; \
+	if printf '%s\n' "$$secrets" | grep -q '^CLOUDFLARE_API_TOKEN[[:space:]]'; then \
 		gh secret delete CLOUDFLARE_API_TOKEN; \
 	fi; \
 	phone="$$(sops -d --extract '["seller"]["phone"]' $(SOPS_FILE))"; \
 	test -n "$$phone" || { echo "empty seller phone" >&2; exit 1; }; \
-	printf '%s' "$$phone" | gh secret set SELLER_PHONE
+	for environment in production preview; do \
+		printf '%s' "$$phone" | gh secret set SELLER_PHONE --env "$$environment"; \
+	done; \
+	unset phone; \
+	secrets="$$(gh secret list)"; \
+	if printf '%s\n' "$$secrets" | grep -q '^SELLER_PHONE[[:space:]]'; then \
+		gh secret delete SELLER_PHONE; \
+	fi
+
+audit-deploy: ## Check the live deploy settings and secrets (read-only)
+	scripts/audit-deploy.sh
 
 protect-main: ## Require the CI test check on main (idempotent; admins can still bypass)
 	gh api -X PUT repos/{owner}/{repo}/branches/main/protection --input .github/branch-protection.json >/dev/null

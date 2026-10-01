@@ -1,0 +1,27 @@
+# Weekly read-only check that the deploy environments still allow only `main` (CI-004).
+# The repository-secret part needs the owner's token: `make audit-deploy`.
+name: deploy-audit
+
+on:
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - scripts/audit-deploy.sh
+      - .github/workflows/deploy-audit.yml
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Audit deploy settings
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: scripts/audit-deploy.sh
