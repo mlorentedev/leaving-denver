@@ -2,8 +2,8 @@
 """
 Denver Tech Center Moving Sale - Master Management CLI.
 Coordinates SSOT (data/inventory.yaml), automated photo synchronization,
-public/private builds, staged price drops and a loopback-only preview server.
-Deploys go through GitHub Actions or `make deploy`.
+the public build, staged price drops, the seal of the private data for /seller/ and a
+loopback-only preview server. Deploys go through GitHub Actions or `make deploy`.
 """
 
 import argparse
@@ -13,20 +13,11 @@ import urllib.parse
 from datetime import date
 from pathlib import Path
 
-import yaml
-
-from leaving_denver.config import DIST_DIR, DIST_PRIVATE_DIR, PRIVATE_PANEL_HTML
-from leaving_denver.panel import (
-    CHANNELS,
-    panel_actions,
-    panel_rows,
-    render_panel,
-    takedown_steps,
-    write_panel,
-)
+from leaving_denver import seal
+from leaving_denver.channels import CHANNELS, takedown_steps
+from leaving_denver.config import DIST_DIR
 from leaving_denver.pricing import price_tiers
 from leaving_denver.private_data import (
-    decrypt_private,
     load_private,
     record_post,
     record_price,
@@ -110,6 +101,15 @@ def record_privately(recorder, *record_args):
         sys.exit(1)
 
 
+def offer_seller_update():
+    """After a record: ask whether to update /seller/ now. A failure is the command's own."""
+    try:
+        seal.offer_update()
+    except RuntimeError as err:
+        print(f"Error: /seller/ was not updated ({err}).")
+        sys.exit(1)
+
+
 def cmd_post(args):
     known_item(args.id)
     if args.channel not in CHANNELS:
@@ -118,6 +118,7 @@ def cmd_post(args):
     on = day_arg(args.on)
     record_privately(record_post, args.id, args.channel, on)
     print(f"Recorded: {args.id} posted on {args.channel} on {on}.")
+    offer_seller_update()
 
 
 def cmd_reprice(args):
@@ -130,6 +131,7 @@ def cmd_reprice(args):
     print(
         f"Recorded: {args.id} asking ${args.price} from {on}. Edit its price in the inventory too."
     )
+    offer_seller_update()
 
 
 def cmd_sold(args):
@@ -152,6 +154,16 @@ def cmd_sold(args):
     for step in takedown_steps(args.id, load_private()):
         print(f"- {step}")
     print("=" * 60)
+    offer_seller_update()
+
+
+def cmd_seal(args):
+    """Seal the private data for /seller/ and set the secret. Needs a terminal."""
+    try:
+        seal.run_seal()
+    except RuntimeError as err:
+        print(f"Error: {err}")
+        sys.exit(1)
 
 
 def cmd_drops(args):
@@ -187,45 +199,16 @@ def cmd_drops(args):
     print("Hormozi Protocol: If 0 inquiries within 4-7 days on an item, lower to Week 2 tier.")
 
 
-def cmd_panel(args):
-    """Write the private control panel. Fails closed: no file when the data cannot be read."""
-    try:
-        if args.private_file:
-            private = yaml.safe_load(Path(args.private_file).read_text(encoding="utf-8")) or {}
-        else:
-            private = decrypt_private()
-    except (RuntimeError, OSError) as err:
-        print(f"Error: cannot read the private data ({err}). No panel written.")
-        sys.exit(1)
-    today = date.today()
-    rows = panel_rows(load_inventory_yaml(), private, today)
-    try:
-        out = write_panel(render_panel(rows, today), args.out)
-    except RuntimeError as err:
-        print(f"Error: {err}")
-        sys.exit(1)
-    due = panel_actions(rows)
-    print(f"Panel written to {out} (private: do not copy it into build/public).")
-    print(f"{len(due['renewals'])} Facebook renewals due, {len(due['drops'])} drops open.")
-
-
 def resolve_request_path(path: str) -> Path | None:
-    """Map a request path onto a file under build/, or None when it escapes its root.
+    """Map a request path onto a file under build/public/, or None when it escapes it.
 
-    /private/ and the poster tool come from build/private/; everything else from
-    build/public/, the way Cloudflare Pages serves it. Nothing outside build/ is
-    reachable: the repo root holds data/inventory.json (with the reserve floors)
-    and, one level up, the age key.
-    """
+    Nothing outside build/public/ is reachable: the repo root holds the encrypted private file
+    and, one level up, the age key."""
     path = urllib.parse.unquote(urllib.parse.urlsplit(path).path)
-    if path.startswith("/private/") or path.startswith("/poster_assistant.html"):
-        root, rel = DIST_PRIVATE_DIR, path.removeprefix("/private/")
-    else:
-        root, rel = DIST_DIR, path
-    target = (root / rel.lstrip("/")).resolve()
-    if not target.is_relative_to(root.resolve()):
+    target = (DIST_DIR / path.lstrip("/")).resolve()
+    if not target.is_relative_to(DIST_DIR.resolve()):
         return None
-    return root / target.relative_to(root.resolve())
+    return DIST_DIR / target.relative_to(DIST_DIR.resolve())
 
 
 class PreviewHandler(http.server.SimpleHTTPRequestHandler):
@@ -248,8 +231,8 @@ def cmd_serve(args):
     with make_server(args.port, args.host) as httpd:
         host, port = httpd.server_address[:2]
         print("=" * 65)
-        print(f"Public catalog:      http://{host}:{port}/")
-        print(f"Private seller tool: http://{host}:{port}/poster_assistant.html")
+        print(f"Public catalog: http://{host}:{port}/")
+        print(f"Seller tool:    http://{host}:{port}/seller/")
         print("=" * 65)
         try:
             httpd.serve_forever()
@@ -299,22 +282,19 @@ def main():
     drops_p = subparsers.add_parser("drops", help="Calculate Hormozi 3-week staged pricing drops")
     drops_p.set_defaults(func=cmd_drops)
 
-    panel_p = subparsers.add_parser(
-        "panel", help="Write the private control panel (build/private/)"
+    seal_p = subparsers.add_parser(
+        "seal",
+        help="Seal the private data for /seller/ and set SELLER_SEALED (needs a terminal)",
     )
-    panel_p.add_argument(
-        "--private-file", help="Read a plain YAML instead of the sops file (e.g. the fixture)"
-    )
-    panel_p.add_argument("--out", type=Path, default=PRIVATE_PANEL_HTML, help="Where to write it")
-    panel_p.set_defaults(func=cmd_panel)
+    seal_p.set_defaults(func=cmd_seal)
 
-    serve_p = subparsers.add_parser("serve", help="Serve catalog and seller tool locally")
+    serve_p = subparsers.add_parser("serve", help="Serve the built catalog and seller tool locally")
     serve_p.add_argument("--port", type=int, default=8088, help="Port (default: 8088)")
     serve_p.add_argument(
         "--host",
         default="127.0.0.1",
-        help="Bind address (default: 127.0.0.1). The private tool is served too, so "
-        "binding a LAN address exposes the reserve floors to that network.",
+        help="Bind address (default: 127.0.0.1). It serves build/public/ with no Access in "
+        "front, so a LAN address shows /seller/ (and its sealed data) to that network.",
     )
     serve_p.set_defaults(func=cmd_serve)
 

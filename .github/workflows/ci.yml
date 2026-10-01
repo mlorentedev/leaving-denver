@@ -23,8 +23,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       # Placeholder so the public build can run; the real number is only used by
-      # the deploy job. The sops file is not decryptable here, so tests that need
-      # the reserve floors skip.
+      # the deploy job. The encrypted private file is not decryptable here, so tests
+      # that need the reserve floors skip. There is no SELLER_SEALED either: this build
+      # shows "No private data in this build" (ADR-007).
       SELLER_PHONE: "+15555550100"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -59,6 +60,9 @@ jobs:
       url: ${{ steps.deploy.outputs.deployment-url }}
     env:
       SELLER_PHONE: ${{ secrets.SELLER_PHONE }}
+      # The ciphertext of the private views (ADR-007). Sealed on the owner's machine by
+      # `make ci-secrets`; this job never holds a key or any plaintext.
+      SELLER_SEALED: ${{ secrets.SELLER_SEALED }}
       # A production deploy smokes a candidate first; a dispatched preview deploys once.
       PRODUCTION: ${{ github.event_name == 'push' || inputs.branch == 'main' }}
     steps:
@@ -79,6 +83,15 @@ jobs:
           digits="${SELLER_PHONE//[^0-9]/}"
           if [ -z "$digits" ] || [ "${digits#1}" = "5555550100" ]; then
             echo "::error::SELLER_PHONE secret is required for deployment"
+            exit 1
+          fi
+
+      # A deploy without the sealed data would publish /seller/ saying "No private data in
+      # this build". Only its presence is checked here; the build validates the envelope.
+      - name: Require sealed private data
+        run: |
+          if [ -z "${SELLER_SEALED//[[:space:]]/}" ]; then
+            echo "::error::SELLER_SEALED secret is required for deployment (run make ci-secrets)"
             exit 1
           fi
 

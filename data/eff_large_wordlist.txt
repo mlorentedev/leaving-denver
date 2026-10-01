@@ -1,11 +1,14 @@
-# EFF Large Wordlist for Passphrases (7,776 words), used by `leaving-denver seal` (ADR-007).
+# EFF Large Wordlist for Passphrases (7,772 of its 7,776 words, see Changes), used by `leaving-denver seal` (ADR-007).
 # Source:  https://www.eff.org/files/2016/07/18/eff_large_wordlist.txt
 #          https://www.eff.org/deeplinks/2016/07/new-wordlists-random-passphrases
 # Author:  Electronic Frontier Foundation, 2016.
 # Licence: Creative Commons Attribution 3.0 United States (CC BY 3.0 US),
 #          https://creativecommons.org/licenses/by/3.0/us/
-# Changes: the five-digit dice prefix on each line was removed, leaving one word per line in
-#          the original order. Lines starting with "#" are this header, not words.
+# Changes: (1) the five-digit dice prefix on each line was removed, leaving one word per line in
+#          the original order. (2) The four hyphenated entries (drop-down, felt-tip, t-shirt, yo-yo)
+#          were removed: a hyphen separates the words of a passphrase, so those four could not be
+#          typed back unambiguously. That leaves 7,772 words (64.6 bits for five, as before).
+#          Lines starting with "#" are this header, not words.
 abacus
 abdomen
 abdominal
@@ -2014,7 +2017,6 @@ drizzly
 drone
 drool
 droop
-drop-down
 dropbox
 dropkick
 droplet
@@ -2533,7 +2535,6 @@ feed
 feel
 feisty
 feline
-felt-tip
 feminine
 feminism
 feminist
@@ -6645,7 +6646,6 @@ synthesis
 synthetic
 syrup
 system
-t-shirt
 tabasco
 tabby
 tableful
@@ -7753,7 +7753,6 @@ yiddish
 yield
 yin
 yippee
-yo-yo
 yodel
 yoga
 yogurt

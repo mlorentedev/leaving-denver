@@ -283,3 +283,49 @@ def test_the_runbook_numbers_the_deploy_steps_and_names_the_candidate():
     numbers = [int(n) for n in re.findall(r"^(\d+)\. ", deploy, flags=re.MULTILINE)]
     assert numbers == list(range(1, len(numbers) + 1))
     assert "candidate" in deploy
+
+
+# FEAT-009 PR 2 (ADR-007): the deploy carries the sealed private data, and refuses to go out
+# without it, the way it refuses to go out without the real phone.
+def test_deploy_requires_the_sealed_private_data_before_building():
+    assert DEPLOY["env"]["SELLER_SEALED"] == "${{ secrets.SELLER_SEALED }}"
+    gate = step_index(
+        lambda s: "SELLER_SEALED" in s.get("run", "") and "exit 1" in s.get("run", "")
+    )
+    first_build = step_index(lambda s: s.get("run") == "make check")
+    assert gate < first_build, "the gate must stop the job before it builds anything"
+    script = DEPLOY["steps"][gate]["run"]
+    # An empty secret (the one that was never set arrives empty) must fail the step. The gate
+    # is run here, as the runner would, against an empty and a set value.
+    for value, expected in (("", 1), ("   ", 1), ('{"v":1}', 0)):
+        result = subprocess.run(
+            ["bash", "-c", script],
+            env={**os.environ, "SELLER_SEALED": value},
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert result.returncode == expected, (value, result.stdout, result.stderr)
+    refused = subprocess.run(
+        ["bash", "-c", script],
+        env={**os.environ, "SELLER_SEALED": ""},
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert "SELLER_SEALED" in refused.stdout
+
+
+def test_the_test_job_builds_without_the_sealed_secret():
+    """Every PR and the test job show "No private data in this build"."""
+    assert "SELLER_SEALED" not in WORKFLOW["jobs"]["test"].get("env", {})
+    assert "SELLER_SEALED" not in str(WORKFLOW["jobs"]["test"]["steps"])
+
+
+def test_the_workflow_never_prints_the_sealed_secret():
+    for step in DEPLOY["steps"]:
+        run = step.get("run", "")
+        if "SELLER_SEALED" in run:
+            assert "echo \"$SELLER_SEALED" not in run
+            assert "echo $SELLER_SEALED" not in run
+            assert "cat" not in run.split()

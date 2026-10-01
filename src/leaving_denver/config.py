@@ -22,6 +22,8 @@ INVENTORY_YAML = DATA_DIR / "inventory.yaml"
 INVENTORY_JSON_PRIVATE = DATA_DIR / "inventory.json"
 PRIVATE_SOPS_YAML = DATA_DIR / "private.sops.yaml"
 ASSETS_DIR = BASE_DIR / "src" / "leaving_denver" / "assets"
+# The EFF large wordlist the seal draws and checks passphrases against (see its header).
+WORDLIST_FILE = DATA_DIR / "eff_large_wordlist.txt"
 PUBLIC_INDEX_HTML = DIST_DIR / "index.html"
 PUBLIC_ROBOTS_TXT = DIST_DIR / "robots.txt"
 PUBLIC_HEADERS = DIST_DIR / "_headers"

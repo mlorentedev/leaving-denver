@@ -7,7 +7,9 @@ Nothing here reads data/private.sops.yaml: every value is the fixture's or a sen
 """
 
 import json
+import os
 import subprocess
+import sys
 from pathlib import Path
 
 import yaml
@@ -137,3 +139,52 @@ def seal_fixture(passphrase=PASSPHRASE):
         fixture_private(), datetime(2031, 5, 6, 7, 8, 9, tzinfo=UTC)
     )
     return seal.seal_with_node(payload, passphrase)
+
+
+FAKE_GH = """#!{python}
+import json
+import os
+import sys
+
+stdin = "" if sys.stdin.isatty() else sys.stdin.read()
+with open(os.environ["FAKE_GH_LOG"], "a", encoding="utf-8") as log:
+    log.write(json.dumps({{"argv": sys.argv[1:], "stdin": stdin}}) + "\\n")
+if sys.argv[1:3] == ["secret", "list"]:
+    sys.stdout.write(os.environ.get("FAKE_GH_LIST", ""))
+if os.environ.get("FAKE_GH_FAIL") and os.environ["FAKE_GH_FAIL"] in " ".join(sys.argv[1:]):
+    sys.stderr.write("fake gh: failing on purpose\\n")
+    sys.exit(1)
+"""
+
+FAKE_SOPS = """#!{python}
+import os
+import sys
+
+with open(os.environ["FAKE_GH_LOG"], "a", encoding="utf-8") as log:
+    log.write('{{"sops": true}}\\n')
+sys.exit(1)
+"""
+
+
+def install_fakes(tmp_path, monkeypatch, *, list_output="", fail_on=""):
+    """A fake `gh` (and a `sops` that only records it was called) ahead of the real ones on PATH.
+
+    Returns a function giving the calls the fake `gh` has seen, as {argv, stdin} dicts."""
+    bin_dir = tmp_path / "fake-bin"
+    bin_dir.mkdir()
+    log = tmp_path / "gh-calls.jsonl"
+    for name, body in (("gh", FAKE_GH), ("sops", FAKE_SOPS)):
+        script = bin_dir / name
+        script.write_text(body.format(python=sys.executable), encoding="utf-8")
+        script.chmod(0o755)
+    monkeypatch.setenv("PATH", f"{bin_dir}:{os.environ['PATH']}")
+    monkeypatch.setenv("FAKE_GH_LOG", str(log))
+    monkeypatch.setenv("FAKE_GH_LIST", list_output)
+    monkeypatch.setenv("FAKE_GH_FAIL", fail_on)
+
+    def calls():
+        if not log.exists():
+            return []
+        return [json.loads(line) for line in log.read_text(encoding="utf-8").splitlines()]
+
+    return calls
