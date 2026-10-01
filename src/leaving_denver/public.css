@@ -3,6 +3,7 @@
 @source "./templates/index.html";
 @source "./templates/seller.html";
 @source "./templates/sale_over.html";
+@source "./templates/flyer.html";
 @source "./assets/seller.mjs";
 
 /* Item and bundle sheets: native modal dialogs docked to the bottom edge. */

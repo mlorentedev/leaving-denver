@@ -1,0 +1,58 @@
+[
+  {
+    "id": "FEAT-010-building-flyer-f1",
+    "behavior": "AC1: the build writes flyer/index.html with a Letter @page rule, an inline SVG QR, no script, no img and no foreign host",
+    "verification": "uv run pytest -q tests/test_flyer.py -k 'one_letter_sheet_in_print or no_script_image or resets_the_catalogs'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-010-building-flyer-f2",
+    "behavior": "AC2: the QR's module matrix is segno's for exactly the UTM URL, and the host is printed under it",
+    "verification": "uv run pytest -q tests/test_flyer.py -k 'url_is_the_origin or exactly_the_matrix or another_url or follows_the_origin or address_is_printed'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-010-building-flyer-f3",
+    "behavior": "AC3: no phone in any form, no sms:/tel:, no email and no $ on the flyer",
+    "verification": "uv run pytest -q tests/test_flyer.py -k 'no_phone or no_email or no_price'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-010-building-flyer-f4",
+    "behavior": "AC4: categories, car and date come from the data; no em dash and no invented urgency",
+    "verification": "uv run pytest -q tests/test_flyer.py -k 'categor or car or date or em_dash'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-010-building-flyer-f5",
+    "behavior": "AC5: the page is noindex and nothing else links to it",
+    "verification": "uv run pytest -q tests/test_flyer.py -k 'kept_out_of_search or nothing_else_links or every_other_crawler'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-010-building-flyer-f6",
+    "behavior": "AC6: headless Chrome prints /flyer/ on exactly one US Letter sheet",
+    "verification": "uv run leaving-denver build && uv run pytest -q tests/test_flyer_browser.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-010-building-flyer-f7",
+    "behavior": "AC7: the end build makes no flyer, sweeps a stale one and redirects /flyer and /flyer/* to /",
+    "verification": "uv run pytest -q tests/test_flyer.py tests/test_smoke_end_of_sale.py -k 'end_build or swept or flyer_address or smoke'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-010-building-flyer-f8",
+    "behavior": "AC8: the playbook names /flyer/ and every class of the flyer template is in the compiled stylesheet",
+    "verification": "uv run leaving-denver build && uv run pytest -q tests/test_flyer.py tests/test_class_coverage.py -k 'playbook or flyer'",
+    "state": "pending",
+    "evidence": ""
+  }
+]

@@ -1,0 +1,13 @@
+# The building flyer's own copy (FEAT-010). Kept out of en.yaml and es.yaml, whose keys all
+# travel to the catalog page as inline JSON: the flyer is not part of it.
+en:
+  title: Moving sale flyer
+  heading: I'm moving abroad.
+  deadline: Everything must go by {date}.
+  selling: "For sale:"
+  car: "And my car:"
+  pickup: Pickup in DTC
+  scan: Scan to see photos and prices
+  qr_label: QR code for the moving sale
+es:
+  scan: Escanea para ver todo, en español también

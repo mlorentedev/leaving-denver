@@ -21,8 +21,10 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlsplit
 
+import segno
 import yaml
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
+from markupsafe import Markup
 from PIL import Image
 
 from leaving_denver.config import (
@@ -448,7 +450,8 @@ ROBOTS_TXT = (
 OG_LOCALES = {"en": "en_US", "es": "es_ES"}
 
 # The end-of-sale build (OPS-011): shared links to an item land on the end page, not a 404.
-END_REDIRECTS = "/i/* / 302\n/es/i/* /es/ 302\n"
+# The flyer too (FEAT-010): the paper outlives the sale, and its QR code opens the end page.
+END_REDIRECTS = "/i/* / 302\n/es/i/* /es/ 302\n/flyer / 302\n/flyer/* / 302\n"
 # What an end build leaves in the output root. The stylesheet step runs before the page build,
 # so `styles.css` and `fonts/` are already there.
 END_SITE_FILES = {
@@ -910,6 +913,50 @@ def build_end_site() -> None:
     sweep_to_end_site()
 
 
+# The building flyer (FEAT-010): one printable page whose QR code carries its own UTM tags (ADR-005),
+# so paper shows up in the analytics as a channel of its own.
+FLYER_UTM = "utm_source=flyer&utm_medium=print&utm_campaign=moving-sale"
+# Medium error correction, and segno's default 4-module quiet zone: paper gets creased and shadowed.
+FLYER_QR_ERROR = "m"
+
+
+def flyer_url(origin: str) -> str:
+    return f"{origin}/?{FLYER_UTM}"
+
+
+def flyer_qr_svg(url: str, label: str) -> Markup:
+    """The QR for `url` as inline SVG. It carries no size: the page's CSS gives it one."""
+    code = segno.make(url, error=FLYER_QR_ERROR)
+    return Markup(code.svg_inline(border=4, omitsize=True, light="#fff", title=label))
+
+
+def write_flyer(public_data: dict[str, Any], seller: dict[str, Any], origin: str) -> None:
+    """`flyer/index.html`, from the sanitized data only: what is still for sale and the departure
+    date, never a price or a contact. Sold items are left out so the paper claims nothing gone."""
+    en = load_locale("en")
+    copy = yaml.safe_load((LOCALES_DIR / "flyer.yaml").read_text(encoding="utf-8"))
+    departure = date.fromisoformat(seller["departure_date"])
+    for_sale = [i for i in public_data["items"] if i["status"] != "Sold"]
+    household = [i for i in for_sale if i["category"] != "Vehicle"]
+    car = next((i for i in for_sale if i["category"] == "Vehicle"), None)
+    html = render(
+        "flyer.html",
+        t=copy["en"],
+        site_name=en["site_name"],
+        deadline=copy["en"]["deadline"].format(
+            date=f"{en['months'][departure.month]} {departure.day}"
+        ),
+        qr_svg=flyer_qr_svg(flyer_url(origin), copy["en"]["qr_label"]),
+        address=urlsplit(origin).netloc,
+        es_scan=copy["es"]["scan"],
+        categories=[label for _, label in category_chips(household, en["categories"])],
+        car=car["short_title"] if car else None,
+    )
+    target = DIST_DIR / "flyer" / "index.html"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(html, encoding="utf-8")
+
+
 def build_public_site(full_data: dict[str, Any]) -> None:
     if sale_over(full_data):
         build_end_site()
@@ -969,6 +1016,8 @@ def build_public_site(full_data: dict[str, Any]) -> None:
         target.write_text(html, encoding="utf-8")
 
         write_share_pages(locale, translations, localized_data["items"], previews, origin)
+
+    write_flyer(public_data, seller, origin)
 
     PUBLIC_ROBOTS_TXT.write_text(ROBOTS_TXT, encoding="utf-8")
 

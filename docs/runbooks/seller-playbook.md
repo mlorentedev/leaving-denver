@@ -56,7 +56,7 @@ unverified vehicle service, condition or retail value.
 
 | When | Seller action |
 | :--- | :--- |
-| September 29–October 4 | Photograph and list the car and highest-value items first; list smaller items after the main listings. Post an umbrella message only where group rules allow it and put a QR flyer on the building board if permitted. |
+| September 29–October 4 | Photograph and list the car and highest-value items first; list smaller items after the main listings. Post an umbrella message only where group rules allow it and put a QR flyer on the building board if permitted (print `https://leaving-denver.pages.dev/flyer/` from a browser). |
 | October 5–11 | Reply promptly, follow up on qualified inquiries and renew listings only when the platform offers it. Review items with no messages before changing their public asking prices. |
 | October 12–18 | Refresh eligible listings and photos; follow up with interested buyers. Recheck public asking prices on items still getting no qualified inquiries. |
 | October 19–25 | Promote remaining bundles without claiming items already sold. If the sectional is unsold, contact The Good Couch with real photos by October 22 as a backup; see [backup-exits.md](backup-exits.md). |
