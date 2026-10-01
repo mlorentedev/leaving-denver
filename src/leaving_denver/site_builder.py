@@ -230,6 +230,49 @@ def photo_set(image: str, asset_prefix: str) -> dict[str, Any]:
     return photo
 
 
+def public_item(item: dict[str, Any]) -> dict[str, Any]:
+    """One published item: its id and status checked, its private fields left out."""
+    # Ids become paths (i/<id>/, catalog/<id>/) and URL fragments: slugs only.
+    if not re.fullmatch(r"[a-z0-9]+(-[a-z0-9]+)*", item["id"]):
+        raise RuntimeError(f"Item id {item['id']!r} must be a lower-case slug")
+    status = item.get("status", "Available")
+    if status not in STATUSES:
+        raise RuntimeError(f"Item {item['id']}: status {status!r} is not one of {STATUSES}")
+    pub = {
+        "id": item.get("id"),
+        "category": item.get("category"),
+        "title": item.get("title"),
+        "short_title": item.get("short_title", item.get("title")),
+        "brand": item.get("brand", ""),
+        "model": item.get("model", ""),
+        "year": item.get("year"),
+        "odometer": item.get("odometer"),
+        "title_status": item.get("title_status", ""),
+        "condition": item.get("condition", ""),
+        # A free item keeps its list price in the data (the floors need it) but shows none.
+        "price": 0
+        if item.get("free_with_purchase")
+        else item.get("recommended_list_price", item.get("current_asking", 0)),
+        "free": bool(item.get("free_with_purchase")),
+        "note": item.get("note", ""),
+        "retail": item.get("original_price", 0),
+        "status": status,
+        "dimensions": item.get("dimensions", ""),
+        "color": item.get("color", ""),
+        "images": item.get("images", []),
+        "specs": item.get("specs", []),
+        "included": item.get("included", []),
+        "pickup": item.get(
+            "pickup_note", "Pickup in Denver Tech Center (DTC). Buyer must self-load."
+        ),
+    }
+    if item.get("vin"):
+        pub["vin"] = item["vin"]
+    if item.get("verify"):
+        pub["verify"] = public_verify(item)
+    return pub
+
+
 def sanitize_public_inventory(full_data: dict[str, Any]) -> dict[str, Any]:
     """
     Strips internal seller secrets:
@@ -246,45 +289,7 @@ def sanitize_public_inventory(full_data: dict[str, Any]) -> dict[str, Any]:
     for item in full_data.get("items", []):
         if item["id"] in hidden:
             continue
-        # Ids become paths (i/<id>/, catalog/<id>/) and URL fragments: slugs only.
-        if not re.fullmatch(r"[a-z0-9]+(-[a-z0-9]+)*", item["id"]):
-            raise RuntimeError(f"Item id {item['id']!r} must be a lower-case slug")
-        status = item.get("status", "Available")
-        if status not in STATUSES:
-            raise RuntimeError(f"Item {item['id']}: status {status!r} is not one of {STATUSES}")
-        pub = {
-            "id": item.get("id"),
-            "category": item.get("category"),
-            "title": item.get("title"),
-            "short_title": item.get("short_title", item.get("title")),
-            "brand": item.get("brand", ""),
-            "model": item.get("model", ""),
-            "year": item.get("year"),
-            "odometer": item.get("odometer"),
-            "title_status": item.get("title_status", ""),
-            "condition": item.get("condition", ""),
-            # A free item keeps its list price in the data (the floors need it) but shows none.
-            "price": 0
-            if item.get("free_with_purchase")
-            else item.get("recommended_list_price", item.get("current_asking", 0)),
-            "free": bool(item.get("free_with_purchase")),
-            "note": item.get("note", ""),
-            "retail": item.get("original_price", 0),
-            "status": status,
-            "dimensions": item.get("dimensions", ""),
-            "color": item.get("color", ""),
-            "images": item.get("images", []),
-            "specs": item.get("specs", []),
-            "included": item.get("included", []),
-            "pickup": item.get(
-                "pickup_note", "Pickup in Denver Tech Center (DTC). Buyer must self-load."
-            ),
-        }
-        if item.get("vin"):
-            pub["vin"] = item["vin"]
-        if item.get("verify"):
-            pub["verify"] = public_verify(item)
-        public_items.append(pub)
+        public_items.append(public_item(item))
 
     # Sold items stay visible but go last; sorted() is stable, so the rest keep their order.
     public_items = sorted(public_items, key=lambda item: item["status"] == "Sold")
