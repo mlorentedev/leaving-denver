@@ -141,7 +141,11 @@ CATALOG_TESTS = {
         "test_reopening_for_another_item_resets_the_button",
         "test_the_spanish_page_shares_the_spanish_share_page",
     ),
-    "test_smoke_script.py": ("test_a_path_that_is_not_ready_yet_is_retried",),
+    "test_smoke_script.py": (
+        "test_a_path_that_is_not_ready_yet_is_retried",
+        "test_robots_txt_served_as_the_catalog_is_retried",
+        "test_robots_txt_that_stays_the_catalog_fails_as_such",
+    ),
     "test_verify_sheet_browser.py": (
         "test_a_press_on_the_backdrop_closes_the_sheet",
         "test_back_closes_the_sheet_and_stays_on_the_catalog",

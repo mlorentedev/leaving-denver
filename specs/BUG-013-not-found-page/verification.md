@@ -17,8 +17,8 @@ created: "2026-10-01"
 
 ## Test status
 
-- `SELLER_PHONE=+13035550100 make check` -> `737 passed, 1 skipped in 78.04s`, ruff clean (main before the change: 653 passed at OPS-011; this adds the 404 tests and the smoke cases).
-- The same gate with `seller.sale_over: true` in a scratch edit (reverted, `git status` clean), run as `env -u SELLER_PHONE -u SELLER_SEALED make check` -> `576 passed, 162 skipped in 48.41s`. The new `test_not_found.py` builds scratch sites in both modes, so it runs in both.
+- `SELLER_PHONE=+13035550100 make check` -> `739 passed, 1 skipped in 85.36s`, ruff clean (main before the change: 653 passed at OPS-011; this adds the 404 tests and the smoke cases).
+- The same gate with `seller.sale_over: true` in a scratch edit (reverted, `git status` clean), run as `env -u SELLER_PHONE -u SELLER_SEALED make check` -> `576 passed, 164 skipped in 51.12s`. The new `test_not_found.py` builds scratch sites in both modes, so it runs in both.
 - The four new smoke tests, run against the previous `scripts/smoke.sh`: `4 failed`; against the new one: `4 passed`.
 - Not run: a real Pages deploy. The 404 status itself, and `_headers` (`X-Robots-Tag: noindex`) applying to the 404 response, are confirmed by the smoke on the first deploy after merge, not here.
 
