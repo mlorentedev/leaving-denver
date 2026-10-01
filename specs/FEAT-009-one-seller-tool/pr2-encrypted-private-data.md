@@ -199,7 +199,7 @@ owner's machine under a passphrase only the owner knows.
     invocation. The target cannot tell dotf from a hand-set variable; that is why the check is
     the same either way, and why the TTY rule still applies.
   - No other variable is read. Node, gh and dotf run without `SELLER_PASSPHRASE` in their
-    environment (a test spies on each child's `env`).
+    environment (tests spy on the `env` of Node and gh, and the stub dotf logs its own).
 - [ ] **AC15: the unlock form works with a password manager** (owner, 2026-10-01). The page's
   unlock field is `<input type="password" autocomplete="current-password">`, in one `<form>`
   with a visually hidden text input `autocomplete="username"` whose value is the fixed

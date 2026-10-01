@@ -127,8 +127,8 @@ created: "2026-09-30"
   `::test_the_hidden_username_reaches_neither_the_passphrase_nor_the_payload`
 - [x] AC16 -> `tests/test_seal_command.py`: the environment value is used with no prompt (on both the
   generating and the re-seal path), refused when weak without echoing it, blank means none, the
-  terminal rule still holds, and a spy on `subprocess.run` shows Node and gh get no
-  `SELLER_PASSPHRASE`. Mutation-checked: a `child_env` that keeps it, and a `save_to_bitwarden` that
+  terminal rule still holds, a spy on `subprocess.run` shows Node and gh get no
+  `SELLER_PASSPHRASE`, and the stub dotf logs the names in its own environment (none is it). Mutation-checked: a `child_env` that keeps it, and a `save_to_bitwarden` that
   prints dotf's output, each fail a test.
 
 ### Owner slots
@@ -141,7 +141,7 @@ created: "2026-09-30"
 
 ### PR 2 test status
 
-- `make clean && make check` -> 805 passed, 2 skipped, lint clean. The skips are the deploy-only
+- `make clean && make check` -> 806 passed, 2 skipped, lint clean. The skips are the deploy-only
   envelope test and a Windows-only harness test. With a throwaway fixture
   envelope as `SELLER_SEALED` (the deploy job's condition) the deploy-only test runs too.
 - Every test was written before its code. Mutation checks on the browser tests: removing the

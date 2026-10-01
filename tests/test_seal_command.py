@@ -759,3 +759,15 @@ def test_the_children_do_not_inherit_the_passphrase_from_the_environment(
     for name, env in seen.items():
         assert env is not None and "SELLER_PASSPHRASE" not in env, name
     assert len(sets(calls())) == 2
+
+
+def test_dotf_runs_without_the_passphrase_in_its_environment(machine_with_dotf, monkeypatch):
+    """The third child. With SELLER_PASSPHRASE set the seal never needs dotf, so the call is
+    made directly: the fake dotf logs the names in the environment it was started with."""
+    calls, _ = machine_with_dotf
+    monkeypatch.setenv("SELLER_PASSPHRASE", PASSPHRASE)
+    assert seal.save_to_bitwarden("-".join(WORDS[:5])) is True
+    started = calls.dotf()
+    assert len(started) == 1
+    assert "SELLER_PASSPHRASE" not in started[0]["env"]
+    assert "PATH" in started[0]["env"], "the rest of the environment is still passed on"
