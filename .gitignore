@@ -3,7 +3,7 @@
 .env.*
 *.secret
 
-# Private Seller Distribution (Contains floor prices & PIN gate)
+# Build output (the sealed private data is embedded in build/public/seller/ as ciphertext)
 build/
 data/inventory.json
 

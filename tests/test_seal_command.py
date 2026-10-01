@@ -421,7 +421,11 @@ def test_the_workflows_hold_no_age_key_and_never_mention_sops():
 
 def make_dry_run(target):
     return subprocess.run(
-        ["make", "-n", target], cwd=ROOT, capture_output=True, text=True, check=False
+        ["make", "-n", "--no-print-directory", target],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
     )
 
 
@@ -437,3 +441,20 @@ def test_the_panel_target_is_gone():
     done = make_dry_run("panel")
     assert done.returncode != 0
     assert "No rule to make target" in done.stderr
+
+
+@pytest.mark.parametrize(("stdin", "key"), [(None, "stdin"), ("an-envelope-body", "input")])
+def test_gh_never_inherits_the_terminal_and_gets_a_secret_on_stdin_only(stdin, key, monkeypatch):
+    """A bare `gh` call must not read the owner's terminal (it would hang a recording), and a
+    secret is passed as stdin, never in argv."""
+    seen = {}
+
+    def fake_run(argv, **kwargs):
+        seen.update(argv=argv, **kwargs)
+        return subprocess.CompletedProcess(argv, 0, "", "")
+
+    monkeypatch.undo()  # the autouse guard replaces seal.gh; this test wants the real one
+    monkeypatch.setattr(seal.subprocess, "run", fake_run)
+    seal.gh("secret", "list", stdin=stdin)
+    assert seen[key] == (subprocess.DEVNULL if stdin is None else stdin)
+    assert stdin is None or stdin not in seen["argv"]

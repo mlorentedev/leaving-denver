@@ -148,20 +148,12 @@ def test_footer_rejects_invalid_commit_sha(public_dir, monkeypatch):
         site_builder.build_public_site(inventory())
 
 
-def test_unpublished_item_is_in_private_marked_draft(tmp_path, monkeypatch):
-    private_dir = tmp_path / "private"
+def test_an_unpublished_item_is_not_in_the_seller_roster(monkeypatch):
+    """The page's roster is public facts only: a draft is not in it (the private views show a
+    draft as an id-only row, from the sealed data)."""
     monkeypatch.setenv("SELLER_PHONE", PHONE)
-    monkeypatch.setattr(site_builder, "load_private", lambda: {"floors": {}})
-    monkeypatch.setattr(site_builder, "DIST_PRIVATE_DIR", private_dir)
-    monkeypatch.setattr(site_builder, "INVENTORY_JSON_PRIVATE", tmp_path / "inventory.json")
-    monkeypatch.setattr(site_builder, "PRIVATE_POSTER_HTML", private_dir / "poster_assistant.html")
-
-    site_builder.build_private_workspace(inventory())
-
-    data = json.loads((private_dir / "inventory.json").read_text())
-    drafts = {i["id"]: i.get("draft", False) for i in data["items"]}
-    assert drafts == {"shown-lamp": False, "hidden-widget": True}
-    assert "item.draft" in (private_dir / "poster_assistant.html").read_text(encoding="utf-8")
+    roster = site_builder.seller_roster(site_builder.sanitize_public_inventory(inventory()))
+    assert [row["id"] for row in roster] == ["shown-lamp"]
 
 
 def test_publish_flag_survives_yaml_round_trip(tmp_path, monkeypatch):
@@ -518,23 +510,6 @@ def test_spanish_bundle_copy_and_payment_terms(public_dir):
     assert "Cheque de caja emitido en el banco del comprador o transferencia bancaria" in terms
 
 
-def test_poster_assistant_has_spanish_marketplace_variants():
-    template = (site_builder.TEMPLATES_DIR / "poster_assistant.html").read_text(encoding="utf-8")
-    assert "setPlatform('fb-es')" in template
-    assert "setPlatform('cl-es')" in template
-    assert "platform === 'fb-es'" in template
-    assert "platform === 'cl-es'" in template
-    assert "const copy = { ...item, ...(item.es || {}) };" in template
-    assert "Detalles clave:" in template
-    assert "RECOGIDA Y PAGO:" in template
-    assert "Estado: ${copy.condition}" in template
-    assert "DIMENSIONES: ${copy.dimensions}" in template
-    assert (
-        "First floor, one flight of stairs, no elevator, with parking right by the door. "
-        "I help you carry it down.${item.pickup_note ? ` ${item.pickup_note}` : ''}" in template
-    )
-
-
 def test_sale_schedule_comes_from_departure_date():
     schedule = site_builder.sale_schedule("2026-11-09")
     assert schedule == {
@@ -599,22 +574,6 @@ def test_countdown_updates_in_browser_from_departure_date(public_dir):
     assert "function updateDepartureCountdown()" in html
     assert "America/Denver" in html
     assert "{{ days_remaining }}" not in html
-
-
-def test_vehicle_poster_copy_uses_inventory_fields():
-    template = (site_builder.TEMPLATES_DIR / "poster_assistant.html").read_text(encoding="utf-8")
-    assert "Mileage: ${item.odometer.toLocaleString()}" in template
-    assert template.count("${specs}") >= 2
-    assert template.count("${inc}") >= 2
-    assert template.count("${item.pickup_note}") >= 2
-    assert template.count("${vehiclePayment}") >= 2
-    for stale in (
-        "Mileage: 103,500",
-        "ready to sign over today",
-        "valid, unused certificate",
-        "Clean title ready in hand",
-    ):
-        assert stale not in template
 
 
 def test_bundle_sheet_lists_what_is_in_it(public_dir):

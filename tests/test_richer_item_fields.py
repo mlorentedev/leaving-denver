@@ -351,16 +351,6 @@ def test_the_build_refuses_a_size_or_weight_that_is_not_positive_numbers(fields)
         public_of(lamp("sized", **fields))
 
 
-def test_the_private_poster_gets_the_spanish_label_from_the_locale():
-    labels = SCALE
-    item = {"category": "Bedroom", "condition": "Used - Good"}
-    site_builder.with_spanish_condition(item, labels)
-    assert item["es"]["condition"] == "Usado - Buen estado"
-    car = {"category": "Vehicle", "condition": "Excellent", "es": {"condition": "Excelente"}}
-    site_builder.with_spanish_condition(car, labels)
-    assert car["es"]["condition"] == "Excelente"
-
-
 def test_the_published_item_carries_the_flags_and_no_measurements():
     item = public_of(lamp("big", size_in=[60, 10, 10], weight_lb=80))
     assert "size_in" not in item and "weight_lb" not in item

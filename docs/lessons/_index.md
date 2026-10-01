@@ -33,3 +33,5 @@ tags: [lessons, index, docs, leaving-denver]
 | [lesson-018](lesson-018-defer-shell-token-substitution-in-make.md) | Keep Shell Token Substitution Out of Immediate Make Expansion | 2026-09-30 | [make, cloudflare, secrets, deploy] |
 | [lesson-019](lesson-019-an-unreadable-file-is-not-an-empty-one.md) | An Unreadable File Is Not an Empty One | 2026-09-30 | [secrets, sops, testing] |
 | [lesson-020](lesson-020-unlayered-css-outranks-tailwind-utilities.md) | Unlayered CSS Outranks Tailwind Utilities | 2026-09-30 | [css, tailwind, testing, mobile] |
+| [lesson-021](lesson-021-a-wordlist-separator-must-not-be-in-a-word.md) | A Wordlist Separator Must Not Appear Inside a Word | 2026-10-01 | [crypto, passphrase, testing, ux] |
+| [lesson-022](lesson-022-csp-needs-an-http-served-test-and-no-inline-script.md) | A CSP Test Needs an HTTP Response, and the Page Needs No Inline Script | 2026-10-01 | [csp, testing, browser, cloudflare] |

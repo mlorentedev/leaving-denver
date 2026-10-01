@@ -279,11 +279,9 @@ def test_mobile_access_setup_is_documented():
     assert "anonymous" in ops
 
 
-def test_the_local_assistant_stays_out_of_the_public_build_until_it_moves(tmp_path, monkeypatch):
-    """FEAT-009 PR 1 keeps poster_assistant.html (floors, week plan): PR 2 moves it. Until
-    then it must not reach build/public, and the public tool must not borrow its PIN."""
-    assistant = site_builder.TEMPLATES_DIR / "poster_assistant.html"
-    assert assistant.is_file()
+def test_the_local_assistant_is_gone_and_its_pin_with_it(tmp_path, monkeypatch):
+    """ADR-007 retired the local workspace: no template, no built file, no PIN."""
+    assert not (site_builder.TEMPLATES_DIR / "poster_assistant.html").exists()
     public = tmp_path / "public"
     monkeypatch.setenv("SELLER_PHONE", "+15555550100")
     monkeypatch.setattr(site_builder, "DIST_DIR", public)

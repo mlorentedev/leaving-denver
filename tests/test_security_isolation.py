@@ -7,11 +7,8 @@ import json
 import re
 from pathlib import Path
 
-import pytest
-
 BASE_DIR = Path(__file__).resolve().parent.parent
 DIST_DIR = BASE_DIR / "build" / "public"
-DIST_PRIVATE_DIR = BASE_DIR / "build" / "private"
 
 
 def test_public_build_exists():
@@ -56,14 +53,12 @@ def test_pages_headers():
     assert "max-age=" in headers
 
 
-def test_private_assistant_has_security_gate():
-    if not (DIST_PRIVATE_DIR / "poster_assistant.html").exists():
-        pytest.skip("private workspace not built (sops file not decryptable here)")
-    private_html = (DIST_PRIVATE_DIR / "poster_assistant.html").read_text(encoding="utf-8")
-    assert "pinGateModal" in private_html, "Missing PIN gate modal in seller workspace"
-    assert "checkPin()" in private_html, "Missing PIN check logic"
-    assert "Default: 8011" not in private_html, "Leaked default PIN in placeholder text"
-    assert "defaults to DTC zip prefix" not in private_html, "Leaked default PIN hint text"
+def test_no_pin_gate_and_no_private_workspace_remain():
+    """The PIN-gated workspace is retired (ADR-007): the pin, the page and its folder are gone."""
+    assert not (BASE_DIR / "build" / "private").exists()
+    seller = (DIST_DIR / "seller" / "index.html").read_text(encoding="utf-8")
+    for gone in ("pinGateModal", "checkPin", "8011"):
+        assert gone not in seller
 
 
 def test_static_image_paths_exist():
@@ -101,7 +96,7 @@ def test_template_sees_only_sanitized_data(tmp_path, monkeypatch):
     site_builder.build_public_site(data)
 
     assert set(seen["share.html"]) == {"locale", "t", "og", "target"}
-    assert set(seen["seller.html"]) == {"items_json", "config_json", "replies"}
+    assert set(seen["seller.html"]) == {"items_json", "config_json", "replies", "sealed_json"}
     assert set(seen["index.html"]) == {
         "inventory_json",
         "contact_json",

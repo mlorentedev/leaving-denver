@@ -11,8 +11,10 @@ The data is the fixture's with a sentinel planted in every allow-listed key.
 import base64
 import html
 import json
+import os
 import re
 from datetime import UTC, datetime
+from pathlib import Path
 
 import pytest
 from sealed_helpers import (
@@ -151,3 +153,22 @@ def test_a_well_formed_envelope_passes_the_check():
 def test_the_floor_is_the_owasp_one():
     assert seal.MIN_ITERATIONS == 600_000
     assert seal.validate_envelope(json.dumps({**GOOD, "iter": 600_000}))["iter"] == 600_000
+
+
+@pytest.mark.skipif(
+    not os.environ.get("SELLER_SEALED"), reason="only the deploy job holds the real envelope"
+)
+def test_the_real_envelope_passes_validation_and_is_only_in_the_seller_page():
+    """AC6 in the deploy job: the secret is a valid envelope (shape, iter, size), the page the
+    deploy job built embeds it, and no other file does. Asserts booleans, never the value."""
+    raw = os.environ["SELLER_SEALED"]
+    envelope = seal.validate_envelope(raw)
+    assert envelope["iter"] >= seal.MIN_ITERATIONS
+    assert len(raw.strip().encode()) <= seal.SIZE_BUDGET
+    public = Path(__file__).resolve().parents[1] / "build" / "public"
+    holders = [
+        p.relative_to(public).as_posix()
+        for p in public.rglob("*")
+        if p.is_file() and envelope["ct"] in p.read_text(encoding="utf-8", errors="ignore")
+    ]
+    assert holders == ["seller/index.html"]

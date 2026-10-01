@@ -89,6 +89,33 @@ def test_ops_runbook_covers_what_the_issue_asks():
         assert needle in ops, f"ops.md no longer mentions {needle!r}"
 
 
+def test_the_runbook_covers_the_sealed_private_data():
+    """AC13: SELLER_SEALED, its staleness, rotation (with deleting earlier deployments) and the
+    decommission after the departure date are written down, and the owner's two manual checks."""
+    ops = OPS.read_text(encoding="utf-8")
+    section = ops[ops.index("## The sealed private data") :]
+    section = section[: section.index("\n## ", 3)] if "\n## " in section[3:] else section
+    flat = " ".join(section.split())
+    for needle in (
+        "`SELLER_SEALED`",
+        "make ci-secrets",
+        "uv run leaving-denver seal",
+        "as of the last `make ci-secrets` and deploy",
+        "**Rotation.**",
+        "delete the earlier Pages deployments",
+        "**Decommission after 2026-11-09.**",
+        "gh secret delete SELLER_SEALED --env production",
+        "--env preview",
+        "content-security-policy",
+        "frame-ancestors 'none'",
+        "3 s or less",
+        "update `/seller/` now",
+    ):
+        assert needle in flat, f"the sealed-data section no longer says {needle!r}"
+    departure = (ROOT / "data/inventory.yaml").read_text(encoding="utf-8")
+    assert "departure_date: '2026-11-09'" in departure or "departure_date: 2026-11-09" in departure
+
+
 def test_the_uptime_keyword_is_on_the_page_the_monitor_fetches():
     """The runbook tells the owner what to type into the monitor; that string must be
     on the home page, or the monitor alerts from its first check (or never alerts)."""

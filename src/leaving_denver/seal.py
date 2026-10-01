@@ -242,8 +242,10 @@ def check_envelope(envelope: str) -> int:
 
 
 def gh(*args: str, stdin: str | None = None) -> subprocess.CompletedProcess[str]:
+    """Run gh. With no `stdin` it gets none (never the terminal: a prompt would hang a recording)."""
+    feed = {"input": stdin} if stdin is not None else {"stdin": subprocess.DEVNULL}
     try:
-        return subprocess.run(["gh", *args], input=stdin, capture_output=True, text=True)
+        return subprocess.run(["gh", *args], capture_output=True, text=True, **feed)
     except OSError as err:
         raise SealError(f"gh could not run ({err.strerror})") from err
 

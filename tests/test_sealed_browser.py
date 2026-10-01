@@ -75,7 +75,6 @@ def sealed_dist(tmp_path_factory):
     patcher = pytest.MonkeyPatch()
     try:
         build_site(dist, patcher, sealed=seal_fixture())
-        patcher.setattr(site_builder, "DIST_PRIVATE_DIR", dist.parent / "private")
         site_builder.build_stylesheets()
     finally:
         patcher.undo()
@@ -208,7 +207,6 @@ def test_a_build_without_the_secret_has_no_unlock_and_the_public_half_works(tmp_
     patcher = pytest.MonkeyPatch()
     try:
         build_site(dist, patcher)
-        patcher.setattr(site_builder, "DIST_PRIVATE_DIR", tmp_path / "private")
         site_builder.build_stylesheets()
     finally:
         patcher.undo()

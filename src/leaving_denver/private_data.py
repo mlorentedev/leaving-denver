@@ -4,7 +4,8 @@ Private seller data (reserve floors, phone) kept out of the public tree.
 Source of truth is data/private.sops.yaml, encrypted with sops/age. The public
 build only needs the phone, which can also come from the SELLER_PHONE env var
 (how CI gets it, as a repository secret). Floors are only ever needed locally,
-by the private seller workspace and `leaving-denver drops`.
+by `leaving-denver drops`, the recording commands and `leaving-denver seal`, which seals them
+for the phone (ADR-007).
 """
 
 import json

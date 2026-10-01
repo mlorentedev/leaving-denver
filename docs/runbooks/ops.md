@@ -2,13 +2,13 @@
 
 The catalog deploys automatically on tested pushes to `main`. The public inventory lives in
 `data/inventory.yaml`; encrypted phone, reserve floors, and deployment token
-live in `data/private.sops.yaml`. Only `build/public/` is published.
+live in `data/private.sops.yaml`. Only `build/public/` is published, and the only private
+thing in it is the sealed envelope inside `/seller/` (see "The sealed private data").
 On a fresh checkout, install Node.js 24+, npm, and `uv`, then run `make install`
 before `make check` or direct `uv run leaving-denver build`. Builds compile
 Tailwind CSS locally from pinned npm dependencies; if the CLI is missing, stop
 and run `npm ci` rather than publishing old assets. Verify `/styles.css` loads
-for both `/` and `/es/`; the private assistant's stylesheet remains under
-`build/private/` and is never uploaded to Pages.
+for both `/` and `/es/` (the `/seller/` page uses the same stylesheet).
 
 One-time setup (`make cf-project`, `make protect-main`, `make ci-secrets`) is in the
 README, section 3. Deploy tokens and the contact reach CI only through the `production`
@@ -23,7 +23,8 @@ must never get a production-capable Pages token. `make audit-deploy` checks that
    then use `gh run watch <run-id> --exit-status`. For a manual preview, dispatch
    `gh workflow run ci.yml --ref main -f branch=preview`; to redeploy production
    explicitly, use `gh workflow run ci.yml --ref main -f branch=main`. The deploy job
-   rebuilds with the real `SELLER_PHONE` and runs `make check`.
+   rebuilds with the real `SELLER_PHONE` and `SELLER_SEALED` and runs `make check`, which
+   validates the envelope. The job fails if either secret is missing.
 3. A production deploy publishes to the Pages branch `candidate` first and runs
    `scripts/smoke.sh` against that deployment. Only if it passes does it publish to
    `main` and smoke the canonical `https://leaving-denver.pages.dev`. A failed
@@ -43,8 +44,7 @@ commit before the next production dispatch.
 
 The mobile poster at `https://leaving-denver.pages.dev/seller/` is generated
 from **published asking prices only**. It does not contain negotiation floors
-or the local private assistant. There is no server-side AI endpoint or shared
-JavaScript PIN: select an item and platform, then copy the editable title,
+in the clear. There is no server-side AI endpoint and no PIN: select an item and platform, then copy the editable title,
 description (English or Spanish), tags, and UTM-attributed item link on a phone,
 and copy a scam reply. Listings never carry the seller's phone number. Until Access is
 configured, the Pages middleware responds `503` rather than serving the tool.
@@ -70,12 +70,55 @@ To enable it, an administrator of the Cloudflare Zero Trust account must:
    denied. Only then bookmark or advertise the URL. Recheck after any Access
    policy, Pages hostname, or deployment-route change.
 
-The seller workspace at `build/private/` is **never** uploaded. Never put
-floors, notes, tracking, private drafts, or a PIN under `build/public/` as
+Never put floors, notes, tracking or private drafts under `build/public/` as
 plaintext, even behind Access: disabling an edge policy must not disclose them.
 The one exception is ADR-007's sealed ciphertext, made on the owner's machine
 under a passphrase only the owner knows, and only inside `/seller/`. The buyer
-catalog must stay reachable anonymously.
+catalog must stay reachable anonymously. The old local workspace (its page, its
+folder and its PIN) is gone, and `make serve` serves `build/public/` only.
+
+## The sealed private data (`SELLER_SEALED`)
+
+The owner's floors, targets, sales, listing tracking and notes reach the phone as one
+AES-256-GCM envelope (ADR-007), in the CI secret **`SELLER_SEALED`**. The build embeds it in
+`/seller/index.html`; the page opens it in the browser with a passphrase of five words. With no
+secret the page says "No private data in this build" and the public half still works. The
+seller phone and the Pages token are never in it.
+
+**Seal.** `make ci-secrets` (a terminal is required; the seal refuses without one) scopes the
+deploy secrets, then seals: it decrypts `data/private.sops.yaml` in process, takes the allow-listed
+keys, asks for a passphrase (or generates five words and shows them on the terminal only), seals
+with Node WebCrypto, and writes `SELLER_SEALED` to both environments with `gh secret set`. To
+re-seal without the rest, run `uv run leaving-denver seal`. The envelope has to be under 40,000
+bytes (the worst case measures about 33,000). Nothing is written to disk.
+After sealing, redeploy: `gh workflow run ci.yml --ref main -f branch=main`.
+
+**After `make post`, `make sold` or `make reprice`** the command asks once whether to update
+`/seller/` now. Yes seals, sets both secrets and dispatches that deploy. No, the default, does
+nothing more.
+
+**Staleness.** The phone shows the data as of the last `make ci-secrets` and deploy (it says
+when it was sealed). A recording made on the laptop does not reach the phone until the next seal
+and deploy. Check the "as of" line before trusting a floor.
+
+**Rotation.** To change the passphrase, run `make ci-secrets` again with a new one. A Pages
+deployment keeps the envelope it was built with, and an old envelope still opens with the old
+passphrase, so after a rotation or a passphrase you believe is known: delete the earlier Pages
+deployments in the dashboard (Workers & Pages > `leaving-denver` > Deployments), and keep only
+the new one. Rotate the same way if the secret itself leaks.
+
+**Decommission after 2026-11-09.** After the departure date, delete the `SELLER_SEALED` secret
+from both environments (`gh secret delete SELLER_SEALED --env production`, and `--env preview`),
+redeploy, then delete the earlier Pages deployments and the Access application for `/seller`.
+
+**Owner checks (cannot be run from CI).**
+
+- The served CSP. After an Access login, `curl -sI -H "cf-access-token: ..." https://leaving-denver.pages.dev/seller/`
+  (or the browser's network tab) must show `content-security-policy` with `script-src 'self'`,
+  `connect-src 'none'` and `frame-ancestors 'none'`. Record the result in
+  `specs/FEAT-009-one-seller-tool/verification.md`.
+- The unlock time on the phone, 3 s or less (AC11). Record it there too. Over 3 s, lower `iter`
+  in ADR-007, never below 600,000.
 
 ## Inventory and contact
 
@@ -87,9 +130,9 @@ catalog must stay reachable anonymously.
   commit and merge both `data/inventory.yaml` and `data/private.sops.yaml`, then verify
   the automatic deployment. `sold` lists the marketplaces the item was posted on; take
   those listings down by hand.
-- **Tracking:** `make post`, `make reprice` and the private control panel (`make panel`) are in the
-  [seller playbook](seller-playbook.md#the-control-panel); their data is encrypted in
-  `data/private.sops.yaml` (ADR-006) and the panel stays under `build/private/`.
+- **Tracking:** `make post`, `make reprice` and the private views of `/seller/` are in the
+  [seller playbook](seller-playbook.md#the-private-views); their data is encrypted in
+  `data/private.sops.yaml` (ADR-006) and reaches the phone only as the sealed envelope.
 - **Reserved:** `uv run leaving-denver pending <item-id>` when a buyer agrees a
   pickup: the card shows "Pending pickup" and its bundles go off sale. If the
   pickup falls through, `uv run leaving-denver available <item-id>` puts it

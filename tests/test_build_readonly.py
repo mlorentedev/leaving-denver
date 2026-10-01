@@ -41,7 +41,6 @@ def test_build_does_not_rewrite_the_inventory_yaml(tmp_path, monkeypatch):
     monkeypatch.setattr(site_builder, "PUBLIC_INDEX_HTML", dist / "index.html")
     monkeypatch.setattr(site_builder, "PUBLIC_ROBOTS_TXT", dist / "robots.txt")
     monkeypatch.setattr(site_builder, "PUBLIC_HEADERS", dist / "_headers")
-    monkeypatch.setattr(site_builder, "load_private", lambda: {})
     monkeypatch.setattr(
         site_builder, "sync_all_photos", lambda: {"shown-lamp": ["catalog/shown-lamp/new.jpg"]}
     )
