@@ -187,7 +187,8 @@ def inline_modules(html, folder):
 @contextmanager
 def open_page(tmp_path, page, setup="", fragment=""):
     html = inline_modules((PUBLIC / page).read_text(encoding="utf-8"), (PUBLIC / page).parent)
-    first_script = html.index("<script>")
+    # A page with no script of its own (the flyer) takes the setup at the end of its head.
+    first_script = html.index("<script>") if "<script>" in html else html.index("</head>")
     staged = stage(
         page,
         html[:first_script] + f"<script>{setup}</script>\n" + html[first_script:],
