@@ -10,6 +10,7 @@ import yaml
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 INVENTORY_YAML = BASE_DIR / "data" / "inventory.yaml"
+POSTER = BASE_DIR / "src" / "leaving_denver" / "templates" / "poster_assistant.html"
 
 
 @pytest.fixture
@@ -30,6 +31,27 @@ def test_seller_metadata(inventory):
     assert set(seller["payment_methods"]) == {"household", "vehicle"}
     assert "Venmo" in " ".join(seller["payment_methods"]["household"])
     assert "Venmo" not in " ".join(seller["payment_methods"]["vehicle"])
+
+
+def test_the_car_takes_only_payments_that_cannot_be_clawed_back(inventory):
+    """Cashier's check or wire, nothing else (owner, 2026-09-30; docs/runbooks/vehicle-sale.md)."""
+    assert inventory["seller"]["payment_methods"]["vehicle"] == [
+        "Cashier's check issued at the buyer's bank",
+        "Wire transfer",
+    ]
+    for code in ("en", "es"):
+        labels = yaml.safe_load((BASE_DIR / "locales" / f"{code}.yaml").read_text(encoding="utf-8"))
+        for method in inventory["seller"]["payment_methods"]["vehicle"]:
+            assert method in labels["payment_methods"], f"{code}: no label for {method}"
+    car = next(i for i in inventory["items"] if i["category"] == "Vehicle")
+    copy = " ".join(
+        [car["pickup_note"], car["es"]["pickup_note"]]
+        + re.findall(r"VEHICLE_PAYMENT_ES = '([^']+)'", POSTER.read_text(encoding="utf-8"))
+    ).lower()
+    for banned in ("cash", "efectivo", "venmo", "zelle"):
+        assert not re.search(rf"\b{banned}\b", copy), f"the car's payment copy mentions {banned}"
+    assert "wire" in car["pickup_note"].lower()
+    assert "transferencia" in car["es"]["pickup_note"].lower()
 
 
 def test_items_integrity(inventory):
@@ -109,15 +131,16 @@ def test_private_floors_consistent(inventory):
 
 # Claims the seller cannot back: no 100k service receipt exists, remote start and
 # highway-only miles are not in the data, the departure date is 9 November, and
-# the CSP 21N12 coverage ended at 84k miles.
+# the CSP 21N12 coverage ended at 84k miles. "Garage-kept" was on this list until the
+# owner confirmed it (#48, 2026-09-28).
 UNBACKED_CLAIMS = re.compile(
     r"100k[- ](mile )?(milestone )?(major )?s(er)?v|highway miles|highway-commuter|"
     r"remote start|fully serviced|great mechanical|in 3 weeks|within 2 weeks|"
-    r"everything must go|everything was bought new|garage-kept|one single|21N12|"
+    r"everything must go|everything was bought new|one single|21N12|"
     r"ready for immediate transfer|new, unused certificate is handed over|"
     r"servicio (de )?100k|millas de autopista|arranque remoto|mecánicamente perfecto|"
     r"en 3 semanas|dentro de 2 semanas|todo debe irse|todo se compró nuevo|"
-    r"guardado en garaje|listo para transferencia inmediata",
+    r"listo para transferencia inmediata",
     re.IGNORECASE,
 )
 CLAIM_SOURCES = [

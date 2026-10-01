@@ -227,6 +227,7 @@ def sanitize_public_inventory(full_data: dict[str, Any]) -> dict[str, Any]:
             "color": item.get("color", ""),
             "images": item.get("images", []),
             "specs": item.get("specs", []),
+            "included": item.get("included", []),
             "pickup": item.get(
                 "pickup_note", "Pickup in Denver Tech Center (DTC). Buyer must self-load."
             ),
@@ -439,6 +440,7 @@ def localize_public_inventory(
             ("title", "title"),
             ("short_title", "short_title"),
             ("specs", "specs"),
+            ("included", "included"),
             ("pickup_note", "pickup"),
             ("condition", "condition"),
             ("dimensions", "dimensions"),
