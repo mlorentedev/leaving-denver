@@ -20,7 +20,7 @@ created: "2026-10-01"
 - `SELLER_PHONE=+13035550100 make check` -> `739 passed, 1 skipped in 85.36s`, ruff clean (main before the change: 653 passed at OPS-011; this adds the 404 tests and the smoke cases).
 - The same gate with `seller.sale_over: true` in a scratch edit (reverted, `git status` clean), run as `env -u SELLER_PHONE -u SELLER_SEALED make check` -> `576 passed, 164 skipped in 51.12s`. The new `test_not_found.py` builds scratch sites in both modes, so it runs in both.
 - The four new smoke tests, run against the previous `scripts/smoke.sh`: `4 failed`; against the new one: `4 passed`.
-- Not run: a real Pages deploy. The smoke on the first deploy after merge confirms the 404 status and body. It does not read the 404 response's headers, so `X-Robots-Tag: noindex` from `_headers` on that response stays unverified. The page also carries `<meta name="robots" content="noindex">`, which covers it either way; check once with `curl -sI <deployment>/x-not-found/`.
+- Not run: a real Pages deploy. The smoke on the first deploy after merge confirms the 404 status and body. It does not read the 404 response's headers, so `X-Robots-Tag: noindex` from `_headers` on that response stays unverified. The page also carries a robots meta tag with `noindex`, which covers it either way; check once with `curl -sI <deployment>/x-not-found/`.
 
 ## What relied on the SPA fallback
 
