@@ -13,7 +13,7 @@ A privacy-focused inventory management, automated photo ingestion, and multi-por
 - **Departure-Date Pricing Schedule:** `leaving-denver drops` derives the active drop, floor, and giveaway windows from `seller.departure_date`; prices come from the inventory and encrypted reserve data.
 - **Multi-Portal Copy Generator:** Instant copy-paste listings tailored for Facebook Marketplace, Craigslist Denver, OfferUp, and Nextdoor.
 - **Bilingual Catalog:** The same sanitized inventory renders in English at `/` and neutral Latin American Spanish at `/es/`, with localized SMS intents.
-- **Kubelab Integration:** Ready-to-import n8n workflows for Telegram push alerts, Vikunja task creation, and 48-hour Craigslist bump reminders.
+- **Craigslist Bump Reminder:** A ready-to-import n8n workflow that sends a Telegram reminder to renew listings every 48 hours.
 
 ---
 
@@ -133,13 +133,12 @@ When running `uv run leaving-denver serve`:
 │       ├── cli.py                 # Master orchestration CLI
 │       ├── config.py              # Core configuration & secrets
 │       ├── image_processor.py     # HEIC decoder & EXIF metadata scrubber
-│       ├── site_builder.py        # Site compiler with leak detection
-│       └── n8n_integration.py     # Kubelab webhook integration
+│       └── site_builder.py        # Site compiler with leak detection
 ├── build/
 │   ├── public/                    # Public sanitized distribution (Deploy to Cloudflare)
 │   └── private/                   # Private seller workspace with PIN lock
 ├── integrations/
-│   └── n8n/                       # Kubelab n8n workflows (Telegram, Vikunja, Reminders)
+│   └── n8n/                       # Kubelab n8n workflow (Craigslist bump reminder)
 ├── docs/                          # Architecture, Playbooks, and Kubelab guide
 └── tests/                         # Integrity & security regression tests
 ```

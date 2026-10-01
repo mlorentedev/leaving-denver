@@ -32,8 +32,7 @@ leaving-denver/
 │       ├── cli.py                 <-- Master orchestration CLI
 │       ├── config.py              <-- Paths, quality standards, obfuscation secrets
 │       ├── image_processor.py     <-- Auto-discovery, HEIC decode, EXIF scrubber
-│       ├── site_builder.py        <-- Compiles public/private sites & verifies leaks
-│       └── n8n_integration.py     <-- Webhook dispatcher for kubelab stack
+│       └── site_builder.py        <-- Compiles public/private sites & verifies leaks
 ├── build/
 │   ├── public/                    <-- 100% Sanitized Public Build (Cloudflare Pages)
 │   │   ├── index.html             <-- Generated public catalog
