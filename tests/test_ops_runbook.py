@@ -139,6 +139,22 @@ def test_csp_check_notices_a_policy_that_would_stop_the_beacon(policy, blocked):
     assert len(csp_blocks_beacon(policy)) == blocked
 
 
+def csp_meta_policies(html):
+    """The content of every CSP <meta>, whatever order its attributes come in."""
+    tags = re.findall(r"<meta\b[^>]*>", html, flags=re.IGNORECASE)
+    csp = [t for t in tags if re.search(r"http-equiv=[\"']?content-security-policy", t, re.I)]
+    return [m.group(1) for t in csp if (m := re.search(r'content="([^"]+)"', t, re.I))]
+
+
+def test_the_csp_scan_reads_meta_tags_in_any_attribute_order():
+    for tag in (
+        '<meta http-equiv="Content-Security-Policy" content="script-src \'self\'">',
+        '<meta content="script-src \'self\'" http-equiv="Content-Security-Policy">',
+    ):
+        assert csp_meta_policies(tag) == ["script-src 'self'"], tag
+    assert csp_meta_policies('<meta name="viewport" content="width=device-width">') == []
+
+
 def test_no_csp_stops_the_cloudflare_beacon():
     """ADR-005: Web Analytics is enabled in the Pages dashboard and Cloudflare injects the
     beacon at the edge. A CSP added later would silently break it, so it must allow it."""
@@ -146,11 +162,7 @@ def test_no_csp_stops_the_cloudflare_beacon():
 
     policies = re.findall(r"Content-Security-Policy:\s*(.+)", PAGES_HEADERS, flags=re.IGNORECASE)
     for template in TEMPLATES.rglob("*.html"):
-        policies += re.findall(
-            r'http-equiv="Content-Security-Policy"\s+content="([^"]+)"',
-            template.read_text(encoding="utf-8"),
-            flags=re.IGNORECASE,
-        )
+        policies += csp_meta_policies(template.read_text(encoding="utf-8"))
     for policy in policies:
         assert not csp_blocks_beacon(policy), policy
 
