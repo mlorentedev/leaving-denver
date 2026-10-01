@@ -28,8 +28,8 @@ created: "2026-09-29"
   `src/leaving_denver/site_builder.py` output, and Tailwind source; re-run
   targeted tests (expected PASS).
 - [x] [AC2] Write a failing missing-config/invalid-token test for
-  `functions/seller/_middleware.js`; pin Access plugin with npm, implement
-  JWT middleware, run targeted tests (expected PASS).
+  `functions/_middleware.js`; pin Access plugin with npm, implement
+  root Pages middleware protecting all seller assets, run targeted tests.
 - [x] [AC4] Document exact owner-only Access setup, aliases and smoke gate in
   `docs/runbooks/ops.md` and `README.md`. Run `make check`.
 - [ ] [AC2] [AC4] Configure Access application and Pages variables on Cloudflare

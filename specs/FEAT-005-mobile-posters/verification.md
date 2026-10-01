@@ -10,6 +10,7 @@ created: "2026-09-29"
 Map every acceptance criterion from `proposal.md` to concrete proof (commit hash, test name, or observed behavior).
 
 - [x] AC1 -> `test_mobile_poster_uses_only_published_sanitized_inventory`,
+  `test_mobile_poster_does_not_offer_sold_pending_or_free_items`,
   `test_mobile_copy_uses_public_price_and_singular_voice`
 - [x] AC2 -> `test_access_middleware_fails_closed_without_configuration`,
   `test_access_middleware_rejects_missing_jwt_when_configured`; local Wrangler
@@ -21,8 +22,11 @@ Map every acceptance criterion from `proposal.md` to concrete proof (commit hash
 
 ## Test status
 
-- Test suite: `make check` -> 108 passed; Wrangler Functions compiled.
-- Manual smoke test: local anonymous Pages paths denied `503`; production
+- Test suite after merging `origin/main`: `make check` -> 278 passed, 6 skipped;
+  Wrangler Pages dev compiled the root Functions route.
+- Manual smoke test: local anonymous Pages catalog `/` and `/es/` returned
+  `200`; `/seller/`, its HTML and JS, and an encoded seller path returned
+  `503`. Production
   owner/anonymous Access check remains pending external account configuration.
 - No regressions in existing test suite: yes.
 
