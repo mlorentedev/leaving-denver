@@ -160,7 +160,10 @@ UNBACKED_CLAIMS = re.compile(
     r"ready for immediate transfer|new, unused certificate is handed over|"
     r"servicio (de )?100k|millas de autopista|arranque remoto|mecánicamente perfecto|"
     r"en 3 semanas|dentro de 2 semanas|todo debe irse|todo se compró nuevo|"
-    r"listo para transferencia inmediata",
+    r"listo para transferencia inmediata|"
+    # The car warns but does not brake by itself (owner, 2026-09-30).
+    r"emergency braking|pre-collision assist|frenado (automático )?de emergencia|"
+    r"frenado automático",
     re.IGNORECASE,
 )
 CLAIM_SOURCES = [
@@ -174,6 +177,8 @@ CLAIM_SOURCES = [
 
 def test_claim_guard_recognizes_spanish():
     assert UNBACKED_CLAIMS.search("Incluye arranque remoto")
+    assert UNBACKED_CLAIMS.search("Safety: Automatic Emergency Braking")
+    assert UNBACKED_CLAIMS.search("Seguridad: frenado automático de emergencia")
 
 
 @pytest.mark.parametrize("path", CLAIM_SOURCES, ids=lambda p: p.name)

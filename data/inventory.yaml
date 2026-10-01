@@ -785,8 +785,10 @@ items:
     roof rails'
   - Remote keyless entry, push-button start, hands-free foot-activated power liftgate,
     dual-zone automatic climate control
-  - 'Safety: Brake Assist, AdvanceTrac with Roll Stability Control, rear-view camera
-    and rear parking sensors'
+  # Warnings only, no automatic braking (owner, 2026-09-30).
+  - 'Safety: Brake Assist, AdvanceTrac with Roll Stability Control, rear-view camera,
+    rear parking sensors, forward collision warning (light and chime), and blind-spot
+    and rear cross-traffic alerts'
   - Garage-kept and driven mostly on the highway, commuting to work since 2024. Shifts
     smoothly, no fluid leaks
   - No accidents during my ownership, smoke-free, pet-free, zero dash warning lights
@@ -817,7 +819,8 @@ items:
     - Entrada sin llave con control remoto, encendido por botón, portón eléctrico manos
       libres y climatización automática de dos zonas
     - 'Seguridad: asistencia de frenado, AdvanceTrac con control de estabilidad antivuelco,
-      cámara de reversa y sensores de estacionamiento traseros'
+      cámara de reversa, sensores de estacionamiento traseros, aviso de colisión frontal
+      (luz y pitido), y alertas de ángulo muerto y de tráfico cruzado trasero'
     - Guardado en garaje y usado sobre todo en autopista para ir al trabajo desde 2024.
       Cambios suaves y sin fugas
     - Sin accidentes durante mi propiedad, sin humo ni mascotas y sin alertas en el tablero
