@@ -44,7 +44,7 @@ All tests run against `tests/fixtures/private.example.yaml` (fake numbers); none
 
 ## Test status
 
-- Before: `make check` -> 356 passed, 1 skipped on the base commit's last recorded run.
+- Before: main at e011821 collects 377 tests.
 - The new tests were written first and failed on missing modules and functions (collection
   error, then 8 failed and 16 errors in `test_panel_records.py`, then 3 failed in the isolation
   tests before the guard existed).
