@@ -163,7 +163,7 @@ def test_the_car_says_it_passed_emissions_and_shows_the_report(inventory):
         assert re.search(meaning["passed"], lines["note"].lower()), lines["note"]
         # The included line promises the new certificate, never a "valid" one in hand.
         included = lines["included"].lower()
-        assert re.search(r"new|nuevo", included), included
+        assert re.search(r"\bnew\b|\bnuevo\b", included), included
         assert re.search(r"before handover|antes de la entrega", included), included
         for line in lines.values():
             assert not re.search(r"fresh, unused|sin usar|valid, unused|vigente", line.lower()), (
