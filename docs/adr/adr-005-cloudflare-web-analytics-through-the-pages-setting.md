@@ -13,7 +13,9 @@ created: "2026-09-30"
 
 ## Status
 
-Accepted
+Accepted. Amended by ADR-007: `/seller/*` carries its own Content-Security-Policy, which
+blocks the beacon there and only there, because that page holds decrypted private data.
+`test_no_csp_stops_the_cloudflare_beacon` checks every other path.
 
 ## Date
 

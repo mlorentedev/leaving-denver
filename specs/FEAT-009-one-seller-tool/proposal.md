@@ -74,14 +74,14 @@ Where it lives: `assets/seller.mjs` (copy), `templates/seller.html` (page),
 - Spanish for OfferUp and Nextdoor (the assistant has none either).
 - Gutters: `<main>` padding (PR #141) is not touched.
 
-## PR 2 (needs an ADR amending ADR-005/006 and the runbook rule "never put floors under build/public, even behind Access")
+## PR 2 (decided by ADR-007, which amends ADR-002, ADR-005, ADR-006 and the runbook rule on floors)
 
-Out of scope here and blocked on that ADR: the private data (floors, notes, tracking) reaches
+Out of scope here: the private data (floors, notes, tracking) reaches
 `/seller/` only as **passphrase-encrypted ciphertext**, decrypted in the browser, so that
 turning off the edge policy still discloses nothing. PR 2 would:
 
-1. write the ADR first (ADR-005 and ADR-006 are on unmerged branches when this is written;
-   amend them, and the runbook rule in `docs/runbooks/ops.md`, in the same change);
+1. follow ADR-007 (`docs/adr/adr-007-private-seller-data-travels-as-ciphertext.md`); its
+   acceptance criteria are in `pr2-encrypted-private-data.md`;
 2. add the ciphertext to the build from `data/private.sops.yaml` without ever printing it;
 3. move the plan, floors, negotiation and tracking into `/seller/` behind the passphrase;
 4. delete `poster_assistant.html`, `build/private/` and the PIN, and update

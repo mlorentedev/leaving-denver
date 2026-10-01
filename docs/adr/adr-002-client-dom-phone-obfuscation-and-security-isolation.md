@@ -13,7 +13,10 @@ created: "2026-09-25"
 
 ## Status
 
-Accepted
+Accepted. Decision 2 is amended by ADR-007: the ciphertext of private data, sealed on the
+owner's machine under a passphrase only the owner knows, may be served inside `/seller/`.
+Plaintext still never reaches `build/public/`. The local PIN gate goes with
+`poster_assistant.html` (FEAT-009 PR 2).
 
 ## Date
 
