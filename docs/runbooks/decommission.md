@@ -16,7 +16,7 @@ from this machine. It needs the age key, and it must happen before the token is 
 
 ```
 sed -i '0,/^seller:/s//seller:\n  sale_over: true/' data/inventory.yaml   # not committed
-make deploy                                               # BRANCH=preview: the live site is untouched
+make deploy BRANCH=preview                                # never main: the live site is untouched
 scripts/smoke.sh https://preview.leaving-denver.pages.dev # smoke OK (sale over)
 git checkout data/inventory.yaml
 ```
@@ -138,9 +138,10 @@ new token (ADR-008).
    so nothing keeps asking for a secret that no longer exists:
 
    ```
-   bw unlock
-   bw list items --search leaving-denver-seller      # note the id
+   export BW_SESSION="$(bw unlock --raw)"            # the session key stays out of the terminal
+   bw list items --search leaving-denver-seller | jq -r '.[] | .id + "  " + .name'   # ids only, never the item JSON
    bw delete item <id> --permanent
+   unset BW_SESSION
    ```
 
 7. Drop the local backup of the pre-public history, in every clone that has it:

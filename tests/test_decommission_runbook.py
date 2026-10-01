@@ -34,7 +34,7 @@ def test_nov_8_flips_the_switch_and_takes_the_listings_down():
 
 def test_the_end_deploy_is_rehearsed_on_a_preview_before_the_day():
     before = section("Before Nov 8")
-    assert "make deploy" in before
+    assert "make deploy BRANCH=preview" in before  # never the default-dependent bare target
     assert "preview.leaving-denver.pages.dev" in before
     assert "scripts/smoke.sh" in before
     assert "git checkout data/inventory.yaml" in before  # the rehearsal flip is never committed
@@ -97,3 +97,15 @@ def test_the_adr_keeps_the_project_and_says_why():
     context = ADR.split("## Context")[1].split("## Decision")[0]
     assert "first come, first served" in context
     assert "claim" in context
+
+
+def test_no_runbook_command_prints_a_secret():
+    """`bw unlock` prints the session key and `bw list items` the decrypted item JSON, which
+    holds SELLER_PASSPHRASE. Each must be captured or reduced to ids before it reaches the
+    terminal (PR #148 review)."""
+    for line in RUNBOOK.splitlines():
+        command = line.split("#", 1)[0]
+        if re.search(r"\bbw unlock\b", command):
+            assert "--raw" in command and "$(" in command, line
+        if re.search(r"\bbw (list|get) items?\b", command):
+            assert "| jq -r" in command and ".id" in command, line
