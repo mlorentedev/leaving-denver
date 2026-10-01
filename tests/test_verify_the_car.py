@@ -128,21 +128,13 @@ def test_evidence_links_to_photos_the_car_has_and_the_build_ships(locale):
         assert (PUBLIC / "catalog" / CAR_ID / name).is_file(), f"{href} is not in the build"
 
 
-@pytest.mark.parametrize(
-    ("locale", "certificate", "scam"),
-    [
-        ("en", "fresh, unused", "official sites"),
-        ("es", "sin usar", "sitios oficiales"),
-    ],
-)
-def test_the_section_hands_over_a_fresh_certificate_and_warns_about_paid_report_links(
-    locale, certificate, scam
-):
+@pytest.mark.parametrize(("locale", "certificate"), [("en", "fresh, unused"), ("es", "sin usar")])
+def test_the_section_hands_over_a_fresh_certificate(locale, certificate):
     text = text_of(section(PAGES[locale])).lower()
     assert certificate in text
-    assert scam in text
-    assert ("never pay" if locale == "en" else "nunca pagues") in text
     assert "PASS" in text_of(section(PAGES[locale]))
+    # No anti-scam line: the owner found it superfluous (2026-10-01).
+    assert "official sites above" not in text and "sitios oficiales de arriba" not in text
 
 
 @pytest.mark.parametrize("locale", PAGES)

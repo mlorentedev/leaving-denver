@@ -32,8 +32,8 @@ On the catalog page (`/` and `/es/`), under the car's card, a "Verify it yoursel
 - my own evidence, each linking to a photo of the car's own `photos:` list: the
   recall-closure invoice and the May 2026 emissions report (overall PASS), with the
   note that a fresh, unused emissions certificate is handed over at sale;
-- one line: run checks only on these official sites, never pay for a report through
-  a link someone sends you.
+- (dropped 2026-10-01, owner: the "official sites only, never pay through a link" line
+  was superfluous.)
 
 The links and evidence are data under the car in `data/inventory.yaml` (`verify:`),
 with Spanish labels in the car's `es:` overlay, so adding a check or an evidence item
@@ -73,8 +73,7 @@ and shows the VIN to paste. A VIN query parameter is never guessed.
   links to photos that exist in the car's `photos:` and in the build; the build fails
   on evidence that names a photo the car does not have.
 - [ ] AC4: The section says a fresh, unused emissions certificate is handed over at
-  sale, and carries the anti-scam line (official sites only, never pay through a link
-  someone sends you).
+  sale. (The anti-scam line was dropped on 2026-10-01: the owner found it superfluous.)
 - [ ] AC5: The section makes no 100k-service, Carfax or service-history claim and
   names no title, registration, plate, owner or address.
 - [ ] AC6: The links and evidence are data with English and Spanish labels; the
