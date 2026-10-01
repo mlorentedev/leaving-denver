@@ -14,17 +14,21 @@ Map every acceptance criterion from `proposal.md` to concrete proof (commit hash
   `test_mobile_copy_uses_public_price_and_singular_voice`,
   `test_mobile_copy_links_to_each_public_item_with_platform_attribution`
 - [x] AC2 -> `test_access_middleware_fails_closed_without_configuration`,
-  `test_access_middleware_rejects_missing_jwt_when_configured`; local Wrangler
-  served `/seller`, `/seller/`, `/seller/index.html`, `/seller/seller.mjs` and
-  encoded/normalized paths as `503`, while `/` returned `200`.
+  `test_access_middleware_rejects_missing_jwt_when_configured`,
+  `test_access_middleware_requires_signed_jwt_audience_and_expiration`;
+  a signed token is admitted only with matching audience, issuer and expiration.
+  Local Wrangler served `/seller`, `/seller/`, `/seller/index.html`,
+  `/seller/seller.mjs` and encoded/normalized paths as `503`, while `/` returned `200`.
 - [x] AC3 -> `make check` plus `tests/test_security_isolation.py`
 - [x] AC4 -> `test_mobile_access_setup_is_documented`; owner login smoke is
   pending Zero Trust configuration.
 
 ## Test status
 
-- Test suite after merging `origin/main`: `make check` -> 279 passed, 6 skipped;
-  Wrangler Pages dev compiled the root Functions route.
+- Test suite after merging `origin/main`: 280 non-browser tests passed on
+  Windows; `make lint` and `make build` passed. The new browser harness from
+  #119 cannot collect on Windows until #126 merges; CI runs the full suite on
+  Linux. Wrangler Pages dev compiled the root Functions route.
 - Manual smoke test: local anonymous Pages catalog `/` and `/es/` returned
   `200`; `/seller/`, its HTML and JS, and an encoded seller path returned
   `503`. Production

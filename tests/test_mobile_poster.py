@@ -171,6 +171,69 @@ if (response.status !== 302 || !response.headers.get('Location')?.startsWith(
     assert result.returncode == 0, result.stderr
 
 
+def test_access_middleware_requires_signed_jwt_audience_and_expiration():
+    code = """
+import { onRequest } from './functions/_middleware.js';
+const domain = 'https://example.cloudflareaccess.com';
+const aud = 'a'.repeat(64);
+const pair = await crypto.subtle.generateKey({
+  name: 'RSASSA-PKCS1-v1_5', modulusLength: 2048,
+  publicExponent: new Uint8Array([1, 0, 1]), hash: 'SHA-256'
+}, true, ['sign', 'verify']);
+const jwk = { ...await crypto.subtle.exportKey('jwk', pair.publicKey),
+  kid: 'test-key', alg: 'RS256' };
+globalThis.fetch = async url => {
+  if (url !== `${domain}/cdn-cgi/access/certs`) throw new Error('unexpected cert URL');
+  return Response.json({ keys: [jwk] });
+};
+const encode = data => Buffer.from(JSON.stringify(data)).toString('base64url');
+async function signed(payload) {
+  const body = `${encode({ kid: 'test-key', alg: 'RS256' })}.${encode(payload)}`;
+  const signature = await crypto.subtle.sign(
+    'RSASSA-PKCS1-v1_5', pair.privateKey, new TextEncoder().encode(body)
+  );
+  return `${body}.${Buffer.from(signature).toString('base64url')}`;
+}
+const valid = { iss: domain, aud: [aud], exp: Math.floor(Date.now() / 1000) + 3600 };
+for (const [payload, expected] of [
+  [valid, 200],
+  [{ ...valid, aud: undefined }, 403],
+  [{ ...valid, exp: undefined }, 403],
+  [{ ...valid, iss: undefined }, 403],
+]) {
+  const response = await onRequest({
+    env: { ACCESS_TEAM_DOMAIN: domain, ACCESS_AUD: aud },
+    request: new Request('https://leaving-denver.pages.dev/seller/', {
+      headers: { 'Cf-Access-Jwt-Assertion': await signed(payload) }
+    }),
+    functionPath: '/', data: {}, waitUntil() {}, passThroughOnException() {},
+    next: () => new Response('seller content')
+  });
+  if (response.status !== expected) {
+    throw new Error(`Expected ${expected}, got ${response.status} for ${JSON.stringify(payload)}`);
+  }
+}
+const forged = (await signed(valid)).replace(/\\.[^.]+$/, '.AA');
+const unsignedResponse = await onRequest({
+  env: { ACCESS_TEAM_DOMAIN: domain, ACCESS_AUD: aud },
+  request: new Request('https://leaving-denver.pages.dev/seller/seller.mjs', {
+    headers: { 'Cf-Access-Jwt-Assertion': forged }
+  }),
+  functionPath: '/', data: {}, waitUntil() {}, passThroughOnException() {},
+  next: () => new Response('seller content')
+});
+if (unsignedResponse.status !== 302) throw new Error('Forged token was accepted');
+"""
+    result = subprocess.run(
+        ["node", "--input-type=module", "-e", code],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+
+
 def test_public_catalog_does_not_require_access():
     code = """
 import { onRequest } from './functions/_middleware.js';
