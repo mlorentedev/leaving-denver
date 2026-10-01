@@ -54,7 +54,8 @@ Failure modes, dependencies, and unknowns to clarify before implementation. If a
 Observable outcomes. Each must be testable.
 
 - [ ] AC1: `/seller/` renders a phone-usable per-item copy generator from
-  published inventory, with selectable platforms and copyable title/description.
+  published available inventory, with selectable platforms and copyable
+  title/description and a per-platform UTM-attributed item link.
   It never renders floors, internal notes, draft items, or a plaintext PIN.
 - [ ] AC2: Every `/seller/` request passes Access JWT validation; unset Access
   configuration fails closed and a missing/invalid JWT is denied on every

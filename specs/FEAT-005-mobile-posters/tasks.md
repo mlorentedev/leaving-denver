@@ -22,8 +22,8 @@ created: "2026-09-29"
 - [x] [AC1] [AC3] Write `tests/test_mobile_poster.py` asserting built
   `/seller/index.html` contains only sanitized, published items and no PIN;
   run `uv run pytest -q tests/test_mobile_poster.py` (expected FAIL: file absent).
-- [x] [AC1] Write a Node assertion for mobile listing copy and price fields
-  from `src/leaving_denver/assets/seller.mjs` (expected FAIL: module absent).
+- [x] [AC1] Write Node assertions for listing copy, price and UTM-attributed
+  item links from `src/leaving_denver/assets/seller.mjs`.
 - [x] [AC1] [AC3] Add `src/leaving_denver/templates/seller.html`, seller JS,
   `src/leaving_denver/site_builder.py` output, and Tailwind source; re-run
   targeted tests (expected PASS).

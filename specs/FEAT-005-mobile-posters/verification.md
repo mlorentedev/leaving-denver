@@ -11,7 +11,8 @@ Map every acceptance criterion from `proposal.md` to concrete proof (commit hash
 
 - [x] AC1 -> `test_mobile_poster_uses_only_published_sanitized_inventory`,
   `test_mobile_poster_does_not_offer_sold_pending_or_free_items`,
-  `test_mobile_copy_uses_public_price_and_singular_voice`
+  `test_mobile_copy_uses_public_price_and_singular_voice`,
+  `test_mobile_copy_links_to_each_public_item_with_platform_attribution`
 - [x] AC2 -> `test_access_middleware_fails_closed_without_configuration`,
   `test_access_middleware_rejects_missing_jwt_when_configured`; local Wrangler
   served `/seller`, `/seller/`, `/seller/index.html`, `/seller/seller.mjs` and
@@ -22,7 +23,7 @@ Map every acceptance criterion from `proposal.md` to concrete proof (commit hash
 
 ## Test status
 
-- Test suite after merging `origin/main`: `make check` -> 278 passed, 6 skipped;
+- Test suite after merging `origin/main`: `make check` -> 279 passed, 6 skipped;
   Wrangler Pages dev compiled the root Functions route.
 - Manual smoke test: local anonymous Pages catalog `/` and `/es/` returned
   `200`; `/seller/`, its HTML and JS, and an encoded seller path returned

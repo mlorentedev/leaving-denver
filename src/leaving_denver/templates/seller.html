@@ -37,6 +37,11 @@
       <textarea id="description" rows="13" class="w-full p-3 mt-1 bg-white border border-neutral-300 rounded-lg"></textarea>
       <button type="button" data-copy="description" class="mt-2 px-4 py-3 bg-neutral-900 text-white rounded-lg">Copy description</button>
     </div>
+    <div>
+      <label class="block font-semibold" for="link">Item link with platform attribution</label>
+      <input id="link" class="w-full p-3 mt-1 bg-white border border-neutral-300 rounded-lg" type="url" readonly>
+      <button type="button" data-copy="link" class="mt-2 px-4 py-3 bg-neutral-900 text-white rounded-lg">Copy link</button>
+    </div>
     <p id="status" role="status" aria-live="polite" class="text-sm"></p>
   </main>
   <script>const ITEMS = {{ items_json | safe }}; window.posterItems = ITEMS;</script>

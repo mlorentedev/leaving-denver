@@ -44,9 +44,9 @@ commit before the next production dispatch.
 The mobile poster at `https://leaving-denver.pages.dev/seller/` is generated
 from **published asking prices only**. It does not contain negotiation floors
 or the local private assistant. There is no server-side AI endpoint or shared
-JavaScript PIN: select an item and platform, then copy the editable title and
-description on a phone. Until Access is configured, the Pages middleware
-responds `503` rather than serving the tool.
+JavaScript PIN: select an item and platform, then copy the editable title,
+description, and UTM-attributed item link on a phone. Until Access is
+configured, the Pages middleware responds `503` rather than serving the tool.
 
 To enable it, an administrator of the Cloudflare Zero Trust account must:
 

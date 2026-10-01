@@ -68,7 +68,7 @@ def test_mobile_poster_does_not_offer_sold_pending_or_free_items(tmp_path, monke
 def test_mobile_copy_uses_public_price_and_singular_voice():
     code = """
 import { makeCopy } from './src/leaving_denver/assets/seller.mjs';
-const item = { short_title: 'Desk', title: 'Wood desk', price: 90,
+const item = { id: 'wood-desk', short_title: 'Desk', title: 'Wood desk', price: 90,
   category: 'Office', condition: 'Good', dimensions: '48 x 24',
   specs: ['Solid wood'], pickup: 'One flight of stairs' };
 const descriptions = new Set();
@@ -90,6 +90,34 @@ if (descriptions.size < 3) process.exit(1);
         check=False,
     )
     assert result.returncode == 0, result.stderr
+
+
+def test_mobile_copy_links_to_each_public_item_with_platform_attribution():
+    code = """
+import { makeCopy } from './src/leaving_denver/assets/seller.mjs';
+const item = { id: 'wood-desk', title: 'Wood desk', price: 90 };
+for (const [platform, source] of Object.entries({
+  fb: 'facebook', cl: 'craigslist', offerup: 'offerup', nextdoor: 'nextdoor'
+})) {
+  const copy = makeCopy(item, platform);
+  const url = new URL(copy.link);
+  if (url.origin !== 'https://leaving-denver.pages.dev' ||
+      url.pathname !== '/i/wood-desk/' ||
+      url.searchParams.get('utm_source') !== source ||
+      url.searchParams.get('utm_campaign') !== 'moving-sale') process.exit(1);
+}
+"""
+    result = subprocess.run(
+        ["node", "--input-type=module", "-e", code],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    template = (ROOT / "src/leaving_denver/templates/seller.html").read_text(encoding="utf-8")
+    assert 'id="link"' in template
+    assert 'data-copy="link"' in template
 
 
 @pytest.mark.parametrize(

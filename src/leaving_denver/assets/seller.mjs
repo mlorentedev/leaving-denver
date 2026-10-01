@@ -1,9 +1,12 @@
-const platforms = new Set(['fb', 'cl', 'offerup', 'nextdoor']);
+const sources = { fb: 'facebook', cl: 'craigslist', offerup: 'offerup', nextdoor: 'nextdoor' };
 
 export function makeCopy(item, platform) {
-  if (!platforms.has(platform)) throw new RangeError(`Unknown platform: ${platform}`);
+  if (!Object.hasOwn(sources, platform)) throw new RangeError(`Unknown platform: ${platform}`);
   if (typeof item.price !== 'number' || !Number.isFinite(item.price)) {
     throw new TypeError('A public asking price is required');
+  }
+  if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(item.id)) {
+    throw new TypeError('A public item slug is required');
   }
 
   const name = item.short_title || item.title;
@@ -29,6 +32,7 @@ export function makeCopy(item, platform) {
   return {
     title: title.slice(0, platform === 'cl' ? 70 : platform === 'offerup' ? 60 : 100),
     description: `${introduction}\n\n${details.join('\n')}`,
+    link: `https://leaving-denver.pages.dev/i/${item.id}/?utm_source=${sources[platform]}&utm_campaign=moving-sale`,
   };
 }
 
@@ -38,6 +42,7 @@ if (typeof document !== 'undefined') {
   const platform = document.getElementById('platform');
   const title = document.getElementById('title');
   const description = document.getElementById('description');
+  const link = document.getElementById('link');
   const photo = document.getElementById('photo');
   const status = document.getElementById('status');
 
@@ -54,6 +59,7 @@ if (typeof document !== 'undefined') {
     const copy = makeCopy(item, platform.value);
     title.value = copy.title;
     description.value = copy.description;
+    link.value = copy.link;
     photo.hidden = !item.images?.length;
     if (item.images?.length) {
       photo.src = `../${item.images[0]}`;
