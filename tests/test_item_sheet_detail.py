@@ -19,6 +19,7 @@ SOURCE = {
     for item in yaml.safe_load((DATA_DIR / "inventory.yaml").read_text(encoding="utf-8"))["items"]
 }
 PAGES = {"en": "index.html", "es": "es/index.html"}
+LABELS = yaml.safe_load((ROOT / "locales" / "es.yaml").read_text(encoding="utf-8"))["conditions"]
 
 
 def inventory(page):
@@ -42,7 +43,12 @@ def test_the_spanish_sheet_has_spanish_details():
     _, items = inventory(PAGES["es"])
     for item_id, item in items.items():
         overlay = SOURCE[item_id].get("es", {})
+        # Household conditions are Facebook-scale labels, translated once in locales/es.yaml.
+        if SOURCE[item_id]["category"] != "Vehicle":
+            assert item["condition"] == LABELS[SOURCE[item_id]["condition"]], item_id
         for field in ("condition", "dimensions", "color"):
+            if field == "condition" and SOURCE[item_id]["category"] != "Vehicle":
+                continue
             if SOURCE[item_id].get(field):
                 assert overlay.get(field), f"{item_id}: no Spanish {field}"
                 assert item[field] == overlay[field], f"{item_id}: {field}"

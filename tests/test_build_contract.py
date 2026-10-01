@@ -412,6 +412,7 @@ def test_spanish_fallbacks_and_asset_paths(public_dir):
     rendered_items = {item["id"]: item for item in json.loads(match.group(1))["items"]}
 
     fallbacks = []
+    labels = site_builder.load_locale("es")["conditions"]
     for item in data["items"]:
         if item.get("published", True) is False:
             continue
@@ -422,7 +423,6 @@ def test_spanish_fallbacks_and_asset_paths(public_dir):
             "specs",
             "included",
             "pickup_note",
-            "condition",
             "dimensions",
         ):
             if field not in translated:
@@ -432,7 +432,10 @@ def test_spanish_fallbacks_and_asset_paths(public_dir):
         assert rendered["short_title"] == translated["short_title"]
         assert rendered["specs"] == translated["specs"]
         assert rendered["pickup"] == translated["pickup_note"]
-        assert rendered["condition"] == translated["condition"]
+        # Household conditions are labels on Facebook's scale, translated once in the locale.
+        assert rendered["condition"] == translated.get(
+            "condition", labels.get(item["condition"], item["condition"])
+        )
         assert rendered["dimensions"] == translated["dimensions"]
         assert rendered["images"] == [f"../{image}" for image in item["images"]]
 

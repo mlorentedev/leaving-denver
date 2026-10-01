@@ -1,0 +1,51 @@
+[
+  {
+    "id": "FEAT-007-richer-item-fields-f1",
+    "behavior": "One asking price; the build refuses current_asking or no price; published prices unchanged",
+    "verification": "uv run pytest -q tests/test_richer_item_fields.py tests/test_richer_item_fields_browser.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-007-richer-item-fields-f2",
+    "behavior": "Household conditions on the scale, ES label from the locale, off-scale refused, car keeps its wording",
+    "verification": "uv run pytest -q tests/test_richer_item_fields.py tests/test_richer_item_fields_browser.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-007-richer-item-fields-f3",
+    "behavior": "Flaws render on the sheet in both languages as text, none renders no section, no ES overlay refused, seller copy lists them",
+    "verification": "uv run pytest -q tests/test_richer_item_fields.py tests/test_richer_item_fields_browser.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-007-richer-item-fields-f4",
+    "behavior": "% off is floor((retail-price)/retail*100), only when retail > price, never free, Sold or car",
+    "verification": "uv run pytest -q tests/test_richer_item_fields.py tests/test_richer_item_fields_browser.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-007-richer-item-fields-f5",
+    "behavior": "Size badges over 48 in / 50 lb / 75 lb from explicit numbers; invalid numbers refused; no unsourced weight",
+    "verification": "uv run pytest -q tests/test_richer_item_fields.py tests/test_richer_item_fields_browser.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-007-richer-item-fields-f6",
+    "behavior": "Catalog sorted by ascending price, Sold last, free by list price, ties in data order",
+    "verification": "uv run pytest -q tests/test_richer_item_fields.py tests/test_richer_item_fields_browser.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-007-richer-item-fields-f7",
+    "behavior": "Existing guards stay green: class coverage, contrast, UNBACKED_CLAIMS, pickup and payment",
+    "verification": "make check",
+    "state": "pending",
+    "evidence": ""
+  }
+]

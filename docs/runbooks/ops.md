@@ -95,6 +95,16 @@ must stay reachable anonymously.
 - **Price:** edit the item's `recommended_list_price` in
   `data/inventory.yaml`; run `make check`, inspect the diff, commit and merge,
   then verify the automatic deployment. Never put reserve floors in public inventory.
+  `recommended_list_price` is the item's one asking price (the build refuses a
+  `current_asking`); the "% off" badge and the catalog order follow from it and
+  `original_price`.
+- **Condition, flaws, size:** `condition` is one of New, Used - Like New, Used - Good,
+  Used - Fair (the car keeps its own wording); the Spanish label comes from
+  `locales/es.yaml`. List a known flaw under `flaws:` with the same number of lines
+  under `es: flaws:`; with none known leave it out. Add `size_in: [w, d, h]` only as
+  the owner's own numbers from `dimensions` (as the buyer carries it: omit it for
+  things that roll or fold), and `weight_lb` plus `weight_source` only for a weighed
+  item. Over 48 in or 50 lb shows "Needs truck/SUV"; over 75 lb also "2-person lift".
 - **Phone spam:** obtain and test a Google Voice number first. Run
   `make secrets` to update `seller.phone` in `data/private.sops.yaml`. On a
   machine with the age key, run `make ci-secrets` **before** merging to refresh

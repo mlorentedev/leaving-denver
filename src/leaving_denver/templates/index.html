@@ -22,6 +22,19 @@
 {% macro photo(p, sizes, alt, class, lazy=true, priority=false) %}
 <img src="{{ p.src }}"{% if p.srcset %} srcset="{{ p.srcset }}" sizes="{{ sizes }}" width="{{ p.width }}" height="{{ p.height }}"{% endif %} alt="{{ alt }}"{% if lazy %} loading="lazy"{% endif %}{% if priority %} fetchpriority="high"{% endif %} class="{{ class }}">
 {%- endmacro %}
+{# "% off" and size badges: figures and flags derived by the builder, labels from the locale. #}
+{% macro item_badges(item) -%}
+{% if item.status != "Sold" and (item.discount_pct or item.size_badges) %}
+<span class="flex flex-wrap gap-1 pt-0.5">
+  {% if item.discount_pct %}
+  <span data-role="discount-badge" class="px-1.5 py-0.5 rounded-md text-xs font-bold bg-emerald-50 text-emerald-800">{{ t.percent_off | replace('{n}', item.discount_pct) }}</span>
+  {% endif %}
+  {% for label in item.size_badges %}
+  <span data-role="size-badge" class="px-1.5 py-0.5 rounded-md text-xs font-semibold bg-neutral-100 text-neutral-800">{{ label }}</span>
+  {% endfor %}
+</span>
+{% endif %}
+{%- endmacro %}
 {% macro status_badge(item) -%}
 <span data-role="status-badge" class="self-start px-2 py-0.5 rounded-md text-xs font-bold {{ 'bg-neutral-900 text-white' if item.status == 'Sold' else 'bg-amber-100 text-amber-900' }}">{{ item.status_label }}</span>
 {%- endmacro %}
@@ -195,6 +208,7 @@
             {% endif %}
           </span>
           {% endif %}
+          {{ item_badges(item) }}
         </span>
       </button>
       {% endfor %}
@@ -331,10 +345,17 @@
           <span id="modalStatus" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200"></span>
         </div>
 
+        <div id="modalBadges" class="flex flex-wrap gap-1.5" hidden></div>
+
         <div>
           <h4 class="text-xs font-bold uppercase tracking-wider text-neutral-500 mb-1.5">{{ t.details }}</h4>
           <p id="modalSummary" class="mb-1.5 text-xs font-semibold text-neutral-800"></p>
           <ul id="itemFacts" class="space-y-1 text-xs text-neutral-700"></ul>
+        </div>
+
+        <div id="modalFlawsBox">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-neutral-500 mb-1.5">{{ t.flaws_heading }}</h4>
+          <ul id="modalFlaws" class="space-y-1 text-xs text-neutral-700"></ul>
         </div>
 
         <div id="modalIncludedBox">
@@ -438,6 +459,26 @@
       const status = document.getElementById('modalStatus');
       status.textContent = item.status_label;
       status.className = 'text-xs font-semibold px-2.5 py-0.5 rounded-full border ' + STATUS_PILL[item.status];
+      // "% off" and the size badges, as derived by the builder; none on a Sold item.
+      const badges = document.getElementById('modalBadges');
+      badges.replaceChildren();
+      if (item.status !== 'Sold') {
+        if (item.discount_pct) {
+          const off = document.createElement('span');
+          off.dataset.role = 'discount-badge';
+          off.className = 'px-1.5 py-0.5 rounded-md text-xs font-bold bg-emerald-50 text-emerald-800';
+          off.textContent = UI.percent_off.replace('{n}', item.discount_pct);
+          badges.appendChild(off);
+        }
+        (item.size_badges || []).forEach(label => {
+          const size = document.createElement('span');
+          size.dataset.role = 'size-badge';
+          size.className = 'px-1.5 py-0.5 rounded-md text-xs font-semibold bg-neutral-100 text-neutral-800';
+          size.textContent = label;
+          badges.appendChild(size);
+        });
+      }
+      badges.hidden = !badges.children.length;
       document.getElementById('modalRetail').textContent = item.retail ? UI.original + ': $' + item.retail.toLocaleString() : '';
       document.getElementById('modalPickup').textContent = item.pickup || UI.default_pickup;
 
@@ -490,6 +531,8 @@
         });
       };
       bullets(document.getElementById('itemFacts'), item.specs || []);
+      bullets(document.getElementById('modalFlaws'), item.flaws || []);
+      document.getElementById('modalFlawsBox').hidden = !(item.flaws || []).length;
       bullets(document.getElementById('modalIncluded'), item.included || []);
       document.getElementById('modalIncludedBox').hidden = !(item.included || []).length;
 
