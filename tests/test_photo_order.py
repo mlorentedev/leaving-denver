@@ -7,7 +7,7 @@ last; which photo leads is the owner's call, recorded in the data.
 import pytest
 import yaml
 
-from leaving_denver.config import DATA_DIR
+from leaving_denver.config import DATA_DIR, SUPPORTED_IMAGE_EXTS
 from leaving_denver.image_processor import synced_name
 from leaving_denver.site_builder import apply_photos
 
@@ -62,11 +62,14 @@ def test_cover_is_no_longer_read():
 
 
 def test_every_item_with_several_photos_lists_them_all():
+    # Which photo leads is the owner's call, so this checks the list is complete, not its order.
     items = yaml.safe_load((DATA_DIR / "inventory.yaml").read_text(encoding="utf-8"))["items"]
     photos_dir = DATA_DIR.parent / "content" / "photos"
     for item in items:
         folder = photos_dir / item["id"]
-        own = sorted(synced_name(p.name) for p in folder.iterdir()) if folder.is_dir() else []
+        files = folder.iterdir() if folder.is_dir() else []
+        # The same files photo sync takes; anything else (.DS_Store) never reaches the build.
+        own = sorted(synced_name(p.name) for p in files if p.suffix.lower() in SUPPORTED_IMAGE_EXTS)
         if len(own) > 1:
             listed = sorted(synced_name(name) for name in item.get("photos", []))
-            assert listed == own, f"{item['id']}: photos: must list every photo in order"
+            assert listed == own, f"{item['id']}: photos: must list every one of its photos"
