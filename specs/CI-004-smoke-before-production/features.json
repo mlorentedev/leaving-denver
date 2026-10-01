@@ -1,0 +1,51 @@
+[
+  {
+    "id": "CI-004-smoke-before-production-f1",
+    "behavior": "Production deploys smoke a candidate first; a preview deploys once",
+    "verification": "uv run pytest -q tests/test_cd_workflow.py -k candidate",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "CI-004-smoke-before-production-f2",
+    "behavior": "The canonical site is smoke-tested after the production deploy",
+    "verification": "uv run pytest -q tests/test_cd_workflow.py -k canonical",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "CI-004-smoke-before-production-f3",
+    "behavior": "ci-secrets scopes SELLER_PHONE to the environments",
+    "verification": "uv run pytest -q tests/test_cd_workflow.py -k seller_phone_is_environment_scoped",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "CI-004-smoke-before-production-f4",
+    "behavior": "Every action in ci.yml is pinned to a commit SHA",
+    "verification": "uv run pytest -q tests/test_cd_workflow.py -k pinned",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "CI-004-smoke-before-production-f5",
+    "behavior": "The deploy audit fails on drift and passes on the expected settings",
+    "verification": "uv run pytest -q tests/test_deploy_audit.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "CI-004-smoke-before-production-f6",
+    "behavior": "The deploy gate refuses the test placeholder phone",
+    "verification": "uv run pytest -q tests/test_cd_workflow.py -k placeholder",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "CI-004-smoke-before-production-f7",
+    "behavior": "The ops runbook numbers the Deploy steps in order and names the candidate",
+    "verification": "uv run pytest -q tests/test_cd_workflow.py -k runbook",
+    "state": "pending",
+    "evidence": ""
+  }
+]

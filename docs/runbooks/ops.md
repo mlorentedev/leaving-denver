@@ -13,7 +13,8 @@ for both `/` and `/es/`; the private assistant's stylesheet remains under
 Before merging CD, run `make protect-main` and `make ci-secrets` from a machine
 with the age key. This restricts both GitHub deployment environments to the
 `main` workflow ref, moves the Cloudflare token out of repository-wide secrets,
-and refreshes the contact secret. Verify the environments still allow only
+and moves the contact secret into both environments too, so a workflow outside
+them cannot read the phone. Verify the environments still allow only
 `main` after changing deployment settings. A branch workflow must never receive
 a production-capable Pages token, even for a preview. `make protect-deploy`
 removes any stale extra branch or tag policies as well as ensuring the `main`
@@ -27,8 +28,12 @@ branch policy exists.
    then use `gh run watch <run-id> --exit-status`. For a manual preview, dispatch
    `gh workflow run ci.yml --ref main -f branch=preview`; to redeploy production
    explicitly, use `gh workflow run ci.yml --ref main -f branch=main`. The deploy job
-   rebuilds with the real `SELLER_PHONE`, runs `make check`, publishes to Pages
-   and invokes `scripts/smoke.sh` against the deployment URL.
+   rebuilds with the real `SELLER_PHONE` and runs `make check`.
+3. A production deploy publishes to the Pages branch `candidate` first and runs
+   `scripts/smoke.sh` against that deployment. Only if it passes does it publish to
+   `main` and smoke the canonical `https://leaving-denver.pages.dev`. A failed
+   candidate smoke leaves production on the previous deployment: fix forward. A
+   manual preview publishes once and smokes its own deployment URL.
 4. Check `https://leaving-denver.pages.dev/` and `/es/` on a phone. Verify the
    changed content and SMS CTA on the canonical site, not just the deployment
    URL. Do not share a failed deployment.
@@ -119,6 +124,10 @@ must stay reachable anonymously.
   redirects it on the server.
 
 ## Minimal monitoring (owner setup)
+
+- `make audit-deploy` reads the live settings: both environments, their single `main`
+  branch policy, and (with the owner's `gh`) no deploy secret left at the repository
+  level. The `deploy-audit` workflow runs the settings part weekly.
 
 - Configure one free external HTTP monitor for
   `https://leaving-denver.pages.dev/`, alerting the owner's phone. Test the
