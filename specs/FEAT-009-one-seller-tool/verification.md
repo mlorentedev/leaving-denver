@@ -130,6 +130,16 @@ created: "2026-09-30"
   terminal rule still holds, a spy on `subprocess.run` shows Node and gh get no
   `SELLER_PASSPHRASE`, and the stub dotf logs the names in its own environment (none is it). Mutation-checked: a `child_env` that keeps it, and a `save_to_bitwarden` that
   prints dotf's output, each fail a test.
+- [x] Review round 2 (F1-F9) -> `--yes` on the save (`tests/test_seal_command.py`, the fake dotf
+  refuses a create without it); the order seal, save, set and the Bitwarden line when the upload
+  fails; a fixed save-failure line and a Node failure that names only its exit code (canary and
+  sentinel tests); sops children get no `SELLER_PASSPHRASE`; `iter` capped at 10,000,000
+  (`tests/test_sealed_build.py`); an oracle independent of `seller.mjs` in node:crypto
+  (`tests/test_sealed_oracle.py`, and the browser opens an oracle-sealed envelope at its own `iter`
+  in `tests/test_sealed_browser.py`); `scripts/audit-deploy.sh` (no repository `SELLER_SEALED`,
+  a warning when an environment lacks it) and `scripts/smoke.sh` (anonymous `/seller/` carries no
+  envelope). `dotf secrets run` keeps stdin a terminal (PTY or inherited fd), so the `has_tty()`
+  rule stands; ADR-007 records it with the accepted passphrase risk.
 
 ### Owner slots
 

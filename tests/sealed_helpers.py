@@ -89,6 +89,65 @@ def open_in_node(envelope, passphrase):
     return answer["plaintext"] if answer["ok"] else None
 
 
+# An implementation of the envelope that shares no code with seller.mjs: node:crypto's PBKDF2 and
+# AES-GCM, written from the ADR (key = PBKDF2-SHA256(normalised words, salt, iter) -> 32 bytes;
+# AAD = {"v","kdf","iter","salt"} as JSON; 128-bit tag at the end of ct). A fault in the page's
+# own derivation (a fixed iteration count, a wrong AAD) cannot hide behind a round trip with itself.
+ORACLE_SCRIPT = """
+import { createCipheriv, createDecipheriv, pbkdf2Sync, randomBytes } from 'node:crypto';
+let raw = '';
+for await (const chunk of process.stdin) raw += chunk;
+const input = JSON.parse(raw);
+const aad = e => Buffer.from(JSON.stringify({ v: e.v, kdf: e.kdf, iter: e.iter, salt: e.salt }));
+const key = (words, e) => pbkdf2Sync(Buffer.from(words, 'utf8'), Buffer.from(e.salt, 'base64'), e.iter, 32, 'sha256');
+if (input.cmd === 'seal') {
+  const e = { v: 1, kdf: 'PBKDF2-SHA256', iter: input.iter, salt: randomBytes(16).toString('base64') };
+  const iv = randomBytes(12);
+  const cipher = createCipheriv('aes-256-gcm', key(input.words, e), iv, { authTagLength: 16 });
+  cipher.setAAD(aad(e));
+  const ct = Buffer.concat([cipher.update(input.plaintext, 'utf8'), cipher.final(), cipher.getAuthTag()]);
+  process.stdout.write(JSON.stringify({ ...e, iv: iv.toString('base64'), ct: ct.toString('base64') }));
+} else {
+  try {
+    const e = input.envelope;
+    const body = Buffer.from(e.ct, 'base64');
+    const decipher = createDecipheriv('aes-256-gcm', key(input.words, e), Buffer.from(e.iv, 'base64'), { authTagLength: 16 });
+    decipher.setAAD(aad(e));
+    decipher.setAuthTag(body.subarray(body.length - 16));
+    const plain = Buffer.concat([decipher.update(body.subarray(0, body.length - 16)), decipher.final()]);
+    process.stdout.write(JSON.stringify({ ok: true, plaintext: plain.toString('utf8') }));
+  } catch (error) {
+    process.stdout.write(JSON.stringify({ ok: false }));
+  }
+}
+"""
+
+
+def oracle_words(passphrase):
+    from leaving_denver import seal
+
+    return " ".join(seal.passphrase_words(passphrase))
+
+
+def oracle_seal(plaintext, passphrase=PASSPHRASE, iterations=1_000_000):
+    """An envelope (JSON text) sealed by the independent implementation."""
+    request = {"cmd": "seal", "plaintext": plaintext, "words": oracle_words(passphrase)}
+    result = node(ORACLE_SCRIPT, json.dumps({**request, "iter": iterations}))
+    assert result.returncode == 0, result.stderr
+    return result.stdout
+
+
+def oracle_open(envelope, passphrase=PASSPHRASE):
+    """The plaintext the independent implementation gets, or None when it will not open."""
+    if isinstance(envelope, str):
+        envelope = json.loads(envelope)
+    request = {"cmd": "open", "envelope": envelope, "words": oracle_words(passphrase)}
+    result = node(ORACLE_SCRIPT, json.dumps(request))
+    assert result.returncode == 0, result.stderr
+    answer = json.loads(result.stdout)
+    return answer["plaintext"] if answer["ok"] else None
+
+
 def json_block(html, block_id):
     """The parsed content of a <script type="application/json" id=...> block, or None."""
     import re
@@ -145,8 +204,10 @@ import os
 import sys
 
 stdin = "" if sys.stdin.isatty() else sys.stdin.read()
+import time
+
 with open(os.environ["FAKE_GH_LOG"], "a", encoding="utf-8") as log:
-    log.write(json.dumps({{"argv": sys.argv[1:], "stdin": stdin}}) + "\\n")
+    log.write(json.dumps({{"argv": sys.argv[1:], "stdin": stdin, "t": time.time_ns()}}) + "\\n")
 if sys.argv[1:3] == ["secret", "list"]:
     sys.stdout.write(os.environ.get("FAKE_GH_LIST", ""))
 if os.environ.get("FAKE_GH_FAIL") and os.environ["FAKE_GH_FAIL"] in " ".join(sys.argv[1:]):
@@ -169,14 +230,27 @@ import json
 import os
 import sys
 
+import time
+
 stdin = sys.stdin.read()
 with open(os.environ["FAKE_DOTF_LOG"], "a", encoding="utf-8") as log:
-    log.write(json.dumps({{"argv": sys.argv[1:], "stdin": stdin, "env": sorted(os.environ)}}) + "\\n")
+    log.write(
+        json.dumps(
+            {{"argv": sys.argv[1:], "stdin": stdin, "env": sorted(os.environ), "t": time.time_ns()}}
+        )
+        + "\\n"
+    )
+# What dotf does with a value on a pipe: it cannot ask, so an absent item needs --yes.
+CANARY = "FAKE-DOTF-STDERR-CANARY"
+if not os.environ.get("FAKE_DOTF_EXISTS") and not {{"--yes", "-y"}} & set(sys.argv[1:]):
+    sys.stderr.write(CANARY + ": item not found; re-run with --yes to create it non-interactively\\n")
+    sys.exit(1)
 if os.environ.get("FAKE_DOTF_ECHO"):
     # A careless tool: the value on both streams. Nothing of it may reach the owner's screen.
     sys.stdout.write(stdin)
     sys.stderr.write(stdin)
 if os.environ.get("FAKE_DOTF_FAIL"):
+    sys.stderr.write(CANARY + ": failing on purpose\\n")
     sys.exit(3)
 """
 
@@ -201,6 +275,7 @@ def install_fakes(tmp_path, monkeypatch, *, list_output="", fail_on="", dotf=Fal
     monkeypatch.setenv("FAKE_DOTF_LOG", str(dotf_log))
     monkeypatch.delenv("FAKE_DOTF_FAIL", raising=False)
     monkeypatch.delenv("FAKE_DOTF_ECHO", raising=False)
+    monkeypatch.delenv("FAKE_DOTF_EXISTS", raising=False)
 
     def calls():
         if not log.exists():

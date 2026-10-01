@@ -79,4 +79,10 @@ for path in /inventory.json /poster_assistant.html /private/inventory.json; do
   grep -qE 'firm_floor_price|pinGateModal' <<<"$body" && fail "$path serves private content"
 done
 
+# An anonymous visitor to /seller/ must never get the sealed envelope (Access answers first).
+for path in /seller/ /seller/index.html; do
+  body=$(curl -sS "$url$path")
+  grep -qE 'id="sealed"|"kdf": ?"PBKDF2-SHA256"' <<<"$body" && fail "$path serves the sealed envelope anonymously"
+done
+
 echo "smoke OK: $url"

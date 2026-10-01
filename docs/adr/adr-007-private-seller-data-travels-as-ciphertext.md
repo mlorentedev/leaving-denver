@@ -85,6 +85,16 @@ Sealing happens inside `make ci-secrets`, on the owner's machine:
    environment of every child the target starts (Node, gh, dotf). The terminal rule stands: with
    no TTY the target still refuses, so an agent that somehow had the variable still could not seal.
    Any other variable, and argv, are ignored or refused.
+   *Amended after review (2026-10-01):* `dotf secrets run` keeps the terminal rule satisfiable.
+   When its stdout is a terminal it gives the child a pseudo-terminal for stdin, stdout and
+   stderr, so `isatty(stdin)` holds and `/dev/tty` is that pseudo-terminal; otherwise it passes its
+   own stdin through, a terminal if it was one. So the target keeps requiring a TTY (which is also
+   what stops an agent shell) and nothing about the environment path needs a prompt. The order is
+   seal, then save to Bitwarden (`dotf secrets set SELLER_PASSPHRASE --yes`, which dotf needs to
+   create an item from a pipe), then `gh secret set`: a failed save stops before anything is
+   uploaded, and an upload that fails after a save says so, since Bitwarden then already holds the
+   new passphrase and `make ci-secrets` is simply run again. Neither dotf's stderr nor Node's is
+   ever relayed; both can echo what was sent to them.
 4. **Encrypt with WebCrypto in Node** (`crypto.subtle`). It is the same API the page decrypts
    with, and Node 24 is already required for Tailwind, so there is no new dependency. The
    payload and the passphrase reach the Node child on stdin.
@@ -152,9 +162,11 @@ the passphrase silently (owner, 2026-10-01).
 - **Right passphrase.** The page shows the private views and "Private data as of
   `<sealed_at>`". `sealed_at` is inside the ciphertext, so even the date of the last update is
   hidden.
-- **Remembering the passphrase.** Not persisted. The derived key is a non-extractable `CryptoKey`
-  held in memory. There is nothing in `localStorage`, `sessionStorage`, IndexedDB or cookies. A
-  "Lock" button and `pagehide` drop the key and clear the private DOM, and a reload asks again.
+- **Remembering the passphrase.** Not persisted, and not held. The key is derived once per
+  unlock, used for the one decrypt and dropped: nothing keeps a key or the passphrase in memory
+  afterwards. What stays between an unlock and Lock is the decrypted rows. There is nothing in
+  `localStorage`, `sessionStorage`, IndexedDB or cookies. A "Lock" button and `pagehide` clear the
+  private DOM and the rows, and a reload asks again.
   The phone's own password manager may fill the field (`autocomplete="current-password"`). That
   store is the device's, guarded by its unlock, not the site's. sessionStorage was rejected:
   phone tabs live for days, so the passphrase would sit in plain text in origin storage for any
@@ -229,6 +241,11 @@ input is mixed into the payload, so compressing before encrypting leaks only the
   5. If Access or the email account is also suspect, fix it first.
 - **The passphrase is the whole defence once Access fails.** A weak or reused one undoes this
   ADR. The target's word rule is a floor, not proof.
+- **Accepted: a typed passphrase is only checked, not measured.** A phrase of five distinct EFF
+  words that someone chose rather than drew passes the rule, and the target cannot tell. That is
+  why it offers to generate one. And the guarantee that a sale cannot rotate the passphrase
+  silently covers an empty entry only: a re-seal with a *different* valid phrase rotates it. The
+  re-seal says "Sealing with this passphrase replaces the one your phone uses" before it seals.
 - **What this does not cover:** a compromised phone or computer, a keylogger, or a malicious
   script running in `/seller/` after unlock. The CSP narrows the last one; it does not remove it.
 

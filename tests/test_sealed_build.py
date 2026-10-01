@@ -129,6 +129,7 @@ MALFORMED = {
     "version as text": json.dumps({**GOOD, "v": "1"}),
     "other kdf": json.dumps({**GOOD, "kdf": "scrypt"}),
     "iter below the floor": json.dumps({**GOOD, "iter": 599_999}),
+    "iter above the cap": json.dumps({**GOOD, "iter": 10_000_001}),
     "iter as text": json.dumps({**GOOD, "iter": "1000000"}),
     "iter as a bool": json.dumps({**GOOD, "iter": True}),
     "salt of 15 bytes": json.dumps({**GOOD, "salt": b64(15)}),

@@ -20,6 +20,8 @@ from sealed_helpers import (
     SENTINEL_TARGET,
     build_site,
     dom_forms,
+    fixture_private,
+    oracle_seal,
     seal_fixture,
 )
 
@@ -224,3 +226,35 @@ return { unlock: Boolean($('unlock')), note: $('no-private')?.textContent,
     assert result["note"] == "No private data in this build."
     assert result["description"]
     assert result["options"] > 0
+
+
+def test_the_browser_opens_an_envelope_sealed_independently_at_its_own_iteration_count(tmp_path):
+    """The page's deriveKey must use the envelope's `iter`. The envelope is sealed by node:crypto
+    at 700,000 iterations (a count the page never writes), so a page that fixed the count could
+    not open it, whatever it does with its own seals."""
+    from datetime import UTC, datetime
+
+    from leaving_denver import seal
+
+    payload = seal.allowlisted_payload(fixture_private(), datetime(2031, 5, 6, 7, 8, 9, tzinfo=UTC))
+    envelope = oracle_seal(json.dumps(payload), PASSPHRASE, 700_000)
+    dist = tmp_path / "public"
+    patcher = pytest.MonkeyPatch()
+    try:
+        build_site(dist, patcher, sealed=envelope)
+        site_builder.build_stylesheets()
+    finally:
+        patcher.undo()
+    result = run_page(
+        tmp_path,
+        "seller/index.html",
+        HELPERS
+        + f"""
+await unlock({json.dumps(PASSPHRASE)});
+return {{ ...state(), text: $('private-views').innerText }};
+""",
+        public=dist,
+    )
+    assert result["message"] == ""
+    assert result["formHidden"] is True
+    assert f"{SENTINEL_FLOOR:,}" in result["text"]

@@ -23,6 +23,12 @@ GH = textwrap.dedent(
     import json, os, subprocess, sys
     state = json.loads(open(os.environ["GH_AUDIT_STATE"]).read())
     args = sys.argv[1:]
+    if args[:2] == ["secret", "list"] and "--env" in args:
+        names = state["env_secrets"].get(args[args.index("--env") + 1])
+        if names is None:
+            sys.exit("HTTP 403: Resource not accessible by integration")
+        print("".join(f"{name}\\t2026-09-30\\n" for name in names), end="")
+        sys.exit(0)
     if args[:2] == ["secret", "list"]:
         if state["secrets"] is None:
             sys.exit("HTTP 403: Resource not accessible by integration")
@@ -55,6 +61,7 @@ def expected():
     return {
         "environments": {"production": environment, "preview": json.loads(json.dumps(environment))},
         "secrets": ["SOME_OTHER_SECRET"],
+        "env_secrets": {"production": ["SELLER_SEALED"], "preview": ["SELLER_SEALED"]},
     }
 
 
@@ -121,9 +128,26 @@ def drift(change):
             drift(lambda s: s["secrets"].append("CLOUDFLARE_API_TOKEN")),
             "CLOUDFLARE_API_TOKEN is still",
         ),
+        (drift(lambda s: s["secrets"].append("SELLER_SEALED")), "SELLER_SEALED is still"),
     ],
 )
 def test_drift_fails_the_audit(tmp_path, state, reason):
     result = audit(tmp_path, state)
     assert result.returncode != 0
     assert reason in result.stderr
+
+
+@pytest.mark.parametrize("environment", ["production", "preview"])
+def test_a_missing_sealed_secret_in_either_environment_warns_without_failing(tmp_path, environment):
+    state = expected()
+    state["env_secrets"][environment] = ["SOME_OTHER_SECRET"]
+    result = audit(tmp_path, state)
+    assert result.returncode == 0, result.stderr
+    assert f"SELLER_SEALED is not set in {environment}" in result.stderr
+    other = "preview" if environment == "production" else "production"
+    assert f"not set in {other}" not in result.stderr
+
+
+def test_both_environments_holding_the_sealed_secret_raise_no_warning(tmp_path):
+    result = audit(tmp_path, expected())
+    assert "warning" not in result.stderr

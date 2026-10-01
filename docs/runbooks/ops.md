@@ -96,10 +96,13 @@ After sealing, redeploy: `gh workflow run ci.yml --ref main -f branch=main`.
 **The passphrase and Bitwarden.** Press Enter at the prompt to have five words generated. With
 `dotf` on `PATH` they are saved to the Bitwarden login item `leaving-denver-seller` (field
 `password`, secret id `SELLER_PASSPHRASE`, registered in dotfiles) with
-`dotf secrets set SELLER_PASSPHRASE`, and the command prints only "Saved to Bitwarden as
-SELLER_PASSPHRASE", never the words. Without `dotf`, or if the save fails, the words are shown on
-the terminal only, with "Write this down now. It is not stored anywhere.", and you type them back
-once to confirm; a wrong confirmation seals nothing. A passphrase you type yourself is asked for
+`dotf secrets set SELLER_PASSPHRASE --yes`, and the command prints only "Saved to Bitwarden as
+SELLER_PASSPHRASE", never the words. The order is seal, save, then set the secret, so a failed save
+stops before anything is uploaded; if the upload fails after a save, Bitwarden already holds the new
+passphrase and you run `make ci-secrets` again. Without `dotf`, or if the save fails, the words are
+shown on the terminal only, with "Write this down now. It is not stored anywhere.", and you type
+them back once to confirm; a wrong confirmation sets nothing. When a save fails the command says
+only that `dotf secrets set` failed: run it by hand to see why. A passphrase you type yourself is asked for
 twice, and with `dotf` the target offers "Save it to Bitwarden? [y/N]". For autofill on the
 phone, open the item in the Bitwarden app and add the URI
 `https://leaving-denver.pages.dev/seller/`: the unlock form carries a hidden username field,

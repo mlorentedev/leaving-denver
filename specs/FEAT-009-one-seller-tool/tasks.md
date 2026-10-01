@@ -63,6 +63,7 @@ created: "2026-09-30"
 - [x] [AC13] Runbook, playbook, architecture notes, ADR amendments; `tests/test_ops_runbook.py`.
 - [x] Guards for the defects found: every wordlist word survives being typed back; `gh` never
   inherits the terminal; the autouse guards in `tests/conftest.py` (no real `gh`, no TTY).
+- [x] Review round 2 (F1-F9): see `verification.md`.
 - [ ] [AC9] [AC11] Owner: the served header after an Access login, and the unlock time on the
   phone (`verification.md`).
 

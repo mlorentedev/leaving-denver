@@ -300,7 +300,7 @@ def test_the_generated_phrase_is_drawn_from_the_list_and_printed_once(machine, m
 def test_a_confirmation_that_does_not_match_the_generated_phrase_aborts(machine, monkeypatch):
     calls, work = machine
     terminal = Terminal(monkeypatch, secrets=("", PASSPHRASE))
-    with pytest.raises(seal.SealError, match="nothing was sealed"):
+    with pytest.raises(seal.SealError, match="nothing was set"):
         seal.run_seal()
     assert calls() == [], "nothing set, no gh call at all"
     assert not list(work.iterdir())
@@ -482,6 +482,36 @@ def test_the_python_side_hands_the_node_child_stdin_and_nothing_else(
     assert not list(tmp_path.glob("*.json"))
 
 
+def test_sops_children_never_get_the_passphrase_variable(machine, monkeypatch, tmp_path):
+    """decrypt_private and set_private launch sops: it needs the age key, not the passphrase."""
+    from leaving_denver import private_data
+
+    kept = tmp_path / "stand-in.sops.yaml"
+    kept.write_text("x: 1\n", encoding="utf-8")
+    monkeypatch.setattr(private_data, "PRIVATE_SOPS_YAML", kept)
+    monkeypatch.setenv(seal.PASSPHRASE_ENV, "abacus abide abiding ability abdomen")
+    seen = []
+    real_run = subprocess.run
+
+    def spy(cmd, *args, **kwargs):
+        if cmd[0] == "sops":
+            seen.append(kwargs.get("env"))
+        return real_run(cmd, *args, **kwargs)
+
+    monkeypatch.setattr(private_data.subprocess, "run", spy)
+    for action in (
+        private_data.decrypt_private,
+        lambda: private_data.set_private(["notes", "x"], "y"),
+    ):
+        try:
+            action()
+        except (RuntimeError, ValueError):
+            pass  # the fake sops need not succeed: only what it was launched with matters
+    assert len(seen) == 2, "both sops launches were seen"
+    for env in seen:
+        assert env is not None and seal.PASSPHRASE_ENV not in env
+
+
 def test_the_workflows_hold_no_age_key_and_never_mention_sops():
     for workflow in (ROOT / ".github" / "workflows").glob("*.yml"):
         text = workflow.read_text(encoding="utf-8").lower()
@@ -584,7 +614,7 @@ def test_enter_with_dotf_saves_the_phrase_to_bitwarden_and_prints_no_value(
     terminal = Terminal(monkeypatch, secrets=("",))
     seal.run_seal()
     saved = calls.dotf()
-    assert [c["argv"] for c in saved] == [["secrets", "set", "SELLER_PASSPHRASE"]]
+    assert [c["argv"] for c in saved] == [["secrets", "set", "SELLER_PASSPHRASE", "--yes"]]
     assert saved[0]["stdin"] == phrase, "the value goes on stdin, exactly, never in argv"
     assert phrase not in " ".join(saved[0]["argv"])
     assert terminal.shown == [], "nothing is shown on the terminal when it was saved"
@@ -630,7 +660,7 @@ def test_a_failed_save_and_a_wrong_confirmation_seal_nothing(machine_with_dotf, 
     calls, _ = machine_with_dotf
     monkeypatch.setenv("FAKE_DOTF_FAIL", "1")
     Terminal(monkeypatch, secrets=("", PASSPHRASE))
-    with pytest.raises(seal.SealError, match="nothing was sealed"):
+    with pytest.raises(seal.SealError, match="nothing was set"):
         seal.run_seal()
     assert calls() == []
 
@@ -653,7 +683,7 @@ def test_a_typed_passphrase_with_dotf_is_offered_a_save(machine_with_dotf, monke
     seal.run_seal()
     assert any("Save it to Bitwarden? [y/N]" in prompt for prompt in terminal.asked)
     saved = calls.dotf()
-    assert [c["argv"] for c in saved] == [["secrets", "set", "SELLER_PASSPHRASE"]]
+    assert [c["argv"] for c in saved] == [["secrets", "set", "SELLER_PASSPHRASE", "--yes"]]
     assert saved[0]["stdin"] == PASSPHRASE.replace(" ", "-")
     assert len(sets(calls())) == 2
 
@@ -676,7 +706,7 @@ def test_a_save_the_owner_asked_for_that_fails_seals_nothing(machine_with_dotf, 
     calls, _ = machine_with_dotf
     monkeypatch.setenv("FAKE_DOTF_FAIL", "1")
     Terminal(monkeypatch, lines=("y",))
-    with pytest.raises(seal.SealError, match="nothing was sealed"):
+    with pytest.raises(seal.SealError, match="nothing was set"):
         seal.run_seal()
     assert calls() == []
 
@@ -771,3 +801,195 @@ def test_dotf_runs_without_the_passphrase_in_its_environment(machine_with_dotf, 
     assert len(started) == 1
     assert "SELLER_PASSPHRASE" not in started[0]["env"]
     assert "PATH" in started[0]["env"], "the rest of the environment is still passed on"
+
+
+# Round two of the review (F1, F3, F5, F6, F7, F9)
+
+FIXED_REASON = "`dotf secrets set SELLER_PASSPHRASE` failed; run it by hand to see why"
+CANARY = "FAKE-DOTF-STDERR-CANARY"
+
+
+def test_the_save_passes_yes_so_dotf_may_create_the_absent_item(machine_with_dotf, monkeypatch):
+    """dotf cannot ask on a pipe: without --yes it refuses to create the item, and the first run
+    would always fall back to the terminal. The fake dotf refuses the same way."""
+    calls, _ = machine_with_dotf
+    phrase = "-".join(WORDS[-5:])
+    monkeypatch.setattr(seal, "generate_passphrase", lambda: phrase)
+    terminal = Terminal(monkeypatch, secrets=("",))
+    seal.run_seal()
+    saved = calls.dotf()
+    assert saved[0]["argv"] == ["secrets", "set", "SELLER_PASSPHRASE", "--yes"]
+    assert terminal.shown == [], "saved, so no terminal fallback"
+
+
+def test_the_fake_dotf_refuses_to_create_without_yes(machine_with_dotf):
+    """The stand-in is only worth anything if it behaves like dotf on this point."""
+    refused = subprocess.run(
+        ["dotf", "secrets", "set", "SELLER_PASSPHRASE"], input="x", capture_output=True, text=True
+    )
+    assert refused.returncode != 0
+    assert "--yes" in refused.stderr
+
+
+def test_a_failed_save_names_a_fixed_reason_and_never_forwards_dotfs_stderr(
+    machine_with_dotf, monkeypatch, capfd
+):
+    calls, _ = machine_with_dotf
+    phrase = "-".join(WORDS[-5:])
+    monkeypatch.setattr(seal, "generate_passphrase", lambda: phrase)
+    monkeypatch.setenv("FAKE_DOTF_FAIL", "1")
+    monkeypatch.setenv("FAKE_DOTF_ECHO", "1")
+    Terminal(monkeypatch, secrets=("", phrase))
+    seal.run_seal()
+    seen = capfd.readouterr()
+    assert FIXED_REASON in seen.err
+    assert CANARY not in seen.out + seen.err
+    assert phrase not in seen.out + seen.err
+
+
+def test_a_requested_save_that_fails_says_the_fixed_reason_and_sets_nothing(
+    machine_with_dotf, monkeypatch
+):
+    calls, _ = machine_with_dotf
+    monkeypatch.setenv("FAKE_DOTF_FAIL", "1")
+    Terminal(monkeypatch, lines=("y",))
+    with pytest.raises(seal.SealError) as refused:
+        seal.run_seal()
+    assert FIXED_REASON in str(refused.value)
+    assert CANARY not in str(refused.value)
+    assert calls() == []
+
+
+def times(entries):
+    return [entry["t"] for entry in entries]
+
+
+def test_the_order_is_seal_then_bitwarden_then_the_secret(machine_with_dotf, monkeypatch):
+    calls, _ = machine_with_dotf
+    order = []
+    real_seal = seal.seal_with_node
+
+    def sealed(*args, **kwargs):
+        order.append("seal")
+        return real_seal(*args, **kwargs)
+
+    monkeypatch.setattr(seal, "seal_with_node", sealed)
+    phrase = "-".join(WORDS[-5:])
+    monkeypatch.setattr(seal, "generate_passphrase", lambda: phrase)
+    Terminal(monkeypatch, secrets=("",))
+    seal.run_seal()
+    assert order == ["seal"]
+    saved, uploaded = times(calls.dotf()), times(sets(calls()))
+    assert len(saved) == 1 and len(uploaded) == 2
+    assert saved[0] < min(uploaded), "Bitwarden is written before the secret is set"
+
+
+def test_a_save_that_fails_leaves_the_secret_untouched_even_though_it_was_sealed(
+    machine_with_dotf, monkeypatch
+):
+    calls, _ = machine_with_dotf
+    sealed = []
+    real_seal = seal.seal_with_node
+    monkeypatch.setattr(
+        seal, "seal_with_node", lambda *a, **k: sealed.append(1) or real_seal(*a, **k)
+    )
+    monkeypatch.setenv("FAKE_DOTF_FAIL", "1")
+    Terminal(monkeypatch, secrets=("", PASSPHRASE))
+    with pytest.raises(seal.SealError):
+        seal.run_seal()
+    assert sealed == [1]
+    assert calls() == []
+
+
+def test_an_upload_that_fails_after_a_saved_passphrase_says_bitwarden_holds_the_new_one(
+    tmp_path, monkeypatch, fixture_data
+):
+    calls = install_fakes(tmp_path, monkeypatch, dotf=True, fail_on="--env production")
+    monkeypatch.chdir(tmp_path)
+    Terminal(monkeypatch, secrets=("",))
+    with pytest.raises(seal.SealError) as failed:
+        seal.run_seal()
+    message = str(failed.value)
+    assert "Bitwarden now holds the new passphrase" in message
+    assert "run make ci-secrets again" in message
+    assert len(calls.dotf()) == 1
+
+
+def test_an_upload_that_fails_after_no_save_does_not_mention_bitwarden(
+    tmp_path, monkeypatch, fixture_data
+):
+    install_fakes(tmp_path, monkeypatch, fail_on="--env production")
+    monkeypatch.chdir(tmp_path)
+    Terminal(monkeypatch)
+    with pytest.raises(seal.SealError) as failed:
+        seal.run_seal()
+    assert "Bitwarden" not in str(failed.value)
+
+
+def test_a_repository_copy_that_cannot_be_deleted_is_an_error(tmp_path, monkeypatch, fixture_data):
+    install_fakes(
+        tmp_path, monkeypatch, list_output="SELLER_SEALED\tUpdated\n", fail_on="secret delete"
+    )
+    monkeypatch.chdir(tmp_path)
+    Terminal(monkeypatch)
+    with pytest.raises(seal.SealError, match="repository-level"):
+        seal.run_seal()
+
+
+def test_node_failing_never_puts_the_payload_or_the_passphrase_in_the_error(
+    tmp_path, monkeypatch, capfd
+):
+    """Node echoes the offending stdin line when JSON.parse fails; nothing of that may travel."""
+    sentinel = "sentinel-passphrase-quokka-8812"
+    echo = tmp_path / "echo.mjs"
+    echo.write_text(
+        "let raw = ''; for await (const c of process.stdin) raw += c;"
+        " console.error('SyntaxError near ' + raw); process.exit(1);",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(seal, "SEAL_SCRIPT", echo)
+    with pytest.raises(seal.SealError) as failed:
+        seal.seal_with_node({"floors": {"x": 7310987}}, sentinel)
+    seen = capfd.readouterr()
+    for text in (str(failed.value), seen.out, seen.err):
+        assert sentinel not in text
+        assert "7310987" not in text
+        assert "SyntaxError" not in text
+    assert "exit" in str(failed.value)
+
+
+def test_a_payload_json_cannot_carry_is_refused_before_node_runs(monkeypatch):
+    monkeypatch.setattr(
+        subprocess, "run", lambda *a, **k: pytest.fail("node ran with a payload NaN would break")
+    )
+    with pytest.raises(seal.SealError, match="JSON"):
+        seal.seal_with_node({"floors": {"x": float("nan")}}, PASSPHRASE)
+
+
+def test_the_builder_caps_the_iteration_count():
+    assert seal.MAX_ITERATIONS == 10_000_000
+    envelope = {
+        "v": 1,
+        "kdf": "PBKDF2-SHA256",
+        "iter": seal.MAX_ITERATIONS,
+        "salt": "AAAAAAAAAAAAAAAAAAAAAA==",
+        "iv": "AAAAAAAAAAAAAAAA",
+        "ct": "A" * 22 + "==",
+    }
+    assert seal.envelope_problem(envelope) is None
+    assert "iter" in seal.envelope_problem({**envelope, "iter": seal.MAX_ITERATIONS + 1})
+
+
+def test_a_resealing_reminds_that_the_phone_passphrase_is_replaced(machine, monkeypatch, capsys):
+    calls, _ = machine
+    Terminal(monkeypatch)
+    seal.run_seal(offer_generation=False)
+    assert (
+        "Sealing with this passphrase replaces the one your phone uses" in capsys.readouterr().out
+    )
+
+
+def test_a_new_passphrase_from_ci_secrets_needs_no_such_reminder(machine, monkeypatch, capsys):
+    Terminal(monkeypatch)
+    seal.run_seal()
+    assert "replaces the one your phone uses" not in capsys.readouterr().out

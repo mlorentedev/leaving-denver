@@ -17,11 +17,12 @@ import secrets
 import shutil
 import subprocess
 import sys
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
 
 from leaving_denver.config import ASSETS_DIR, WORDLIST_FILE
-from leaving_denver.private_data import decrypt_private
+from leaving_denver.private_data import PASSPHRASE_ENV, child_env, decrypt_private
 
 SEAL_SCRIPT = ASSETS_DIR / "seal.mjs"
 
@@ -34,6 +35,8 @@ NOTE_LIMIT = 500
 ENVELOPE_VERSION = 1
 ENVELOPE_KDF = "PBKDF2-SHA256"
 MIN_ITERATIONS = 600_000
+# A cap too: an envelope with a huge count would make every unlock hang the phone.
+MAX_ITERATIONS = 10_000_000
 SALT_BYTES = 16
 IV_BYTES = 12
 TAG_BYTES = 16
@@ -44,9 +47,8 @@ SIZE_BUDGET = 40_000
 ENVIRONMENTS = ("production", "preview")
 SECRET_NAME = "SELLER_SEALED"
 PASSPHRASE_WORDS = 5
-# The one variable the target reads a passphrase from: `dotf secrets run --only SELLER_PASSPHRASE
-# -- make ...` injects it into that child alone. The bitwarden id is the dotfiles secret's name.
-PASSPHRASE_ENV = "SELLER_PASSPHRASE"
+# The bitwarden id is the dotfiles secret's name; PASSPHRASE_ENV (private_data) is the variable
+# `dotf secrets run --only SELLER_PASSPHRASE -- make ...` injects into one child alone.
 BITWARDEN_ID = "SELLER_PASSPHRASE"
 DEPLOY_DISPATCH = ["workflow", "run", "ci.yml", "--ref", "main", "-f", "branch=main"]
 
@@ -55,20 +57,20 @@ class SealError(RuntimeError):
     """The seal cannot go on. The message never holds a passphrase or a payload value."""
 
 
-def child_env() -> dict[str, str]:
-    """The environment a child process gets: ours without the passphrase, which no child needs."""
-    return {name: value for name, value in os.environ.items() if name != PASSPHRASE_ENV}
-
-
 def seal_with_node(payload: dict[str, Any] | str, passphrase: str) -> str:
     """The envelope (JSON text) for a payload, sealed by Node's WebCrypto.
 
     The child opens its own envelope and compares it with the payload before answering."""
     plaintext = payload if isinstance(payload, dict) else json.loads(payload)
     try:
+        # No NaN or Infinity: JSON.parse would refuse them, and Node's SyntaxError echoes the line.
+        feed = json.dumps({"payload": plaintext, "passphrase": passphrase}, allow_nan=False)
+    except ValueError as err:
+        raise SealError("the payload cannot be written as JSON") from err
+    try:
         child = subprocess.run(
             ["node", str(SEAL_SCRIPT)],
-            input=json.dumps({"payload": plaintext, "passphrase": passphrase}),
+            input=feed,
             capture_output=True,
             text=True,
             env=child_env(),
@@ -76,8 +78,8 @@ def seal_with_node(payload: dict[str, Any] | str, passphrase: str) -> str:
     except OSError as err:
         raise SealError(f"node could not run ({err.strerror})") from err
     if child.returncode != 0:
-        # stderr is the script's own fixed message or Node's trace of it: never the payload.
-        raise SealError(f"the Node sealer failed: {child.stderr.strip()[:300]}")
+        # Never its stderr: on a parse failure Node echoes the stdin line, payload and passphrase.
+        raise SealError(f"the Node sealer failed (exit {child.returncode})")
     return child.stdout
 
 
@@ -110,8 +112,8 @@ def envelope_problem(envelope: Any) -> str | None:
         (envelope["v"] == ENVELOPE_VERSION and type(envelope["v"]) is int, "v is not 1"),
         (envelope["kdf"] == ENVELOPE_KDF, f"kdf is not {ENVELOPE_KDF}"),
         (
-            type(iterations) is int and iterations >= MIN_ITERATIONS,
-            f"iter is not an integer of at least {MIN_ITERATIONS}",
+            type(iterations) is int and MIN_ITERATIONS <= iterations <= MAX_ITERATIONS,
+            f"iter is not an integer from {MIN_ITERATIONS} to {MAX_ITERATIONS}",
         ),
         (b64_length(envelope["salt"]) == SALT_BYTES, f"salt is not {SALT_BYTES} bytes of base64"),
         (b64_length(envelope["iv"]) == IV_BYTES, f"iv is not {IV_BYTES} bytes of base64"),
@@ -208,6 +210,9 @@ FIRST_PROMPT = "Passphrase (Enter to generate one): "
 RESEAL_PROMPT = "Passphrase: "
 CURRENT_PASSPHRASE_HINT = "Type your current passphrase (or run make ci-secrets to make a new one)"
 SAVED = f"Saved to Bitwarden as {BITWARDEN_ID}"
+# dotf's own words are never relayed: this is all that is said when a save fails.
+SAVE_FAILED = f"`dotf secrets set {BITWARDEN_ID}` failed; run it by hand to see why"
+RESEAL_REMINDER = "Sealing with this passphrase replaces the one your phone uses."
 
 
 def passphrase_from_environment() -> str | None:
@@ -229,18 +234,32 @@ def hyphenated(passphrase: str) -> str:
     return "-".join(passphrase_words(passphrase))
 
 
-def ask_passphrase(offer_generation: bool = True) -> str:
+@dataclass(frozen=True)
+class Choice:
+    """The passphrase for this seal and what is still owed to Bitwarden once it is sealed.
+
+    `save` is set when it is to be stored; `generated` when the owner has not seen it yet, so
+    a failed save falls back to showing it, rather than losing the only copy."""
+
+    passphrase: str
+    save: bool = False
+    generated: bool = False
+
+
+def ask_passphrase(offer_generation: bool = True) -> Choice:
     """The passphrase for this seal: from SELLER_PASSPHRASE, typed, or generated.
 
     - SELLER_PASSPHRASE, when set, is used without a prompt.
     - Otherwise the owner types it twice. Where `offer_generation` (`make ci-secrets` only) Enter
       instead generates a new one, and a typed one can be saved to Bitwarden.
     - A routine re-seal after a sale never generates: an empty entry aborts, so a sale cannot
-      rotate the passphrase silently."""
+      rotate the passphrase silently.
+
+    Nothing is saved here: Bitwarden is written only after the seal has worked."""
     from_environment = passphrase_from_environment()
     if from_environment:
         print(f"Using the passphrase in {PASSPHRASE_ENV}.")
-        return from_environment
+        return Choice(from_environment)
     first = prompt_secret(FIRST_PROMPT if offer_generation else RESEAL_PROMPT)
     if not first.strip():
         if not offer_generation:
@@ -252,9 +271,7 @@ def ask_passphrase(offer_generation: bool = True) -> str:
         passphrase = validate_passphrase(first)
     except ValueError as err:
         raise SealError(f"that passphrase is refused: {err}") from err
-    if offer_generation and offer_save():
-        save_or_abort(passphrase)
-    return passphrase
+    return Choice(passphrase, save=offer_generation and offer_save())
 
 
 def offer_save() -> bool:
@@ -264,31 +281,38 @@ def offer_save() -> bool:
     )
 
 
-def save_or_abort(passphrase: str) -> None:
-    if not save_to_bitwarden(hyphenated(passphrase)):
-        raise SealError(
-            f"dotf could not save {BITWARDEN_ID} to Bitwarden: nothing was sealed "
-            "and nothing was set"
-        )
-    print(SAVED)
-
-
-def generate_new_passphrase() -> str:
-    """Five new words. Saved to Bitwarden through dotf when it is there: then nothing is
-    shown. If it is missing or the save fails, they are shown on the terminal only and typed
-    back once, which is how the owner proves they were written down."""
+def generate_new_passphrase() -> Choice:
+    """Five new words. With dotf they are saved to Bitwarden after the seal and never shown;
+    without it they are shown on the terminal only and typed back once, which is how the owner
+    proves they were written down."""
     phrase = generate_passphrase()
     if have_dotf():
-        if save_to_bitwarden(phrase):
-            print(SAVED)
-            return phrase
-        print(f"dotf could not save {BITWARDEN_ID} to Bitwarden.", file=sys.stderr)
+        return Choice(phrase, save=True, generated=True)
+    show_and_confirm(phrase)
+    return Choice(phrase)
+
+
+def show_and_confirm(phrase: str) -> None:
     tell(
         f"\nNew passphrase:\n\n    {phrase}\n\nWrite this down now. It is not stored anywhere.\n\n"
     )
     if passphrase_words(prompt_secret("Type it back to confirm: ")) != passphrase_words(phrase):
-        raise SealError("the confirmation does not match: nothing was sealed and nothing was set")
-    return phrase
+        raise SealError("the confirmation does not match: nothing was set")
+
+
+def store_in_bitwarden(choice: Choice) -> bool:
+    """Save the passphrase. True when Bitwarden now holds it.
+
+    A typed one that cannot be saved aborts: the owner asked for the save. A generated one is
+    shown and typed back instead, since this run holds the only copy."""
+    if save_to_bitwarden(hyphenated(choice.passphrase)):
+        print(SAVED)
+        return True
+    if not choice.generated:
+        raise SealError(f"{SAVE_FAILED}: nothing was set")
+    print(SAVE_FAILED, file=sys.stderr)
+    show_and_confirm(choice.passphrase)
+    return False
 
 
 # The payload and the envelope
@@ -349,7 +373,9 @@ def run_dotf(*args: str, stdin: str) -> subprocess.CompletedProcess[str]:
 def save_to_bitwarden(passphrase: str) -> bool:
     """Store the passphrase as the SELLER_PASSPHRASE secret (stdin only). True when it took."""
     try:
-        return run_dotf("secrets", "set", BITWARDEN_ID, stdin=passphrase).returncode == 0
+        # --yes: on a pipe dotf cannot ask, and refuses to create the item without it.
+        done = run_dotf("secrets", "set", BITWARDEN_ID, "--yes", stdin=passphrase)
+        return done.returncode == 0
     except SealError:
         return False
 
@@ -368,7 +394,12 @@ def upload_secret(envelope: str) -> None:
     if listed.returncode != 0:
         raise SealError(f"gh could not list the repository secrets: {listed.stderr.strip()[:200]}")
     if any(line.split()[:1] == [SECRET_NAME] for line in listed.stdout.splitlines()):
-        gh("secret", "delete", SECRET_NAME)
+        removed = gh("secret", "delete", SECRET_NAME)
+        if removed.returncode != 0:
+            raise SealError(
+                f"gh could not remove the repository-level {SECRET_NAME}: "
+                f"{removed.stderr.strip()[:200]}"
+            )
 
 
 def dispatch_deploy() -> None:
@@ -395,10 +426,21 @@ def run_seal(offer_generation: bool = True) -> None:
     except RuntimeError as err:
         raise SealError(str(err)) from err
     check_notes(payload["notes"])
-    passphrase = ask_passphrase(offer_generation)
-    envelope = seal_with_node(payload, passphrase)
+    choice = ask_passphrase(offer_generation)
+    if not offer_generation:
+        print(RESEAL_REMINDER)
+    envelope = seal_with_node(payload, choice.passphrase)
     size = check_envelope(envelope)
-    upload_secret(envelope)
+    # Bitwarden before the secret: a lost upload is rerun, a lost passphrase is not recoverable.
+    saved = store_in_bitwarden(choice) if choice.save else False
+    try:
+        upload_secret(envelope)
+    except SealError as err:
+        if saved:
+            raise SealError(
+                f"{err}. Bitwarden now holds the new passphrase: run make ci-secrets again"
+            ) from err
+        raise
     print(
         f"Sealed private data as of {payload['sealed_at']} ({size} bytes) into {SECRET_NAME} "
         f"for {' and '.join(ENVIRONMENTS)}. Deploy for the page to carry it."
