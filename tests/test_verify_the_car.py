@@ -1,12 +1,12 @@
 """
-The car's "verify it yourself" section (FEAT-008): the public VIN, links to official sources
+The car's "verify it yourself" sheet (FEAT-008): the public VIN, links to official sources
 only, and the seller's own evidence, which is a photo the car already carries. The links and
 the evidence are data under the car (`verify:`), so a check or an evidence item added later is
 one list entry; the builder refuses a check that is not https on an official host and evidence
 that is not one of the car's photos.
 
 No Carfax and no dealer service-history printout yet: they are pending owner tasks (#28, #34),
-so the section renders only what exists. Those tests flip on purpose when the entries land.
+so the sheet renders only what exists. Those tests flip on purpose when the entries land.
 """
 
 import copy
@@ -81,10 +81,31 @@ def test_the_section_shows_the_vin_and_the_three_official_hosts(locale):
     assert heading in text_of(html)
 
 
-def test_the_section_sits_under_the_car_and_not_in_the_footer():
-    html = (PUBLIC / "index.html").read_text(encoding="utf-8")
-    assert html.index('data-role="vehicle-payment"') < html.index('data-role="verify-car"')
-    assert html.index('data-role="verify-car"') < html.index("<footer")
+@pytest.mark.parametrize("locale", PAGES)
+def test_the_checks_open_from_a_button_on_the_car_card_and_are_not_inline(locale):
+    html = (PUBLIC / PAGES[locale]).read_text(encoding="utf-8")
+    heading = {"en": "Verify it yourself", "es": "Compruébalo tú mismo"}[locale]
+    button = re.search(
+        r'<button[^>]*data-open-sheet="verifySheet"[^>]*>(.*?)</button>', html, re.DOTALL
+    )
+    assert button, f"{locale}: no button opens the verify sheet"
+    assert heading in text_of(button.group(1))
+    # On the car card's action row: after the car's own buttons, before its payment line.
+    assert (
+        html.index('data-sms-intent="') < button.start() < html.index('data-role="vehicle-payment"')
+    )
+    # The content lives in a closed sheet, after the page body, never as a section on the page.
+    sheet = html.index('<dialog id="verifySheet"')
+    assert sheet > html.index("<footer")
+    assert html.index('data-role="verify-car"') > sheet
+    assert html.count('data-role="verify-car"') == 1
+    assert "data-close-sheet" in html[sheet : html.index("</dialog>", sheet)]
+
+
+def test_the_share_page_still_sends_buyers_to_the_car():
+    html = (PUBLIC / "i" / CAR_ID / "index.html").read_text(encoding="utf-8")
+    assert f"#{CAR_ID}" in html
+    assert 'data-role="verify-car"' not in html
 
 
 @pytest.mark.parametrize("locale", PAGES)
@@ -196,10 +217,12 @@ def built_page(public_dir, car):
     return (public_dir / "index.html").read_text(encoding="utf-8")
 
 
-def test_a_car_without_verify_data_renders_no_section(public_dir):
+def test_a_car_without_verify_data_renders_no_button_and_no_sheet(public_dir):
     car = copy.deepcopy(CAR)
     car.pop("verify", None)
-    assert 'data-role="verify-car"' not in built_page(public_dir, car)
+    html = built_page(public_dir, car)
+    for absent in ('data-role="verify-car"', "verifySheet", 'data-open-sheet="'):
+        assert absent not in html, absent
 
 
 def test_a_car_with_verify_data_renders_it_from_the_data(public_dir):
