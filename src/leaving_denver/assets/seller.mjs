@@ -23,6 +23,7 @@ export function makeCopy(item, platform) {
   const details = [
     `Asking price: ${price}.`,
     item.condition && `Condition: ${item.condition}.`,
+    item.flaws?.length && `Known flaws: ${item.flaws.join('; ')}.`,
     item.dimensions && `Dimensions: ${item.dimensions}.`,
     ...(item.specs || []).map(spec => `- ${spec}`),
     item.note && `Details: ${item.note}`,
