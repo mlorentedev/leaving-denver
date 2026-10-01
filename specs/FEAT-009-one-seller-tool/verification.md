@@ -38,53 +38,64 @@ created: "2026-09-30"
   (now checks the page and `seller.mjs` for 13 private markers, the phone's digits included),
   `tests/test_security_isolation.py` (template context is `items_json`, `config_json`,
   `replies`)
-- [x] AC10 -> `tests/test_seller_browser.py` (Spanish channel rewrites the listing; counters,
-  creator link and tags follow the channel; every copy button copies what is on screen,
-  replies included; all six channels render for all 12 items; a count turns red past the limit)
-- [x] AC11 -> `tests/test_mobile_poster.py::test_the_local_assistant_stays_out_of_the_public_build_until_it_moves`;
-  `git diff origin/main -- src/leaving_denver/templates/poster_assistant.html` is empty
+- [x] AC10 -> `tests/test_seal_command.py::test_the_python_side_hands_the_node_child_stdin_and_nothing_else`,
+  `::test_the_command_without_a_terminal_exits_non_zero_and_touches_nothing`,
+  `::test_the_workflows_hold_no_age_key_and_never_mention_sops`
+- [ ] AC11 -> **owner slot**: unlock time on the phone (below).
+- [x] AC12 -> `tests/test_private_isolation.py::test_nothing_in_src_or_the_build_refers_to_the_retired_workspace`
+  and the plaintext-marker and stray-envelope tests in the same file
+- [x] AC13 -> `tests/test_ops_runbook.py::test_the_runbook_covers_the_sealed_private_data`
+- [x] AC14 -> `tests/test_update_offer.py`
 
-## Test status
+### Owner slots
 
-- Before: `make check` -> 442 passed, 1 skipped.
-- The new and extended tests were written first. Run against the old `src/`: 10 failed,
-  17 errors (the page fixture finds no `CONFIG`), 79 passed (the tests that do not touch the
-  new behaviour: the existing ones and the guards that hold before and after, such as the
-  voice test).
-- The class-coverage guard for `seller.mjs` failed (`text-red-700` has no CSS rule) until
-  `public.css` scanned the script.
-- After: `make check` -> 489 passed, 1 skipped (47 new tests; lint clean).
-- Complexity: `uvx radon cc -s` on `site_builder.py`: the new functions are A or B (highest:
-  `seller_replies`, B 8); `ruff` C901 (max 10) is clean. The functions in `seller.mjs` are
-  small and flat; no JS complexity tool is configured.
+- [ ] AC9: `curl -sI -H "cf-access-token: ..." https://leaving-denver.pages.dev/seller/` after an
+  Access login shows `content-security-policy` with `script-src 'self'`, `connect-src 'none'`,
+  `frame-ancestors 'none'`. Result: ____
+- [ ] AC11: unlock time on the owner's phone, with 1,000,000 iterations, 3 s or less. Result: ____
+  (over 3 s: lower `iter`, never below 600,000, and amend ADR-007)
 
-## Decisions made during implementation
+### PR 2 test status
 
-- **Payload.** `items_json` stays a list of items (the tests that parse it keep working);
-  the page settings go in a second `CONFIG` and the replies are rendered by Jinja, so the
-  template context grows by `config_json` and `replies` and the isolation test names them.
-- **Replies in a data file, not the locales.** The locale files ship whole to the catalog
-  page (`ui_json`), so seller-only text there would be published to buyers. `data/seller-replies.yaml`
-  is read only by the `/seller/` build.
-- **The car's payment appears twice.** Its pickup note already states the payment; the
-  `Payment:` line is the tested, data-driven one. See the proposal's risks.
-- **No link in any listing body**, Craigslist and Nextdoor included. The playbook's
-  "include the full catalog link" row is about umbrella posts, not per-item listings.
-- **Spanish links** point at `/es/i/<id>/` (the Spanish share pages exist).
-- **Condition wording** comes from the catalog's localized item (`conditions` in the
-  locales), not the raw data, so the listing says what the catalog says.
-- **Dropped on purpose** (not ported): the retail anchor and "bought new" lines, the x1.15
-  tax math, the hard-coded payment wording, the selling points no data backs, the phone in
-  the copy, the PIN.
-- **Not done:** Spanish for OfferUp and Nextdoor (the assistant has none); a JS complexity
-  tool.
+- `make clean && make check` -> 776 passed, 2 skipped, lint clean. The skips are the deploy-only
+  envelope test and a Windows-only harness test. With a throwaway fixture
+  envelope as `SELLER_SEALED` (the deploy job's condition) the deploy-only test runs too.
+- Every test was written before its code. Mutation checks on the browser tests: removing the
+  `pagehide` listener, a Lock that keeps the views, and a wrong passphrase that renders a view each
+  fail a test. The tier parity test and the CSP browser test were mutation-checked earlier.
+- Complexity: `uvx radon cc -s` on `seal.py`, `channels.py`, `cli.py` and `site_builder.py`: every
+  function added or changed is A or B (highest: `envelope_problem` B 8, `takedown_steps` B 7);
+  `ruff` C901 with max 10 is clean. `seller.mjs` has no complexity tool; its functions are short.
+
+### PR 2 decisions
+
+- **Row logic runs in the browser, not precomputed into the sealed payload.** AC1 fixes the sealed
+  keys at `floors, targets, sales, tracking, notes, sealed_at`, so a precomputed table would add
+  keys the criterion forbids; "due now" depends on today's date, which a payload sealed days ago
+  cannot know; and the public inputs (roster, drops, renewal days) are already public, so the page
+  gets them in its CONFIG block. `roundHalfEven` matches Python's rounding, and
+  `tests/test_seller_private_logic.py` compares `priceTiers` with `pricing.price_tiers` over a grid
+  that includes half cases.
+- **No inline script, because of the CSP.** Data moved into `application/json` blocks and code into
+  `seller.mjs`, which `script-src 'self'` allows. A `file://` test cannot see a header, so
+  `tests/test_seller_csp.py` serves the page over HTTP (lesson-022).
+- **The key is dropped after one decryption.** The ADR says a non-extractable key is held in
+  memory; the page keeps only the plaintext payload and derives again on the next unlock. Stricter,
+  and no longer needs a key to be tracked.
+- **Draft items** (private ids not in the public roster) show as id-only "unpublished" rows: their
+  titles and prices are not public, and the sealed data does not carry them.
+- **Hyphenated EFF words removed** (7,772 words left; five words are still about 64.6 bits): a hyphen
+  is a separator, so those four words could not be typed back (lesson-021; ADR-007 notes it).
+- **The update offer skips the generate-a-passphrase prompt**: it is a recording, not a rotation,
+  so it asks for the existing passphrase twice and nothing else.
+- **`gh` gets no stdin unless it is passing a secret**, so a recording cannot hang on a prompt.
 
 ## Promotion candidates
 
 - [ ] Lesson for the repo's `docs/lessons/`? no: the lesson (a class named only in a script is
   never compiled) is already lesson-015; this change extended its guard to the seller page.
-- [ ] ADR-worthy decision for the repo's `docs/adr/adr-XXX.md`? no for PR 1; PR 2 needs the ADR
-  described in `proposal.md`.
+- [x] ADR-worthy decision for the repo's `docs/adr/adr-XXX.md`? PR 2 implements ADR-007 (already
+  merged) and amends it for the 7,772-word list; lessons 021 and 022 added.
 - [ ] New pattern candidate for `00_meta/patterns/`? no.
 
 ## Archive checklist

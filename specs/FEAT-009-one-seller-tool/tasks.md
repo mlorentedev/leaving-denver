@@ -5,8 +5,8 @@ created: "2026-09-30"
 
 # Tasks - FEAT-009-one-seller-tool
 
-> TDD order. PR 1 only (the public-safe copy); PR 2 is described in `proposal.md` and is not
-> tracked here.
+> TDD order. PR 1 (the public-safe copy) first, then PR 2 (`pr2-encrypted-private-data.md`,
+> ADR-007), tracked in its own section below.
 
 ## Setup
 
@@ -39,6 +39,30 @@ created: "2026-09-30"
 - [x] Update `docs/runbooks/seller-playbook.md` and `docs/runbooks/ops.md`.
 - [x] Run `make check`.
 
+## PR 2: sealed private data (branch `feat/seller-sealed-private-data`)
+
+- [x] [AC6] [AC7] `data/eff_large_wordlist.txt` (EFF source and licence in the header) and
+  `assets/seal.mjs` + the page's `sealEnvelope`/`openEnvelope`; `tests/test_sealed_envelope.py`.
+- [x] [AC1] [AC2] [AC8] `site_builder.sealed_envelope`, the sealed block and the unlock section in
+  `seller.html`; `tests/test_sealed_build.py`.
+- [x] [AC3] [AC7] `seller.mjs` unlock, views, Lock, pagehide; `tests/test_sealed_browser.py`
+  (headless Chrome). Mutation-checked: no pagehide, Lock that keeps the views, and a wrong
+  passphrase that renders a view each fail a test.
+- [x] [AC4] [AC5] [AC10] `seal.py` and `leaving-denver seal`; `make ci-secrets` ends with it;
+  `tests/test_seal_command.py` stubs the TTY, `gh` and the Node child.
+- [x] [AC2] The deploy job requires `SELLER_SEALED`; `tests/test_cd_workflow.py`.
+- [x] [AC9] The CSP in `functions/_middleware.js`, inline code out of `seller.html`;
+  `tests/test_seller_csp.py`; `test_no_csp_stops_the_cloudflare_beacon` narrowed.
+- [x] [AC14] `cli.offer_seller_update` after post, reprice and sold; `tests/test_update_offer.py`.
+- [x] [AC12] Remove the panel, the poster assistant, its PIN, `build/private/` and `make panel`;
+  the row logic moves to `seller.mjs` (`tests/test_seller_private_logic.py`);
+  `tests/test_private_isolation.py`.
+- [x] [AC13] Runbook, playbook, architecture notes, ADR amendments; `tests/test_ops_runbook.py`.
+- [x] Guards for the defects found: every wordlist word survives being typed back; `gh` never
+  inherits the terminal; the autouse guards in `tests/conftest.py` (no real `gh`, no TTY).
+- [ ] [AC9] [AC11] Owner: the served header after an Access login, and the unlock time on the
+  phone (`verification.md`).
+
 ## Closing
 
 - [x] Every acceptance criterion from `proposal.md` is covered by at least one test
@@ -46,5 +70,5 @@ created: "2026-09-30"
 - [x] Lint passes
 - [x] No unrelated changes in the diff (no scope creep)
 - [x] `verification.md` filled in
-- [ ] PR opened referencing this spec folder (GitHub auth was invalid when the branch was
-  made: committed locally, not pushed)
+- [x] PR 1 merged
+- [ ] PR 2 opened as a draft; not merged until the owner has run `make ci-secrets`
