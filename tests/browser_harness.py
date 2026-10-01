@@ -16,7 +16,6 @@ frames soon after the first paint, and a <dialog>'s close event waits for a fram
 Tests using it skip where no Chrome is installed; GitHub's ubuntu runners have one.
 """
 
-import fcntl
 import json
 import os
 import re
@@ -29,12 +28,19 @@ from pathlib import Path
 
 import pytest
 
+if os.name == "posix":
+    import fcntl
+
 ROOT = Path(__file__).resolve().parents[1]
 PUBLIC = ROOT / "build" / "public"
-CHROME = next(
-    (p for p in map(shutil.which, ("google-chrome", "chromium", "chromium-browser")) if p), None
+CHROME = (
+    next(
+        (p for p in map(shutil.which, ("google-chrome", "chromium", "chromium-browser")) if p), None
+    )
+    if os.name == "posix"
+    else None
 )
-needs_chrome = pytest.mark.skipif(CHROME is None, reason="no Chrome to run the page in")
+needs_chrome = pytest.mark.skipif(CHROME is None, reason="Chrome CDP pipe needs POSIX and Chrome")
 DEADLINE = 30
 
 # Stubs the page's pointer check: True is a desktop mouse, False a phone or a tablet.
