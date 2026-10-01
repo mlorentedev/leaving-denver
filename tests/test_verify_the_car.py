@@ -92,9 +92,12 @@ def test_the_checks_open_from_a_button_on_the_car_card_and_are_not_inline(locale
     )
     assert button, f"{locale}: no button opens the verify sheet"
     assert heading in text_of(button.group(1))
-    # On the car card's action row: after the car's own buttons, before its payment line.
+    # On the car card's action row: after its specs button (always there, unlike the text link
+    # a Sold car drops), before its payment line.
     assert (
-        html.index('data-sms-intent="') < button.start() < html.index('data-role="vehicle-payment"')
+        html.index("openModal('" + CAR_ID + "')")
+        < button.start()
+        < html.index('data-role="vehicle-payment"')
     )
     # The content lives in a closed sheet, after the page body, never as a section on the page.
     sheet = html.index('<dialog id="verifySheet"')
