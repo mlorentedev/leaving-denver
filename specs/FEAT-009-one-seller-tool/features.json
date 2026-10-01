@@ -1,0 +1,79 @@
+[
+  {
+    "id": "FEAT-009-one-seller-tool-f1",
+    "behavior": "fb-es and cl-es write the listing from each item's es overlay and Spanish labels; the English channels show none of it",
+    "verification": "uv run pytest -q tests/test_seller_copy.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-009-one-seller-tool-f2",
+    "behavior": "The car's copy is vehicle copy on every channel and takes only the car's bank payments from the data",
+    "verification": "uv run pytest -q tests/test_seller_copy.py tests/test_inventory_ssot.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-009-one-seller-tool-f3",
+    "behavior": "Payment wording comes from seller.payment_methods and the locales; seller.mjs and seller.html hardcode none",
+    "verification": "uv run pytest -q tests/test_seller_copy.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-009-one-seller-tool-f4",
+    "behavior": "Known flaws follow every positive line, in the page's language, and are absent without flaws",
+    "verification": "uv run pytest -q tests/test_seller_copy.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-009-one-seller-tool-f5",
+    "behavior": "Every listing is first person singular, says no holds and no deposits, and has no phone, hype, retail or tax math",
+    "verification": "uv run pytest -q tests/test_seller_copy.py tests/test_poster_voice.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-009-one-seller-tool-f6",
+    "behavior": "Every real item fits each channel's title limit and Facebook's 5000-character description; overlong titles are flagged, never silently cut",
+    "verification": "uv run pytest -q tests/test_seller_copy.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-009-one-seller-tool-f7",
+    "behavior": "Each channel's link has its own utm_source (Spanish channels under /es/) and no listing body holds a link",
+    "verification": "uv run pytest -q tests/test_seller_copy.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-009-one-seller-tool-f8",
+    "behavior": "Six scam replies in English and Spanish with copy buttons, from data/seller-replies.yaml, the car payment filled from the data; the build rejects an incomplete reply",
+    "verification": "uv run pytest -q tests/test_seller_copy.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-009-one-seller-tool-f9",
+    "behavior": "/seller/ holds no floor, reserve, note, PIN or phone number, and its template gets only items_json, config_json and replies",
+    "verification": "uv run pytest -q tests/test_mobile_poster.py tests/test_security_isolation.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-009-one-seller-tool-f10",
+    "behavior": "In a browser the controls rewrite the listing and every copy button copies what is on screen",
+    "verification": "uv run pytest -q tests/test_seller_browser.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-009-one-seller-tool-f11",
+    "behavior": "poster_assistant.html is unchanged and still absent from build/public/",
+    "verification": "uv run pytest -q tests/test_security_isolation.py tests/test_mobile_poster.py",
+    "state": "pending",
+    "evidence": ""
+  }
+]

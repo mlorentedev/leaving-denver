@@ -101,7 +101,7 @@ def test_template_sees_only_sanitized_data(tmp_path, monkeypatch):
     site_builder.build_public_site(data)
 
     assert set(seen["share.html"]) == {"locale", "t", "og", "target"}
-    assert set(seen["seller.html"]) == {"items_json"}
+    assert set(seen["seller.html"]) == {"items_json", "config_json", "replies"}
     assert set(seen["index.html"]) == {
         "inventory_json",
         "contact_json",

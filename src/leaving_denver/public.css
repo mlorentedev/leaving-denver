@@ -2,6 +2,7 @@
 @import "./theme.css";
 @source "./templates/index.html";
 @source "./templates/seller.html";
+@source "./assets/seller.mjs";
 
 /* Item and bundle sheets: native modal dialogs docked to the bottom edge. */
 dialog.sheet {

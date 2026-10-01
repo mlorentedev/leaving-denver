@@ -15,10 +15,15 @@ from leaving_denver import site_builder
 
 ROOT = Path(__file__).resolve().parents[1]
 TEMPLATES = ROOT / "src" / "leaving_denver" / "templates"
+PUBLIC_CSS = ROOT / "build" / "public" / "styles.css"
 PAGES = {
-    "index.html": ROOT / "build" / "public" / "styles.css",
+    "index.html": PUBLIC_CSS,
+    "seller.html": PUBLIC_CSS,
+    # Script-only classes: the page's module is a Tailwind source too (public.css).
+    "seller.mjs": PUBLIC_CSS,
     "poster_assistant.html": ROOT / "build" / "private" / "styles.css",
 }
+SOURCES = {"seller.mjs": ROOT / "src" / "leaving_denver" / "assets" / "seller.mjs"}
 
 # Classes that only name elements for scripts or for the template's own <style>;
 # they have no Tailwind rule on purpose.
@@ -229,9 +234,9 @@ def rendered(tmp_path_factory):
     return html
 
 
-@pytest.mark.parametrize("name", ["index.html", "poster_assistant.html"])
+@pytest.mark.parametrize("name", list(PAGES))
 def test_every_class_is_covered(name, rendered):
-    template = (TEMPLATES / name).read_text(encoding="utf-8")
+    template = SOURCES.get(name, TEMPLATES / name).read_text(encoding="utf-8")
     tokens = source_tokens(template)  # raises Unresolved on a class it cannot read
     if name == "index.html":
         for html in rendered:
