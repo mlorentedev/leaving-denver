@@ -797,8 +797,10 @@ items:
   # "Verify it yourself" (FEAT-008): official lookups for the public VIN, then my own papers.
   # One list entry is one link; its Spanish copy is under es.verify, by id. A `url` must be
   # https on an official host (OFFICIAL_CHECK_HOSTS in site_builder.py) and a `photo` must be
-  # one of this car's photos. Carfax and the dealer service-history printout are pending
-  # (#28, #34): they become one entry each here once they exist, and not before.
+  # one of this car's photos. The April 2024 Carfax backs the history specs above; it stays
+  # private (prior owners, purchase details) and is shown to a buyer in person, so it is no
+  # entry here. The dealer service-history printout is pending (#34) and becomes one entry
+  # once it exists, and not before.
   verify:
     checks:
     # NHTSA's VIN deep-link format could not be confirmed from NHTSA itself, so this links
