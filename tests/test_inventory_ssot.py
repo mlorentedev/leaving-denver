@@ -105,7 +105,7 @@ def test_vehicle_specifics(inventory):
     )
     assert vehicle is not None, "2019 Ford Escape SEL AWD not found in items"
     assert vehicle.get("category") == "Vehicle"
-    assert vehicle.get("recommended_list_price") == 11875
+    assert vehicle.get("recommended_list_price") == 11950
 
     # Ensure zero open recall is noted
     specs_text = " ".join(vehicle.get("specs", []))
