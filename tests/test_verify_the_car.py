@@ -5,8 +5,10 @@ the evidence are data under the car (`verify:`), so a check or an evidence item 
 one list entry; the builder refuses a check that is not https on an official host and evidence
 that is not one of the car's photos.
 
-No Carfax and no dealer service-history printout yet: they are pending owner tasks (#28, #34),
-so the sheet renders only what exists. Those tests flip on purpose when the entries land.
+No Carfax on the sheet: the owner's April 2024 report backs the listing's history specs but
+stays private (prior owners, purchase details) and is shown in person. The dealer
+service-history printout is pending (#34), so the sheet renders only what exists. Those tests
+flip on purpose when an entry lands.
 """
 
 import copy

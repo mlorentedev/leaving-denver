@@ -768,9 +768,11 @@ items:
     (report in the photos). That certificate is already used for my registration renewal:
     before handover I'll take a new emissions test and give you that new certificate"
   - Zero open recalls (recall 22S43 closed at a Ford dealership on 25 Sep 2026; invoice
-    in the photos). Pre-purchase inspection welcome
+    in the photos)
   - 'Ford dealer inspection on 25 Sep 2026: battery good, brakes OK, tires good (on
     the recall invoice in the photos)'
+  - 'Dealer service when I bought it in April 2024: new spark plugs, oil change and four
+    new tires (on the 2024 Carfax)'
   - Ford SYNC 3 with 8-inch touchscreen, Apple CarPlay, Android Auto, Bluetooth, Wi-Fi
     hotspot
   - 'Cold Weather Package: Heated front leather seats, heated side mirrors, factory
@@ -783,8 +785,8 @@ items:
     and rear cross-traffic alerts'
   - Garage-kept and driven mostly on the highway, commuting to work since 2024. Shifts
     smoothly, no fluid leaks
-  - No accidents during my ownership, smoke-free, pet-free, zero dash warning lights
-    or mechanical codes
+  - 'Clean Carfax when I bought it in April 2024: no accidents or damage reported. No
+    accidents since, smoke-free, pet-free, zero dash warning lights or mechanical codes'
   included:
   - 2019 Ford Escape SEL AWD
   - Original Key Fobs
@@ -795,8 +797,10 @@ items:
   # "Verify it yourself" (FEAT-008): official lookups for the public VIN, then my own papers.
   # One list entry is one link; its Spanish copy is under es.verify, by id. A `url` must be
   # https on an official host (OFFICIAL_CHECK_HOSTS in site_builder.py) and a `photo` must be
-  # one of this car's photos. Carfax and the dealer service-history printout are pending
-  # (#28, #34): they become one entry each here once they exist, and not before.
+  # one of this car's photos. The April 2024 Carfax backs the history specs above; it stays
+  # private (prior owners, purchase details) and is shown to a buyer in person, so it is no
+  # entry here. The dealer service-history printout is pending (#34) and becomes one entry
+  # once it exists, and not before.
   verify:
     checks:
     # NHTSA's VIN deep-link format could not be confirmed from NHTSA itself, so this links
@@ -836,6 +840,8 @@ items:
     - 'Pasó la prueba de emisiones de Colorado el 12 de mayo de 2026: resultado PASS, sin códigos de falla (reporte en las fotos). Ese certificado ya se usó para renovar mi registro: antes de la entrega haré una nueva prueba de emisiones y te daré ese certificado nuevo'
     - Sin recalls abiertos; el recall 22S43 se cerró en concesionario Ford el 25 de septiembre de 2026
     - Inspección Ford del 25 de septiembre de 2026 con batería, frenos y llantas en buen estado
+    - 'Servicio en concesionario cuando lo compré en abril de 2024: bujías nuevas, cambio de
+      aceite y cuatro llantas nuevas (en el Carfax de 2024)'
     - Ford SYNC 3, pantalla de 8 pulgadas, Apple CarPlay, Android Auto, Bluetooth y Wi-Fi
     - Paquete para clima frío con asientos delanteros y espejos calefactados
     - Entrada sin llave con control remoto, encendido por botón, portón eléctrico manos
@@ -845,7 +851,8 @@ items:
       (luz y pitido), y alertas de ángulo muerto y de tráfico cruzado trasero'
     - Guardado en garaje y usado sobre todo en autopista para ir al trabajo desde 2024.
       Cambios suaves y sin fugas
-    - Sin accidentes durante mi propiedad, sin humo ni mascotas y sin alertas en el tablero
+    - 'Carfax limpio cuando lo compré en abril de 2024: sin accidentes ni daños reportados.
+      Sin accidentes desde entonces, sin humo ni mascotas y sin alertas en el tablero'
     included:
     - Ford Escape SEL AWD 2019
     - Controles originales
