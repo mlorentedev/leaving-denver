@@ -5,10 +5,11 @@ Compiles Single Source of Truth (data/inventory.yaml) into:
    build/public/i/<id>/index.html (and es/i/<id>/) - Per-item share pages with Open Graph tags.
 2. build/public/robots.txt - Link-preview fetchers allowed, every other crawler disallowed.
    build/public/_headers - Cloudflare Pages response headers.
-3. build/private/ - Private local seller tool with multi-platform listing copy and PIN lock.
+   build/public/seller/index.html - The seller tool: listing copy, plus the private data as an
+   encrypted envelope that only the owner's passphrase opens in the browser (ADR-007).
 
 With `seller.sale_over: true` the public build is one "the sale is over" page per language
-instead (OPS-011), and the private tool is not built.
+instead (OPS-011), and the seller tool is not built.
 """
 
 import json
@@ -27,15 +28,12 @@ from jinja2 import Environment, FileSystemLoader, StrictUndefined
 from markupsafe import Markup
 from PIL import Image
 
+from leaving_denver.channels import RENEW_AFTER_DAYS
 from leaving_denver.config import (
     BASE_DIR,
     DIST_DIR,
-    DIST_PRIVATE_DIR,
-    INVENTORY_JSON_PRIVATE,
     INVENTORY_YAML,
     LOCALES_DIR,
-    PANEL_MARKER,
-    PRIVATE_POSTER_HTML,
     PUBLIC_HEADERS,
     PUBLIC_INDEX_HTML,
     PUBLIC_ROBOTS_TXT,
@@ -50,7 +48,9 @@ from leaving_denver.image_processor import (
     variant_path,
     write_share_image,
 )
-from leaving_denver.private_data import floors, load_private, phone_parts, seller_phone
+from leaving_denver.pricing import DROP_WINDOWS
+from leaving_denver.private_data import phone_parts, seller_phone
+from leaving_denver.seal import validate_envelope
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
 # The theme font (theme.css @font-face), copied next to each stylesheet.
@@ -82,10 +82,7 @@ def build_stylesheets() -> None:
         raise RuntimeError("Tailwind CLI missing; run npm ci before leaving-denver build")
     if not FONT_FILE.is_file():
         raise RuntimeError("Theme font missing; run npm ci before leaving-denver build")
-    for source, output in (
-        ("public", DIST_DIR / "styles.css"),
-        ("private", DIST_PRIVATE_DIR / "styles.css"),
-    ):
+    for source, output in (("public", DIST_DIR / "styles.css"),):
         output.parent.mkdir(parents=True, exist_ok=True)
         staged = output.with_suffix(".css.new")
         try:
@@ -828,6 +825,42 @@ def seller_items(
     ]
 
 
+def seller_roster(public_data: dict[str, Any]) -> list[dict[str, Any]]:
+    """Every published item as the private views know it: id, title, category, status, the
+    public price and whether it is free. Public facts only (the catalog shows all of them)."""
+    return [
+        {
+            "id": item["id"],
+            "title": item["short_title"] or item["title"] or item["id"],
+            "category": item["category"],
+            "status": item["status"],
+            "price": item["price"],
+            "free": item["free"],
+        }
+        for item in public_data["items"]
+    ]
+
+
+def seller_drops(departure_date: str) -> dict[str, str]:
+    """The day each price-drop window opens, from the departure date."""
+    schedule = sale_schedule(departure_date)
+    return {window: schedule[window][0].isoformat() for window in DROP_WINDOWS}
+
+
+def sealed_envelope() -> str | None:
+    """The SELLER_SEALED envelope as compact JSON, or None when the build has none.
+
+    An unset or blank secret is "no private data in this build" (every PR and the test job).
+    A set one that is malformed fails the build, and the message never repeats it."""
+    raw = (os.environ.get("SELLER_SEALED") or "").strip()
+    if not raw:
+        return None
+    try:
+        return json.dumps(validate_envelope(raw), separators=(",", ":"))
+    except ValueError as err:
+        raise RuntimeError(f"SELLER_SEALED is not a valid sealed envelope: {err}") from err
+
+
 def write_seller_poster(public_data: dict[str, Any], full_data: dict[str, Any]) -> None:
     """The /seller/ listing generator: the items that can still be listed, the page's
     settings and the scam replies. Public data only, and no phone (listings never carry it)."""
@@ -843,6 +876,10 @@ def write_seller_poster(public_data: dict[str, Any], full_data: dict[str, Any]) 
     config = {
         "origin": site_url(),
         "month": {code: translations[code]["months"][month] for code in LISTING_LOCALES},
+        # For the private views, computed in the page once the data is open (ADR-007).
+        "roster": seller_roster(public_data),
+        "drops": seller_drops(seller["departure_date"]),
+        "renew_after_days": RENEW_AFTER_DAYS,
     }
     car_payment = {
         code: seller_payment(methods[code], translations[code], True) for code in LISTING_LOCALES
@@ -859,6 +896,7 @@ def write_seller_poster(public_data: dict[str, Any], full_data: dict[str, Any]) 
             items_json=script_json(items),
             config_json=script_json(config),
             replies=seller_replies(car_payment),
+            sealed_json=sealed_envelope(),
         ),
         encoding="utf-8",
     )
@@ -1042,57 +1080,41 @@ def build_public_site(full_data: dict[str, Any]) -> None:
         shutil.rmtree(DIST_DIR / "catalog" / item_id, ignore_errors=True)
 
 
-def with_spanish_condition(item: dict[str, Any], labels: dict[str, str]) -> None:
-    """The private poster reads `es.condition` from the raw data; the label lives in the locale."""
-    if item.get("category") != "Vehicle" and item.get("condition") in labels:
-        item.setdefault("es", {}).setdefault("condition", labels[item["condition"]])
+# Text no public page may carry: the plaintext of the private data. The sealed envelope has none
+# of it (a base64 body and a header), so it passes.
+PLAINTEXT_MARKERS = ("firm_floor_price", '"sealed_at"', '"floors":', '"price_log"')
+SCANNED_SUFFIXES = {".html", ".txt", ".json", ".mjs", ".js", ""}
 
 
-def build_private_workspace(full_data: dict[str, Any]) -> None:
-    private = load_private()
-    if not private:
-        print("   Skipped: data/private.sops.yaml is not decryptable here (expected in CI).")
-        return
+def check_public_names() -> None:
+    for path in DIST_DIR.glob("**/*"):
+        name = path.name.lower()
+        if path.is_file() and (
+            any(word in name for word in ("poster", "panel")) or name == "inventory.json"
+        ):
+            raise RuntimeError(f"SECURITY LEAK: {path.name} found in public dist directory!")
 
-    DIST_PRIVATE_DIR.mkdir(parents=True, exist_ok=True)
 
-    # Merge the encrypted reserve floors and phone back in, for local use only
-    full_data = json.loads(json.dumps(full_data))
-    reserve = floors(private)
-    hidden = unpublished_ids(full_data)
-    spanish_conditions = load_locale("es")["conditions"]
-    for item in full_data.get("items", []):
-        item["draft"] = item["id"] in hidden
-        with_spanish_condition(item, spanish_conditions)
-        if item["id"] in reserve:
-            item["firm_floor_price"] = reserve[item["id"]]
-    full_data.setdefault("seller", {})["phone"] = seller_phone(private)
-
-    for target in (INVENTORY_JSON_PRIVATE, DIST_PRIVATE_DIR / "inventory.json"):
-        with open(target, "w", encoding="utf-8") as f:
-            json.dump(full_data, f, indent=2)
-
-    template_path = TEMPLATES_DIR / "poster_assistant.html"
-    if template_path.exists():
-        shutil.copy2(template_path, PRIVATE_POSTER_HTML)
+def check_public_text(path: Path, ciphertext: str | None) -> None:
+    """One built file: no plaintext of the private data, and the envelope only in /seller/."""
+    content = path.read_text(encoding="utf-8", errors="replace")
+    for marker in PLAINTEXT_MARKERS:
+        if marker in content:
+            raise RuntimeError(f"SECURITY LEAK: {marker} found in {path}!")
+    stray = 'id="sealed"' in content or (ciphertext is not None and ciphertext in content)
+    if stray and path != DIST_DIR / "seller" / "index.html":
+        raise RuntimeError(f"SECURITY LEAK: the sealed envelope is outside /seller/ in {path}!")
 
 
 def verify_security_guarantees() -> None:
-    """Verifies that no private files or floor prices leaked into build/public/"""
-    dist_files = [f.name for f in DIST_DIR.glob("**/*") if f.is_file()]
-    for fname in dist_files:
-        if any(word in fname.lower() for word in ("poster", "panel")) or (
-            fname.lower() == "inventory.json"
-        ):
-            raise RuntimeError(f"SECURITY LEAK: {fname} found in public dist directory!")
-
-    # Check every localized public page for floor price leaks.
-    for path in DIST_DIR.rglob("*.html"):
-        content = path.read_text(encoding="utf-8")
-        if "firm_floor_price" in content:
-            raise RuntimeError(f"SECURITY LEAK: firm_floor_price found in {path}!")
-        if PANEL_MARKER in content:
-            raise RuntimeError(f"SECURITY LEAK: the private control panel is in {path}!")
+    """Verifies that no private file, floor price or plaintext private data leaked into
+    build/public/, and that the sealed envelope (ADR-007) is in /seller/index.html alone."""
+    check_public_names()
+    sealed = sealed_envelope()
+    ciphertext = json.loads(sealed)["ct"] if sealed else None
+    for path in DIST_DIR.rglob("*"):
+        if path.is_file() and path.suffix in SCANNED_SUFFIXES:
+            check_public_text(path, ciphertext)
 
 
 def build_all() -> None:
@@ -1118,13 +1140,7 @@ def build_all() -> None:
     print("3. Building sanitized public distribution (build/public/)...")
     build_public_site(data)
 
-    if over:
-        print("4. The sale is over: no private seller assistant.")
-    else:
-        print("4. Building private seller assistant (build/private/)...")
-        build_private_workspace(data)
-
-    print("5. Verifying security & data isolation...")
+    print("4. Verifying security & data isolation...")
     verify_security_guarantees()
 
-    print("Build complete: Public site ready in build/public/, private tool in build/private/")
+    print("Build complete: Public site ready in build/public/")

@@ -17,6 +17,7 @@ Object.defineProperty(navigator, 'clipboard', { configurable: true,
 
 SHOW = """
 const $ = id => document.getElementById(id);
+const ITEMS = JSON.parse($('seller-items').textContent);
 const choose = async (id, value) => {
   $(id).value = value;
   $(id).dispatchEvent(new Event('change'));
@@ -82,11 +83,11 @@ for (const id of ['title', 'description', 'link', 'tags']) {
 }
 $('copy-price').click();
 await wait(20);
-copied.push([window.CLIPBOARD.at(-1), String(window.posterItems[Number($('item').value)].price)]);
+copied.push([window.CLIPBOARD.at(-1), String(ITEMS[Number($('item').value)].price)]);
 $('copy-full').click();
 await wait(20);
 copied.push([window.CLIPBOARD.at(-1), `TITLE: ${$('title').value}\\nPRICE: $${
-  window.posterItems[Number($('item').value)].price.toLocaleString('en-US')}\\n\\n${$('description').value}`]);
+  ITEMS[Number($('item').value)].price.toLocaleString('en-US')}\\n\\n${$('description').value}`]);
 for (const button of document.querySelectorAll('[data-reply] [data-copy]')) {
   button.click();
   await wait(5);

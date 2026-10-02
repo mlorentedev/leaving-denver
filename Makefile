@@ -23,7 +23,7 @@ CF_ENV    = CLOUDFLARE_ACCOUNT_ID=$(CF_ACCOUNT_ID) CLOUDFLARE_API_TOKEN="$$(sops
 
 .DEFAULT_GOAL := help
 
-.PHONY: help install lint format build test check serve drops panel post reprice sold deploy cf-project ci-secrets protect-deploy protect-main audit-deploy secrets clean
+.PHONY: help install lint format build test check serve drops post reprice sold deploy cf-project ci-secrets protect-deploy protect-main audit-deploy secrets clean
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
@@ -52,7 +52,7 @@ format: ## Auto-fix style with ruff
 	$(UV) run ruff check --fix .
 	$(UV) run ruff format .
 
-build: ## Process photos and compile build/public/ (public) + build/private/ (local only)
+build: ## Process photos and compile build/public/ (set SELLER_SEALED to embed the sealed private data)
 	$(UV) run leaving-denver build
 
 test: build ## Build, then run the test suite against the fresh build
@@ -60,14 +60,11 @@ test: build ## Build, then run the test suite against the fresh build
 
 check: lint test ## Lint + build + test (what CI runs)
 
-serve: build ## Serve the catalog and the private tool on 127.0.0.1:$(PORT) (loopback only)
+serve: build ## Serve the catalog and /seller/ on 127.0.0.1:$(PORT) (loopback only)
 	$(UV) run leaving-denver serve --port $(PORT)
 
 drops: ## Show the staged price-drop table (needs the sops key)
 	$(UV) run leaving-denver drops
-
-panel: ## Write the private control panel to build/private/panel.html (needs the sops key)
-	$(UV) run leaving-denver panel
 
 post: ## Record a posting or renewal: make post ID=sofa-sleeper CHANNEL=facebook [ON=2026-10-01]
 	@test -n "$(ID)" && test -n "$(CHANNEL)" || { echo "usage: make post ID=<item-id> CHANNEL=<facebook|craigslist|offerup|nextdoor|activebuilding> [ON=<YYYY-MM-DD>]"; exit 1; }
@@ -105,7 +102,7 @@ protect-deploy: ## Allow deploy secrets only from main, including manual preview
 		fi; \
 	done
 
-ci-secrets: protect-deploy ## Scope the deploy token and the contact to the protected environments
+ci-secrets: protect-deploy ## Scope the deploy token and the contact to the protected environments, then seal the private data (needs a terminal)
 	@set -e; token="$$(sops -d --extract '["cloudflare_pages_token"]' $(SOPS_FILE))"; \
 	test -n "$$token" || { echo "empty Cloudflare token" >&2; exit 1; }; \
 	for environment in production preview; do \
@@ -126,6 +123,7 @@ ci-secrets: protect-deploy ## Scope the deploy token and the contact to the prot
 	if printf '%s\n' "$$secrets" | grep -q '^SELLER_PHONE[[:space:]]'; then \
 		gh secret delete SELLER_PHONE; \
 	fi
+	$(UV) run leaving-denver seal
 
 audit-deploy: ## Check the live deploy settings and secrets (read-only)
 	scripts/audit-deploy.sh
@@ -134,9 +132,10 @@ protect-main: ## Require the CI test check on main (idempotent; admins can still
 	gh api -X PUT repos/{owner}/{repo}/branches/main/protection --input .github/branch-protection.json >/dev/null
 	@echo "main requires: $$(gh api repos/{owner}/{repo}/branches/main/protection --jq '[.required_status_checks.contexts[]] | join(", ")')"
 
-secrets: ## Edit the encrypted reserve floors, phone and deploy token
+secrets: ## Edit the encrypted floors, targets, notes, phone and deploy token (then `make ci-secrets` to update /seller/)
 	sops $(SOPS_FILE)
 
 clean: ## Remove build output and caches
+	# data/inventory.json: an earlier build wrote the plaintext floors there; nothing does now.
 	rm -rf build data/inventory.json .pytest_cache .ruff_cache
 	find . -name __pycache__ -type d -prune -exec rm -rf {} +

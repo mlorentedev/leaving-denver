@@ -33,8 +33,9 @@ flip the switch on a failing rehearsal. Delete the rehearsal deployment when don
 
 ## Nov 8: turn the sale off
 
-The deploy job refuses to run without the `SELLER_PHONE` secret, so the secrets stay in place
-until the end page is live. Deleting them first would leave the catalog up and make the deploy
+The deploy job refuses to run without the `SELLER_PHONE` secret (and, while the sale is on,
+without `SELLER_SEALED`; the switch lifts that one), so the secrets stay in place until the end
+page is live. Deleting them first would leave the catalog up and make the deploy
 that replaces it fail.
 
 1. Flip the switch on a branch and see the gate pass. The end build needs no phone and no key:
@@ -84,7 +85,10 @@ that replaces it fail.
    - ActiveBuilding (the complex portal): remove the post.
    - The building flyer: take the paper down; its QR code now opens the end page.
 
-   `uv run leaving-denver panel` lists where each item was posted; it needs the age key.
+   Where each item was posted is the `tracking` section of the encrypted file: `make secrets`
+   opens it in your editor (it needs the age key; close without changing anything). `/seller/`
+   shows the same until the end page replaces it, so read it there first if you can. The
+   `make sold` takedown list names the channels an item was posted on, too.
 
 6. Pause the uptime monitor (ops.md, "Minimal monitoring"). Its keyword was the catalog title,
    which the end page does not carry, so it alerts from its next check. Uptime Kuma on the

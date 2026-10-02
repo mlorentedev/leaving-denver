@@ -21,7 +21,7 @@ done
 
 # The workflow's token cannot list secrets; the owner's can, so this part runs locally.
 if secrets=$(gh secret list 2>/dev/null); then
-  for name in CLOUDFLARE_API_TOKEN SELLER_PHONE; do
+  for name in CLOUDFLARE_API_TOKEN SELLER_PHONE SELLER_SEALED; do
     if grep -q "^$name[[:space:]]" <<<"$secrets"; then
       problem "$name is still a repository secret: run make ci-secrets"
     fi
@@ -29,6 +29,15 @@ if secrets=$(gh secret list 2>/dev/null); then
 else
   echo "deploy audit: this token cannot list repository secrets, so that check is skipped"
 fi
+
+# SELLER_SEALED (ADR-007) belongs to both environments. A missing one is a warning, not a
+# failure: the secret is set by `make ci-secrets`, and a build without it only has no /seller/ data.
+for environment in production preview; do
+  if listed=$(gh secret list --env "$environment" 2>/dev/null); then
+    grep -q "^SELLER_SEALED[[:space:]]" <<<"$listed" ||
+      echo "deploy audit: warning: SELLER_SEALED is not set in $environment: run make ci-secrets" >&2
+  fi
+done
 
 [ "$fail" = 0 ] || exit 1
 echo "deploy audit OK"

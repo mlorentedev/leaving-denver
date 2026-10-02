@@ -57,7 +57,7 @@
   },
   {
     "id": "FEAT-009-one-seller-tool-f9",
-    "behavior": "/seller/ holds no floor, reserve, note, PIN or phone number, and its template gets only items_json, config_json and replies",
+    "behavior": "/seller/ holds no floor, reserve, note, PIN or phone number in the clear, and its template gets only items_json, config_json, replies and sealed_json",
     "verification": "uv run pytest -q tests/test_mobile_poster.py tests/test_security_isolation.py",
     "state": "pending",
     "evidence": ""
@@ -70,9 +70,114 @@
     "evidence": ""
   },
   {
-    "id": "FEAT-009-one-seller-tool-f11",
-    "behavior": "poster_assistant.html is unchanged and still absent from build/public/",
-    "verification": "uv run pytest -q tests/test_security_isolation.py tests/test_mobile_poster.py",
+    "id": "FEAT-009-one-seller-tool-f12",
+    "behavior": "PR 2, AC1: no built file holds a private value or the phone in the clear, and the envelope opens to the allow-list keys only",
+    "verification": "uv run pytest -q tests/test_sealed_build.py -k 'private_value or allow_list'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-009-one-seller-tool-f13",
+    "behavior": "PR 2, AC2: without SELLER_SEALED the build succeeds and /seller/ says there is no private data; a malformed envelope fails the build",
+    "verification": "uv run pytest -q tests/test_sealed_build.py tests/test_cd_workflow.py -k 'secret or malformed or empty or sealed or SELLER'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-009-one-seller-tool-f14",
+    "behavior": "PR 2, AC3: in a browser a wrong passphrase shows one message and nothing else, the right one opens the views, Lock and pagehide clear the DOM, no storage API is touched",
+    "verification": "uv run pytest -q tests/test_sealed_browser.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-009-one-seller-tool-f15",
+    "behavior": "PR 2, AC4: the seal refuses a weak or mismatched passphrase and a run with no TTY, refuses argv, sets both environments with the envelope on stdin; Enter generates five hyphenated words and saves them with dotf secrets set SELLER_PASSPHRASE (printing only 'Saved to Bitwarden'), or without dotf shows them on the TTY only to be typed back; a typed passphrase can be saved on request",
+    "verification": "uv run pytest -q tests/test_seal_command.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-009-one-seller-tool-f16",
+    "behavior": "PR 2, AC5: the worst-case payload seals under the 40,000-byte budget and the seal refuses an envelope over it",
+    "verification": "uv run pytest -q -s tests/test_seal_command.py -k 'size or budget or worst'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-009-one-seller-tool-f17",
+    "behavior": "PR 2, AC6: the envelope has iter 1000000, a 16-byte salt and 12-byte IV, differs per seal, and fails to open if its header is edited",
+    "verification": "uv run pytest -q tests/test_sealed_envelope.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-009-one-seller-tool-f18",
+    "behavior": "PR 2, AC7: the page, in headless Chrome, opens an envelope the Node seal wrote",
+    "verification": "uv run pytest -q tests/test_sealed_browser.py -k right_passphrase",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-009-one-seller-tool-f19",
+    "behavior": "PR 2, AC8: the envelope is in /seller/index.html and in no other built file",
+    "verification": "uv run pytest -q tests/test_sealed_build.py tests/test_private_isolation.py -k 'seller_page_only or anywhere_but'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-009-one-seller-tool-f20",
+    "behavior": "PR 2, AC9: /seller/* carries a CSP with script-src 'self', connect-src 'none' and frame-ancestors 'none' (set by the middleware), every other path carries none, and the page runs under it",
+    "verification": "uv run pytest -q tests/test_seller_csp.py tests/test_ops_runbook.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-009-one-seller-tool-f21",
+    "behavior": "PR 2, AC10: the seal writes no file, passes the payload and passphrase to Node on stdin only, and no workflow names sops or the age key",
+    "verification": "uv run pytest -q tests/test_seal_command.py tests/test_cd_workflow.py -k 'stdin or file or workflow or sops or age'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-009-one-seller-tool-f22",
+    "behavior": "PR 2, AC11: unlocking on the phone takes 3 s or less (manual check; the owner records the time in verification.md)",
+    "verification": "manual: unlock on the owner's phone and time it",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-009-one-seller-tool-f23",
+    "behavior": "PR 2, AC12: poster_assistant.html, the PIN, make panel, panel.py and build/private/ are gone from src/ and the build, and the leak check accepts the sealed block but fails a plaintext fixture value",
+    "verification": "uv run pytest -q tests/test_private_isolation.py tests/test_security_isolation.py tests/test_mobile_poster.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-009-one-seller-tool-f24",
+    "behavior": "PR 2, AC13: docs/runbooks/ops.md names SELLER_SEALED, staleness, rotation with deleting earlier deployments and the decommission after 2026-11-09",
+    "verification": "uv run pytest -q tests/test_ops_runbook.py -k sealed",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-009-one-seller-tool-f25",
+    "behavior": "PR 2, AC14: after a successful make post, sold or reprice the command offers to update /seller/; no is the default and non-TTY means no; yes seals (an empty passphrase aborts, never generates), sets both secrets and dispatches the deploy",
+    "verification": "uv run pytest -q tests/test_update_offer.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-009-one-seller-tool-f26",
+    "behavior": "PR 2, AC15: the unlock form has a password field with autocomplete current-password and a visually hidden read-only username field 'seller' in one JS-handled form, so a password manager (Bitwarden) can save and fill it",
+    "verification": "uv run pytest -q tests/test_sealed_build.py -k 'unlock_form or hidden_username'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-009-one-seller-tool-f27",
+    "behavior": "PR 2, AC16: SELLER_PASSPHRASE (that name only) is used without a prompt, validated and never printed, and removed from the environment of the Node, gh and dotf children; the terminal rule still holds",
+    "verification": "uv run pytest -q tests/test_seal_command.py -k 'environment or children'",
     "state": "pending",
     "evidence": ""
   }

@@ -75,7 +75,8 @@ analysis cannot see, and what matters here:
 
 - private data reaching build/public/: reserve floors, the phone outside its
   fragmented `_C` form, or anything from data/private.sops.yaml. The public build is
-  deployed to Cloudflare Pages; build/private/ never is.
+  deployed to Cloudflare Pages. The one private thing in it is the sealed envelope in
+  seller/index.html (ciphertext, ADR-007); plaintext of it anywhere is a leak.
 - a secret on argv, stdout or in a log line: the deploy token and the phone move from
   sops into `gh secret set` or wrangler's environment, never through echo or argv.
 - listing copy (templates, data/inventory.yaml) that claims something the data does

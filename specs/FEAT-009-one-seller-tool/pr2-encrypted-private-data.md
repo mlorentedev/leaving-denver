@@ -94,9 +94,25 @@ owner's machine under a passphrase only the owner knows.
   - a word not in the vendored EFF large wordlist;
   - two entries that do not match;
   - no TTY.
-  A passphrase given in argv or the environment is ignored, and the target still asks the TTY.
+  A passphrase given in argv is refused, and one in the environment is read under the single name
+  `SELLER_PASSPHRASE` only (AC16); the target still needs the TTY.
   A valid 5-word passphrase leads to exactly two `secret set SELLER_SEALED` calls, `--env
   production` and `--env preview`, each with the envelope on stdin and never in argv.
+  The first prompt of `make ci-secrets` reads "Passphrase (Enter to generate one): " (owner,
+  2026-10-01):
+  - Empty input generates 5 distinct EFF words with `secrets.choice`, joined by hyphens.
+  - With `dotf` on `PATH` (owner, 2026-10-01, Bitwarden): the words are piped to
+    `dotf secrets set SELLER_PASSPHRASE` on stdin and the exit code is checked. On success the
+    target prints only "Saved to Bitwarden as SELLER_PASSPHRASE", never the value, and dotf's
+    own output is never relayed. A test with a stub `dotf` on `PATH` records the stdin and
+    asserts the value reaches neither stdout nor stderr, even when the stub echoes it.
+  - Without `dotf`, or when the save fails: the words are written to the TTY only (`/dev/tty`:
+    never stdout, stderr, a file or a log) with "Write this down now. It is not stored
+    anywhere.", and the owner types them back once. A mismatch aborts with nothing sealed and
+    nothing set. So a failed save never seals unless that confirmation succeeds.
+  - Non-empty input follows the rules above: 5 or more distinct listed words, entered twice,
+    matching. With `dotf` on `PATH` the target then asks "Save it to Bitwarden? [y/N]"; yes saves
+    the words as typed (hyphenated), and a failed save aborts with nothing sealed.
 - [ ] **AC5: the payload is under the secret size limit.**
   - The target refuses an envelope over 40,000 bytes and sets nothing.
   - A synthetic worst case is sealed: 18 items, each with a floor, a target and a sale; 5
@@ -171,3 +187,22 @@ owner's machine under a passphrase only the owner knows.
   or `make reprice`, the command asks once whether to update `/seller/`. "No" (the default, and
   any non-TTY run) changes nothing more. "Yes" runs the seal and the dispatch, and the command's
   exit status reflects them. Tests stub the prompt, the seal and `gh`.
+  This seal never generates (owner, 2026-10-01): an empty passphrase aborts with "Type your
+  current passphrase (or run make ci-secrets to make a new one)", so a routine sale cannot
+  rotate the passphrase silently. Nothing is sealed, set or dispatched.
+- [ ] **AC16: the passphrase can come from the environment, under one name** (owner,
+  2026-10-01). `SELLER_PASSPHRASE`, when set and not blank, is used without a prompt, by the
+  re-seal after `make post|sold|reprice` and by `make ci-secrets` (which then never generates).
+  - It is validated like a typed one (5 or more distinct EFF words); a bad value aborts with a
+    message that names the variable and never repeats the value.
+  - `dotf secrets run --only SELLER_PASSPHRASE -- make sold ID=... PRICE=...` is the documented
+    invocation. The target cannot tell dotf from a hand-set variable; that is why the check is
+    the same either way, and why the TTY rule still applies.
+  - No other variable is read. Node, gh and dotf run without `SELLER_PASSPHRASE` in their
+    environment (tests spy on the `env` of Node and gh, and the stub dotf logs its own).
+- [ ] **AC15: the unlock form works with a password manager** (owner, 2026-10-01). The page's
+  unlock field is `<input type="password" autocomplete="current-password">`, in one `<form>`
+  with a visually hidden text input `autocomplete="username"` whose value is the fixed
+  "seller". It is in the page (not `type="hidden"`, not `display:none`), read-only and out of the
+  tab order. The form has no `action`; JavaScript handles the submit. The derived key still
+  stays in memory only, and the page script never reads the username.

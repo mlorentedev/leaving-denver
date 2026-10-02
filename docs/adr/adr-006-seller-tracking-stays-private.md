@@ -41,7 +41,8 @@ is public and a push to `main` deploys. `data/private.sops.yaml` already holds t
 2. Writes go through `sops set` with the value on stdin (`private_data.set_private`); the
    owner never decrypts the file to edit it. A list grows by setting its next index, because
    `sops set` rejects a bare JSON list as a value.
-3. The panel is a local HTML file at `build/private/panel.html`, written 0600, refused under
+3. (Retired by ADR-007, FEAT-009 PR 2: the panel's rows now render in `/seller/` from the sealed
+   data, and `build/private/` is gone.) The panel is a local HTML file at `build/private/panel.html`, written 0600, refused under
    `build/public/`, marked with `data-private-panel` so `verify_security_guarantees` fails the
    build if a public page ever carries it. It has no script and loads nothing.
 4. `listed_at` and the renewal date are derived from the posting dates, never stored.

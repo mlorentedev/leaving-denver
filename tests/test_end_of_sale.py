@@ -13,7 +13,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-from leaving_denver import site_builder
+from leaving_denver import private_data, site_builder
 from leaving_denver.config import DATA_DIR
 
 # Not a real number and not the CI placeholder: it must reach no built file in any form.
@@ -233,8 +233,10 @@ def test_the_end_build_needs_no_phone_and_no_private_data(tmp_path, monkeypatch)
         raise AssertionError("the end build reached for a secret or a photo")
 
     # The key is gone from the machine: nothing may even try to read the encrypted file.
-    for name in ("load_private", "seller_phone", "sync_all_photos", "build_private_workspace"):
+    for name in ("seller_phone", "sync_all_photos"):
         monkeypatch.setattr(site_builder, name, unreachable)
+    for name in ("load_private", "decrypt_private"):
+        monkeypatch.setattr(private_data, name, unreachable)
 
     site_builder.build_all()
 

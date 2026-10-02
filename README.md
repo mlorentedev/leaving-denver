@@ -52,9 +52,8 @@ uv run leaving-denver serve --port 8088
 make check
 ```
 
-`make build` and direct `leaving-denver build` compile separate Tailwind CSS
-stylesheets into `build/public/styles.css` (shared by EN/ES) and
-`build/private/styles.css` (local only). Run `make install` first: a missing
+`make build` and direct `leaving-denver build` compile the Tailwind CSS stylesheet
+`build/public/styles.css` (shared by EN/ES and `/seller/`). Run `make install` first: a missing
 Tailwind CLI fails the build instead of silently shipping stale or unstyled HTML.
 Only `build/public/` is uploaded to Pages.
 
@@ -104,7 +103,7 @@ sops data/private.sops.yaml          # edit floors / phone
 ```
 
 - The **public build** only needs the phone: from `SELLER_PHONE` (CI secret) or the sops file.
-- The **private workspace** and `uv run leaving-denver drops` need the floors, so they only work where the file decrypts.
+- `uv run leaving-denver drops` and `uv run leaving-denver seal` need the floors, so they only work where the file decrypts. The deployed `/seller/` gets them only as the `SELLER_SEALED` ciphertext (ADR-007).
 - Photos under `content/photos/` are stored with Git LFS (`git lfs install --local --skip-repo`).
 
 ---
@@ -114,8 +113,8 @@ sops data/private.sops.yaml          # edit floors / phone
 When running `uv run leaving-denver serve`:
 - **Public Minimalist Catalog:** `http://127.0.0.1:8088/`
 - **Spanish Public Catalog:** `http://127.0.0.1:8088/es/`
-- **Private Seller Workspace (local only):** `http://127.0.0.1:8088/poster_assistant.html`. `make serve` binds loopback only and refuses paths outside `build/`. The PIN screen is a UI gate against shoulder-surfing, not access control: the PIN is in the page's JavaScript and the tool is never deployed.
-- **Mobile seller listing copy:** `https://leaving-denver.pages.dev/seller/` after owner-only Cloudflare Access is configured and tested. It uses published inventory only; missing Access configuration fails closed. Follow [site operations](docs/runbooks/ops.md#owner-only-mobile-listing-copy-cloudflare-access) before using or sharing the URL.
+- **Seller tool:** `http://127.0.0.1:8088/seller/`. `make serve` binds loopback only and refuses paths outside `build/public/`. Built without `SELLER_SEALED` it shows the public copy tools only; the private views need the sealed envelope and its passphrase (see [site operations](docs/runbooks/ops.md#the-sealed-private-data-seller_sealed)).
+- **Mobile seller listing copy:** `https://leaving-denver.pages.dev/seller/` after owner-only Cloudflare Access is configured and tested. Its private views open only with the sealed envelope's passphrase; missing Access configuration fails closed. Follow [site operations](docs/runbooks/ops.md#owner-only-mobile-listing-copy-cloudflare-access) before using or sharing the URL.
 
 ---
 
@@ -135,8 +134,7 @@ When running `uv run leaving-denver serve`:
 │       ├── image_processor.py     # HEIC decoder & EXIF metadata scrubber
 │       └── site_builder.py        # Site compiler with leak detection
 ├── build/
-│   ├── public/                    # Public sanitized distribution (Deploy to Cloudflare)
-│   └── private/                   # Private seller workspace with PIN lock
+│   └── public/                    # Public sanitized distribution (Deploy to Cloudflare)
 ├── integrations/
 │   └── n8n/                       # Kubelab n8n workflow (Craigslist bump reminder)
 ├── docs/                          # Architecture, Playbooks, and Kubelab guide

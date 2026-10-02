@@ -76,10 +76,10 @@ def page_items(page):
     return html, og_url, re.findall(r'data-item="([^"]+)"', html)
 
 
-def stage(page, html, root):
+def stage(page, html, root, public=PUBLIC):
     """Writes the page under root, with every other file of the build linked around it, so
     its relative links (styles.css, fonts, photos) resolve and the sheets have their layout."""
-    source, target = PUBLIC, root
+    source, target = public, root
     for part in Path(page).parts:
         target.mkdir(parents=True, exist_ok=True)
         for entry in source.iterdir():
@@ -185,15 +185,26 @@ def inline_modules(html, folder):
 
 
 @contextmanager
-def open_page(tmp_path, page, setup="", fragment=""):
-    html = inline_modules((PUBLIC / page).read_text(encoding="utf-8"), (PUBLIC / page).parent)
-    # A page with no script of its own (the flyer) takes the setup at the end of its head.
-    first_script = html.index("<script>") if "<script>" in html else html.index("</head>")
-    staged = stage(
-        page,
-        html[:first_script] + f"<script>{setup}</script>\n" + html[first_script:],
-        tmp_path / "site",
-    )
+def open_page(tmp_path, page, setup="", fragment="", public=PUBLIC, url=None):
+    """Opens a page of `public` (the real build by default; a test may pass a build of its own,
+    such as one sealed with a fixture envelope).
+
+    With `url` the page is fetched from there instead (a test serving a build over HTTP, for
+    what only a response header can show, such as a Content-Security-Policy); `setup` then runs
+    on the new document before its own scripts."""
+    staged = None
+    if url is None:
+        html = inline_modules((public / page).read_text(encoding="utf-8"), (public / page).parent)
+        # Before the first script of any kind: a page may open with data blocks, not code. A
+        # page with no script of its own (the flyer) takes the setup at the end of its head.
+        first = re.search(r"<script[ >]", html)
+        first_script = first.start() if first else html.index("</head>")
+        staged = stage(
+            page,
+            html[:first_script] + f"<script>{setup}</script>\n" + html[first_script:],
+            tmp_path / "site",
+            public,
+        )
     # Every end is moved above fd 4 first, so the dup2 calls below never meet themselves: a
     # dup2 onto its own fd keeps close-on-exec and Chrome would start without its pipe.
     ends = []
@@ -236,15 +247,19 @@ def open_page(tmp_path, page, setup="", fragment=""):
         attached = browser.send("Target.attachToTarget", targetId=target, flatten=True)
         browser.session = attached["sessionId"]
         browser.send("Page.enable")
-        browser.send("Page.navigate", url=staged.as_uri() + (f"#{fragment}" if fragment else ""))
+        target_url = url or staged.as_uri()
+        if url is not None and setup:
+            browser.send("Page.addScriptToEvaluateOnNewDocument", source=setup)
+        browser.send("Page.navigate", url=target_url + (f"#{fragment}" if fragment else ""))
         browser.wait_for("Page.loadEventFired")
-        # The load event carries no frame: make sure it was the staged page, not about:blank.
+        # The load event carries no frame: make sure it was the page, not about:blank.
+        scheme = "http:" if url is not None else "file:"
         assert (
             browser.run(
-                "await until(() => location.protocol === 'file:' && document.readyState === 'complete');"
+                f"await until(() => location.protocol === '{scheme}' && document.readyState === 'complete');"
                 "return location.protocol;"
             )
-            == "file:"
+            == scheme
         )
         yield browser
     finally:
@@ -254,6 +269,6 @@ def open_page(tmp_path, page, setup="", fragment=""):
         os.close(from_chrome_r)
 
 
-def run_page(tmp_path, page, steps, setup="", fragment=""):
-    with open_page(tmp_path, page, setup, fragment) as browser:
+def run_page(tmp_path, page, steps, setup="", fragment="", public=PUBLIC, url=None):
+    with open_page(tmp_path, page, setup, fragment, public, url) as browser:
         return browser.run(steps)

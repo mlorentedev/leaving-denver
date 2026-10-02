@@ -4,7 +4,8 @@ Private seller data (reserve floors, phone) kept out of the public tree.
 Source of truth is data/private.sops.yaml, encrypted with sops/age. The public
 build only needs the phone, which can also come from the SELLER_PHONE env var
 (how CI gets it, as a repository secret). Floors are only ever needed locally,
-by the private seller workspace and `leaving-denver drops`.
+by `leaving-denver drops`, the recording commands and `leaving-denver seal`, which seals them
+for the phone (ADR-007).
 """
 
 import json
@@ -16,6 +17,15 @@ from datetime import date
 from typing import Any
 
 from leaving_denver.config import PRIVATE_SOPS_YAML
+
+# The one variable a passphrase may arrive in (`dotf secrets run --only SELLER_PASSPHRASE -- ...`).
+# No child process of ours needs it, so none is handed it.
+PASSPHRASE_ENV = "SELLER_PASSPHRASE"
+
+
+def child_env() -> dict[str, str]:
+    """The environment a child process gets: ours without the passphrase."""
+    return {name: value for name, value in os.environ.items() if name != PASSPHRASE_ENV}
 
 
 def decrypt_private() -> dict[str, Any]:
@@ -31,6 +41,7 @@ def decrypt_private() -> dict[str, Any]:
         ["sops", "--decrypt", "--output-type", "json", str(PRIVATE_SOPS_YAML)],
         capture_output=True,
         text=True,
+        env=child_env(),
     )
     if res.returncode != 0:
         raise RuntimeError("data/private.sops.yaml is not decryptable (sops + age key required)")
@@ -83,6 +94,7 @@ def set_private(keys: list[str | int], value: Any) -> None:
         input=json.dumps(value),
         capture_output=True,
         text=True,
+        env=child_env(),
     )
     if res.returncode != 0:
         raise RuntimeError(f"sops set failed: {res.stderr.strip()}")

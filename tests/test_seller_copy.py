@@ -11,6 +11,7 @@ from pathlib import Path
 
 import pytest
 import yaml
+from sealed_helpers import json_block
 
 from leaving_denver import site_builder
 
@@ -48,8 +49,8 @@ def built(tmp_path_factory):
     site_builder.build_public_site(site_builder.load_inventory_yaml())
     patch.undo()
     html = (public / "seller/index.html").read_text(encoding="utf-8")
-    items = json.loads(html.split("const ITEMS = ", 1)[1].split("; window.posterItems", 1)[0])
-    config = json.loads(html.split("const CONFIG = ", 1)[1].split("; window.sellerConfig", 1)[0])
+    items = json_block(html, "seller-items")
+    config = json_block(html, "seller-config")
     return {"html": html, "items": items, "config": config}
 
 

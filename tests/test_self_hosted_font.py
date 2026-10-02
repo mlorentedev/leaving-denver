@@ -7,14 +7,13 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 PUBLIC = ROOT / "build" / "public"
-PRIVATE = ROOT / "build" / "private"
 TEMPLATES = ROOT / "src" / "leaving_denver" / "templates"
 
 
 @pytest.mark.parametrize(
     "path",
-    [TEMPLATES / "index.html", TEMPLATES / "poster_assistant.html"],
-    ids=["catalog", "assistant"],
+    [TEMPLATES / "index.html", TEMPLATES / "seller.html"],
+    ids=["catalog", "seller"],
 )
 def test_no_google_fonts(path):
     html = path.read_text(encoding="utf-8")
@@ -22,7 +21,7 @@ def test_no_google_fonts(path):
     assert "fonts.gstatic.com" not in html
 
 
-@pytest.mark.parametrize("root", [PUBLIC, PRIVATE], ids=["public", "private"])
+@pytest.mark.parametrize("root", [PUBLIC], ids=["public"])
 def test_stylesheet_font_face_points_at_a_built_file(root):
     css = (root / "styles.css").read_text(encoding="utf-8")
     faces = re.findall(r"@font-face\{[^}]*\}", css)

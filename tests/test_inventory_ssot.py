@@ -10,7 +10,6 @@ import yaml
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 INVENTORY_YAML = BASE_DIR / "data" / "inventory.yaml"
-POSTER = BASE_DIR / "src" / "leaving_denver" / "templates" / "poster_assistant.html"
 
 
 @pytest.fixture
@@ -44,10 +43,7 @@ def test_the_car_takes_only_payments_that_cannot_be_clawed_back(inventory):
         for method in inventory["seller"]["payment_methods"]["vehicle"]:
             assert method in labels["payment_methods"], f"{code}: no label for {method}"
     car = next(i for i in inventory["items"] if i["category"] == "Vehicle")
-    copy = " ".join(
-        [car["pickup_note"], car["es"]["pickup_note"]]
-        + re.findall(r"VEHICLE_PAYMENT_ES = '([^']+)'", POSTER.read_text(encoding="utf-8"))
-    ).lower()
+    copy = " ".join([car["pickup_note"], car["es"]["pickup_note"]]).lower()
     for banned in ("cash", "efectivo", "venmo", "zelle"):
         assert not re.search(rf"\b{banned}\b", copy), f"the car's payment copy mentions {banned}"
     assert "wire" in car["pickup_note"].lower()
@@ -57,7 +53,6 @@ def test_the_car_takes_only_payments_that_cannot_be_clawed_back(inventory):
 # Only the car is paid by cashier's check, so a line that offers cash next to a cashier's check
 # is the old car copy, wherever it is written by hand.
 CAR_COPY = [
-    POSTER,
     BASE_DIR / "src" / "leaving_denver" / "assets" / "seller.mjs",
     BASE_DIR / "src" / "leaving_denver" / "templates" / "seller.html",
     BASE_DIR / "data" / "seller-replies.yaml",
@@ -229,7 +224,6 @@ UNBACKED_CLAIMS = re.compile(
 CLAIM_SOURCES = [
     INVENTORY_YAML,
     BASE_DIR / "src" / "leaving_denver" / "templates" / "index.html",
-    BASE_DIR / "src" / "leaving_denver" / "templates" / "poster_assistant.html",
     BASE_DIR / "src" / "leaving_denver" / "assets" / "seller.mjs",
     BASE_DIR / "data" / "seller-replies.yaml",
     BASE_DIR / "build" / "public" / "seller" / "index.html",

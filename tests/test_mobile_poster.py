@@ -1,8 +1,8 @@
-import json
 import subprocess
 from pathlib import Path
 
 import pytest
+from sealed_helpers import json_block
 
 from leaving_denver import site_builder
 
@@ -42,8 +42,7 @@ def test_mobile_poster_uses_only_published_sanitized_inventory(tmp_path, monkeyp
     site_builder.build_public_site(inventory)
 
     poster = (public / "seller/index.html").read_text(encoding="utf-8")
-    payload = poster.split("const ITEMS = ", 1)[1].split("; window.posterItems", 1)[0]
-    items = json.loads(payload)
+    items = json_block(poster, "seller-items")
     assert {item["id"] for item in items} == {
         item["id"]
         for item in inventory["items"]
@@ -79,8 +78,7 @@ def test_mobile_poster_does_not_offer_sold_pending_or_free_items(tmp_path, monke
     site_builder.build_public_site(inventory)
 
     poster = (public / "seller/index.html").read_text(encoding="utf-8")
-    payload = poster.split("const ITEMS = ", 1)[1].split("; window.posterItems", 1)[0]
-    ids = {item["id"] for item in json.loads(payload)}
+    ids = {item["id"] for item in json_block(poster, "seller-items")}
     assert not ids.intersection({item["id"] for item in candidates[:3]})
     assert candidates[3]["id"] in ids
 
@@ -281,11 +279,9 @@ def test_mobile_access_setup_is_documented():
     assert "anonymous" in ops
 
 
-def test_the_local_assistant_stays_out_of_the_public_build_until_it_moves(tmp_path, monkeypatch):
-    """FEAT-009 PR 1 keeps poster_assistant.html (floors, week plan): PR 2 moves it. Until
-    then it must not reach build/public, and the public tool must not borrow its PIN."""
-    assistant = site_builder.TEMPLATES_DIR / "poster_assistant.html"
-    assert assistant.is_file()
+def test_the_local_assistant_is_gone_and_its_pin_with_it(tmp_path, monkeypatch):
+    """ADR-007 retired the local workspace: no template, no built file, no PIN."""
+    assert not (site_builder.TEMPLATES_DIR / "poster_assistant.html").exists()
     public = tmp_path / "public"
     monkeypatch.setenv("SELLER_PHONE", "+15555550100")
     monkeypatch.setattr(site_builder, "DIST_DIR", public)

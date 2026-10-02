@@ -75,9 +75,26 @@ Sealing happens inside `make ci-secrets`, on the owner's machine:
 2. **Build the payload from an allow-list**: `floors`, `targets`, `sales`, `tracking`, `notes`,
    and `sealed_at` (the date and time of the seal). `seller.phone` and `cloudflare_pages_token`
    are never in it; the phone keeps its own secret (`SELLER_PHONE`, ADR-002).
-3. **Read the passphrase from the terminal**, twice, with echo off. Never from argv, the
-   environment or a pipe. With no TTY, the target refuses. An agent shell has no TTY, so an
-   agent cannot run it.
+3. **Read the passphrase from the terminal**, twice, with echo off. Never from argv or a pipe.
+   With no TTY, the target refuses. An agent shell has no TTY, so an agent cannot run it.
+   *Amended 2026-10-01 (owner):* the environment is read under one name only,
+   `SELLER_PASSPHRASE`, meant for `dotf secrets run --only SELLER_PASSPHRASE -- make ...`: dotf
+   keeps the passphrase in Bitwarden, injects it into that child only and keeps it out of the shell
+   history. Nothing can tell a variable dotf injected from one set by hand, so it is validated
+   like a typed one (five or more distinct EFF words), never printed, and removed from the
+   environment of every child the target starts (Node, gh, dotf). The terminal rule stands: with
+   no TTY the target still refuses, so an agent that somehow had the variable still could not seal.
+   Any other variable, and argv, are ignored or refused.
+   *Amended after review (2026-10-01):* `dotf secrets run` keeps the terminal rule satisfiable.
+   When its stdout is a terminal it gives the child a pseudo-terminal for stdin, stdout and
+   stderr, so `isatty(stdin)` holds and `/dev/tty` is that pseudo-terminal; otherwise it passes its
+   own stdin through, a terminal if it was one. So the target keeps requiring a TTY (which is also
+   what stops an agent shell) and nothing about the environment path needs a prompt. The order is
+   seal, then save to Bitwarden (`dotf secrets set SELLER_PASSPHRASE --yes`, which dotf needs to
+   create an item from a pipe), then `gh secret set`: a failed save stops before anything is
+   uploaded, and an upload that fails after a save says so, since Bitwarden then already holds the
+   new passphrase and `make ci-secrets` is simply run again. Neither dotf's stderr nor Node's is
+   ever relayed; both can echo what was sent to them.
 4. **Encrypt with WebCrypto in Node** (`crypto.subtle`). It is the same API the page decrypts
    with, and Node 24 is already required for Tailwind, so there is no new dependency. The
    payload and the passphrase reach the Node child on stdin.
@@ -99,7 +116,7 @@ The age key never goes to CI. CI never sees plaintext.
 | IV | 12 random bytes, new on every seal |
 | Additional data | the envelope header (`v`, `kdf`, `iter`, `salt`), so a header that was edited fails decryption |
 | Envelope | `{"v":1,"kdf":"PBKDF2-SHA256","iter":1000000,"salt":"<b64>","iv":"<b64>","ct":"<b64>"}` |
-| Passphrase | at least 5 distinct words from the EFF large wordlist (7,776 words), separated by spaces or hyphens. A random 5-word phrase is 64.6 bits. |
+| Passphrase | at least 5 distinct words from the EFF large wordlist, separated by spaces or hyphens. A random 5-word phrase is about 64.6 bits. The bundled list has 7,772 words, not 7,776: the four hyphenated entries (`drop-down`, `felt-tip`, `t-shirt`, `yo-yo`) are removed, because a hyphen is a separator and those words could not be typed back (lesson-023). Five words from 7,772 are 64.6 bits still. |
 
 **Salt and IV are per seal, not per build.** CI holds no key, so it cannot re-encrypt. Every build
 of one secret embeds the same bytes. That is safe: GCM is broken by reusing an IV with *different*
@@ -118,8 +135,19 @@ thousands of years.
 
 **The rule the target enforces.** The target cannot tell whether words were chosen at random, so
 it checks only what it can measure: the word count, the words are on the list, no word repeats,
-and both entries match. It offers to generate a passphrase with `secrets.choice` and writes it to
-the TTY only.
+and both entries match. Enter at the first prompt ("Passphrase (Enter to generate one):")
+generates five distinct words with `secrets.choice`, joined by hyphens. They are written to the
+TTY only, with "Write this down now. It is not stored anywhere.", and the owner types them back
+once; a mismatch aborts with nothing sealed and nothing set. When `dotf` is on `PATH` the
+generated words are saved instead, with `dotf secrets set SELLER_PASSPHRASE` (the value on its
+stdin, its output never relayed), the target prints only "Saved to Bitwarden as
+SELLER_PASSPHRASE", and the terminal print is the fallback if the save fails. A typed passphrase
+is entered twice, and with `dotf` the owner is offered "Save it to Bitwarden? [y/N]" (a save they
+asked for that fails aborts the seal). `make ci-secrets` with Enter overwrites both the secret and
+the Bitwarden field: that is the rotation.
+A re-seal after `make post|sold|reprice` never generates: an empty entry aborts with "Type your
+current passphrase (or run make ci-secrets to make a new one)", so a routine sale cannot rotate
+the passphrase silently (owner, 2026-10-01).
 
 ### 5. The page
 
@@ -134,9 +162,11 @@ the TTY only.
 - **Right passphrase.** The page shows the private views and "Private data as of
   `<sealed_at>`". `sealed_at` is inside the ciphertext, so even the date of the last update is
   hidden.
-- **Remembering the passphrase.** Not persisted. The derived key is a non-extractable `CryptoKey`
-  held in memory. There is nothing in `localStorage`, `sessionStorage`, IndexedDB or cookies. A
-  "Lock" button and `pagehide` drop the key and clear the private DOM, and a reload asks again.
+- **Remembering the passphrase.** Not persisted, and not held. The key is derived once per
+  unlock, used for the one decrypt and dropped: nothing keeps a key or the passphrase in memory
+  afterwards. What stays between an unlock and Lock is the decrypted rows. There is nothing in
+  `localStorage`, `sessionStorage`, IndexedDB or cookies. A "Lock" button and `pagehide` clear the
+  private DOM and the rows, and a reload asks again.
   The phone's own password manager may fill the field (`autocomplete="current-password"`). That
   store is the device's, guarded by its unlock, not the site's. sessionStorage was rejected:
   phone tabs live for days, so the passphrase would sit in plain text in origin storage for any
@@ -174,8 +204,8 @@ input is mixed into the payload, so compressing before encrypting leaks only the
 
 - **One tool.** `make panel` and `build/private/panel.html` are retired in PR 2. `/seller/`
   shows the same data. Recording stays `make post|sold|reprice`.
-- **Passphrase.** It is generated: 5 words from the EFF list, offered by the target, as in
-  decision 4. There is no owner-chosen phrase and no strength-estimator dependency.
+- **Passphrase.** It is generated: 5 words from the EFF list, offered by the target (Enter at
+  the prompt, `make ci-secrets` only), as in decision 4. There is no owner-chosen phrase and no strength-estimator dependency.
 - **Re-seal on record.** After `make post|sold|reprice` succeeds, the target asks whether to
   update `/seller/` now. On yes, it asks for the passphrase, seals, sets the secret and
   dispatches the deploy. On no, nothing else happens.
@@ -211,6 +241,11 @@ input is mixed into the payload, so compressing before encrypting leaks only the
   5. If Access or the email account is also suspect, fix it first.
 - **The passphrase is the whole defence once Access fails.** A weak or reused one undoes this
   ADR. The target's word rule is a floor, not proof.
+- **Accepted: a typed passphrase is only checked, not measured.** A phrase of five distinct EFF
+  words that someone chose rather than drew passes the rule, and the target cannot tell. That is
+  why it offers to generate one. And the guarantee that a sale cannot rotate the passphrase
+  silently covers an empty entry only: a re-seal with a *different* valid phrase rotates it. The
+  re-seal says "Sealing with this passphrase replaces the one your phone uses" before it seals.
 - **What this does not cover:** a compromised phone or computer, a keylogger, or a malicious
   script running in `/seller/` after unlock. The CSP narrows the last one; it does not remove it.
 
@@ -257,10 +292,12 @@ input is mixed into the payload, so compressing before encrypting leaks only the
 - **Writes on the phone become necessary:** if staleness makes the owner quote or record a wrong
   price more than once, the KV backend is reopened.
 - **The envelope passes 32 KB:** compress (`v: 2`) before the 40,000-byte refusal is reached.
-- **The sale ends** (2026-11-09):
-  - delete `SELLER_SEALED` from both environments;
-  - redeploy;
-  - delete the deployments that carry an envelope.
+- **The sale ends** (2026-11-09): follow `docs/runbooks/decommission.md` and ADR-008. In that
+  order: deploy the end page first (`seller.sale_over: true` builds no `/seller/` and no sealed
+  block, and the deploy no longer requires `SELLER_SEALED`), delete the old deployments that carry
+  an envelope, and only then delete `SELLER_SEALED` from both environments with the other secrets.
+  Deleting the secret first would only make the deploy that replaces the page fail, since a
+  deploy without it is refused until the switch is on.
 
   This ADR then describes nothing live.
 

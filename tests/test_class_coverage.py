@@ -24,7 +24,6 @@ PAGES = {
     "flyer.html": PUBLIC_CSS,
     # Script-only classes: the page's module is a Tailwind source too (public.css).
     "seller.mjs": PUBLIC_CSS,
-    "poster_assistant.html": ROOT / "build" / "private" / "styles.css",
 }
 SOURCES = {"seller.mjs": ROOT / "src" / "leaving_denver" / "assets" / "seller.mjs"}
 

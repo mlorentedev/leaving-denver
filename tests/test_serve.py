@@ -8,7 +8,7 @@ import threading
 import pytest
 
 from leaving_denver.cli import make_server, resolve_request_path
-from leaving_denver.config import DIST_DIR, DIST_PRIVATE_DIR
+from leaving_denver.config import DIST_DIR
 
 
 @pytest.mark.parametrize(
@@ -30,10 +30,11 @@ def test_paths_outside_the_build_roots_are_refused(path):
 def test_routes():
     assert resolve_request_path("/") == DIST_DIR
     assert resolve_request_path("/robots.txt?x=1") == DIST_DIR / "robots.txt"
-    assert resolve_request_path("/private/inventory.json") == DIST_PRIVATE_DIR / "inventory.json"
-    assert resolve_request_path("/poster_assistant.html") == (
-        DIST_PRIVATE_DIR / "poster_assistant.html"
+    # The old private workspace is gone (ADR-007): its paths are plain public paths now.
+    assert (
+        resolve_request_path("/private/inventory.json") == DIST_DIR / "private" / "inventory.json"
     )
+    assert resolve_request_path("/poster_assistant.html") == DIST_DIR / "poster_assistant.html"
 
 
 def test_server_binds_loopback_and_refuses_traversal_over_http():
