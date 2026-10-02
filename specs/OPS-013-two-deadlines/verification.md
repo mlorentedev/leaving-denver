@@ -8,7 +8,7 @@ created: "2026-10-02"
 ## Evidence
 
 - [x] AC1 (data) -> `tests/test_two_deadlines.py::test_the_real_data_holds_the_owners_two_deadlines_and_no_departure_date`, `::test_the_price_schedule_is_the_owners_explicit_dates` (the four windows, Oct 6-11, 12-15, 16-19, 20-22), `::test_the_schedule_is_written_down_not_computed_from_a_deadline` (moving a deadline moves no window); `tests/test_inventory_ssot.py::test_seller_metadata`.
-- [x] AC2 (fail closed) -> `::test_a_missing_or_ill_ordered_schedule_fails_closed` (14 cases: each key missing, unknown window, unquoted date, non-ISO, impossible date, car before household, windows out of order or equal, giveaway on the deadline, a list), `::test_the_build_refuses_a_bad_schedule`, `::test_the_end_build_needs_no_dates`.
+- [x] AC2 (fail closed) -> `::test_a_missing_or_ill_ordered_schedule_fails_closed` (15 cases, the compact `20261109` included: each key missing, unknown window, unquoted date, non-ISO, impossible date, car before household, windows out of order or equal, giveaway on the deadline, a list), `::test_the_build_refuses_a_bad_schedule`, `::test_the_end_build_needs_no_dates`.
 - [x] AC3 (countdown) -> `::test_while_household_items_are_for_sale_the_countdown_targets_their_deadline`, `::test_a_pending_household_item_still_counts_as_for_sale`, `::test_with_no_household_item_left_the_countdown_targets_the_car[hidden|sold]`, `::test_a_sold_car_does_not_move_the_household_deadline`, `::test_the_meta_description_month_follows_the_same_rule`; `tests/test_build_contract.py::test_locales_cover_every_deadline_month`, `::test_countdown_updates_in_browser_from_the_deadline_in_the_data`.
 - [x] AC4 (copy) -> `::test_the_car_card_says_it_is_available_until_the_car_deadline`, `::test_a_car_that_is_not_available_does_not_claim_to_be[Pending|Sold]`, `::test_the_hero_names_what_is_still_for_sale`, `::test_the_page_without_the_car_still_says_furniture_and_tech`, `::test_the_hero_no_longer_claims_a_month_the_owner_is_not_leaving_in`; `tests/test_build_contract.py::test_spanish_ui_and_sms_are_localized`.
 - [x] AC5 (flyer) -> `::test_the_flyer_states_both_dates_and_drops_the_everything_claim`, `::test_a_sold_car_leaves_only_the_household_date`, `::test_with_no_household_item_left_the_flyer_names_only_the_car`, `::test_the_flyer_dates_come_from_the_data`; `tests/test_flyer.py` (figures on the page are 23, 9 and the car's name).
@@ -18,8 +18,8 @@ created: "2026-10-02"
 
 ## Test status
 
-- `SELLER_PHONE=+13035550100 make check` -> `1032 passed, 2 skipped in 146.48s`, ruff clean (main before the change: `992 passed, 2 skipped`).
-- The same gate with `seller.sale_over: true` added in a scratch edit (restored from a copy, never committed), run as `env -u SELLER_PHONE -u SELLER_SEALED make check` -> `870 passed, 164 skipped in 102.68s`. The first run failed on one new test that built the catalog from the data with the switch on; the test now removes the switch from its own copy.
+- `SELLER_PHONE=+13035550100 make check` -> `1034 passed, 2 skipped in 151.90s`, ruff clean (main before the change: `992 passed, 2 skipped`).
+- The same gate with `seller.sale_over: true` added in a scratch edit (restored from a copy, never committed), run as `env -u SELLER_PHONE -u SELLER_SEALED make check` -> `872 passed, 164 skipped in 107.24s`. The first run failed on one new test that built the catalog from the data with the switch on; the test now removes the switch from its own copy.
 - Screenshots of the built catalog (EN, ES) and the flyer were read in headless Chrome.
 - Not run: a real deploy. The countdown, the car card and the flyer are read from a local build; check them on the first deploy after merge.
 

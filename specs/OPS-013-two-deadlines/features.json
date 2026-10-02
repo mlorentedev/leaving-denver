@@ -44,7 +44,7 @@
   {
     "id": "OPS-013-two-deadlines-f7",
     "behavior": "AC7: the close-out snippet hides every unsold household item and nothing else, and the result builds with the car's date and no household share page",
-    "verification": "uv run pytest -q tests/test_two_deadlines.py -k closeout tests/test_decommission_runbook.py",
+    "verification": "uv run pytest -q tests/test_two_deadlines.py -k closeout && uv run pytest -q tests/test_decommission_runbook.py",
     "state": "pending",
     "evidence": ""
   },

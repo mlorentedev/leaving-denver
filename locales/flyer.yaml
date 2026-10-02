@@ -8,6 +8,7 @@ en:
   deadline_car: car until {date}
   selling: "For sale:"
   car: "And my car:"
+  car_alone: "My car:"
   pickup: Pickup in DTC
   scan: Scan to see photos and prices
   qr_label: QR code for the moving sale

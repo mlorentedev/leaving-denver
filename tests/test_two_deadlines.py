@@ -158,6 +158,7 @@ BAD_SELLERS = {
         lambda s: s["price_schedule"].update(first_drop=date(2026, 10, 6))
     ),
     "not an ISO date": broken(lambda s: s.update(vehicle_deadline="11/09/2026")),
+    "the compact form": broken(lambda s: s.update(vehicle_deadline="20261109")),
     "a date that does not exist": broken(lambda s: s.update(vehicle_deadline="2026-11-31")),
     "the car before the household": broken(lambda s: s.update(vehicle_deadline="2026-10-23")),
     "windows out of order": broken(lambda s: s["price_schedule"].update(second_drop="2026-10-05")),
@@ -303,6 +304,14 @@ def test_with_no_household_item_left_the_flyer_names_only_the_car(public_dir):
     data = catalog_inventory()
     hide_household(data)
     assert flyer_deadline(build(public_dir, data)["flyer"]) == "Car until November 9"
+
+
+def test_a_flyer_with_only_the_car_has_no_for_sale_line(public_dir):
+    data = catalog_inventory()
+    hide_household(data)
+    text = text_of(build(public_dir, data)["flyer"])
+    assert "For sale:" not in text
+    assert "My car: 2019 Ford Escape SEL AWD" in text
 
 
 def test_the_flyer_dates_come_from_the_data(public_dir):

@@ -426,6 +426,9 @@ def seller_day(seller: dict[str, Any], key: str, value: Any) -> date:
     2026-10-23 as a date object, which `fromisoformat` rejects with a message that names no key."""
     if not isinstance(value, str):
         raise ValueError(f"seller.{key} must be a quoted YYYY-MM-DD string, got {value!r}")
+    # `fromisoformat` also takes the compact 20261023, which no one reads back as this date.
+    if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", value):
+        raise ValueError(f"seller.{key} must be a YYYY-MM-DD date, got {value!r}")
     try:
         return date.fromisoformat(value)
     except ValueError:
