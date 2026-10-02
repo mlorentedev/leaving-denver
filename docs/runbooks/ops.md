@@ -131,7 +131,7 @@ passphrase, so after a rotation or a passphrase you believe is known: delete the
 deployments in the dashboard (Workers & Pages > `leaving-denver` > Deployments), and keep only
 the new one. Rotate the same way if the secret itself leaks.
 
-**Decommission after 2026-11-09.** After the departure date, delete the `SELLER_SEALED` secret
+**Decommission after 2026-11-09.** After the car is handed over (the car deadline, `seller.vehicle_deadline`, is the latest), delete the `SELLER_SEALED` secret
 from both environments (`gh secret delete SELLER_SEALED --env production`, and `--env preview`),
 redeploy, then delete the earlier Pages deployments and the Access application for `/seller`.
 
@@ -244,4 +244,4 @@ Owner setup (dashboards; this repository cannot enable either). Both are in plac
 
 ## End of the sale
 
-On Nov 8 the sale ends and the site becomes one "the sale is over" page; the steps, and what to remove by Nov 15, are in the [decommission runbook](decommission.md).
+The sale has two deadlines: household items by Oct 23 (the unsold ones come off the catalog that day) and the car by Nov 9. Once the car is handed over, and no later than Nov 9, the site becomes one "the sale is over" page; the steps, and what to remove by Nov 15, are in the [decommission runbook](decommission.md).

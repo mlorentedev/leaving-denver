@@ -25,6 +25,8 @@ from leaving_denver.site_builder import (
 )
 
 TODAY = "2026-10-07"
+# Halfway from the monitor's asking price to its $61 floor, to the nearest $5.
+MONITOR_DROP = 80
 
 SCRIPT = """
 import { buildRows } from './src/leaving_denver/assets/seller.mjs';
@@ -48,7 +50,7 @@ def private():
 def rows_by_id(inventory, private, today=TODAY):
     public = sanitize_public_inventory(copy.deepcopy(inventory))
     config = {
-        "drops": seller_drops(inventory["seller"]["departure_date"]),
+        "drops": seller_drops(inventory["seller"]),
         "renew_after_days": {"facebook": 7},
     }
     payload = {
@@ -83,8 +85,8 @@ def test_the_fixture_names_only_items_the_inventory_has(inventory, private):
 
 
 def test_the_drop_windows_are_the_schedules_opening_days(inventory):
-    schedule = sale_schedule(inventory["seller"]["departure_date"])
-    assert seller_drops(inventory["seller"]["departure_date"]) == {
+    schedule = sale_schedule(inventory["seller"])
+    assert seller_drops(inventory["seller"]) == {
         window: schedule[window][0].isoformat() for window in pricing.DROP_WINDOWS
     }
 
@@ -134,7 +136,7 @@ def test_a_row_carries_every_field_the_panel_had(inventory, private):
     assert sofa["daysListed"] == 8
     assert [c["name"] for c in sofa["channels"]] == ["facebook", "craigslist"]
     assert sofa["renewDue"] == "2026-10-13"
-    # The log shows a reprice on 10-03, so the first drop is covered.
+    # The log shows a reprice on 10-06, the day the first drop opened, so it is covered.
     assert sofa["nextDrop"]["price"] == 195
 
 
@@ -170,19 +172,19 @@ def test_a_null_section_reads_as_empty(inventory, private, section):
 
 
 def test_the_next_drop_steps_halfway_to_the_floor_at_the_first_drop_window(inventory, private):
-    schedule = sale_schedule(inventory["seller"]["departure_date"])
-    car = rows_by_id(inventory, private)["2019-ford-escape-sel-awd"]
-    assert car["nextDrop"] == {
+    schedule = sale_schedule(inventory["seller"])
+    monitor = rows_by_id(inventory, private)["dell-monitor-32"]
+    assert monitor["nextDrop"] == {
         "on": schedule["first_drop"][0].isoformat(),
-        "price": 11300,
+        "price": MONITOR_DROP,
         "overdue": True,
     }
 
 
 def test_a_window_the_price_log_already_covers_is_not_the_next_drop(inventory, private):
-    # The sofa was repriced on 10-03, the day the first drop opened: the second drop is next.
+    # The sofa was repriced on 10-06, the day the first drop opened: the second drop is next.
     sofa = rows_by_id(inventory, private)["sofa-sleeper"]
-    assert sofa["nextDrop"] == {"on": "2026-10-15", "price": 195, "overdue": False}
+    assert sofa["nextDrop"] == {"on": "2026-10-12", "price": 195, "overdue": False}
 
 
 def test_each_drop_recomputes_from_the_asking_price_in_force(inventory, private):
@@ -192,8 +194,8 @@ def test_each_drop_recomputes_from_the_asking_price_in_force(inventory, private)
 
 
 def test_the_last_step_is_the_floor_at_the_clear_floors_window(inventory, private):
-    schedule = sale_schedule(inventory["seller"]["departure_date"])
-    data = with_log(private, "sofa-sleeper", "2026-10-03", "2026-10-15")
+    schedule = sale_schedule(inventory["seller"])
+    data = with_log(private, "sofa-sleeper", "2026-10-06", "2026-10-12")
     row = rows_by_id(inventory, data)["sofa-sleeper"]
     assert row["nextDrop"] == {
         "on": schedule["clear_floors"][0].isoformat(),
@@ -203,7 +205,7 @@ def test_the_last_step_is_the_floor_at_the_clear_floors_window(inventory, privat
 
 
 def test_nothing_is_left_to_drop_once_every_window_is_covered(inventory, private):
-    data = with_log(private, "sofa-sleeper", "2026-10-03", "2026-10-15", "2026-10-20")
+    data = with_log(private, "sofa-sleeper", "2026-10-06", "2026-10-12", "2026-10-16")
     assert rows_by_id(inventory, data)["sofa-sleeper"]["nextDrop"] is None
 
 
@@ -215,6 +217,7 @@ def test_nothing_is_left_to_drop_once_every_window_is_covered(inventory, private
         ("onn-43-4k-tv", {"status": "Sold"}),
         ("onn-43-4k-tv", {"status": "Pending"}),
         ("dell-monitor-32", {"recommended_list_price": 61}),  # already at the floor
+        ("2019-ford-escape-sel-awd", {}),  # the car has no drop schedule (OPS-013)
     ],
 )
 def test_no_next_drop_when_there_is_nothing_to_drop(inventory, private, item_id, fields):
@@ -224,7 +227,7 @@ def test_no_next_drop_when_there_is_nothing_to_drop(inventory, private, item_id,
 
 def test_a_drop_whose_window_has_not_started_is_not_overdue(inventory, private):
     early = rows_by_id(inventory, private, today="2026-09-29")
-    assert early["2019-ford-escape-sel-awd"]["nextDrop"]["overdue"] is False
+    assert early["dell-monitor-32"]["nextDrop"]["overdue"] is False
 
 
 # Renew due and days listed
@@ -273,7 +276,7 @@ def test_a_sale_recorded_the_old_way_as_a_bare_price_still_reads(inventory, priv
 
 def test_the_price_log_is_shown_and_flagged_when_it_disagrees_with_asking(inventory, private):
     sofa = rows_by_id(inventory, private)["sofa-sleeper"]
-    assert sofa["priceLog"] == [{"at": "2026-10-03", "price": 205}]
+    assert sofa["priceLog"] == [{"at": "2026-10-06", "price": 205}]
     assert sofa["logMismatch"] is True  # asking is still 220
     dell = rows_by_id(inventory, private)["dell-monitor-32"]
     assert dell["logMismatch"] is False  # nothing logged, nothing to disagree with

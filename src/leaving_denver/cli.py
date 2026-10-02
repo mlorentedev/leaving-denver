@@ -185,7 +185,7 @@ def cmd_drops(args):
         print("Error: data/private.sops.yaml is not decryptable (sops + age key required).")
         sys.exit(1)
 
-    schedule = sale_schedule(data["seller"]["departure_date"])
+    schedule = sale_schedule(data["seller"])
     print("SALE TIMELINE")
     for label, key in (
         ("First drop", "first_drop"),

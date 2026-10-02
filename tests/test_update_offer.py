@@ -15,7 +15,7 @@ from sealed_helpers import PASSPHRASE, fixture_private, install_fakes
 from leaving_denver import cli, seal
 
 INVENTORY_OF_ONE = {
-    "seller": {"departure_date": "2026-11-09"},
+    "seller": {},
     "items": [{"id": "sofa-sleeper", "title": "Sofa", "status": "Available"}],
 }
 
@@ -24,7 +24,7 @@ INVENTORY_OF_ONE = {
 def commands(monkeypatch):
     """The CLI with inventory, recorders and rebuild stubbed; `calls` records the order."""
     inventory = {
-        "seller": {"departure_date": "2026-11-09"},
+        "seller": {},
         "items": [{"id": "sofa-sleeper", "title": "Sofa", "status": "Available"}],
     }
     calls = []
@@ -150,7 +150,7 @@ def test_an_unknown_item_never_asks(commands, monkeypatch):
 def test_yes_end_to_end_sets_both_environments_then_dispatches_the_deploy(tmp_path, monkeypatch):
     """The real seal and the real `gh` call sequence, with the terminal and `gh` stubbed."""
     inventory = {
-        "seller": {"departure_date": "2026-11-09"},
+        "seller": {},
         "items": [{"id": "sofa-sleeper", "title": "Sofa", "status": "Available"}],
     }
     monkeypatch.setattr(cli, "load_inventory_yaml", lambda: inventory)

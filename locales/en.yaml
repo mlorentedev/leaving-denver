@@ -1,10 +1,15 @@
-page_title_vehicle: Denver Tech Center Relocation Sale — Furniture, Tech & Vehicle
+page_title_both: Denver Tech Center Relocation Sale — Furniture, Tech & Vehicle
 page_title_household: Denver Tech Center Relocation Sale — Furniture & Tech
+page_title_vehicle: Denver Tech Center Relocation Sale — AWD SUV
+hero_both: I am relocating and selling furniture, tech, and an AWD SUV in Denver Tech Center.
+hero_household: I am relocating and selling furniture and tech in Denver Tech Center.
+hero_vehicle: I am relocating and selling my AWD SUV in Denver Tech Center.
 site_name: Moving Sale
-relocating_in: Relocating in
-hero_prefix: I am relocating in
-hero_vehicle_suffix: and selling furniture, tech, and an AWD SUV in Denver Tech Center.
-hero_household_suffix: and selling furniture and tech in Denver Tech Center.
+# The date line over the hero and the car card: the household items go first, the car later.
+date_format: "{month} {day}"
+deadline_household: Furniture & tech until {date}
+deadline_vehicle: Car available until {date}
+vehicle_until: Available until {date}
 pickup_near: Pickup in DTC near I-25 & Belleview
 household_payment_summary: Cash, Venmo or Zelle for household items
 vehicle: Vehicle

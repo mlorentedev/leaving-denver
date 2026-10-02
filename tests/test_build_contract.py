@@ -4,7 +4,6 @@ Build contract: the builder fails closed, and unpublished items never reach buil
 
 import json
 import re
-from datetime import date
 from html import unescape
 
 import pytest
@@ -28,7 +27,14 @@ def inventory(*, hidden_published=False):
     return {
         "seller": {
             "location": "DTC, CO 80111",
-            "departure_date": "2026-11-09",
+            "household_deadline": "2026-10-23",
+            "vehicle_deadline": "2026-11-09",
+            "price_schedule": {
+                "first_drop": "2026-10-06",
+                "second_drop": "2026-10-12",
+                "clear_floors": "2026-10-16",
+                "giveaway": "2026-10-20",
+            },
             "payment_methods": {
                 "household": ["Cash", "Venmo", "Zelle"],
                 "vehicle": ["Cashier's check issued at the buyer's bank", "wire transfer"],
@@ -384,15 +390,22 @@ def test_spanish_page_is_built(public_dir):
         assert {"min-w-10", "min-h-10"} <= set(link.group(1).split())
 
 
-def test_locales_cover_every_departure_month(public_dir):
+def test_locales_cover_every_deadline_month(public_dir):
     data = inventory()
-    data["seller"]["departure_date"] = "2026-03-09"
+    data["seller"]["household_deadline"] = "2026-03-09"
+    data["seller"]["vehicle_deadline"] = "2026-03-10"
+    data["seller"]["price_schedule"] = {
+        "first_drop": "2026-03-01",
+        "second_drop": "2026-03-02",
+        "clear_floors": "2026-03-03",
+        "giveaway": "2026-03-04",
+    }
     site_builder.build_public_site(data)
 
     english = (public_dir / "index.html").read_text(encoding="utf-8")
     spanish = (public_dir / "es" / "index.html").read_text(encoding="utf-8")
-    assert "Relocating in March" in english
-    assert "Me mudo en marzo" in spanish
+    assert "Furniture &amp; tech until March 9" in english
+    assert "Muebles y tecnología hasta el 9 de marzo" in spanish
 
 
 def test_spanish_fallbacks_and_asset_paths(public_dir):
@@ -461,7 +474,8 @@ def test_spanish_ui_and_sms_are_localized(public_dir):
     html = (public_dir / "es" / "index.html").read_text(encoding="utf-8")
 
     for text in (
-        "Me mudo en noviembre",
+        "Muebles y tecnología hasta el 23 de octubre",
+        "Disponible hasta el 9 de noviembre",
         "Primer piso, un tramo de escaleras, sin ascensor.",
         "Ahorre con un paquete",
         "Ver qué incluye",
@@ -476,7 +490,7 @@ def test_spanish_ui_and_sms_are_localized(public_dir):
     ):
         assert text in html
     for stale in (
-        "Relocating in",
+        "Furniture &amp; tech until",
         "Save with a bundle",
         "How pickup works",
         "Details & Specifications",
@@ -508,18 +522,6 @@ def test_spanish_bundle_copy_and_payment_terms(public_dir):
     terms = text_for_role(html, "pickup-terms")
     assert "Efectivo, Venmo, Zelle en persona" in " ".join(terms.split())
     assert "Cheque de caja emitido en el banco del comprador o transferencia bancaria" in terms
-
-
-def test_sale_schedule_comes_from_departure_date():
-    schedule = site_builder.sale_schedule("2026-11-09")
-    assert schedule == {
-        "first_drop": (date(2026, 10, 3), date(2026, 10, 6)),
-        "second_drop": (date(2026, 10, 15), date(2026, 10, 17)),
-        "clear_floors": (date(2026, 10, 20), date(2026, 10, 25)),
-        "giveaway": (date(2026, 11, 3), date(2026, 11, 5)),
-    }
-    shifted = site_builder.sale_schedule("2026-11-10")
-    assert shifted["first_drop"] == (date(2026, 10, 4), date(2026, 10, 7))
 
 
 def test_vehicle_card_claims_are_in_data(public_dir):
@@ -568,10 +570,10 @@ def test_pickup_facts_come_from_data_one_per_line(public_dir):
     assert text_for_role(html, "pickup-summary").strip() == data["seller"]["pickup_summary"]
 
 
-def test_countdown_updates_in_browser_from_departure_date(public_dir):
+def test_countdown_updates_in_browser_from_the_deadline_in_the_data(public_dir):
     _, html = real_page(public_dir)
-    assert 'data-departure-date="2026-11-09"' in html
-    assert "function updateDepartureCountdown()" in html
+    assert 'data-countdown-date="2026-10-23"' in html
+    assert "function updateDeadlineCountdown()" in html
     assert "America/Denver" in html
     assert "{{ days_remaining }}" not in html
 

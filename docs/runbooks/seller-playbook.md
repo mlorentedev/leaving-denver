@@ -1,6 +1,6 @@
 # Denver Tech Center Moving Sale — Seller Playbook
 
-Operational guidelines for the sale before the 2026-11-09 departure. Public
+Operational guidelines for the sale: household items go by 2026-10-23 and the car by 2026-11-09. Public
 prices come from `data/inventory.yaml`; reserve floors live encrypted in
 `data/private.sops.yaml`. Dates below are planning checkpoints, not promises
 to buyers. Confirm current listings and platform rules before posting.
@@ -57,19 +57,20 @@ unverified vehicle service, condition or retail value.
 | When | Seller action |
 | :--- | :--- |
 | September 29–October 4 | Photograph and list the car and highest-value items first; list smaller items after the main listings. Post an umbrella message only where group rules allow it and put a QR flyer on the building board if permitted (print `https://leaving-denver.pages.dev/flyer/` from a browser). |
-| October 5–11 | Reply promptly, follow up on qualified inquiries and renew listings only when the platform offers it. Review items with no messages before changing their public asking prices. |
-| October 12–18 | Refresh eligible listings and photos; follow up with interested buyers. Recheck public asking prices on items still getting no qualified inquiries. |
-| October 19–25 | Promote remaining bundles without claiming items already sold. If the sectional is unsold, contact The Good Couch with real photos by October 22 as a backup; see [backup-exits.md](backup-exits.md). |
-| October 26–November 1 | Reassess unsold items and book donation/pickup alternatives by October 26 ([backup-exits.md](backup-exits.md)); confirm acceptance first, especially for bedding, electronics and sleeper sofas. Refresh car instant offers around November 1–2; see [vehicle-sale.md](vehicle-sale.md). |
-| November 2–8 | Give away or donate remaining low-value items if needed. Arrange vehicle handover for November 5, with November 6 as the latest fallback; do not promise a later bank transaction. Take down sold listings and follow the [decommission ticket](https://github.com/mlorentedev/leaving-denver/issues/38) to remove public contact details. |
-| November 9 | Departure: verify the sale has ended and the catalog no longer exposes a contact number. |
+| October 5–11 | Reply promptly, follow up on qualified inquiries and renew listings only when the platform offers it. The first household price drop opens October 6; review items with no messages before changing their public asking prices. |
+| October 12–15 | The second drop opens October 12. If the sectional is unsold, contact The Good Couch with real photos by October 12 as a backup, and book donation/pickup alternatives by October 15 ([backup-exits.md](backup-exits.md)); confirm acceptance first, especially for bedding, electronics and sleeper sofas. |
+| October 16–19 | Reserve floors open October 16 for household items. Promote remaining bundles without claiming items already sold. |
+| October 20–22 | Household giveaway window: give away or donate what is left; last drop-offs and recycling by October 21 ([backup-exits.md](backup-exits.md)). Take down sold listings. |
+| October 23 | Household deadline: take the unsold household items off the catalog ([household close-out](decommission.md)). From here the page is about the car. |
+| October 24–November 9 | Sell the car and arrange its handover in this window, never later than November 9 (see [vehicle-sale.md](vehicle-sale.md)); refresh the car's instant offers after October 30 and do not promise a later bank transaction. |
+| By November 9 | Car handed over: turn the sale off, take down the car's listings and follow the [decommission ticket](https://github.com/mlorentedev/leaving-denver/issues/38) to remove public contact details. Verify the catalog no longer exposes a contact number. |
 
-Run `leaving-denver drops` immediately before repricing. It derives schedule windows from `seller.departure_date` and displays all price tiers:
+Run `leaving-denver drops` immediately before repricing. It reads the household windows from `seller.price_schedule` (the car has no schedule) and displays all price tiers:
 
 * **First drop:** reduce items with no qualified inquiries.
 * **Second drop:** make the next controlled reduction.
 * **Clear reserve floors:** use the encrypted per-item minimums.
-* **Giveaway window:** dispose of remaining low-value items before departure.
+* **Giveaway window:** dispose of remaining low-value household items before October 23.
 
 The command output is seller-only. Do not publish its dates, reserve timing, or
 totals; the displayed tiers come from the inventory and encrypted reserve data

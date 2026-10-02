@@ -26,7 +26,8 @@ def test_seller_metadata(inventory):
     assert "location" in seller
     assert "email" in seller
     assert "CO 80111" in seller["location"]
-    assert seller["departure_date"] == "2026-11-09"
+    assert seller["household_deadline"] == "2026-10-23"
+    assert seller["vehicle_deadline"] == "2026-11-09"
     assert set(seller["payment_methods"]) == {"household", "vehicle"}
     assert "Venmo" in " ".join(seller["payment_methods"]["household"])
     assert "Venmo" not in " ".join(seller["payment_methods"]["vehicle"])
@@ -205,8 +206,8 @@ def test_private_floors_consistent(inventory):
 
 
 # Claims the seller cannot back: no 100k service receipt exists, remote start and
-# highway-only miles are not in the data, the departure date is 9 November, and
-# the CSP 21N12 coverage ended at 84k miles. "Garage-kept" was on this list until the
+# highway-only miles are not in the data, the sale has two deadlines (household 23 October,
+# car 9 November, so "everything must go" is false), and the CSP 21N12 coverage ended at 84k miles. "Garage-kept" was on this list until the
 # owner confirmed it (#48, 2026-09-28).
 UNBACKED_CLAIMS = re.compile(
     r"100k[- ](mile )?(milestone )?(major )?s(er)?v|highway miles|highway-commuter|"

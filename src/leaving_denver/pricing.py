@@ -9,7 +9,7 @@ in assets/seller.mjs); a test compares the tiers.
 
 from typing import Any
 
-# The sale windows a drop can happen in, in order (sale_schedule names them).
+# The household windows a drop can happen in, in order (`seller.price_schedule` opens them).
 DROP_WINDOWS = ("first_drop", "second_drop", "clear_floors")
 
 

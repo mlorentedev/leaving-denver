@@ -19,7 +19,7 @@ import shutil
 import subprocess
 from datetime import date, timedelta
 from pathlib import Path
-from typing import Any
+from typing import Any, NamedTuple
 from urllib.parse import urlsplit
 
 import segno
@@ -405,22 +405,81 @@ def sanitize_public_seller(full_data: dict[str, Any]) -> dict[str, Any]:
     seller = full_data["seller"]
     return {
         "location": seller["location"],
-        "departure_date": seller["departure_date"],
         "payment_methods": seller["payment_methods"],
         "pickup": seller.get("pickup", []),
         "pickup_summary": seller.get("pickup_summary", ""),
     }
 
 
-def sale_schedule(departure_date: str) -> dict[str, tuple[date, date]]:
-    """Return the sale windows as offsets from the departure date."""
-    departure = date.fromisoformat(departure_date)
-    return {
-        "first_drop": (departure - timedelta(days=37), departure - timedelta(days=34)),
-        "second_drop": (departure - timedelta(days=25), departure - timedelta(days=23)),
-        "clear_floors": (departure - timedelta(days=20), departure - timedelta(days=15)),
-        "giveaway": (departure - timedelta(days=6), departure - timedelta(days=4)),
-    }
+class SaleDates(NamedTuple):
+    household: date
+    vehicle: date
+    schedule: dict[str, tuple[date, date]]
+
+
+# The household price windows, in order; each is listed in `seller.price_schedule` by the day it opens.
+SCHEDULE_WINDOWS = ("first_drop", "second_drop", "clear_floors", "giveaway")
+
+
+def seller_day(seller: dict[str, Any], key: str, value: Any) -> date:
+    """One date of the seller's data. Only a quoted ISO string counts: YAML reads a bare
+    2026-10-23 as a date object, which `fromisoformat` rejects with a message that names no key."""
+    if not isinstance(value, str):
+        raise ValueError(f"seller.{key} must be a quoted YYYY-MM-DD string, got {value!r}")
+    try:
+        return date.fromisoformat(value)
+    except ValueError:
+        raise ValueError(f"seller.{key} must be a YYYY-MM-DD date, got {value!r}") from None
+
+
+def sale_dates(seller: dict[str, Any]) -> SaleDates:
+    """The two deadlines and the household price windows (OPS-013), checked.
+
+    A missing or ill-ordered schedule fails the build: a drop a day late or a deadline after
+    the car's is a buyer shown the wrong date. Each window runs to the day before the next one
+    opens, and the last (the giveaway) to the day before the household deadline."""
+    opens = seller.get("price_schedule")
+    if not isinstance(opens, dict) or set(opens) != set(SCHEDULE_WINDOWS):
+        raise ValueError(f"seller.price_schedule must name exactly {SCHEDULE_WINDOWS}")
+    days = [seller_day(seller, f"price_schedule.{w}", opens[w]) for w in SCHEDULE_WINDOWS]
+    household = seller_day(seller, "household_deadline", seller.get("household_deadline"))
+    vehicle = seller_day(seller, "vehicle_deadline", seller.get("vehicle_deadline"))
+    if household >= vehicle:
+        raise ValueError("seller.household_deadline must be before seller.vehicle_deadline")
+    ends = [*(day - timedelta(days=1) for day in days[1:]), household - timedelta(days=1)]
+    if any(start > end for start, end in zip(days, ends, strict=True)):
+        raise ValueError(
+            "seller.price_schedule must open its windows in order, each before the next and "
+            "the last before seller.household_deadline"
+        )
+    windows = dict(zip(SCHEDULE_WINDOWS, zip(days, ends, strict=True), strict=True))
+    return SaleDates(household, vehicle, windows)
+
+
+def sale_schedule(seller: dict[str, Any]) -> dict[str, tuple[date, date]]:
+    """The household price windows as (first day, last day), from `seller.price_schedule`."""
+    return sale_dates(seller).schedule
+
+
+def for_sale(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """What a buyer can still ask about: anything not Sold (Pending still counts)."""
+    return [i for i in items if i["status"] != "Sold"]
+
+
+def countdown_deadline(items: list[dict[str, Any]], dates: SaleDates) -> tuple[date, bool]:
+    """The date the page counts down to, and whether it is the household one.
+
+    It is the household deadline while any published household item is for sale, and the car's
+    after that. Hiding the unsold household items on the day (the decommission runbook) is what
+    moves it, not the calendar."""
+    if any(i["category"] != "Vehicle" for i in for_sale(items)):
+        return dates.household, True
+    return dates.vehicle, False
+
+
+def format_day(day: date, t: dict[str, Any]) -> str:
+    """A date as the locale writes it: October 23, 23 de octubre."""
+    return t["date_format"].format(month=t["months"][day.month], day=day.day)
 
 
 # Cloudflare Pages reads _headers from the output root. Photos keep their names
@@ -503,6 +562,15 @@ def og_common(locale: str) -> dict[str, Any]:
     }
 
 
+def page_copy(vehicle: dict[str, Any] | None, items: list[dict[str, Any]]) -> dict[str, str]:
+    """The locale keys for the title and the hero line: what the page still sells decides them.
+    A Sold item still sits on the page, so only what a buyer can ask about counts."""
+    car = vehicle is not None and vehicle["status"] != "Sold"
+    stuff = bool(for_sale(items))
+    key = "both" if car and stuff else "vehicle" if car else "household"
+    return {"title": f"page_title_{key}", "hero": f"hero_{key}"}
+
+
 def catalog_og(
     locale: str,
     t: dict[str, Any],
@@ -510,16 +578,15 @@ def catalog_og(
     items: list[dict[str, Any]],
     previews: dict[str, str],
     origin: str,
-    departure: date,
+    countdown: str,
 ) -> dict[str, Any]:
-    """The catalog page's own preview: the hero line, and the vehicle's image (or the
-    first item's with one)."""
+    """The catalog page's own preview: the hero line and the deadline the page counts down to,
+    and the vehicle's image (or the first item's with one)."""
     showcase = next((i for i in [vehicle, *items] if i and i["id"] in previews), None)
-    suffix = t["hero_vehicle_suffix" if vehicle else "hero_household_suffix"]
     return {
         **og_common(locale),
-        "title": t["page_title_vehicle" if vehicle else "page_title_household"],
-        "description": f"{t['hero_prefix']} {t['months'][departure.month]} {suffix}",
+        "title": t[page_copy(vehicle, items)["title"]],
+        "description": f"{t[page_copy(vehicle, items)['hero']]} {countdown}.",
         "url": f"{origin}/{locale_path(locale)}",
         "image": f"{origin}/{previews[showcase['id']]}" if showcase else None,
         "image_alt": showcase["title"] if showcase else "",
@@ -841,9 +908,9 @@ def seller_roster(public_data: dict[str, Any]) -> list[dict[str, Any]]:
     ]
 
 
-def seller_drops(departure_date: str) -> dict[str, str]:
-    """The day each price-drop window opens, from the departure date."""
-    schedule = sale_schedule(departure_date)
+def seller_drops(seller: dict[str, Any]) -> dict[str, str]:
+    """The day each price-drop window opens, from the seller's explicit schedule."""
+    schedule = sale_schedule(seller)
     return {window: schedule[window][0].isoformat() for window in DROP_WINDOWS}
 
 
@@ -872,13 +939,14 @@ def write_seller_poster(public_data: dict[str, Any], full_data: dict[str, Any]) 
         code: localize_seller(seller, full_data, code, translations[code])["payment_methods"]
         for code in LISTING_LOCALES
     }
-    month = date.fromisoformat(seller["departure_date"]).month
+    # Listings say when the owner moves, and that is the car's month: the owner leaves in November.
+    month = sale_dates(full_data["seller"]).vehicle.month
     config = {
         "origin": site_url(),
         "month": {code: translations[code]["months"][month] for code in LISTING_LOCALES},
         # For the private views, computed in the page once the data is open (ADR-007).
         "roster": seller_roster(public_data),
-        "drops": seller_drops(seller["departure_date"]),
+        "drops": seller_drops(full_data["seller"]),
         "renew_after_days": RENEW_AFTER_DAYS,
     }
     car_payment = {
@@ -979,22 +1047,32 @@ def flyer_qr_svg(url: str, label: str) -> Markup:
     return Markup(code.svg_inline(border=4, omitsize=True, light="#fff", title=label))
 
 
-def write_flyer(public_data: dict[str, Any], seller: dict[str, Any], origin: str) -> None:
-    """`flyer/index.html`, from the sanitized data only: what is still for sale and the departure
-    date, never a price or a contact. Sold items are left out so the paper claims nothing gone."""
+def flyer_deadline(
+    copy: dict[str, str], en: dict[str, Any], dates: SaleDates, household: bool, car: bool
+) -> str:
+    """The flyer's one line of dates: each deadline only while something under it is for sale."""
+    parts = []
+    if household:
+        parts.append(copy["deadline_household"].format(date=format_day(dates.household, en)))
+    if car:
+        parts.append(copy["deadline_car"].format(date=format_day(dates.vehicle, en)))
+    line = " · ".join(parts)
+    return line[:1].upper() + line[1:]
+
+
+def write_flyer(public_data: dict[str, Any], dates: SaleDates, origin: str) -> None:
+    """`flyer/index.html`, from the sanitized data only: what is still for sale and the two
+    deadlines, never a price or a contact. Sold items are left out so the paper claims nothing gone."""
     en = load_locale("en")
     copy = yaml.safe_load((LOCALES_DIR / "flyer.yaml").read_text(encoding="utf-8"))
-    departure = date.fromisoformat(seller["departure_date"])
-    for_sale = [i for i in public_data["items"] if i["status"] != "Sold"]
-    household = [i for i in for_sale if i["category"] != "Vehicle"]
-    car = next((i for i in for_sale if i["category"] == "Vehicle"), None)
+    on_sale = for_sale(public_data["items"])
+    household = [i for i in on_sale if i["category"] != "Vehicle"]
+    car = next((i for i in on_sale if i["category"] == "Vehicle"), None)
     html = render(
         "flyer.html",
         t=copy["en"],
         site_name=en["site_name"],
-        deadline=copy["en"]["deadline"].format(
-            date=f"{en['months'][departure.month]} {departure.day}"
-        ),
+        deadline=flyer_deadline(copy["en"], en, dates, bool(household), car is not None),
         qr_svg=flyer_qr_svg(flyer_url(origin), copy["en"]["qr_label"]),
         address=urlsplit(origin).netloc,
         es_scan=copy["es"]["scan"],
@@ -1018,7 +1096,8 @@ def build_public_site(full_data: dict[str, Any]) -> None:
     public_data = sanitize_public_inventory(full_data)
     seller = sanitize_public_seller(full_data)
     write_seller_poster(public_data, full_data)
-    departure = date.fromisoformat(seller["departure_date"])
+    dates = sale_dates(full_data["seller"])
+    deadline, for_household = countdown_deadline(public_data["items"], dates)
     contact_json = json.dumps(phone_parts(phone))
     origin = site_url()
     previews = share_images(public_data["items"])
@@ -1029,6 +1108,9 @@ def build_public_site(full_data: dict[str, Any]) -> None:
             public_data, full_data, locale, translations, asset_prefix
         )
         sections = catalog_sections(localized_data)
+        countdown = translations[
+            "deadline_household" if for_household else "deadline_vehicle"
+        ].format(date=format_day(deadline, translations))
         og = catalog_og(
             locale,
             translations,
@@ -1036,7 +1118,7 @@ def build_public_site(full_data: dict[str, Any]) -> None:
             sections["items"],
             previews,
             origin,
-            departure,
+            countdown,
         )
         # `<` escaped so item text cannot close the inline <script> ("</script>", "<!--").
         inventory_json = json.dumps(localized_data, indent=2).replace("<", "\\u003c")
@@ -1051,7 +1133,12 @@ def build_public_site(full_data: dict[str, Any]) -> None:
             contact_json=contact_json,
             seller=localize_seller(seller, full_data, locale, translations),
             og=og,
-            departure_month=translations["months"][departure.month],
+            countdown=countdown,
+            countdown_date=deadline.isoformat(),
+            copy=page_copy(sections["vehicle"], sections["items"]),
+            vehicle_until=translations["vehicle_until"].format(
+                date=format_day(dates.vehicle, translations)
+            ),
             chips=category_chips(sections["items"], translations["categories"]),
             language_links=(
                 {"en": "index.html", "es": "es/"} if locale == "en" else {"en": "../", "es": "./"}
@@ -1066,7 +1153,7 @@ def build_public_site(full_data: dict[str, Any]) -> None:
 
         write_share_pages(locale, translations, localized_data["items"], previews, origin)
 
-    write_flyer(public_data, seller, origin)
+    write_flyer(public_data, dates, origin)
 
     PUBLIC_ROBOTS_TXT.write_text(ROBOTS_TXT, encoding="utf-8")
 

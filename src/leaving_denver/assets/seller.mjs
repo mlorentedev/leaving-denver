@@ -50,7 +50,7 @@ const TEXT = {
   },
 };
 
-// Opening line by channel. `when` is " in November" (or empty without a departure month).
+// Opening line by channel. `when` is " in November" (or empty without a month).
 const INTROS = {
   fb: ({ item, when }) => `I am moving${when} and selling my ${item.title} in the Denver Tech Center.`,
   cl: ({ item, name, when }) => `${item.title}\n\nI am moving${when} and selling my ${name} in DTC.`,
@@ -241,9 +241,10 @@ export function priceTiers(item, floor) {
 }
 
 // The first drop window the price log does not cover yet. A window is covered once a reprice
-// is logged on or after the day it opens; the last window is the floor itself.
+// is logged on or after the day it opens; the last window is the floor itself. The windows are
+// the household schedule: the car has none (OPS-013), so it never gets a next drop.
 export function nextDrop(item, floor, drops, today, repricedOn) {
-  if (item.status !== 'Available' || item.free) return null;
+  if (item.status !== 'Available' || item.free || item.category === 'Vehicle') return null;
   const [asking, step, low] = priceTiers(item, floor);
   if (low >= asking) return null;
   const last = repricedOn.reduce((a, b) => (a > b ? a : b), '');

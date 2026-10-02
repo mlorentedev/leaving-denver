@@ -1,5 +1,5 @@
 """The decommission runbook and ADR-008 (OPS-011): the end of the sale is a dated checklist
-the owner follows on Nov 8 and by Nov 15, so each step has to be a command or a named
+the owner follows on Oct 23, by Nov 9 and by Nov 15, so each step has to be a command or a named
 dashboard path, and no credential the repository uses can be left off the list."""
 
 import re
@@ -19,21 +19,22 @@ def section(heading):
 
 
 def test_there_is_a_section_for_each_date():
-    assert section("Nov 8")
+    assert section("Oct 23")
+    assert section("By Nov 9")
     assert section("By Nov 15")
 
 
-def test_nov_8_flips_the_switch_and_takes_the_listings_down():
-    nov_8 = section("Nov 8")
-    assert "sale_over: true" in nov_8
-    assert "make check" in nov_8
+def test_by_nov_9_flips_the_switch_and_takes_the_listings_down():
+    by_nov_9 = section("By Nov 9")
+    assert "sale_over: true" in by_nov_9
+    assert "make check" in by_nov_9
     for channel in ("Facebook Marketplace", "Craigslist", "OfferUp", "Nextdoor", "flyer"):
-        assert channel in nov_8, channel
-    assert "Delete deployment" in nov_8
+        assert channel in by_nov_9, channel
+    assert "Delete deployment" in by_nov_9
 
 
 def test_the_end_deploy_is_rehearsed_on_a_preview_before_the_day():
-    before = section("Before Nov 8")
+    before = section("Before Nov 9")
     assert "make deploy BRANCH=preview" in before  # never the default-dependent bare target
     assert "preview.leaving-denver.pages.dev" in before
     assert "scripts/smoke.sh" in before
@@ -43,12 +44,12 @@ def test_the_end_deploy_is_rehearsed_on_a_preview_before_the_day():
 def test_the_switch_is_flipped_before_the_secrets_go():
     # The deploy job refuses to run without SELLER_PHONE: delete it first and the deploy that
     # replaces the catalog fails. The rehearsal flips the switch too, so the order is read from
-    # the dated sections: the flip in Nov 8, the deletion in By Nov 15, and Nov 8 comes first.
-    assert "sale_over: true" in section("Nov 8")
+    # the dated sections: the flip in By Nov 9, the deletion in By Nov 15, and By Nov 9 comes first.
+    assert "sale_over: true" in section("By Nov 9")
     assert "gh secret delete" in section("By Nov 15")
-    assert "gh secret delete" not in section("Nov 8")
-    assert "gh secret delete" not in section("Before Nov 8")
-    assert RUNBOOK.index("\n## Nov 8") < RUNBOOK.index("\n## By Nov 15")
+    assert "gh secret delete" not in section("By Nov 9")
+    assert "gh secret delete" not in section("Before Nov 9")
+    assert RUNBOOK.index("\n## By Nov 9") < RUNBOOK.index("\n## By Nov 15")
 
 
 def test_every_secret_a_workflow_reads_is_deleted_in_both_environments():
@@ -109,3 +110,17 @@ def test_no_runbook_command_prints_a_secret():
             assert "--raw" in command and "$(" in command, line
         if re.search(r"\bbw (list|get) items?\b", command):
             assert "| jq -r" in command and ".id" in command, line
+
+
+def test_the_household_closeout_comes_first_and_does_not_end_the_sale():
+    oct_23 = section("Oct 23")
+    assert RUNBOOK.index("\n## Oct 23") < RUNBOOK.index("\n## Before Nov 9")
+    assert "published: false" in oct_23
+    assert "sale_over" not in oct_23
+    assert "without being marked Sold" in " ".join(oct_23.split())
+
+
+def test_the_sale_is_turned_off_with_the_car_not_on_a_fixed_day():
+    by_nov_9 = " ".join(section("By Nov 9").split())
+    assert "as soon as the car is handed over" in by_nov_9
+    assert "no later than Nov 9" in by_nov_9

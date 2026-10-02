@@ -205,9 +205,9 @@ def test_the_flyer_holds_no_email_address(flyer):
 
 def test_the_flyer_names_no_price(flyer):
     assert "$" not in flyer
-    # The only figures on the page are the departure day and the car's own name.
+    # The only figures on the page are the two deadline days and the car's own name.
     car = next(i for i in SOURCE["items"] if i["category"] == "Vehicle")["short_title"]
-    assert set(re.findall(r"\d+", text_of(flyer))) <= {"9", *re.findall(r"\d+", car)}
+    assert set(re.findall(r"\d+", text_of(flyer))) <= {"23", "9", *re.findall(r"\d+", car)}
 
 
 # AC4: copy from the data.
@@ -263,15 +263,6 @@ def test_a_catalog_without_a_car_still_makes_a_flyer(public_dir):
     data["items"] = [i for i in data["items"] if i["category"] != "Vehicle"]
     data["bundles"] = [b for b in data["bundles"] if "2019-ford-escape-sel-awd" not in b["items"]]
     assert "Escape" not in text_of(build_flyer(public_dir, data))
-
-
-def test_the_date_is_the_departure_date_in_the_data(flyer, public_dir):
-    assert "November 9" in text_of(flyer)
-    data = catalog_inventory()
-    data["seller"]["departure_date"] = "2027-03-04"
-    text = text_of(build_flyer(public_dir, data))
-    assert "March 4" in text
-    assert "November" not in text
 
 
 def test_the_date_is_stated_as_a_fact_and_not_as_pressure(flyer):
