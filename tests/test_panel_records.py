@@ -53,8 +53,9 @@ def test_record_sale_writes_the_price_and_the_day_as_one_object(tmp_path, monkey
     path, value, argv = sops.sets[0]
     assert path == '["sales"]["lamp"]'
     assert value == {"price": 120, "at": "2026-10-07"}
-    # The values travel on stdin: nothing in argv reveals them.
-    assert "120" not in " ".join(argv)
+    # The values travel on stdin: nothing in argv reveals them. The file path is left out, since
+    # pytest's temp directory is numbered (pytest-1120/) and may itself contain the digits.
+    assert "120" not in " ".join(a for a in argv if a != str(private_data.PRIVATE_SOPS_YAML))
 
 
 def test_record_sale_without_a_price_records_only_the_day(tmp_path, monkeypatch):

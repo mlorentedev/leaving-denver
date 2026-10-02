@@ -16,6 +16,7 @@ from pathlib import Path
 
 import pytest
 import yaml
+from pages_stub import MissingPath
 
 from leaving_denver import site_builder
 from leaving_denver.config import DATA_DIR
@@ -25,7 +26,7 @@ BUILT = ROOT / "build" / "public"
 pytestmark = pytest.mark.skipif(not (BUILT / "styles.css").exists(), reason="site not built")
 
 
-class EndDeployment(http.server.SimpleHTTPRequestHandler):
+class EndDeployment(MissingPath, http.server.SimpleHTTPRequestHandler):
     redirects: dict[str, str] = {}
 
     def end_headers(self):
@@ -151,3 +152,17 @@ def test_smoke_fails_when_the_seller_tool_is_served(end_site):
     result = smoke(end_site)
     assert result.returncode != 0
     assert "/seller/" in result.stderr
+
+
+def test_smoke_fails_when_an_unknown_path_answers_200(end_site, monkeypatch):
+    monkeypatch.setattr(EndDeployment, "spa_fallback", True)
+    result = smoke(end_site)
+    assert result.returncode != 0
+    assert "answers 200, not 404" in result.stderr
+
+
+def test_smoke_fails_when_the_end_build_has_no_not_found_page(end_site):
+    (end_site / "404.html").unlink()
+    result = smoke(end_site)
+    assert result.returncode != 0
+    assert "the 404 is not the not-found page" in result.stderr

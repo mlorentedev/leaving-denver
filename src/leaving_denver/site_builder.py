@@ -454,6 +454,7 @@ END_REDIRECTS = "/i/* / 302\n/es/i/* /es/ 302\n/flyer / 302\n/flyer/* / 302\n"
 END_SITE_FILES = {
     "index.html",
     "es/index.html",
+    "404.html",
     "robots.txt",
     "_headers",
     "_redirects",
@@ -916,6 +917,15 @@ def sweep_to_end_site() -> None:
             path.unlink()
 
 
+def write_not_found() -> None:
+    """`404.html` (BUG-013). Without a top-level one Pages runs the site as a single-page app and
+    answers every unknown path with the catalog and a 200. It takes no data at all: Pages serves
+    it for any path, so it must hold no phone and no item, in either build mode."""
+    copy = yaml.safe_load((LOCALES_DIR / "not_found.yaml").read_text(encoding="utf-8"))
+    html = render("not_found.html", copy=copy, site_name=load_locale("en")["site_name"])
+    (DIST_DIR / "404.html").write_text(html, encoding="utf-8")
+
+
 def build_end_site() -> None:
     """The sale is over: one page per language, from the locale files and nothing else. No
     phone, no item and no photo goes in, so none of them needs to be at hand."""
@@ -948,6 +958,7 @@ def build_end_site() -> None:
     PUBLIC_ROBOTS_TXT.write_text(ROBOTS_TXT, encoding="utf-8")
     PUBLIC_HEADERS.write_text(PAGES_HEADERS, encoding="utf-8")
     (DIST_DIR / "_redirects").write_text(END_REDIRECTS, encoding="utf-8")
+    write_not_found()
     sweep_to_end_site()
 
 
@@ -1060,6 +1071,8 @@ def build_public_site(full_data: dict[str, Any]) -> None:
     PUBLIC_ROBOTS_TXT.write_text(ROBOTS_TXT, encoding="utf-8")
 
     PUBLIC_HEADERS.write_text(PAGES_HEADERS, encoding="utf-8")
+
+    write_not_found()
 
     # Photo sync copies every content/photos/<id>/, so drop the unpublished ones,
     # including any left from a build when the item was still published.

@@ -29,7 +29,15 @@ PHONE_FORMS = (
 SOURCE = yaml.safe_load((DATA_DIR / "inventory.yaml").read_text(encoding="utf-8"))
 ITEM_IDS = [entry["id"] for kind in ("items", "bundles") for entry in SOURCE[kind]]
 # Everything an end build may publish, relative to the output root.
-ALLOWED = {"index.html", "es/index.html", "robots.txt", "_headers", "_redirects", "favicon.svg"}
+ALLOWED = {
+    "index.html",
+    "es/index.html",
+    "404.html",
+    "robots.txt",
+    "_headers",
+    "_redirects",
+    "favicon.svg",
+}
 
 
 def end_inventory():

@@ -177,6 +177,8 @@ CATALOG_TESTS = {
         # A positive control for the catalog's smoke path (the end smoke needs the redirects a
         # static stub cannot serve); the leak test beside it still runs in both modes.
         "test_a_redirect_in_front_of_the_seller_page_passes_the_smoke",
+        "test_robots_txt_served_as_the_catalog_is_retried",
+        "test_robots_txt_that_stays_the_catalog_fails_as_such",
     ),
     "test_verify_sheet_browser.py": (
         "test_a_press_on_the_backdrop_closes_the_sheet",
