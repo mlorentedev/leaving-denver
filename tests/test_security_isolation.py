@@ -5,6 +5,7 @@ Verifies that no private seller data leaks into the public distribution (build/p
 
 import json
 import re
+import urllib.robotparser
 from pathlib import Path
 
 from conftest import sale_is_over
@@ -46,6 +47,37 @@ def test_robots_txt_disallow_all():
     robots = (DIST_DIR / "robots.txt").read_text(encoding="utf-8")
     assert "User-agent: *" in robots
     assert "Disallow: /" in robots
+
+
+def robots_parser():
+    parser = urllib.robotparser.RobotFileParser()
+    parser.parse((DIST_DIR / "robots.txt").read_text(encoding="utf-8").splitlines())
+    return parser
+
+
+# ADR-009: an assistant fetching the page because a person asked about it. Written out here,
+# not imported from the builder, so the test fails if the builder's list widens or shrinks.
+ASSISTANT_FETCHERS = ("ChatGPT-User", "Claude-User", "Perplexity-User", "MistralAI-User")
+# Training and search crawlers stay out, along with everything not named.
+TRAINING_AND_SEARCH = ("GPTBot", "ClaudeBot", "CCBot", "Google-Extended", "Googlebot", "Bingbot")
+
+
+def test_assistants_a_person_asked_may_read_the_catalog():
+    parser = robots_parser()
+    for agent in ASSISTANT_FETCHERS:
+        for path in ("/", "/es/", "/i/2019-ford-escape-sel-awd/"):
+            assert parser.can_fetch(agent, f"https://leaving-denver.pages.dev{path}"), (agent, path)
+
+
+def test_robots_txt_does_not_advertise_the_seller_tool():
+    # Cloudflare Access guards /seller/ (ADR-007); a Disallow line would only point at it.
+    assert "seller" not in (DIST_DIR / "robots.txt").read_text(encoding="utf-8")
+
+
+def test_training_and_search_crawlers_stay_out():
+    parser = robots_parser()
+    for agent in TRAINING_AND_SEARCH:
+        assert not parser.can_fetch(agent, "https://leaving-denver.pages.dev/"), agent
 
 
 def test_pages_headers():

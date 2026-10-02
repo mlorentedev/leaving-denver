@@ -3,7 +3,8 @@ Site Builder for Denver Tech Center Moving Sale.
 Compiles Single Source of Truth (data/inventory.yaml) into:
 1. build/public/index.html - Sanitized, high-speed public catalog (Zero floor prices, obfuscated contacts).
    build/public/i/<id>/index.html (and es/i/<id>/) - Per-item share pages with Open Graph tags.
-2. build/public/robots.txt - Link-preview fetchers allowed, every other crawler disallowed.
+2. build/public/robots.txt - Link-preview fetchers and assistant fetchers allowed, every other
+   crawler disallowed.
    build/public/_headers - Cloudflare Pages response headers.
    build/public/seller/index.html - The seller tool: listing copy, plus the private data as an
    encrypted envelope that only the owner's passphrase opens in the browser (ADR-007).
@@ -501,9 +502,16 @@ PAGES_HEADERS = """/*
 # Link-preview fetchers (ADR-004). They build the card a shared link shows and index
 # nothing; every other crawler stays out, and X-Robots-Tag keeps pages out of search.
 PREVIEW_CRAWLERS = ("facebookexternalhit", "Facebot", "Twitterbot", "TelegramBot", "WhatsApp")
+# AI assistants fetching a page because a person asked about it (ADR-009): a buyer who pastes
+# the link into one gets an answer. Their training and search crawlers are other user agents
+# and stay under `*`. /seller/ is not named: Cloudflare Access guards it, and naming it here
+# would advertise it.
+ASSISTANT_FETCHERS = ("ChatGPT-User", "Claude-User", "Perplexity-User", "MistralAI-User")
 ROBOTS_TXT = (
-    "# Link-preview fetchers may read the pages; every other crawler is disallowed.\n\n"
+    "# Link-preview fetchers and assistants a person asked may read the pages;\n"
+    "# every other crawler is disallowed.\n\n"
     + "".join(f"User-agent: {bot}\nAllow: /\n\n" for bot in PREVIEW_CRAWLERS)
+    + "".join(f"User-agent: {bot}\nAllow: /\n\n" for bot in ASSISTANT_FETCHERS)
     + "User-agent: *\nDisallow: /\n"
 )
 OG_LOCALES = {"en": "en_US", "es": "es_ES"}
