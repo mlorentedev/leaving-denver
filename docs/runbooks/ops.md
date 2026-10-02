@@ -150,26 +150,30 @@ Repo side, nothing to do:
   branch policy, and (with the owner's `gh`) no deploy secret left at the repository
   level. The `deploy-audit` workflow runs the settings part weekly.
 
-Owner setup (dashboards; this repository cannot enable either):
+Owner setup (dashboards; this repository cannot enable either). Both are in place since
+2026-10-01:
 
-- **Uptime.** A free HTTP keyword monitor, for example UptimeRobot's free plan (5-minute
-  checks, push alerts through its phone app). URL: `https://leaving-denver.pages.dev/`.
-  Keyword: `Denver Tech Center Relocation Sale` (the page title; an error page or a
-  Pages 5xx does not carry it). Alert the phone, then test the alert by pausing the
-  check or pointing it at a keyword that is not there. On an alert, run
-  `scripts/smoke.sh https://leaving-denver.pages.dev`, check Cloudflare Pages status,
-  and roll back if a deploy caused it.
-- **Web Analytics.** Enable it in Workers & Pages > `leaving-denver` > Metrics > Web
-  Analytics (ADR-005: the repo ships no beacon, and no CSP blocks it). Verify with
-  `curl -s https://leaving-denver.pages.dev/ | grep -c cloudflareinsights`
-  and a test visit that shows in the dashboard; if the beacon is missing, redeploy
-  production once. Share distinct campaign links, e.g.
-  `?utm_source=nextdoor&utm_campaign=moving-sale` (the seller tool builds them), and
-  check whether the dashboard reports channel attribution before relying on UTMs;
-  otherwise use its referrer data. Do not put personal data in URL parameters.
-
-Neither is enabled by this repository or its CI; each needs the owner to finish and
-verify it.
+- **Uptime.** An Uptime Kuma monitor on the owner's homelab (kubelab), type
+  "HTTP(s) - Keyword", every 300 s, alerting to Telegram.
+  - URL: `https://leaving-denver.pages.dev/`.
+  - Keyword: `Denver Tech Center Relocation Sale`. That is the page title; an error page
+    or a Pages 5xx does not carry it.
+  - To rebuild the monitor, set the same fields and press the notification's Test.
+  - The monitor lives on the homelab, so a homelab outage silences it. That is accepted:
+    the deploy smoke already guards the likelier failure, a bad deploy.
+  - On an alert, run `scripts/smoke.sh https://leaving-denver.pages.dev`, check Cloudflare
+    Pages status, and roll back if a deploy caused it.
+- **Web Analytics.** Enabled in Workers & Pages > `leaving-denver` > Metrics > Web Analytics
+  (ADR-005: the repo ships no beacon, and no CSP blocks it).
+  - Pages injects the beacon only from the next deployment on. On 2026-10-01 a production
+    redeploy (`gh workflow run ci.yml --ref main -f branch=main`) was needed before it
+    appeared.
+  - Verify with `curl -s https://leaving-denver.pages.dev/ | grep -c cloudflareinsights`
+    and a test visit that shows in the dashboard.
+  - Share distinct campaign links, e.g. `?utm_source=nextdoor&utm_campaign=moving-sale` (the
+    seller tool builds them). Check whether the dashboard reports channel attribution
+    before relying on UTMs; otherwise use its referrer data.
+  - Do not put personal data in URL parameters.
 
 ## End of the sale
 

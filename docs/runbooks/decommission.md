@@ -87,8 +87,8 @@ that replaces it fail.
    `uv run leaving-denver panel` lists where each item was posted; it needs the age key.
 
 6. Pause the uptime monitor (ops.md, "Minimal monitoring"). Its keyword was the catalog title,
-   which the end page does not carry, so it alerts from its next check. UptimeRobot dashboard >
-   the `leaving-denver` monitor > Pause (or Delete).
+   which the end page does not carry, so it alerts from its next check. Uptime Kuma on the
+   homelab > the `leaving-denver` monitor > Pause (or Delete).
 
 7. Optional: platforms cache link previews for about 30 days. To show "The sale is over" sooner,
    paste `https://leaving-denver.pages.dev/` into the Facebook Sharing Debugger
