@@ -20,15 +20,19 @@
 <body class="bg-[#fbfbfb] text-neutral-900 antialiased">
   <main class="sheet mx-auto w-[7.5in] max-w-full px-4 py-8 text-center">
     <h1 class="text-6xl font-extrabold">{{ t.heading }}</h1>
+{% if deadline %}
     <p class="mt-3 text-2xl font-semibold">{{ deadline }}</p>
+{% endif %}
     <div class="qr mx-auto mt-8 w-[4.75in] max-w-full bg-white">{{ qr_svg }}</div>
     <p class="mt-4 text-3xl font-bold">{{ t.scan }}</p>
     <p class="mt-1 text-2xl font-semibold tracking-tight">{{ address }}</p>
     <p lang="es" class="mt-3 text-xl text-neutral-700">{{ es_scan }}</p>
     <div class="mt-8 border-t-2 border-neutral-900 pt-6 text-2xl">
+{% if categories %}
       <p><span class="font-bold">{{ t.selling }}</span> {{ categories | join(" · ") }}</p>
+{% endif %}
 {% if car %}
-      <p class="mt-2"><span class="font-bold">{{ t.car }}</span> {{ car }}</p>
+      <p class="mt-2"><span class="font-bold">{{ t.car if categories else t.car_alone }}</span> {{ car }}</p>
 {% endif %}
       <p class="mt-2 font-bold">{{ t.pickup }}</p>
     </div>

@@ -22,7 +22,7 @@ Accepted. It extends ADR-004 (link-preview crawlers stay allowed) and relies on 
 
 ## Context
 
-The seller leaves Denver on 2026-11-09. After that nobody can watch the phone number the site
+The seller leaves Denver on 2026-11-09 (amended 2026-10-02, OPS-013: 2026-11-09 is now the car's deadline, the household items go by 2026-10-23 and the owner flies on 2026-11-18; the decision below is unchanged). After that nobody can watch the phone number the site
 shows, and every old marketplace listing, shared link and the building flyer's QR code still
 point at `https://leaving-denver.pages.dev`. Issue #38 asks for the site to be shut down.
 

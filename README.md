@@ -10,7 +10,7 @@ A privacy-focused inventory management, automated photo ingestion, and multi-por
 - **Folder-Convention Media Pipeline:** Drop any photo (including iPhone HEIC) into `content/photos/<item_id>/` and run `leaving-denver build` to auto-discover, strip GPS EXIF metadata, optimize (<300 KB), and compile.
 - **Data & Privacy Isolation:** Public build in `build/public/` is completely stripped of internal reserve floor prices, negotiation notes, and seller admin tools.
 - **Bot & Scraper Defense:** Telephone numbers are obfuscated and assembled dynamically via client JS. Static HTML attributes contain no harvestable numbers. `robots.txt` enforces `Disallow: /`.
-- **Departure-Date Pricing Schedule:** `leaving-denver drops` derives the active drop, floor, and giveaway windows from `seller.departure_date`; prices come from the inventory and encrypted reserve data.
+- **Two Deadlines and a Written-Down Price Schedule:** household items go by `seller.household_deadline` and the car by `seller.vehicle_deadline`; `leaving-denver drops` prints the drop, floor and giveaway windows from `seller.price_schedule`, and prices come from the inventory and encrypted reserve data.
 - **Multi-Portal Copy Generator:** Instant copy-paste listings tailored for Facebook Marketplace, Craigslist Denver, OfferUp, and Nextdoor.
 - **Bilingual Catalog:** The same sanitized inventory renders in English at `/` and neutral Latin American Spanish at `/es/`, with localized SMS intents.
 - **Craigslist Bump Reminder:** A ready-to-import n8n workflow that sends a Telegram reminder to renew listings every 48 hours.

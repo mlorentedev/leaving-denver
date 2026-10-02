@@ -1,0 +1,58 @@
+[
+  {
+    "id": "OPS-013-two-deadlines-f1",
+    "behavior": "AC1: the data holds two deadlines and an explicit price schedule, no departure_date, and the schedule yields the owner's windows",
+    "verification": "uv run pytest -q tests/test_two_deadlines.py -k 'owners_two_deadlines or explicit_dates or written_down'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "OPS-013-two-deadlines-f2",
+    "behavior": "AC2: a missing or ill-ordered schedule, a non-ISO or unquoted date, or a car deadline not after the household's fails closed",
+    "verification": "uv run pytest -q tests/test_two_deadlines.py -k 'fails_closed or refuses_a_bad or needs_no_dates'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "OPS-013-two-deadlines-f3",
+    "behavior": "AC3: the countdown targets the household deadline while an item is for sale and the car's after, in both languages; the meta description follows",
+    "verification": "uv run pytest -q tests/test_two_deadlines.py -k 'countdown or meta_description or pending_household'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "OPS-013-two-deadlines-f4",
+    "behavior": "AC4: the car card says available until the car deadline only while Available; the hero and the title name what is for sale, EN and ES",
+    "verification": "uv run pytest -q tests/test_two_deadlines.py -k 'car_card or hero or not_available'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "OPS-013-two-deadlines-f5",
+    "behavior": "AC5: the flyer states both dates, drops the everything claim, and shows the car part only while the car is for sale",
+    "verification": "uv run pytest -q tests/test_two_deadlines.py -k flyer && uv run pytest -q tests/test_flyer.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "OPS-013-two-deadlines-f6",
+    "behavior": "AC6: seller_drops, the built /seller/ config and leaving-denver drops follow the explicit schedule",
+    "verification": "uv run pytest -q tests/test_two_deadlines.py -k 'seller_tool or drop_days or drops_prints' && uv run pytest -q tests/test_seller_private_logic.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "OPS-013-two-deadlines-f7",
+    "behavior": "AC7: the close-out snippet hides every unsold household item and nothing else, and the result builds with the car's date and no household share page",
+    "verification": "uv run pytest -q tests/test_two_deadlines.py -k closeout && uv run pytest -q tests/test_decommission_runbook.py",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "OPS-013-two-deadlines-f8",
+    "behavior": "AC8: make check is green with the sale on and with sale_over: true",
+    "verification": "SELLER_PHONE=+13035550100 make check",
+    "state": "pending",
+    "evidence": ""
+  }
+]

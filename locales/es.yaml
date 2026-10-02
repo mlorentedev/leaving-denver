@@ -1,10 +1,14 @@
-page_title_vehicle: Venta por mudanza en Denver Tech Center — Muebles, tecnología y auto
+page_title_both: Venta por mudanza en Denver Tech Center — Muebles, tecnología y auto
 page_title_household: Venta por mudanza en Denver Tech Center — Muebles y tecnología
+page_title_vehicle: Venta por mudanza en Denver Tech Center — SUV AWD
+hero_both: Me mudo y vendo muebles, tecnología y un SUV AWD en Denver Tech Center.
+hero_household: Me mudo y vendo muebles y tecnología en Denver Tech Center.
+hero_vehicle: Me mudo y vendo mi SUV AWD en Denver Tech Center.
 site_name: Venta por mudanza
-relocating_in: Me mudo en
-hero_prefix: Me mudo en
-hero_vehicle_suffix: y vendo muebles, tecnología y un SUV AWD en Denver Tech Center.
-hero_household_suffix: y vendo muebles y tecnología en Denver Tech Center.
+date_format: "{day} de {month}"
+deadline_household: Muebles y tecnología hasta el {date}
+deadline_vehicle: Auto disponible hasta el {date}
+vehicle_until: Disponible hasta el {date}
 pickup_near: Recogida en DTC cerca de I-25 y Belleview
 household_payment_summary: Efectivo, Venmo o Zelle para artículos del hogar
 vehicle: Auto

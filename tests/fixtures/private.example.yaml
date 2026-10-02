@@ -24,7 +24,7 @@ tracking:
       facebook: ["2026-09-29", "2026-10-06"]
       craigslist: ["2026-09-29"]
     price_log:
-      - {at: "2026-10-03", price: 205}
+      - {at: "2026-10-06", price: 205}
   dell-monitor-32:
     channels:
       facebook: ["2026-09-30"]

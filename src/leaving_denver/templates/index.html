@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
-  <title>{{ t.page_title_vehicle if vehicle else t.page_title_household }}</title>
+  <title>{{ t[copy.title] }}</title>
 {% include "_og.html" %}
   <link rel="icon" type="image/svg+xml" href="{{ asset_prefix }}favicon.svg">
   <link rel="alternate" hreflang="en" href="{{ language_links.en }}">
@@ -62,10 +62,10 @@
     <div class="max-w-2xl space-y-3">
       <div class="inline-flex items-center gap-2 text-xs font-semibold text-neutral-500 uppercase tracking-wider">
         <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-        <span id="departureCountdown" data-departure-date="{{ seller.departure_date }}">{{ t.relocating_in }} {{ departure_month }}</span>
+        <span id="deadlineCountdown" data-countdown-date="{{ countdown_date }}">{{ countdown }}</span>
       </div>
       <h1 data-role="hero-copy" class="text-3xl sm:text-4xl font-extrabold tracking-tight text-neutral-900 leading-tight">
-        {{ t.hero_prefix }} {{ departure_month }} {{ t.hero_vehicle_suffix if vehicle else t.hero_household_suffix }}
+        {{ t[copy.hero] }}
       </h1>
       <div class="flex flex-wrap items-center gap-y-2 gap-x-4 pt-2 text-xs text-neutral-500">
         <span>{{ t.pickup_near }}</span>
@@ -109,6 +109,9 @@
               <div class="text-right">
                 <div class="text-2xl font-black text-neutral-900">${{ "{:,}".format(vehicle.price) }}</div>
                 <div class="text-xs font-semibold text-emerald-700">{{ vehicle.title_status }}</div>
+                {% if vehicle.status == "Available" %}
+                <div data-role="vehicle-until" class="text-xs text-neutral-500">{{ vehicle_until }}</div>
+                {% endif %}
               </div>
             </div>
 
@@ -421,8 +424,8 @@
       return `sms:${getSellerPhone()}${body ? SMS_BODY + encodeURIComponent(body) : ''}`;
     }
 
-    function updateDepartureCountdown() {
-      const element = document.getElementById('departureCountdown');
+    function updateDeadlineCountdown() {
+      const element = document.getElementById('deadlineCountdown');
       if (!element) return;
 
       const parts = new Intl.DateTimeFormat('en-US', {
@@ -433,8 +436,8 @@
       }).formatToParts(new Date());
       const values = Object.fromEntries(parts.map(part => [part.type, part.value]));
       const today = Date.UTC(Number(values.year), Number(values.month) - 1, Number(values.day));
-      const departure = Date.parse(`${element.dataset.departureDate}T00:00:00Z`);
-      const days = Math.max(Math.ceil((departure - today) / 86400000), 0);
+      const deadline = Date.parse(`${element.dataset.countdownDate}T00:00:00Z`);
+      const days = Math.max(Math.ceil((deadline - today) / 86400000), 0);
       if (days > 0) element.textContent += ` · ${days} ${UI.days}`;
     }
 
@@ -664,7 +667,7 @@
       // A reload keeps a sheet's history entry but no sheet is open: neutralise it, or the
       // next close would go back onto it and Back would need two presses.
       if (history.state && history.state.sheet) history.replaceState(null, '');
-      updateDepartureCountdown();
+      updateDeadlineCountdown();
       initDynamicContacts();
       document.addEventListener('click', e => {
         const link = e.target.closest('a[href^="sms:"]');

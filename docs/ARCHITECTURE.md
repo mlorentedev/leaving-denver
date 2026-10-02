@@ -1,6 +1,6 @@
 # Leaving Denver Platform — System Architecture & Data Flow
 
-This project implements an automated, privacy-first inventory management and sales platform for an international relocation moving sale in Denver Tech Center (DTC / 80111), Colorado. The sale schedule is derived from the seller's `departure_date`.
+This project implements an automated, privacy-first inventory management and sales platform for an international relocation moving sale in Denver Tech Center (DTC / 80111), Colorado. The sale has two deadlines, household items and the car, and the household price schedule is written down in the seller's `price_schedule`.
 
 ---
 

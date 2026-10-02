@@ -1,6 +1,6 @@
 # Vehicle Sale Runbook: 2019 Ford Escape SEL AWD
 
-How the car is sold safely in Colorado. The seller needs the car until the last days before the 2026-11-09 departure, so the sale is agreed early and the car is handed over later.
+How the car is sold safely in Colorado. The car has its own deadline, 2026-11-09 (owner, 2026-10-02): the household items go by 2026-10-23, and the page says the car is available until Nov 9. The seller needs the car until close to that date, so the sale is agreed early and the car is handed over later, in the handover window of late October through Nov 9.
 
 Owner decisions are marked **[OWNER]**. Everything else is procedure. Sources are at the end. Never commit a filled-in copy of the agreement, the plate number or the buyer's details: this repo is public.
 
@@ -37,7 +37,7 @@ Owner decisions are marked **[OWNER]**. Everything else is procedure. Sources ar
 - [ ] Listing copy states only what the documents back (`test_no_unbacked_vehicle_claims`). There is no 100k service receipt, so the listing never claims that service.
 - [x] The listing says 103,500 mi on purpose (owner, 2026-09-27): it covers the miles driven until handover, so the buyer never finds more miles than advertised. The recall invoice shows 102,692 mi on 2026-09-25. The title and DR 2173 get the real dashboard reading on handover day (§5). That leaves about 800 miles of headroom: read the dashboard when the listing photos are taken and again a week before handover, and raise the listed figure if it is within 200 miles.
 - [ ] When the Carfax report (OPS-003 #28) or the dealer service-history printout (OPS-009 #34) exists, add it to the car's `verify:` in `data/inventory.yaml` (one `evidence` entry plus its `es.verify` copy; a Carfax link also needs its host added to `OFFICIAL_CHECK_HOSTS`, on purpose). The page shows only what exists (FEAT-008).
-- [ ] Instant offers pulled (CarMax, Carvana, KBB ICO, Peddle) to know the floor. They expire in 7 days, so pull them again around Nov 1–2 (OPS-002 #27).
+- [ ] Instant offers pulled (CarMax, Carvana, KBB ICO, Peddle) to know the floor. They expire in 7 days, so pull them again within the 7 days before the actual handover date, whenever that lands (OPS-002 #27).
 - [ ] Title in hand, no lienholder. Keep it at home; it only leaves home on handover day.
 - [ ] AirCare test booked for the days just before handover, not now (OPS-008 #33). See §6.
 
@@ -78,7 +78,7 @@ A real buyer will do all of the following. Ask for it before the first meeting:
 
 ## 4. Agreeing the sale before handover
 
-The buyer agrees now and takes the car on **Thursday 2026-11-05** (owner, 2026-09-26). The date is negotiable, but never later than Friday Nov 6: that leaves a banking day before the Sunday Nov 9 flight. Write the agreement down, using the Appendix.
+The buyer agrees now and takes the car in the **handover window: late October through Monday 2026-11-09** (owner, 2026-10-02; the car deadline replaces the earlier handover on Thursday Nov 5). Fix the date when you sign, with a fallback date, and keep both inside the window. The handover includes the trip to the buyer's bank (§5), so it falls on a banking day, and Nov 9 is the last one: a buyer who cannot do it by then does not get the car (the fallback is §8). Write the agreement down, using the Appendix.
 
 ### 4.1 Deposit: none (owner, 2026-09-26)
 
@@ -88,12 +88,12 @@ No escrow product locks a buyer in with a non-refundable deposit.
 
 - **KeySavvy** holds the buyer's payment, but that payment is refundable until pickup, so it does not lock the buyer.
 - **PrivateAuto** (funds held by US Alliance) and **Caramel** (Cars.com checkout) are the other escrow-style platforms in the research. Their deposit terms were not checked, because the no-deposit decision does not depend on them. If a buyer insists on one, type its address yourself and read who holds the money before agreeing.
-- **KeySavvy for the whole sale** is a poor fit for this timeline too. It pays the seller only once the title has been mailed to KeySavvy and the buyer has picked up the car. With handover Nov 5–6 and departure Nov 9, the mail is the failure mode.
+- **KeySavvy for the whole sale** is a poor fit for this timeline too. It pays the seller only once the title has been mailed to KeySavvy and the buyer has picked up the car. With the handover as late as Nov 9, the mail is the failure mode.
 
 | Option | How | Seller risk | Buyer risk |
 |---|---|---|---|
 | **A. Signed deposit** | $300–500 paid to you in person (Zelle confirmed in *your* bank app, or cash) against the signed agreement. The deposit counts toward the price. It is kept if the buyer walks away, and returned in full if you do or if the car is lost or damaged (§4.2). | Low | The buyer trusts you with the deposit. Some buyers will refuse. |
-| **B. No deposit** | Price and date agreed in writing, and nothing paid until handover. You keep showing the car to a backup buyer. | The buyer can vanish. Covered by the CarMax re-pull ~Nov 1–2 and an in-store appraisal ~Nov 2. | None |
+| **B. No deposit** | Price and date agreed in writing, and nothing paid until handover. You keep showing the car to a backup buyer. | The buyer can vanish. Covered by the CarMax re-pull and an in-store appraisal about a week before the handover date (§8). | None |
 
 ### 4.2 Terms the agreement must include
 
@@ -105,7 +105,7 @@ No escrow product locks a buyer in with a non-refundable deposit.
 
 ## 5. Handover day, in this order
 
-Plan it at least two banking days before departure, so a problem still has time to be fixed.
+Plan it early in the window, not on its last day: Nov 9 is the limit, not the target, and a problem at the bank still needs time to be fixed.
 
 1. **At the buyer's bank:**
    - Watch the teller issue a cashier's check drawn on that bank, payable to you, for the balance.
@@ -142,13 +142,13 @@ A car that fails emissions within 5 business days of sale can be returned by the
 ## 7. After the sale
 
 - **Insurance:** cancel it only after the title is signed, the plates are off and the release is filed. Ask the insurer for a cancellation letter showing claim-free years; it helps with insurance abroad.
-- **Plates:** turn them in at the county office or a metal recycler, and do it before Nov 9.
+- **Plates:** they come off at handover. After it, turn them in at the county office or a metal recycler.
 - **Records:** keep the photos from §5 and the release confirmation somewhere you can reach from abroad.
 
 ## 8. If it has not sold
 
-- **Nov 1–2:** pull the instant offers again (§1).
-- **Around Nov 2:** a CarMax in-store appraisal holds for 7 days, which covers the departure. Selling to CarMax still follows §5 steps 5–9.
+- **Oct 30:** pull the instant offers again (§1); they expire in 7 days.
+- **Around Nov 2:** a CarMax in-store appraisal holds for 7 days, which covers the car deadline (Nov 9). Selling to CarMax still follows §5 steps 5–9. Book the appraisal no earlier than Nov 2, or it lapses before Nov 9.
 
 ## Appendix: agreement template
 

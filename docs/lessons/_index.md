@@ -39,3 +39,4 @@ tags: [lessons, index, docs, leaving-denver]
 | [lesson-024](lesson-024-csp-needs-an-http-served-test-and-no-inline-script.md) | A CSP Test Needs an HTTP Response, and the Page Needs No Inline Script | 2026-10-01 | [csp, testing, browser, cloudflare] |
 | [lesson-025](lesson-025-pages-answers-a-missing-file-with-the-home-page.md) | Pages Answers a Missing File With the Home Page | 2026-10-01 | [cloudflare, ci, smoke, testing] |
 | [lesson-026](lesson-026-one-404-page-is-served-at-every-missing-url.md) | One 404 Page Is Served at Every Missing URL | 2026-10-01 | [cloudflare, html, testing, i18n] |
+| [lesson-027](lesson-027-one-date-was-three-facts.md) | One Date Was Three Facts | 2026-10-02 | [data, copy, testing, yaml] |

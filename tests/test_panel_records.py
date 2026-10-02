@@ -140,7 +140,7 @@ def test_a_failed_set_is_reported(tmp_path, monkeypatch, fixture_private):
 def commands(monkeypatch, fixture_private):
     """The CLI with inventory, recorders and rebuild stubbed; `calls` collects what ran."""
     inventory = {
-        "seller": {"departure_date": "2026-11-09"},
+        "seller": {},
         "items": [
             {"id": "sofa-sleeper", "title": "Sofa", "status": "Available"},
             {"id": "lamp", "title": "Lamp", "status": "Available"},

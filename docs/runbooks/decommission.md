@@ -1,13 +1,79 @@
 # Decommission runbook: end of the sale
 
-The seller leaves Denver on 2026-11-09. The site must not outlive the sale with a phone number
-behind it: that number would keep drawing spam and scam messages nobody can answer. Two steps,
-in this order. Spec: `specs/OPS-011-end-of-sale/`. The Pages project stays (ADR-008).
+The sale has two deadlines (OPS-013): household items go by 2026-10-23 and the car by
+2026-11-09, and the seller flies on 2026-11-18. The site must not outlive the sale with a phone
+number behind it: that number would keep drawing spam and scam messages nobody can answer. Three
+steps, in this order: take the unsold household items off the catalog on Oct 23, turn the sale
+off once the car is handed over (no later than Nov 9), then remove the credentials. Specs:
+`specs/OPS-013-two-deadlines/`, `specs/OPS-011-end-of-sale/`. The Pages project stays (ADR-008).
 
 Run every command from a clone of the repository, in a shell where `gh` is logged in as the
 owner. Nothing here prints a secret.
 
-## Before Nov 8: rehearse the end deploy on a preview
+## Oct 23: household close-out
+
+The household deadline passes with items unsold. They leave the catalog without being marked
+Sold: Sold is a sale that happened, and the sofa that nobody bought is not one. An item set to
+`published: false` is left out of the page, of every bundle that contains it, of its share page
+(`/i/<id>/` answers the 404 page) and of its photos. The data stays in `data/inventory.yaml`.
+
+By then the sale must be settled: an item with a pickup still to come is `Pending`; finish
+that pickup first, or leave the item out of this step by hand. Then, from a clone of the
+repository, hide every household item that is not Sold. The snippet edits the text of the file
+and adds one line per item, so its comments stay:
+
+```python
+import pathlib
+import re
+
+import yaml
+
+path = pathlib.Path("data/inventory.yaml")
+text = path.read_text(encoding="utf-8")
+unsold = [
+    item["id"]
+    for item in yaml.safe_load(text)["items"]
+    if item["category"] != "Vehicle"
+    and item.get("status", "Available") != "Sold"
+    and item.get("published", True)
+]
+for item_id in unsold:
+    text = re.sub(
+        rf"^- id: {re.escape(item_id)}$",
+        f"- id: {item_id}\n  published: false",
+        text,
+        count=1,
+        flags=re.M,
+    )
+path.write_text(text, encoding="utf-8")
+print(f"hidden: {len(unsold)}")
+```
+
+Run it with `uv run python - <<'PY'` and the snippet, then:
+
+```
+git switch -c chore/household-close-out main
+git diff data/inventory.yaml   # only added `published: false` lines
+make check
+git commit -am "chore: take the unsold household items off the catalog"
+git push -u origin chore/household-close-out
+gh pr create --fill
+```
+
+After the owner merges, the push to `main` deploys. The page now counts down to the car's date
+(`seller.vehicle_deadline`), says only that the car is for sale, and the flyer names only the
+car. Check it:
+
+```
+curl -s https://leaving-denver.pages.dev/ | grep -o 'Car available until [A-Za-z]* [0-9]*'
+curl -sI https://leaving-denver.pages.dev/i/sofa-sleeper/ | head -1   # 404
+```
+
+Then take the household listings down, on the channels listed in step 5 of "By Nov 9", and keep
+the car's. The flyer rebuilt by this deploy names only the car; reprint it if the paper one
+still says furniture.
+
+## Before Nov 9: rehearse the end deploy on a preview
 
 The candidate smoke runs before production moves, and it fails if Cloudflare Pages does not
 answer `/i/*` with the 302 while `functions/_middleware.js` is present. Find that out a week
@@ -25,13 +91,17 @@ This was proven once, on 2026-10-01: an end build deployed with `make deploy
 BRANCH=endsale-rehearsal` answered `/` and `/es/` with 200, `/i/sofa-sleeper/` with a 302 to `/`,
 `/es/i/sofa-sleeper/` with a 302 to `/es/` and `/seller/` with a 302 to the Access login, and
 the smoke printed `smoke OK (sale over)`. The deployment was deleted afterwards. Repeat it a
-week before Nov 8 anyway: Pages, the middleware or the Access app may have changed since.
+week before the car is handed over anyway: Pages, the middleware or the Access app may have changed since.
 
 If the smoke reports an old share link that does not redirect, `_redirects` is not applied
-there: fix that before Nov 8 (a redirect in the middleware, or a `functions/i` route). Do not
-flip the switch on a failing rehearsal. Delete the rehearsal deployment when done (Nov 8, step 4).
+there: fix that before turning the sale off (a redirect in the middleware, or a `functions/i` route). Do not
+flip the switch on a failing rehearsal. Delete the rehearsal deployment when done (step 4 of the next section).
 
-## Nov 8: turn the sale off
+## By Nov 9: turn the sale off
+
+Turn the sale off as soon as the car is handed over, and no later than Nov 9. If the car sells
+earlier, do not wait for the date: the phone number has no more use.
+
 
 The deploy job refuses to run without the `SELLER_PHONE` secret (and, while the sale is on,
 without `SELLER_SEALED`; the switch lifts that one), so the secrets stay in place until the end
@@ -100,7 +170,7 @@ that replaces it fail.
 
 ## By Nov 15: remove the credentials and the number
 
-Only after step 3 of Nov 8 passed. From here the CI deploy cannot run again: it needs
+Only after step 3 of "By Nov 9" passed. From here the CI deploy cannot run again: it needs
 `SELLER_PHONE` and the token. The deployed end page keeps serving. A later change to it needs a
 new token (ADR-008).
 
