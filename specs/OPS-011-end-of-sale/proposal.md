@@ -12,7 +12,7 @@ template_version: "1.0"
 
 ## Why
 
-The seller leaves Denver on 2026-11-09 (`seller.departure_date`). The site will outlive the sale unless something turns it off. Its phone number and its old marketplace links will keep drawing spam and scam messages to a number the seller can no longer watch. Shared links and the building flyer's QR code point at `leaving-denver.pages.dev`. Deleting the Pages project frees that subdomain for anyone to claim, and they would then own every link already out there. So the safe end state is: the same project, serving one page that says the sale is over, with no phone and no live credential behind it. Issue #38.
+The seller leaves Denver on 2026-11-09 (`seller.departure_date`; OPS-013 replaced it with `household_deadline` and `vehicle_deadline`, and the sale is now turned off with the car, no later than Nov 9, not on Nov 8). The site will outlive the sale unless something turns it off. Its phone number and its old marketplace links will keep drawing spam and scam messages to a number the seller can no longer watch. Shared links and the building flyer's QR code point at `leaving-denver.pages.dev`. Deleting the Pages project frees that subdomain for anyone to claim, and they would then own every link already out there. So the safe end state is: the same project, serving one page that says the sale is over, with no phone and no live credential behind it. Issue #38.
 
 ## What
 
