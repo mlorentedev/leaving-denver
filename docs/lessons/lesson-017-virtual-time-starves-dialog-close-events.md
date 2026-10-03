@@ -52,3 +52,8 @@ showed it still starting 25 s after launch. The first test failed while every la
 passed. Only that first answer
 gets a longer deadline (`STARTUP`); every other command keeps 30 s, so a hung page still fails
 fast.
+
+A fourth, outside the harness: a hidden tab paints no frames either. During FEAT-003's manual check
+the interactive Chrome window reported `visibilityState: hidden`, and no dialog there fired `close`
+at all, by any path. Same cause as virtual time: no frame, no event. Verify `<dialog>` behaviour in
+a visible window or in the headless harness above, never in a background tab.
