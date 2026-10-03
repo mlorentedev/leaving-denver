@@ -43,7 +43,8 @@ return { description: $('description').value, link: $('link').value,
 """,
     )
     assert result["options"] == ["fb", "fb-es", "cl", "cl-es", "offerup", "nextdoor"]
-    assert "Me mudo en noviembre" in result["description"]
+    assert "Me mudo y vendo" in result["description"]
+    assert "noviembre" not in result["description"]
     assert "Precio: $220." in result["description"]
     assert "/es/i/sofa-sleeper/" in result["link"]
 

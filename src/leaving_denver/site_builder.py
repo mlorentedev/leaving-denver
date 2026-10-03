@@ -470,22 +470,6 @@ def for_sale(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [i for i in items if i["status"] != "Sold"]
 
 
-def countdown_deadline(items: list[dict[str, Any]], dates: SaleDates) -> tuple[date, bool]:
-    """The date the page counts down to, and whether it is the household one.
-
-    It is the household deadline while any published household item is for sale, and the car's
-    after that. Hiding the unsold household items on the day (the decommission runbook) is what
-    moves it, not the calendar."""
-    if any(i["category"] != "Vehicle" for i in for_sale(items)):
-        return dates.household, True
-    return dates.vehicle, False
-
-
-def format_day(day: date, t: dict[str, Any]) -> str:
-    """A date as the locale writes it: October 23, 23 de octubre."""
-    return t["date_format"].format(month=t["months"][day.month], day=day.day)
-
-
 # Cloudflare Pages reads _headers from the output root. Photos keep their names
 # when replaced, so they get a day of cache rather than `immutable`.
 PAGES_HEADERS = """/*
@@ -589,15 +573,14 @@ def catalog_og(
     items: list[dict[str, Any]],
     previews: dict[str, str],
     origin: str,
-    countdown: str,
 ) -> dict[str, Any]:
-    """The catalog page's own preview: the hero line and the deadline the page counts down to,
-    and the vehicle's image (or the first item's with one)."""
+    """The catalog page's own preview: the hero line, never a sale date (FEAT-014), and the
+    vehicle's image (or the first item's with one)."""
     showcase = next((i for i in [vehicle, *items] if i and i["id"] in previews), None)
     return {
         **og_common(locale),
         "title": t[page_copy(vehicle, items)["title"]],
-        "description": f"{t[page_copy(vehicle, items)['hero']]} {countdown}.",
+        "description": t[page_copy(vehicle, items)["hero"]],
         "url": f"{origin}/{locale_path(locale)}",
         "image": f"{origin}/{previews[showcase['id']]}" if showcase else None,
         "image_alt": showcase["title"] if showcase else "",
@@ -950,11 +933,8 @@ def write_seller_poster(public_data: dict[str, Any], full_data: dict[str, Any]) 
         code: localize_seller(seller, full_data, code, translations[code])["payment_methods"]
         for code in LISTING_LOCALES
     }
-    # Listings say when the owner moves, and that is the car's month: the owner leaves in November.
-    month = sale_dates(full_data["seller"]).vehicle.month
     config = {
         "origin": site_url(),
-        "month": {code: translations[code]["months"][month] for code in LISTING_LOCALES},
         # For the private views, computed in the page once the data is open (ADR-007).
         "roster": seller_roster(public_data),
         "drops": seller_drops(full_data["seller"]),
@@ -1058,22 +1038,9 @@ def flyer_qr_svg(url: str, label: str) -> Markup:
     return Markup(code.svg_inline(border=4, omitsize=True, light="#fff", title=label))
 
 
-def flyer_deadline(
-    copy: dict[str, str], en: dict[str, Any], dates: SaleDates, household: bool, car: bool
-) -> str:
-    """The flyer's one line of dates: each deadline only while something under it is for sale."""
-    parts = []
-    if household:
-        parts.append(copy["deadline_household"].format(date=format_day(dates.household, en)))
-    if car:
-        parts.append(copy["deadline_car"].format(date=format_day(dates.vehicle, en)))
-    line = " · ".join(parts)
-    return line[:1].upper() + line[1:]
-
-
-def write_flyer(public_data: dict[str, Any], dates: SaleDates, origin: str) -> None:
-    """`flyer/index.html`, from the sanitized data only: what is still for sale and the two
-    deadlines, never a price or a contact. Sold items are left out so the paper claims nothing gone."""
+def write_flyer(public_data: dict[str, Any], origin: str) -> None:
+    """`flyer/index.html`, from the sanitized data only: what is still for sale, never a date
+    (FEAT-014), a price or a contact. Sold items are left out so the paper claims nothing gone."""
     en = load_locale("en")
     copy = yaml.safe_load((LOCALES_DIR / "flyer.yaml").read_text(encoding="utf-8"))
     on_sale = for_sale(public_data["items"])
@@ -1083,7 +1050,6 @@ def write_flyer(public_data: dict[str, Any], dates: SaleDates, origin: str) -> N
         "flyer.html",
         t=copy["en"],
         site_name=en["site_name"],
-        deadline=flyer_deadline(copy["en"], en, dates, bool(household), car is not None),
         qr_svg=flyer_qr_svg(flyer_url(origin), copy["en"]["qr_label"]),
         address=urlsplit(origin).netloc,
         es_scan=copy["es"]["scan"],
@@ -1107,8 +1073,6 @@ def build_public_site(full_data: dict[str, Any]) -> None:
     public_data = sanitize_public_inventory(full_data)
     seller = sanitize_public_seller(full_data)
     write_seller_poster(public_data, full_data)
-    dates = sale_dates(full_data["seller"])
-    deadline, for_household = countdown_deadline(public_data["items"], dates)
     contact_json = json.dumps(phone_parts(phone))
     origin = site_url()
     previews = share_images(public_data["items"])
@@ -1119,9 +1083,6 @@ def build_public_site(full_data: dict[str, Any]) -> None:
             public_data, full_data, locale, translations, asset_prefix
         )
         sections = catalog_sections(localized_data)
-        countdown = translations[
-            "deadline_household" if for_household else "deadline_vehicle"
-        ].format(date=format_day(deadline, translations))
         og = catalog_og(
             locale,
             translations,
@@ -1129,7 +1090,6 @@ def build_public_site(full_data: dict[str, Any]) -> None:
             sections["items"],
             previews,
             origin,
-            countdown,
         )
         # `<` escaped so item text cannot close the inline <script> ("</script>", "<!--").
         inventory_json = json.dumps(localized_data, indent=2).replace("<", "\\u003c")
@@ -1144,12 +1104,7 @@ def build_public_site(full_data: dict[str, Any]) -> None:
             contact_json=contact_json,
             seller=localize_seller(seller, full_data, locale, translations),
             og=og,
-            countdown=countdown,
-            countdown_date=deadline.isoformat(),
             copy=page_copy(sections["vehicle"], sections["items"]),
-            vehicle_until=translations["vehicle_until"].format(
-                date=format_day(dates.vehicle, translations)
-            ),
             chips=category_chips(sections["items"], translations["categories"]),
             language_links=(
                 {"en": "index.html", "es": "es/"} if locale == "en" else {"en": "../", "es": "./"}
@@ -1164,7 +1119,7 @@ def build_public_site(full_data: dict[str, Any]) -> None:
 
         write_share_pages(locale, translations, localized_data["items"], previews, origin)
 
-    write_flyer(public_data, dates, origin)
+    write_flyer(public_data, origin)
 
     PUBLIC_ROBOTS_TXT.write_text(ROBOTS_TXT, encoding="utf-8")
 

@@ -5,10 +5,7 @@ hero_both: Me mudo y vendo muebles, tecnología y un SUV AWD en Denver Tech Cent
 hero_household: Me mudo y vendo muebles y tecnología en Denver Tech Center.
 hero_vehicle: Me mudo y vendo mi SUV AWD en Denver Tech Center.
 site_name: Venta por mudanza
-date_format: "{day} de {month}"
-deadline_household: Muebles y tecnología hasta el {date}
-deadline_vehicle: Auto disponible hasta el {date}
-vehicle_until: Disponible hasta el {date}
+sale_status: Disponible ahora
 pickup_near: Recogida en DTC cerca de I-25 y Belleview
 household_payment_summary: Efectivo, Venmo o Zelle para artículos del hogar
 vehicle: Auto
@@ -55,7 +52,6 @@ text_about_bundle: Escribir sobre este paquete
 unavailable: Ya no está disponible
 availability_line: "{available} de {total} disponibles"
 sold_count: "{n} vendidos"
-days: días
 default_pickup: Recogida en Denver Tech Center (DTC). El comprador debe cargar el artículo.
 sms_generic: ¡Hola! Vi su catálogo de venta por mudanza en DTC y tengo una pregunta.
 sms_bundle_prefix: ¡Hola! Me interesa el paquete
@@ -69,19 +65,6 @@ verify_paperwork: Mis documentos
 verify_new_tab: (se abre en otra pestaña)
 percent_off: "{n}% de descuento"
 flaws_heading: Defectos conocidos
-months:
-  1: enero
-  2: febrero
-  3: marzo
-  4: abril
-  5: mayo
-  6: junio
-  7: julio
-  8: agosto
-  9: septiembre
-  10: octubre
-  11: noviembre
-  12: diciembre
 categories:
   Living Room: Sala
   Bedroom: Dormitorio

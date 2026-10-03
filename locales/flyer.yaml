@@ -3,9 +3,6 @@
 en:
   title: Moving sale flyer
   heading: I'm moving abroad.
-  # The date line: each part only while something under it is for sale.
-  deadline_household: Furniture & tech by {date}
-  deadline_car: car until {date}
   selling: "For sale:"
   car: "And my car:"
   car_alone: "My car:"
