@@ -87,9 +87,16 @@ DATE_SHAPES = (
 
 
 def public_pages(public_dir, pages):
-    """Every page a buyer can reach: both catalogs, the flyer and the share pages."""
-    shared = {str(p): p.read_text(encoding="utf-8") for p in (public_dir / "i").rglob("*.html")}
-    return {"en": pages["en"], "es": pages["es"], "flyer": pages["flyer"], **shared}
+    """Every page a buyer can reach: every built HTML file but the Access-gated seller tool, so
+    the English and Spanish share pages (`i/`, `es/i/`) are swept along with the catalogs."""
+    built = {
+        str(p.relative_to(public_dir)): p.read_text(encoding="utf-8")
+        for p in public_dir.rglob("*.html")
+        if p.relative_to(public_dir).parts[0] != "seller"
+    }
+    assert {"index.html", "es/index.html", "flyer/index.html"} <= built.keys()
+    assert any(name.startswith("es/i/") for name in built), "no Spanish share page was built"
+    return built
 
 
 def dates_on(page):
