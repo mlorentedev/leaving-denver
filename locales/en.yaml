@@ -5,11 +5,9 @@ hero_both: I am relocating and selling furniture, tech, and an AWD SUV in Denver
 hero_household: I am relocating and selling furniture and tech in Denver Tech Center.
 hero_vehicle: I am relocating and selling my AWD SUV in Denver Tech Center.
 site_name: Moving Sale
-# The date line over the hero and the car card: the household items go first, the car later.
-date_format: "{month} {day}"
-deadline_household: Furniture & tech until {date}
-deadline_vehicle: Car available until {date}
-vehicle_until: Available until {date}
+# The line over the hero. Never a date (FEAT-014): a buyer who sees the day I must sell by
+# can wait for it and bargain.
+sale_status: Available now
 pickup_near: Pickup in DTC near I-25 & Belleview
 household_payment_summary: Cash, Venmo or Zelle for household items
 vehicle: Vehicle
@@ -56,7 +54,6 @@ text_about_bundle: Text about this bundle
 unavailable: No longer available
 availability_line: "{available} of {total} available"
 sold_count: "{n} sold"
-days: days
 default_pickup: Pickup in Denver Tech Center (DTC). Buyer must self-load.
 sms_generic: Hi! I saw your DTC Moving Sale catalog and had a question.
 sms_bundle_prefix: Hi! I am interested in the
@@ -70,19 +67,6 @@ verify_paperwork: My paperwork
 verify_new_tab: (opens in a new tab)
 percent_off: "{n}% off"
 flaws_heading: Known flaws
-months:
-  1: January
-  2: February
-  3: March
-  4: April
-  5: May
-  6: June
-  7: July
-  8: August
-  9: September
-  10: October
-  11: November
-  12: December
 categories:
   Living Room: Living room
   Bedroom: Bedroom

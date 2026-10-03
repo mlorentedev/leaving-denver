@@ -35,7 +35,7 @@ const TEXT = {
   en: {
     asking: 'Asking price', mileage: 'Mileage', miles: 'miles', miAbbr: 'mi', title: 'Title',
     condition: 'Condition', dimensions: 'Dimensions', included: 'Included', details: 'Details',
-    flaws: 'Known flaws', pickup: 'Pickup', payment: 'Payment', in: 'in',
+    flaws: 'Known flaws', pickup: 'Pickup', payment: 'Payment',
     noHolds: 'No holds and no deposits: it goes to the first person who confirms a pickup time.',
     bundle: 'Taking several items? Ask me about a bundle price.',
     nextdoorTitle: 'DTC moving sale',
@@ -43,21 +43,22 @@ const TEXT = {
   es: {
     asking: 'Precio', mileage: 'Millaje', miles: 'millas', miAbbr: 'millas', title: 'Título',
     condition: 'Estado', dimensions: 'Dimensiones', included: 'Incluye', details: 'Detalles',
-    flaws: 'Defectos conocidos', pickup: 'Recogida', payment: 'Pago', in: 'en',
+    flaws: 'Defectos conocidos', pickup: 'Recogida', payment: 'Pago',
     noHolds: 'No aparto artículos ni pido depósitos: se lo lleva la primera persona que confirme una hora de recogida.',
     bundle: '¿Varios artículos? Pregúnteme por un precio en paquete.',
     nextdoorTitle: 'Venta por mudanza en DTC',
   },
 };
 
-// Opening line by channel. `when` is " in November" (or empty without a month).
+// Opening line by channel. It never says when I move (FEAT-014): a buyer who knows the day can
+// wait for it and bargain.
 const INTROS = {
-  fb: ({ item, when }) => `I am moving${when} and selling my ${item.title} in the Denver Tech Center.`,
-  cl: ({ item, name, when }) => `${item.title}\n\nI am moving${when} and selling my ${name} in DTC.`,
+  fb: ({ item }) => `I am moving and selling my ${item.title} in the Denver Tech Center.`,
+  cl: ({ item, name }) => `${item.title}\n\nI am moving and selling my ${name} in DTC.`,
   offerup: ({ name }) => `My ${name} is ready for pickup in DTC.`,
-  nextdoor: ({ item, when }) => `Hi neighbors,\n\nI am moving${when} and selling my ${item.title} in the Denver Tech Center.`,
-  'fb-es': ({ item, when }) => `Me mudo${when} y vendo mi ${item.title} en Denver Tech Center.`,
-  'cl-es': ({ item, name, when }) => `${item.title}\n\nMe mudo${when} y vendo mi ${name} en DTC.`,
+  nextdoor: ({ item }) => `Hi neighbors,\n\nI am moving and selling my ${item.title} in the Denver Tech Center.`,
+  'fb-es': ({ item }) => `Me mudo y vendo mi ${item.title} en Denver Tech Center.`,
+  'cl-es': ({ item, name }) => `${item.title}\n\nMe mudo y vendo mi ${name} en DTC.`,
 };
 
 // Closing line by channel: how the buyer reaches me, for an item and for the car. No phone
@@ -117,15 +118,14 @@ function titleFor(platform, item, text) {
   return `${name}${miles} - ${price} (DTC)`;
 }
 
-function describe(platform, item, text, month) {
+function describe(platform, item, text) {
   const name = item.short_title || item.title;
-  const when = month ? ` ${text.in} ${month}` : '';
-  const intro = INTROS[platform]({ item, name, when });
+  const intro = INTROS[platform]({ item, name });
   const body = [...factLines(item, text), ...termLines(item, text)].filter(Boolean).join('\n');
   return `${intro}\n\n${body}\n\n${CLOSINGS[platform][isCar(item) ? 1 : 0]}`;
 }
 
-// The listing for one item on one channel. `config` is the page's settings ({ origin, month }).
+// The listing for one item on one channel. `config` is the page's settings ({ origin }).
 // A title over the platform's limit is cut and flagged in `fits`; a description is never cut.
 export function makeCopy(item, platform, config = {}) {
   if (!Object.hasOwn(CHANNELS, platform)) throw new RangeError(`Unknown platform: ${platform}`);
@@ -140,7 +140,7 @@ export function makeCopy(item, platform, config = {}) {
   const own = channel.lang === 'es' ? { ...item, ...item.es } : item;
   const text = TEXT[channel.lang];
   const title = titleFor(platform, own, text);
-  const description = describe(platform, own, text, config.month?.[channel.lang]);
+  const description = describe(platform, own, text);
   const path = channel.lang === 'es' ? '/es' : '';
   return {
     title: title.slice(0, channel.title),

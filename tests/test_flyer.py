@@ -205,9 +205,9 @@ def test_the_flyer_holds_no_email_address(flyer):
 
 def test_the_flyer_names_no_price(flyer):
     assert "$" not in flyer
-    # The only figures on the page are the two deadline days and the car's own name.
+    # The only figures on the page are the car's own name: no price, and no date (FEAT-014).
     car = next(i for i in SOURCE["items"] if i["category"] == "Vehicle")["short_title"]
-    assert set(re.findall(r"\d+", text_of(flyer))) <= {"23", "9", *re.findall(r"\d+", car)}
+    assert set(re.findall(r"\d+", text_of(flyer))) <= set(re.findall(r"\d+", car))
 
 
 # AC4: copy from the data.

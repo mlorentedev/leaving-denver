@@ -20,9 +20,6 @@
 <body class="bg-[#fbfbfb] text-neutral-900 antialiased">
   <main class="sheet mx-auto w-[7.5in] max-w-full px-4 py-8 text-center">
     <h1 class="text-6xl font-extrabold">{{ t.heading }}</h1>
-{% if deadline %}
-    <p class="mt-3 text-2xl font-semibold">{{ deadline }}</p>
-{% endif %}
     <div class="qr mx-auto mt-8 w-[4.75in] max-w-full bg-white">{{ qr_svg }}</div>
     <p class="mt-4 text-3xl font-bold">{{ t.scan }}</p>
     <p class="mt-1 text-2xl font-semibold tracking-tight">{{ address }}</p>

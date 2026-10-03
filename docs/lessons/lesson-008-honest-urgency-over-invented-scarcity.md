@@ -26,6 +26,12 @@ first to arrive with payment", sold items kept visible, an "X of 14 sold" counte
 close when a piece sells, and "was $X, now $Y" after a real drop. Keep the drop schedule private,
 because publishing it teaches buyers to wait.
 
+Update 2026-10-03 (FEAT-014, #164): the deadline went private too, on the same reasoning as the
+drop schedule. A buyer who sees the day the seller must sell by can wait for it and bargain, and
+that matters most on the car. What remains public is the reason ("I am relocating") and the
+signals that need no date: no holds, sold items visible, real drops. Being honest means never
+saying anything false. It does not mean publishing every true fact that weakens your position.
+
 ## Anti-Pattern (What NOT to do)
 Invented demand ("3 people asking"), fake deadlines, or "prices go up tomorrow".
 

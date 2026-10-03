@@ -115,7 +115,8 @@ def test_the_spanish_channels_write_the_listing_from_the_spanish_overlay(built, 
             assert f"- {spec}" in copy["description"], item["id"]
         assert es["pickup"] in copy["description"], item["id"]
         assert "Asking price" not in copy["description"]
-        assert "Me mudo en noviembre" in copy["description"]
+        assert copy["description"].count("Me mudo y vendo") == 1
+        assert "noviembre" not in copy["description"]
 
 
 def test_the_spanish_overlay_is_complete_for_every_listable_item(built):

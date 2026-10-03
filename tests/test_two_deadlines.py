@@ -71,12 +71,29 @@ def role(page, name):
     return " ".join(unescape(found.group(1)).split())
 
 
-def countdown(page):
-    found = re.search(
-        r'<span id="deadlineCountdown" data-countdown-date="([^"]+)">([^<]+)</span>', page
-    )
-    assert found
-    return found.group(1), " ".join(unescape(found.group(2)).split())
+# Every way a deadline could be written on a public page (FEAT-014): ISO, US and Spanish.
+DATE_SHAPES = (
+    "2026-10-23",
+    "2026-11-09",
+    "October 23",
+    "Oct 23",
+    "10/23",
+    "23 de octubre",
+    "November 9",
+    "Nov 9",
+    "11/9",
+    "9 de noviembre",
+)
+
+
+def public_pages(public_dir, pages):
+    """Every page a buyer can reach: both catalogs, the flyer and the share pages."""
+    shared = {str(p): p.read_text(encoding="utf-8") for p in (public_dir / "i").rglob("*.html")}
+    return {"en": pages["en"], "es": pages["es"], "flyer": pages["flyer"], **shared}
+
+
+def dates_on(page):
+    return [shape for shape in DATE_SHAPES if shape in unescape(page)]
 
 
 def description(page):
@@ -189,50 +206,43 @@ def test_the_end_build_needs_no_dates(public_dir):
     assert (public_dir / "index.html").exists()
 
 
-# The page: the countdown follows what is still for sale.
+# The page: no sale date on any public surface (FEAT-014). A buyer who sees the day the seller
+# must sell by can wait for it and bargain; the dates stay in the data for the seller tool.
 
 
-def test_while_household_items_are_for_sale_the_countdown_targets_their_deadline(public_dir):
+@pytest.mark.parametrize("how", ["all for sale", "household hidden", "car sold"])
+def test_no_public_page_shows_a_sale_date(public_dir, how):
+    data = catalog_inventory()
+    if how == "household hidden":
+        hide_household(data)
+    if how == "car sold":
+        next(i for i in data["items"] if i["id"] == CAR)["status"] = "Sold"
+    pages = public_pages(public_dir, build(public_dir, data))
+    assert {name: dates_on(page) for name, page in pages.items() if dates_on(page)} == {}
+
+
+def test_moved_dates_still_never_reach_a_public_page(public_dir):
+    data = catalog_inventory()
+    data["seller"]["household_deadline"] = "2026-10-30"
+    data["seller"]["vehicle_deadline"] = "2026-12-04"
+    pages = public_pages(public_dir, build(public_dir, data))
+    for page in pages.values():
+        for shape in ("October 30", "30 de octubre", "December 4", "4 de diciembre", "2026-12-04"):
+            assert shape not in unescape(page)
+
+
+def test_the_hero_strip_says_the_sale_is_on_without_a_date(public_dir):
     pages = build(public_dir, catalog_inventory())
-    assert countdown(pages["en"]) == ("2026-10-23", "Furniture & tech until October 23")
-    assert countdown(pages["es"]) == (
-        "2026-10-23",
-        "Muebles y tecnología hasta el 23 de octubre",
-    )
+    assert role(pages["en"], "sale-status") == "Available now"
+    assert role(pages["es"], "sale-status") == "Disponible ahora"
+    assert "deadlineCountdown" not in pages["en"]
+    assert "data-countdown-date" not in pages["en"]
 
 
-def test_a_pending_household_item_still_counts_as_for_sale(public_dir):
-    data = catalog_inventory()
-    hide_household(data, sold=True)
-    household(data)[0]["status"] = "Pending"
-    assert countdown(build(public_dir, data)["en"])[0] == "2026-10-23"
-
-
-@pytest.mark.parametrize("how", ["hidden", "sold"])
-def test_with_no_household_item_left_the_countdown_targets_the_car(public_dir, how):
-    data = catalog_inventory()
-    hide_household(data, sold=how == "sold")
-    pages = build(public_dir, data)
-    assert countdown(pages["en"]) == ("2026-11-09", "Car available until November 9")
-    assert countdown(pages["es"]) == ("2026-11-09", "Auto disponible hasta el 9 de noviembre")
-
-
-def test_a_sold_car_does_not_move_the_household_deadline(public_dir):
-    data = catalog_inventory()
-    next(i for i in data["items"] if i["id"] == CAR)["status"] = "Sold"
-    assert countdown(build(public_dir, data)["en"])[0] == "2026-10-23"
-
-
-def test_the_meta_description_month_follows_the_same_rule(public_dir):
-    data = catalog_inventory()
-    pages = build(public_dir, data)
-    assert "October 23" in description(pages["en"])
-    assert "23 de octubre" in description(pages["es"])
-    hide_household(data)
-    pages = build(public_dir, data)
-    assert "November 9" in description(pages["en"])
-    assert "9 de noviembre" in description(pages["es"])
-    assert "October" not in description(pages["en"])
+def test_the_meta_description_is_the_hero_line_alone(public_dir):
+    pages = build(public_dir, catalog_inventory())
+    assert description(pages["en"]) == role(pages["en"], "hero-copy")
+    assert description(pages["es"]) == role(pages["es"], "hero-copy")
 
 
 def test_the_hero_no_longer_claims_a_month_the_owner_is_not_leaving_in(public_dir):
@@ -261,49 +271,21 @@ def test_the_page_without_the_car_still_says_furniture_and_tech(public_dir):
     assert "furniture and tech" in text and "SUV" not in text
 
 
-# The car card says how long the car is available.
+# The car card and the flyer carry no date either.
 
 
-def test_the_car_card_says_it_is_available_until_the_car_deadline(public_dir):
+def test_the_car_card_claims_no_until_date(public_dir):
     pages = build(public_dir, catalog_inventory())
-    assert role(pages["en"], "vehicle-until") == "Available until November 9"
-    assert role(pages["es"], "vehicle-until") == "Disponible hasta el 9 de noviembre"
+    assert "vehicle-until" not in pages["en"]
+    assert "Available until" not in text_of(pages["en"])
+    assert "Disponible hasta" not in text_of(pages["es"])
 
 
-@pytest.mark.parametrize("status", ["Pending", "Sold"])
-def test_a_car_that_is_not_available_does_not_claim_to_be(public_dir, status):
-    data = catalog_inventory()
-    next(i for i in data["items"] if i["id"] == CAR)["status"] = status
-    assert "vehicle-until" not in build(public_dir, data)["en"]
-
-
-# The flyer.
-
-
-def flyer_deadline(page):
-    return (
-        re.search(r'<p class="mt-3 text-2xl font-semibold"[^>]*>(.*?)</p>', page).group(1).strip()
-    )
-
-
-def test_the_flyer_states_both_dates_and_drops_the_everything_claim(public_dir):
+def test_the_flyer_has_no_date_line_and_no_everything_claim(public_dir):
     flyer = build(public_dir, catalog_inventory())["flyer"]
-    assert flyer_deadline(flyer) == "Furniture &amp; tech by October 23 · car until November 9"
+    assert not dates_on(flyer)
+    assert " until " not in text_of(flyer) and " by " not in text_of(flyer)
     assert "Everything must go" not in text_of(flyer)
-
-
-def test_a_sold_car_leaves_only_the_household_date(public_dir):
-    data = catalog_inventory()
-    next(i for i in data["items"] if i["id"] == CAR)["status"] = "Sold"
-    flyer = build(public_dir, data)["flyer"]
-    assert flyer_deadline(flyer) == "Furniture &amp; tech by October 23"
-    assert "November" not in text_of(flyer)
-
-
-def test_with_no_household_item_left_the_flyer_names_only_the_car(public_dir):
-    data = catalog_inventory()
-    hide_household(data)
-    assert flyer_deadline(build(public_dir, data)["flyer"]) == "Car until November 9"
 
 
 def test_a_flyer_with_only_the_car_has_no_for_sale_line(public_dir):
@@ -312,14 +294,6 @@ def test_a_flyer_with_only_the_car_has_no_for_sale_line(public_dir):
     text = text_of(build(public_dir, data)["flyer"])
     assert "For sale:" not in text
     assert "My car: 2019 Ford Escape SEL AWD" in text
-
-
-def test_the_flyer_dates_come_from_the_data(public_dir):
-    data = catalog_inventory()
-    data["seller"]["household_deadline"] = "2026-10-30"
-    data["seller"]["vehicle_deadline"] = "2026-12-04"
-    flyer = build(public_dir, data)["flyer"]
-    assert flyer_deadline(flyer) == "Furniture &amp; tech by October 30 · car until December 4"
 
 
 # The seller tool.
@@ -340,8 +314,8 @@ def test_the_seller_tool_page_carries_the_explicit_drop_days(public_dir):
         "second_drop": "2026-10-12",
         "clear_floors": "2026-10-16",
     }
-    # Listings say when the owner moves, and that is the car's month: the owner leaves in November.
-    assert config["month"]["en"] == "November"
+    # The listings it writes never say when I move (FEAT-014).
+    assert "month" not in config
 
 
 # The close-out: the runbook's snippet hides what is unsold, and the page follows.
@@ -386,7 +360,7 @@ def test_the_closeout_snippet_hides_unsold_household_items_and_nothing_else(tmp_
     assert after["seller"] == SOURCE["seller"]
 
 
-def test_after_the_closeout_the_page_targets_the_car_and_the_old_share_page_is_gone(
+def test_after_the_closeout_the_page_offers_only_the_car_and_the_old_share_page_is_gone(
     tmp_path, public_dir
 ):
     (tmp_path / "data").mkdir()
@@ -399,6 +373,7 @@ def test_after_the_closeout_the_page_targets_the_car_and_the_old_share_page_is_g
     data = yaml.safe_load((tmp_path / "data" / "inventory.yaml").read_text(encoding="utf-8"))
     data["seller"].pop("sale_over", None)
     pages = build(public_dir, data)
-    assert countdown(pages["en"])[0] == "2026-11-09"
+    assert "furniture" not in role(pages["en"], "hero-copy")
+    assert not dates_on(pages["en"])
     assert not (public_dir / "i" / "sofa-sleeper").exists()
     assert (public_dir / "i" / CAR / "index.html").exists()

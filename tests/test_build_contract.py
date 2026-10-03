@@ -390,24 +390,6 @@ def test_spanish_page_is_built(public_dir):
         assert {"min-w-10", "min-h-10"} <= set(link.group(1).split())
 
 
-def test_locales_cover_every_deadline_month(public_dir):
-    data = inventory()
-    data["seller"]["household_deadline"] = "2026-03-09"
-    data["seller"]["vehicle_deadline"] = "2026-03-10"
-    data["seller"]["price_schedule"] = {
-        "first_drop": "2026-03-01",
-        "second_drop": "2026-03-02",
-        "clear_floors": "2026-03-03",
-        "giveaway": "2026-03-04",
-    }
-    site_builder.build_public_site(data)
-
-    english = (public_dir / "index.html").read_text(encoding="utf-8")
-    spanish = (public_dir / "es" / "index.html").read_text(encoding="utf-8")
-    assert "Furniture &amp; tech until March 9" in english
-    assert "Muebles y tecnología hasta el 9 de marzo" in spanish
-
-
 def test_spanish_fallbacks_and_asset_paths(public_dir):
     data = site_builder.load_inventory_yaml()
     site_builder.build_public_site(data)
@@ -474,8 +456,6 @@ def test_spanish_ui_and_sms_are_localized(public_dir):
     html = (public_dir / "es" / "index.html").read_text(encoding="utf-8")
 
     for text in (
-        "Muebles y tecnología hasta el 23 de octubre",
-        "Disponible hasta el 9 de noviembre",
         "Primer piso, un tramo de escaleras, sin ascensor.",
         "Ahorre con un paquete",
         "Ver qué incluye",
@@ -485,7 +465,7 @@ def test_spanish_ui_and_sms_are_localized(public_dir):
         "Detalles y especificaciones",
         "Escribir sobre este artículo",
         "Cerrar",
-        "días",
+        "Disponible ahora",
         "¡Hola! Vi su catálogo de venta por mudanza",
     ):
         assert text in html
@@ -568,14 +548,6 @@ def test_pickup_facts_come_from_data_one_per_line(public_dir):
     facts = [unescape(f) for f in re.findall(r'data-role="pickup-fact"[^>]*>(.*?)<', html)]
     assert facts == data["seller"]["pickup"]
     assert text_for_role(html, "pickup-summary").strip() == data["seller"]["pickup_summary"]
-
-
-def test_countdown_updates_in_browser_from_the_deadline_in_the_data(public_dir):
-    _, html = real_page(public_dir)
-    assert 'data-countdown-date="2026-10-23"' in html
-    assert "function updateDeadlineCountdown()" in html
-    assert "America/Denver" in html
-    assert "{{ days_remaining }}" not in html
 
 
 def test_bundle_sheet_lists_what_is_in_it(public_dir):
