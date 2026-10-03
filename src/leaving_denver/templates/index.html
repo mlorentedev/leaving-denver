@@ -85,8 +85,6 @@
         <div class="md:col-span-7 bg-neutral-100 relative min-h-[240px] sm:min-h-[300px] flex items-center justify-center cursor-pointer group" onclick="openModal('2019-ford-escape-sel-awd')">
           {% if vehicle.photos %}
           {{ photo(vehicle.photos[0], "(min-width: 1024px) 600px, (min-width: 768px) 58vw, 100vw", vehicle.short_title, "w-full h-full object-cover group-hover:scale-101 transition-transform duration-300", lazy=false, priority=true) }}
-          {% else %}
-          <img src="{{ asset_prefix ~ 'catalog/2019-ford-escape-sel-awd/2019_ford_escape_white_front.jpg' }}" alt="{{ vehicle.short_title }}" fetchpriority="high" class="w-full h-full object-cover group-hover:scale-101 transition-transform duration-300">
           {% endif %}
           <div class="absolute top-3 left-3 flex gap-2">
             <span class="px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider bg-neutral-900 text-white">{{ t.vehicle }}</span>

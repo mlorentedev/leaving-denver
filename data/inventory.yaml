@@ -731,10 +731,27 @@ items:
   - snack table
   - sofa arm table
 - id: 2019-ford-escape-sel-awd
-  # Own photos first, stock last; the first is the cover (FEAT-012).
+  # My own photos, taken 3 Oct 2026; the first is the cover (FEAT-012), the documents close it.
   photos:
-  - 2019_ford_escape_white_front.jpg
-  - 2019_ford_escape_interior_dashboard.jpg
+  - 2019_ford_escape_front_three_quarter.jpg
+  - 2019_ford_escape_rear_three_quarter_driver_side.jpg
+  - 2019_ford_escape_front_passenger_side.jpg
+  - 2019_ford_escape_rear_passenger_side.jpg
+  - 2019_ford_escape_front.jpg
+  - 2019_ford_escape_rear.jpg
+  - 2019_ford_escape_dashboard.jpg
+  - 2019_ford_escape_driver_seat_view.jpg
+  - 2019_ford_escape_odometer_and_trip_mpg.jpg
+  - 2019_ford_escape_apple_carplay.jpg
+  - 2019_ford_escape_climate_and_heated_seats.jpg
+  - 2019_ford_escape_center_console.jpg
+  - 2019_ford_escape_front_seats.jpg
+  - 2019_ford_escape_rear_seats.jpg
+  - 2019_ford_escape_rear_legroom.jpg
+  - 2019_ford_escape_liftgate_open.jpg
+  - 2019_ford_escape_cargo_area.jpg
+  - 2019_ford_escape_wheel_and_tire.jpg
+  - 2019_ford_escape_garage_kept.jpg
   - doc_1_recall_invoice.jpg
   - doc_2_emissions_report.jpg
   category: Vehicle
@@ -752,10 +769,27 @@ items:
   dimensions: Compact SUV · 103.5k Miles · Clean Title
   color: White / Black Leather-Trimmed Interior
   status: Available
-  primary_image: catalog/2019-ford-escape-sel-awd/2019_ford_escape_interior_dashboard.jpg
+  primary_image: catalog/2019-ford-escape-sel-awd/2019_ford_escape_front_three_quarter.jpg
   images:
-  - catalog/2019-ford-escape-sel-awd/2019_ford_escape_interior_dashboard.jpg
-  - catalog/2019-ford-escape-sel-awd/2019_ford_escape_white_front.jpg
+  - catalog/2019-ford-escape-sel-awd/2019_ford_escape_front_three_quarter.jpg
+  - catalog/2019-ford-escape-sel-awd/2019_ford_escape_rear_three_quarter_driver_side.jpg
+  - catalog/2019-ford-escape-sel-awd/2019_ford_escape_front_passenger_side.jpg
+  - catalog/2019-ford-escape-sel-awd/2019_ford_escape_rear_passenger_side.jpg
+  - catalog/2019-ford-escape-sel-awd/2019_ford_escape_front.jpg
+  - catalog/2019-ford-escape-sel-awd/2019_ford_escape_rear.jpg
+  - catalog/2019-ford-escape-sel-awd/2019_ford_escape_dashboard.jpg
+  - catalog/2019-ford-escape-sel-awd/2019_ford_escape_driver_seat_view.jpg
+  - catalog/2019-ford-escape-sel-awd/2019_ford_escape_odometer_and_trip_mpg.jpg
+  - catalog/2019-ford-escape-sel-awd/2019_ford_escape_apple_carplay.jpg
+  - catalog/2019-ford-escape-sel-awd/2019_ford_escape_climate_and_heated_seats.jpg
+  - catalog/2019-ford-escape-sel-awd/2019_ford_escape_center_console.jpg
+  - catalog/2019-ford-escape-sel-awd/2019_ford_escape_front_seats.jpg
+  - catalog/2019-ford-escape-sel-awd/2019_ford_escape_rear_seats.jpg
+  - catalog/2019-ford-escape-sel-awd/2019_ford_escape_rear_legroom.jpg
+  - catalog/2019-ford-escape-sel-awd/2019_ford_escape_liftgate_open.jpg
+  - catalog/2019-ford-escape-sel-awd/2019_ford_escape_cargo_area.jpg
+  - catalog/2019-ford-escape-sel-awd/2019_ford_escape_wheel_and_tire.jpg
+  - catalog/2019-ford-escape-sel-awd/2019_ford_escape_garage_kept.jpg
   - catalog/2019-ford-escape-sel-awd/doc_1_recall_invoice.jpg
   - catalog/2019-ford-escape-sel-awd/doc_2_emissions_report.jpg
   specs:
@@ -778,13 +812,19 @@ items:
   - 'Cold Weather Package: Heated front leather seats, heated side mirrors, factory
     roof rails'
   - Remote keyless entry, push-button start, hands-free foot-activated power liftgate,
-    dual-zone automatic climate control
+    dual-zone automatic climate control, Auto Start-Stop, and MyKey (a second key with
+    limits for a new driver)
   # Warnings only: the car never brakes by itself (owner, 2026-09-30).
   - 'Safety: Brake Assist, AdvanceTrac with Roll Stability Control, rear-view camera,
     rear parking sensors, forward collision warning (light and chime), and blind-spot
     and rear cross-traffic alerts'
-  - Garage-kept and driven mostly on the highway, commuting to work since 2024. Shifts
-    smoothly, no fluid leaks
+  - Garage-kept (a photo shows it in my garage) and driven mostly on the highway, commuting
+    to work since 2024. Shifts smoothly, no fluid leaks (the wet spots on the pavement
+    in the photos are water; I had just washed it)
+  - 'Real-world fuel economy: 27.7 MPG over my last 1,355 miles, on the trip computer in
+    the photos'
+  - "The dashboard read 102,768 miles on 3 Oct 2026 (photo). I list 103,500 to cover the
+    miles I drive until handover, so you never find more than advertised"
   - 'Clean Carfax when I bought it in April 2024: no accidents or damage reported. No
     accidents since, smoke-free, pet-free, zero dash warning lights or mechanical codes'
   included:
@@ -845,12 +885,19 @@ items:
     - Ford SYNC 3, pantalla de 8 pulgadas, Apple CarPlay, Android Auto, Bluetooth y Wi-Fi
     - Paquete para clima frío con asientos delanteros y espejos calefactados
     - Entrada sin llave con control remoto, encendido por botón, portón eléctrico manos
-      libres y climatización automática de dos zonas
+      libres, climatización automática de dos zonas, Auto Start-Stop y MyKey (una segunda
+      llave con límites para un conductor nuevo)
     - 'Seguridad: asistencia de frenado, AdvanceTrac con control de estabilidad antivuelco,
       cámara de reversa, sensores de estacionamiento traseros, aviso de colisión frontal
       (luz y pitido), y alertas de ángulo muerto y de tráfico cruzado trasero'
-    - Guardado en garaje y usado sobre todo en autopista para ir al trabajo desde 2024.
-      Cambios suaves y sin fugas
+    - Guardado en garaje (hay una foto en mi garaje) y usado sobre todo en autopista para
+      ir al trabajo desde 2024. Cambios suaves y sin fugas (las manchas mojadas del
+      asfalto en las fotos son agua; lo acababa de lavar)
+    - 'Consumo real: 27.7 MPG en mis últimas 1,355 millas, según la computadora de viaje
+      en las fotos'
+    - El tablero marcaba 102,768 millas el 3 de octubre de 2026 (foto). Anuncio 103,500
+      para cubrir las millas que haga hasta la entrega, así nunca encontrarás más de las
+      anunciadas
     - 'Carfax limpio cuando lo compré en abril de 2024: sin accidentes ni daños reportados.
       Sin accidentes desde entonces, sin humo ni mascotas y sin alertas en el tablero'
     included:
