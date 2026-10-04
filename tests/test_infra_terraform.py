@@ -273,25 +273,24 @@ def test_the_wider_token_can_be_swapped_for_the_deploy_one_for_a_pages_only_plan
 
 @needs_bash_tools
 def test_apply_applies_only_a_saved_plan_and_never_in_ci(toolbox, tmp_path):
-    plan = TF_DIR / "plan.tfplan"
-    assert not plan.exists()
-    refused = make(["infra-apply"], toolbox)
+    # A scratch TF_DIR: the owner's own saved plan in the real directory must neither fail
+    # this test nor be deleted by it.
+    tf_dir = f"TF_DIR={tmp_path}"
+    plan = tmp_path / "plan.tfplan"
+    refused = make(["infra-apply", tf_dir], toolbox)
     assert refused.returncode != 0 and "make infra-plan" in refused.stderr
     assert not toolbox[1].exists()
 
     plan.write_text("saved by the stub", encoding="utf-8")
-    try:
-        in_ci = make(["infra-apply"], toolbox, CI="true")
-        assert in_ci.returncode != 0 and "never by CI" in in_ci.stderr
-        assert not toolbox[1].exists()
+    in_ci = make(["infra-apply", tf_dir], toolbox, CI="true")
+    assert in_ci.returncode != 0 and "never by CI" in in_ci.stderr
+    assert not toolbox[1].exists()
 
-        applied = make(["infra-apply"], toolbox)
-        assert applied.returncode == 0, applied.stderr
-        assert re.search(r"^argv: .*apply .*plan\.tfplan$", toolbox[1].read_text(), re.MULTILINE)
-        assert "-auto-approve" not in toolbox[1].read_text()
-        assert not plan.exists(), "a plan is applied once"
-    finally:
-        plan.unlink(missing_ok=True)
+    applied = make(["infra-apply", tf_dir], toolbox)
+    assert applied.returncode == 0, applied.stderr
+    assert re.search(r"^argv: .*apply .*plan\.tfplan$", toolbox[1].read_text(), re.MULTILINE)
+    assert "-auto-approve" not in toolbox[1].read_text()
+    assert not plan.exists(), "a plan is applied once"
 
 
 @needs_bash_tools

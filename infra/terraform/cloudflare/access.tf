@@ -8,7 +8,7 @@
 # The one-time PIN: a code sent by email, no external identity provider to depend on.
 resource "cloudflare_zero_trust_access_identity_provider" "one_time_pin" {
   account_id = var.account_id
-  name       = "One-time PIN"
+  name       = ""
   type       = "onetimepin"
   config     = {}
 
@@ -21,12 +21,15 @@ resource "cloudflare_zero_trust_access_identity_provider" "one_time_pin" {
 # who can mint an address there.
 resource "cloudflare_zero_trust_access_policy" "owner_only" {
   account_id = var.account_id
-  name       = "Owner only"
+  name       = "owner-only"
   decision   = "allow"
 
   include = [{
     email = { email = var.owner_email }
   }]
+
+  # The API answers an empty rdp block for every policy; declaring it keeps the plan quiet.
+  connection_rules = { rdp = {} }
 
   lifecycle {
     prevent_destroy = true
@@ -37,9 +40,15 @@ resource "cloudflare_zero_trust_access_policy" "owner_only" {
 # not cover its parent, so the bare path is listed too (ops.md).
 resource "cloudflare_zero_trust_access_application" "seller" {
   account_id       = var.account_id
-  name             = "leaving-denver seller"
+  name             = "leaving-denver.pages.dev"
   type             = "self_hosted"
   session_duration = "24h"
+
+  # The values the dashboard created; declared so the first plan imports without a change.
+  auto_redirect_to_identity  = false
+  enable_binding_cookie      = false
+  http_only_cookie_attribute = false
+  options_preflight_bypass   = false
 
   destinations = [
     { type = "public", uri = "leaving-denver.pages.dev/seller" },
@@ -47,8 +56,6 @@ resource "cloudflare_zero_trust_access_application" "seller" {
     { type = "public", uri = "*.leaving-denver.pages.dev/seller" },
     { type = "public", uri = "*.leaving-denver.pages.dev/seller/*" },
   ]
-
-  allowed_idps = [cloudflare_zero_trust_access_identity_provider.one_time_pin.id]
 
   policies = [{
     id         = cloudflare_zero_trust_access_policy.owner_only.id
