@@ -1,6 +1,6 @@
 # Vehicle Sale Runbook: 2019 Ford Escape SEL AWD
 
-How the car is sold safely in Colorado. The car has its own deadline, 2026-11-09 (owner, 2026-10-02): the household items go by 2026-10-23. The public page shows no date for the car (owner, 2026-10-03): it says only "Available now", so a buyer cannot wait for a deadline. The seller needs the car until close to that date, so the sale is agreed early and the car is handed over later, in the handover window of late October through Nov 9.
+How the car is sold safely in Colorado. The car has its own deadline, 2026-11-09 (owner, 2026-10-02): the household items go by 2026-10-23. The public page shows no date for the car (owner, 2026-10-03): it says only "Ready for pickup", so a buyer cannot wait for a deadline. The seller needs the car until close to that date, so the sale is agreed early and the car is handed over later, in the handover window of late October through Nov 9.
 
 Owner decisions are marked **[OWNER]**. Everything else is procedure. Sources are at the end. Never commit a filled-in copy of the agreement, the plate number or the buyer's details: this repo is public.
 

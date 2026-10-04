@@ -465,7 +465,7 @@ def test_spanish_ui_and_sms_are_localized(public_dir):
         "Detalles y especificaciones",
         "Escribir sobre este artículo",
         "Cerrar",
-        "Disponible ahora",
+        "Listo para recoger",
         "¡Hola! Vi su catálogo de venta por mudanza",
     ):
         assert text in html

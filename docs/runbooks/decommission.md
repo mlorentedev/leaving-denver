@@ -61,12 +61,12 @@ gh pr create --fill
 ```
 
 After the owner merges, the push to `main` deploys. The page now sells only the car: its title
-is the vehicle one, it still says "Available now" (it never shows a date, FEAT-014), and the
+is the vehicle one, it still says "Ready for pickup" (it never shows a date, FEAT-014), and the
 flyer names only the car. Check it:
 
 ```
 curl -s https://leaving-denver.pages.dev/ | grep -o '<title>[^<]*'                 # <title>Denver Tech Center Relocation Sale — AWD SUV
-curl -s https://leaving-denver.pages.dev/ | grep -o 'data-role="sale-status">[^<]*' # data-role="sale-status">Available now
+curl -s https://leaving-denver.pages.dev/ | grep -o 'data-role="sale-status">[^<]*' # data-role="sale-status">Ready for pickup
 curl -sI https://leaving-denver.pages.dev/i/sofa-sleeper/ | head -1   # 404
 ```
 
