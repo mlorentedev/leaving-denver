@@ -43,3 +43,5 @@ tags: [lessons, index, docs, leaving-denver]
 | [lesson-028](lesson-028-two-policies-are-an-intersection-and-chrome-logs-unknown-features.md) | Two Policies Are an Intersection, and Chrome Logs Unknown Permissions-Policy Features | 2026-10-03 | [csp, cloudflare, headers, lighthouse, testing] |
 | [lesson-029](lesson-029-a-redirect-that-rebuilds-the-url-drops-the-query.md) | A Redirect That Rebuilds the URL Drops the Query | 2026-10-03 | [analytics, utm, redirects, testing, cloudflare] |
 | [lesson-030](lesson-030-a-token-without-access-scope-lists-access-as-empty.md) | A Token Without Access Scope Lists Access as Empty | 2026-10-03 | [cloudflare, access, terraform, tokens, testing] |
+| [lesson-031](lesson-031-a-conflicting-pr-runs-no-ci.md) | A Conflicting PR Runs No CI | 2026-10-04 | [ci, github, review, process] |
+| [lesson-032](lesson-032-a-terraform-import-writes-state-only-at-apply.md) | A Terraform Import Writes State Only at Apply | 2026-10-04 | [terraform, cloudflare, access, testing] |
