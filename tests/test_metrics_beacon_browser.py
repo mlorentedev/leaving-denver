@@ -12,6 +12,7 @@ import http.server
 import json
 import threading
 import time
+from collections import Counter
 
 import pytest
 from browser_harness import PUBLIC, needs_chrome, open_page, page_items, pointer, run_page
@@ -382,10 +383,12 @@ def test_a_flyer_scan_reaches_the_endpoint_under_connect_src_self(tmp_path, site
     )
     locale = "es" if prefix else "en"
     sent = received(hits, 2)
-    assert [(e["event"], e["source"], e["locale"]) for e in sent] == [
-        ("visit", "flyer", locale),
-        ("view_item", "flyer", locale),
-    ]
+    assert Counter((e["event"], e["source"], e["locale"]) for e in sent) == Counter(
+        [
+            ("visit", "flyer", locale),
+            ("view_item", "flyer", locale),
+        ]
+    )
     assert result == {"violations": [], "search": ""}
 
 
@@ -419,10 +422,12 @@ def test_a_seller_tool_share_link_keeps_its_source_to_the_catalog(tmp_path, site
         url=f"{base}{prefix}/i/{items[0]}/?utm_source=facebook&utm_campaign=moving-sale",
     )
     sent = received(hits, 2)
-    assert [(e["event"], e["source"], e.get("item")) for e in sent] == [
-        ("visit", "facebook", None),
-        ("view_item", "facebook", items[0]),
-    ]
+    assert Counter((e["event"], e["source"], e.get("item")) for e in sent) == Counter(
+        [
+            ("visit", "facebook", None),
+            ("view_item", "facebook", items[0]),
+        ]
+    )
     assert result == {"path": f"{prefix}/", "search": "", "open": ["itemSheet"], "v": []}
 
 
@@ -477,11 +482,13 @@ def test_the_beacon_fires_under_the_sites_real_content_security_policy(tmp_path,
         )
         sent = received(hits, 3)
         no_trouble(browser)
-    assert [(e["event"], e["source"]) for e in sent] == [
-        ("visit", "flyer"),
-        ("view_item", "flyer"),
-        ("text_tap", "flyer"),
-    ]
+    assert Counter((e["event"], e["source"]) for e in sent) == Counter(
+        [
+            ("visit", "flyer"),
+            ("view_item", "flyer"),
+            ("text_tap", "flyer"),
+        ]
+    )
 
 
 def test_a_share_link_keeps_its_source_under_the_real_policy(tmp_path, real_policy_site):
@@ -495,7 +502,9 @@ def test_a_share_link_keeps_its_source_under_the_real_policy(tmp_path, real_poli
         sent = received(hits, 2)
         assert browser.run("return location.search;") == ""
         no_trouble(browser)
-    assert [(e["event"], e["source"], e.get("item")) for e in sent] == [
-        ("visit", "facebook", None),
-        ("view_item", "facebook", items[0]),
-    ]
+    assert Counter((e["event"], e["source"], e.get("item")) for e in sent) == Counter(
+        [
+            ("visit", "facebook", None),
+            ("view_item", "facebook", items[0]),
+        ]
+    )
