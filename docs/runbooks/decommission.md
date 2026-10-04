@@ -5,7 +5,7 @@ The sale has two deadlines (OPS-013): household items go by 2026-10-23 and the c
 number behind it: that number would keep drawing spam and scam messages nobody can answer. Three
 steps, in this order: take the unsold household items off the catalog on Oct 23, turn the sale
 off once the car is handed over (no later than Nov 9), then remove the credentials. Specs:
-`specs/OPS-013-two-deadlines/`, `specs/OPS-011-end-of-sale/`. The Pages project stays (ADR-008).
+`specs/archive/OPS-013-two-deadlines/`, `specs/archive/OPS-011-end-of-sale/`. The Pages project stays (ADR-008).
 
 Run every command from a clone of the repository, in a shell where `gh` is logged in as the
 owner. Nothing here prints a secret.

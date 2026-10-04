@@ -51,4 +51,4 @@ Preview crawlers are not search indexers. They fetch one page when someone posts
 ## References
 
 - ADR-001 (static catalog, crawler policy), ADR-002 (contact obfuscation), ADR-003 (share pages foreseen)
-- Spec: `specs/FEAT-002-link-previews/`
+- Spec: `specs/archive/FEAT-002-link-previews/`

@@ -1,0 +1,82 @@
+---
+tags: [spec, verification, templates]
+created: "2026-09-30"
+---
+
+# Verification - FEAT-008-verify-the-car
+
+## Evidence
+
+All tests are in `tests/test_verify_the_car.py` unless noted.
+
+- [x] AC1 -> `test_the_section_shows_the_vin_and_the_three_official_hosts[en|es]`,
+  `test_the_checks_open_from_a_button_on_the_car_card_and_are_not_inline[en|es]`,
+  `tests/test_verify_sheet_browser.py` (the button opens the sheet with the VIN and the three
+  official links; the close button, Escape, the backdrop and Back close it and its history
+  entry; the `#<car-id>` deep link still opens the item sheet);
+  `test_the_share_page_still_sends_buyers_to_the_car`
+- [x] AC2 -> `test_every_link_is_https_on_an_official_host_or_one_of_the_cars_photos[en|es]`,
+  `test_the_allow_list_rejects_look_alike_hosts`,
+  `test_the_build_refuses_a_check_that_is_not_https_on_an_official_host` (http, a reseller,
+  suffix look-alikes, userinfo, protocol-relative, `javascript:`)
+- [x] AC3 -> `test_evidence_links_to_photos_the_car_has_and_the_build_ships[en|es]`,
+  `test_the_build_refuses_evidence_that_is_not_one_of_the_cars_photos`
+- [x] AC4 -> `test_the_emissions_note_says_passed_already_used_and_a_new_test_is_coming[en|es]`,
+  `tests/test_inventory_ssot.py::test_the_car_says_it_passed_emissions_and_shows_the_report`
+- [x] AC5 -> `test_the_section_claims_no_service_history_and_shows_no_personal_data[en|es]`
+  (the Carfax and service-history assertions flip on purpose when #28 and #34 land);
+  `tests/test_inventory_ssot.py::test_no_unbacked_vehicle_claims` still covers the new
+  template and data
+- [x] AC6 -> `test_the_data_carries_both_languages_for_every_entry`,
+  `test_the_template_hardcodes_no_check_and_no_evidence`,
+  `test_a_car_with_verify_data_renders_it_from_the_data`,
+  `test_a_car_without_verify_data_renders_no_button_and_no_sheet`,
+  `test_the_build_refuses_verify_data_on_a_car_with_no_vin`
+
+## Test status
+
+- Before: `make check` -> 331 passed, 1 skipped.
+- The new tests were written first and failed (23 failed, 2 passed) with no section and no
+  data.
+- After: `make check` -> 356 passed, 1 skipped (25 new tests; lint clean).
+- Visual check: a 390 px headless Chrome screenshot of `/es/` shows the section under the
+  car's card, one column, no horizontal overflow.
+
+## Decisions made during implementation
+
+- **NHTSA link.** NHTSA's pages answered 403 to a script from the build host, so a VIN
+  deep-link format could not be confirmed from NHTSA itself. The section links
+  `https://www.nhtsa.gov/recalls` and shows the VIN, selectable, to paste. If NHTSA's
+  documented format is confirmed later, it is a one-line change to the data.
+- **Allow-list in code, labels in data.** `OFFICIAL_CHECK_HOSTS` lives in `site_builder.py`:
+  a data-only change can add a link but not a new host, so a reseller cannot slip in through
+  `inventory.yaml`. The test keeps its own copy of the list so it fails if the builder's widens.
+- **Evidence is a photo, not a URL.** Evidence entries name one of the car's photos and link
+  to the built JPEG. The photo must be among the item's built photos or the build fails.
+- **Spanish copy by entry id** under `es.verify`, falling back to English per field like the
+  rest of the overlay; the test requires it complete for the car.
+- **Emissions wording.** The May certificate is already used for the registration renewal,
+  so the copy says a new test is taken before handover (owner, 2026-10-01; C.R.S. 42-4-310),
+  not the phrase `UNBACKED_CLAIMS` bans.
+- **NICB note** says "theft and total-loss (salvage) records" and leaves flood out: nicb.org
+  was not reachable from the build host (403), so flood is unconfirmed. The issue lists it;
+  the owner can add it once checked on the site.
+
+## Independent review (2026-10-03)
+
+The owner chose an independent reviewer subagent for these archives (the repo has no reviewer pool, so `dotf spec review` cannot run). The reviewer was not the implementer, worked read-only on main at 2cdc798, and ran the `features.json` commands plus the full suite on a clean copy (1042 passed, 2 skipped).
+
+- Verdict: archive. AC1-AC6 hold; #145 removed the test-drive link and kept the verify button.
+
+## Promotion candidates
+
+- [x] Lesson for the repo's `docs/lessons/`? no: nothing surprising; the allow-list reasoning is in the spec and the code comment.
+- [x] ADR-worthy decision for the repo's `docs/adr/adr-XXX.md`? no: a new section on the existing static catalog, no architectural change.
+- [x] New pattern candidate for `00_meta/patterns/`? no: single project.
+
+## Archive checklist
+
+- [ ] `proposal.md` frontmatter set to `status: archived`
+- [ ] Folder moved: `specs/FEAT-008-verify-the-car/` -> `specs/archive/FEAT-008-verify-the-car/`
+- [ ] Bitácora board ticket for this spec moved to Done / closed with PR link (ADR-018)
+- [ ] Promotions above executed (if any)

@@ -1,0 +1,8 @@
+[
+  {"id": "BUG-009-class-coverage-f1", "behavior": "AC1: every template class token has a CSS rule or is a declared hook", "verification": "make build && uv run pytest -q tests/test_class_coverage.py -k covered", "state": "pending", "evidence": ""},
+  {"id": "BUG-009-class-coverage-f2", "behavior": "AC2: the detector reports a typo, not hooks or real utilities", "verification": "uv run pytest -q tests/test_class_coverage.py -k detector", "state": "pending", "evidence": ""},
+  {"id": "BUG-009-class-coverage-f3", "behavior": "AC3: an unresolvable class expression fails closed", "verification": "uv run pytest -q tests/test_class_coverage.py -k fails_closed", "state": "pending", "evidence": ""},
+  {"id": "BUG-009-class-coverage-f4", "behavior": "AC4: utility assertions use the parsed class set", "verification": "uv run pytest -q tests/test_tailwind_build.py -k v4_utilities", "state": "pending", "evidence": ""},
+  {"id": "BUG-009-class-coverage-f5", "behavior": "AC5: missing CLI fails closed over a stale stylesheet", "verification": "uv run pytest -q tests/test_tailwind_build.py -k missing_cli", "state": "pending", "evidence": ""},
+  {"id": "BUG-009-class-coverage-f6", "behavior": "AC6: package.json declares engines.node", "verification": "uv run pytest -q tests/test_tailwind_build.py -k declares_the_node", "state": "pending", "evidence": ""}
+]
