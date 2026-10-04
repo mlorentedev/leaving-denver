@@ -1,6 +1,6 @@
 # Vehicle Sale Runbook: 2019 Ford Escape SEL AWD
 
-How the car is sold safely in Colorado. The car has its own deadline, 2026-11-09 (owner, 2026-10-02): the household items go by 2026-10-23, and the page says the car is available until Nov 9. The seller needs the car until close to that date, so the sale is agreed early and the car is handed over later, in the handover window of late October through Nov 9.
+How the car is sold safely in Colorado. The car has its own deadline, 2026-11-09 (owner, 2026-10-02): the household items go by 2026-10-23. The public page shows no date for the car (owner, 2026-10-03): it says only "Available now", so a buyer cannot wait for a deadline. The seller needs the car until close to that date, so the sale is agreed early and the car is handed over later, in the handover window of late October through Nov 9.
 
 Owner decisions are marked **[OWNER]**. Everything else is procedure. Sources are at the end. Never commit a filled-in copy of the agreement, the plate number or the buyer's details: this repo is public.
 
@@ -81,7 +81,7 @@ The buyer agrees now and takes the car in the **handover window: late October th
 
 ### 4.1 Deposit: none (owner, 2026-09-26)
 
-**Decision: option B, no deposit.** Option A is kept below as the alternative that was considered.
+**Decision: no deposit, of any kind** (owner, 2026-09-26). Price and date are agreed in writing, and nothing is paid until handover.
 
 No escrow product locks a buyer in with a non-refundable deposit.
 
@@ -89,16 +89,13 @@ No escrow product locks a buyer in with a non-refundable deposit.
 - **PrivateAuto** (funds held by US Alliance) and **Caramel** (Cars.com checkout) are the other escrow-style platforms in the research. Their deposit terms were not checked, because the no-deposit decision does not depend on them. If a buyer insists on one, type its address yourself and read who holds the money before agreeing.
 - **KeySavvy for the whole sale** is a poor fit for this timeline too. It pays the seller only once the title has been mailed to KeySavvy and the buyer has picked up the car. With the handover as late as Nov 9, the mail is the failure mode.
 
-| Option | How | Seller risk | Buyer risk |
-|---|---|---|---|
-| **A. Signed deposit** | $300–500 paid to you in person (Zelle confirmed in *your* bank app, or cash) against the signed agreement. The deposit counts toward the price. It is kept if the buyer walks away, and returned in full if you do or if the car is lost or damaged (§4.2). | Low | The buyer trusts you with the deposit. Some buyers will refuse. |
-| **B. No deposit** | Price and date agreed in writing, and nothing paid until handover. You keep showing the car to a backup buyer. | The buyer can vanish. Covered by the CarMax re-pull and an in-store appraisal about a week before the handover date (§8). | None |
+The risk is that the buyer vanishes. It is covered by the CarMax re-pull and an in-store appraisal about a week before the handover date (§8), and by keeping a backup buyer.
 
 ### 4.2 Terms the agreement must include
 
 - **Price** (locked, no later renegotiation) and **handover date**, with a fallback date.
 - **Condition:** as-is, the PPI already done, and the car handed over as it was at the PPI apart from normal driving. State the odometer reading at signing and an allowance for miles until handover.
-- **Risk of loss:** it stays with the seller until handover. If the car is damaged, a full refund or a price reduced by agreement. If it is totalled or stolen, a full refund. The seller's insurance stays in force until then.
+- **Risk of loss:** it stays with the seller until handover. If the car is damaged, the buyer may cancel or take a price reduced by agreement. If it is totalled or stolen, the sale is cancelled. No money has changed hands, so nothing is refunded. The seller's insurance stays in force until then.
 - **If either side walks away:** with no deposit, either side may cancel by telling the other in writing. Until handover day the seller keeps a backup buyer and the CarMax fallback (§8).
 - **Payment at handover:** the method in §5, and nothing else.
 
@@ -150,7 +147,7 @@ A car that fails emissions within 5 business days of sale can be returned by the
 
 ## Appendix: agreement template
 
-Print it, fill it in by hand, and never commit a filled-in copy. With no deposit (§4.1), write $0 as the deposit and strike the two deposit sentences in the last paragraph.
+Print it, fill it in by hand, and never commit a filled-in copy. There is no deposit (§4.1).
 
 ```
 VEHICLE SALE AGREEMENT (DELAYED HANDOVER)
@@ -158,22 +155,21 @@ VEHICLE SALE AGREEMENT (DELAYED HANDOVER)
 Vehicle: 2019 Ford Escape SEL AWD, VIN 1FMCU9HD9KUB80146
 Seller: ____________________   Buyer: ____________________ (ID no. ________)
 
-Price: $________ , locked. Deposit received today: $________ (method: ______),
-credited toward the price. Balance due at handover: $________ .
+Price: $________ , locked, due in full at handover. No deposit is paid before then.
 
 Handover: ____ / ____ / 2026 at ______ ; fallback date ____ / ____ / 2026.
-Balance paid at handover by cashier's check issued in the Seller's presence at
+The price is paid at handover by cashier's check issued in the Seller's presence at
 the Buyer's bank, before the title is signed.
 
 Condition: sold AS-IS. Pre-purchase inspection done on ____ / ____ / 2026 at
 ______________________. Odometer today: ________ mi; handover allowance: ______ mi.
 
 Risk of loss stays with the Seller until handover. If the vehicle is lost, stolen
-or totalled before then, the deposit is refunded in full. If it is damaged, the
-Buyer may take a full refund or a price reduced by written agreement.
+or totalled before then, the sale is cancelled. If it is damaged, the Buyer may
+cancel or take a price reduced by written agreement.
 
-If the Buyer does not complete the purchase by the fallback date, the Seller keeps
-the deposit. If the Seller does not complete it, the Seller refunds the deposit in full.
+If either party does not complete the sale by the fallback date, the other may
+cancel it in writing. No money has changed hands before handover.
 
 Seller signature / date: ____________________
 Buyer signature / date:  ____________________

@@ -20,7 +20,7 @@
     {
       "parameters": {
         "chatId": "={{ $env.TELEGRAM_CHAT_ID }}",
-        "text": "=⏰ *CRAIGSLIST 48-HOUR BUMP REMINDER*\n\nIt's time to log into Craigslist Denver and hit *Renew* to put your listings back at the top of the feed:\n\n1. 2019 Ford Escape SEL AWD ($11,500)\n2. AFW Kent Sectional Sleeper ($220)\n3. Master Moving Sale Post\n4. WFH Workstation Setup ($150)\n\n👉 [Manage Craigslist Postings](https://post.craigslist.org/manage)",
+        "text": "=⏰ *CRAIGSLIST 48-HOUR BUMP REMINDER*\n\nIt's time to log into Craigslist Denver and hit *Renew* on the free household listings that offer it, to put them back at the top of the feed. Paid cars-by-owner posts cannot be renewed: repost one only after it expires.\n\n👉 [Manage Craigslist Postings](https://post.craigslist.org/manage)",
         "additionalFields": {
           "parse_mode": "Markdown"
         }

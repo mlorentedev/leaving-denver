@@ -15,6 +15,7 @@ to buyers. Confirm current listings and platform rules before posting.
 | **Craigslist Denver** | Cash-ready buyers & tech items | **Include full catalog link** in master ad | Free posts may be renewed after 48 hours; paid cars/trucks-by-owner posts ($5) cannot be renewed: repost only after expiry |
 | **OfferUp** | Mobile impulse same-day pickups | **NO external links** | Require same-day pickup for discounts |
 | **Nextdoor (DTC)** | Neighborhood buyers | **Include full catalog link** | No duplicate listings or delete/repost to bump; use For Sale & Free for items |
+| **Cars.com (the car only)** | The car's own listing, with the vehicle form | Follow the platform's rules; the listing never carries the phone number | Payment is a cashier's check at the buyer's bank, never a deposit ([vehicle-sale.md](vehicle-sale.md)); take it down when the car is handed over |
 | **Complex Portal (ActiveBuilding)** | High-trust local buyers | **Include full catalog link** | State the one-flight walk-up and no-elevator pickup facts before scheduling |
 
 ### Listing copy: `/seller/`
@@ -33,16 +34,16 @@ description, tags and price. It covers:
 - **Limits.** The page shows the counts: Facebook title 100 and description 5000, Craigslist
   title 70, OfferUp title 60. A red count means the text is too long for that platform.
 - **No phone number.** Facebook and OfferUp take messages in the app and Craigslist replies
-  go through its email relay. The number stays out of every listing (#29 plans a Google Voice
-  number).
+  go through its email relay. The number stays out of every listing. The number a buyer
+  texts is the owner's work phone, so nothing is released at the end (#29 was closed as not
+  planned).
 - **The link.** The per-channel link (its `utm_source` says where the buyer came from) is for
   **chat replies only**. Never paste it into a listing body; the per-item copy has none. The
   full catalog link goes only in an umbrella post, as the table above says.
 - **The listing-creator link** per platform (the vehicle form for the car).
 
 Edit the item in `data/inventory.yaml` (or its `es:` overlay), publish as described in
-[ops.md](ops.md), and the copy follows; nothing is typed into the tool. Floors and
-negotiation are not in `/seller/`: they stay in the local assistant until FEAT-009 PR 2.
+[ops.md](ops.md), and the copy follows; nothing is typed into the tool.
 
 Check each group's rules before posting an umbrella sale message. For
 Facebook/Nextdoor, use one local sale post rather than repeating identical
@@ -63,7 +64,7 @@ unverified vehicle service, condition or retail value.
 | October 20–22 | Household giveaway window: give away or donate what is left; last drop-offs and recycling by October 21 ([backup-exits.md](backup-exits.md)). Take down sold listings. |
 | October 23 | Household deadline: take the unsold household items off the catalog ([household close-out](decommission.md)). From here the page is about the car. |
 | October 24–November 9 | Sell the car and arrange its handover in this window, never later than November 9 (see [vehicle-sale.md](vehicle-sale.md)); refresh the car's instant offers after October 30 and do not promise a later bank transaction. |
-| By November 9 | Car handed over: turn the sale off, take down the car's listings and follow the [decommission ticket](https://github.com/mlorentedev/leaving-denver/issues/38) to remove public contact details. Verify the catalog no longer exposes a contact number. |
+| By November 9 | Car handed over: turn the sale off, take down the car's listings and follow the [decommission runbook](decommission.md) to remove public contact details. Verify the catalog no longer exposes a contact number. |
 
 Run `leaving-denver drops` immediately before repricing. It reads the household windows from `seller.price_schedule` (the car has no schedule) and displays all price tiers:
 
@@ -100,7 +101,7 @@ Record what happens as it happens; each command writes to `data/private.sops.yam
 
 | When | Command |
 | :--- | :--- |
-| You post an item, or renew it | `make post ID=sofa-sleeper CHANNEL=facebook` (channels: facebook, craigslist, offerup, nextdoor, activebuilding; add `ON=2026-10-01` for a post made earlier) |
+| You post an item, or renew it | `make post ID=sofa-sleeper CHANNEL=facebook` (channels: facebook, craigslist, offerup, nextdoor, activebuilding, and carscom for the car only; add `ON=2026-10-01` for a post made earlier) |
 | You change an asking price | edit `recommended_list_price` in `data/inventory.yaml`, then `make reprice ID=sofa-sleeper PRICE=195` (the private views flag a log that differs from the asking price) |
 | An item sells | `make sold ID=sofa-sleeper PRICE=180` records price and date and lists the channels to take it down from |
 

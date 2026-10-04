@@ -67,7 +67,7 @@ drops: ## Show the staged price-drop table (needs the sops key)
 	$(UV) run leaving-denver drops
 
 post: ## Record a posting or renewal: make post ID=sofa-sleeper CHANNEL=facebook [ON=2026-10-01]
-	@test -n "$(ID)" && test -n "$(CHANNEL)" || { echo "usage: make post ID=<item-id> CHANNEL=<facebook|craigslist|offerup|nextdoor|activebuilding> [ON=<YYYY-MM-DD>]"; exit 1; }
+	@test -n "$(ID)" && test -n "$(CHANNEL)" || { echo "usage: make post ID=<item-id> CHANNEL=<facebook|craigslist|offerup|nextdoor|activebuilding|carscom> [ON=<YYYY-MM-DD>]"; exit 1; }
 	$(UV) run leaving-denver post $(ID) $(CHANNEL) $(if $(ON),--on $(ON))
 
 reprice: ## Record an asking-price change: make reprice ID=sofa-sleeper PRICE=190 [ON=2026-10-03]
@@ -137,5 +137,5 @@ secrets: ## Edit the encrypted floors, targets, notes, phone and deploy token (t
 
 clean: ## Remove build output and caches
 	# data/inventory.json: an earlier build wrote the plaintext floors there; nothing does now.
-	rm -rf build data/inventory.json .pytest_cache .ruff_cache
+	rm -rf build data/inventory.json .pytest_cache .ruff_cache src/*.egg-info
 	find . -name __pycache__ -type d -prune -exec rm -rf {} +

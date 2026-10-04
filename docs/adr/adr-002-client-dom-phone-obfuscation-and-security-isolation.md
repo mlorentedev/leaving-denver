@@ -13,10 +13,11 @@ created: "2026-09-25"
 
 ## Status
 
-Accepted. Decision 2 is amended by ADR-007: the ciphertext of private data, sealed on the
-owner's machine under a passphrase only the owner knows, may be served inside `/seller/`.
-Plaintext still never reaches `build/public/`. The local PIN gate goes with
-`poster_assistant.html` (FEAT-009 PR 2).
+Accepted. Decision 1 stands. Decision 2 is superseded by ADR-007: there is no `build/private/`
+and no local PIN gate any more. `poster_assistant.html` went in FEAT-009, and the one build
+output, `build/public/`, holds the seller tool at `/seller/` with the ciphertext of the private
+data, sealed on the owner's machine under a passphrase only the owner knows. Plaintext still
+never reaches `build/public/`.
 
 ## Date
 
@@ -29,7 +30,7 @@ Publishing contact details on public websites invites aggressive automated scrap
 ## Decision
 
 1. **Client DOM Phone Obfuscation:** The public `index.html` must never contain plaintext phone numbers or raw `href="sms:..."` attributes in static markup. Instead, data attributes split the country code, prefix, and line number. Client JavaScript constructs the interactive SMS links dynamically at runtime.
-2. **Strict Output Isolation:** Build output is strictly separated into `build/public/` (public artifacts only) and `build/private/` (internal operator tools with reserve floor prices). Cloudflare Pages deployment only deploys `build/public/`. `build/private/` is gitignored and protected by a local master PIN gate.
+2. **Strict Output Isolation (superseded by ADR-007):** Build output was separated into `build/public/` (public artifacts only) and `build/private/` (internal operator tools with reserve floor prices). Cloudflare Pages deployed only `build/public/`; `build/private/` was gitignored and protected by a local master PIN gate. ADR-007 replaced this: `build/private/` and the PIN gate are gone, and the private data reaches the phone only as ciphertext inside `build/public/seller/index.html`.
 
 ## Consequences
 

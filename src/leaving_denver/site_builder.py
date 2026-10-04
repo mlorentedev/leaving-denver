@@ -162,7 +162,7 @@ def unpublished_ids(full_data: dict[str, Any]) -> set[str]:
 
 # "Verify it yourself" links go to these sites and no others (FEAT-008): a buyer follows them to
 # check the VIN, so a reseller here would turn the section into the scam it warns about. Adding a
-# host (Carfax, once #28 lands) is a deliberate edit to this tuple, never a data-only change.
+# host (a Carfax link, say) is a deliberate edit to this tuple, never a data-only change.
 OFFICIAL_CHECK_HOSTS = ("nhtsa.gov", "ford.com", "nicb.org")
 
 

@@ -5,6 +5,8 @@ dashboard path, and no credential the repository uses can be left off the list."
 import re
 from pathlib import Path
 
+import yaml
+
 ROOT = Path(__file__).resolve().parents[1]
 RUNBOOK = (ROOT / "docs/runbooks/decommission.md").read_text(encoding="utf-8")
 ADR = next((ROOT / "docs/adr").glob("adr-008-*.md")).read_text(encoding="utf-8")
@@ -66,7 +68,7 @@ def test_by_nov_15_names_every_account_and_the_repository():
     by_nov_15 = section("By Nov 15")
     for needle in (
         "API Tokens",
-        "Google Voice",
+        "work phone",
         "leaving-denver-seller",
         "bw delete item",
         "SELLER_PASSPHRASE",
@@ -77,6 +79,34 @@ def test_by_nov_15_names_every_account_and_the_repository():
         assert needle in by_nov_15, needle
     # An archived repository cannot change its secrets: archive last.
     assert by_nov_15.index("gh secret delete") < by_nov_15.index("gh repo archive")
+
+
+def test_no_google_voice_number_is_left_to_release():
+    """The listing number is the owner's work phone (#29 closed as not planned): no runbook step
+    may send the owner to release a number that does not exist."""
+    for name in ("decommission.md", "ops.md", "seller-playbook.md"):
+        text = (ROOT / "docs/runbooks" / name).read_text(encoding="utf-8")
+        assert "Release the Google Voice" not in text, name
+        assert "get a Google Voice" not in text, name
+
+
+def test_the_oct_23_check_matches_the_page_the_build_makes():
+    """The close-out check greps the live page for what the locale file renders (FEAT-014: no
+    date is ever shown), so a reworded page fails here, not on the day."""
+    oct_23 = " ".join(section("Oct 23").split())
+    en = yaml.safe_load((ROOT / "locales/en.yaml").read_text(encoding="utf-8"))
+    assert en["page_title_vehicle"] in oct_23
+    assert en["sale_status"] in oct_23
+    assert "Car available until" not in oct_23
+    assert "counts down" not in oct_23
+
+
+def test_by_nov_9_takes_down_the_cars_listing_and_the_reminder_workflow():
+    by_nov_9 = section("By Nov 9")
+    assert "Cars.com" in by_nov_9
+    assert "Craigslist 48h Bump Reminder" in by_nov_9
+    assert "Uptime Kuma" in by_nov_9
+    assert by_nov_9.index("Uptime Kuma") < by_nov_9.index("Craigslist 48h Bump Reminder")
 
 
 def test_it_ends_with_a_check_that_proves_no_phone_is_served():

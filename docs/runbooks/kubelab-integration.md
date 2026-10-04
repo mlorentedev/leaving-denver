@@ -19,4 +19,10 @@ Craigslist Denver ranks listings in strict reverse-chronological order. Listings
 
 1. Import `integrations/n8n/workflows/craigslist_48h_bump_reminder.json` into n8n.
 2. The cron triggers every 48 hours at 9:00 AM MST.
-3. Sends a direct link to `https://post.craigslist.org/manage` to hit "Renew" on all active listings in 30 seconds.
+3. Sends a direct link to `https://post.craigslist.org/manage` to hit "Renew" on the free household listings that offer it.
+
+The message names no item and no price: prices live in `data/inventory.yaml` and a copy typed
+into the workflow goes stale. The car's paid cars-by-owner post cannot be renewed (repost it
+only after it expires; see [seller-playbook.md](seller-playbook.md)), so the reminder leaves it out.
+
+When the sale ends, deactivate the workflow on kubelab: [decommission.md](decommission.md), "By Nov 9".
