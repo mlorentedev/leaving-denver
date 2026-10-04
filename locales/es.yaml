@@ -34,7 +34,8 @@ original: Original
 details: Detalles y especificaciones
 included: Qué incluye
 pickup_note: Nota para la recogida
-text_about_this: Escribir sobre este artículo
+text_about_this: Lo quiero — escríbeme
+text_about_vehicle: Me interesa — escríbeme
 close: Cerrar
 contact_heading: Escríbame desde su teléfono
 contact_hint: "Mensaje sugerido:"
@@ -50,16 +51,19 @@ open_messages: Abrir en Mensajes
 see_included: Ver qué incluye
 free: Gratis
 separately: Por separado
-text_about_bundle: Escribir sobre este paquete
+text_about_bundle: Quiero este paquete — escríbeme
 unavailable: Ya no está disponible
 availability_line: "{available} de {total} disponibles"
 sold_count: "{n} vendidos"
 default_pickup: Recogida en Denver Tech Center (DTC). El comprador debe cargar el artículo.
 sms_generic: ¡Hola! Vi su catálogo de venta por mudanza en DTC y tengo una pregunta.
-sms_bundle_prefix: ¡Hola! Me interesa el paquete
+sms_bundle_prefix: ¡Hola! Quiero el paquete
 sms_bundle_word: ""
-sms_item_prefix: ¡Hola! Me interesa ver
+sms_item_prefix: ¡Hola! Quiero comprar
+sms_vehicle_prefix: ¡Hola! Me interesa el
 sms_in_dtc: en DTC.
+sms_pickup_ask: ¿Cuándo podría pasar a recoger?
+sms_vehicle_ask: ¿Cuándo podría verlo?
 verify_heading: Compruébalo tú mismo
 verify_intro: "Revisa el auto sin fiarte de mi palabra: pega el VIN en estos sitios oficiales."
 verify_vin: VIN

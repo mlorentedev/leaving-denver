@@ -460,10 +460,10 @@ def test_spanish_ui_and_sms_are_localized(public_dir):
         "Ahorre con un paquete",
         "Ver qué incluye",
         "Por separado",
-        "Escribir sobre este paquete",
+        "Quiero este paquete — escríbeme",
         "Cómo funciona la recogida",
         "Detalles y especificaciones",
-        "Escribir sobre este artículo",
+        "Lo quiero — escríbeme",
         "Cerrar",
         "Disponible ahora",
         "¡Hola! Vi su catálogo de venta por mudanza",
@@ -475,6 +475,8 @@ def test_spanish_ui_and_sms_are_localized(public_dir):
         "How pickup works",
         "Details & Specifications",
         "Text about this",
+        "I want it",
+        "Escribir sobre",
     ):
         assert stale not in html
 
