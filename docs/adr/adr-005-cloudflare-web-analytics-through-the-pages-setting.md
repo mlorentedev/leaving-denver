@@ -21,6 +21,8 @@ public pages now carry a policy, which allows `static.cloudflareinsights.com` in
 
 Amended by ADR-011: Web Analytics does not log query strings, so it cannot tell a flyer scan from a direct visit, and it has no custom events. A first-party event beacon (same origin, no cookie) covers visits by source and item interest; Web Analytics stays as it is.
 
+Amended by ADR-012: Terraform leaves the setting alone (it ignores the project's `build_config`, which holds the beacon pair), so the owner step in the Decision is unchanged.
+
 ## Date
 
 2026-09-30

@@ -206,23 +206,36 @@ new token (ADR-008).
    `Makefile` and `accountId` in `.github/workflows/ci.yml`. There is nothing to delete.
    An account id alone grants nothing.
 
-2. Revoke the Cloudflare API token. Cloudflare dashboard > My Profile > API Tokens > the
-   Pages deploy token > Delete (or Roll, then discard). The encrypted copy in
-   `data/private.sops.yaml` is dead from then on.
+2. Optional: remove the Access objects, with Terraform, **before** their token is revoked in
+   the next step (ADR-012). `/seller/` is no longer built, so this is tidying. Delete
+   `infra/terraform/cloudflare/access.tf` and `outputs.tf`, the three Access `import` blocks in
+   `imports.tf`, and the three `access_*_id` variables in `variables.tf`; then
+   `make infra-plan` (it must say `0 to add, 0 to change, 3 to destroy`: the application, its
+   policy and the identity provider, never the Pages project) and `make infra-apply`; commit the deletion (the repository is
+   archived last). Removing
+   a block also removes its `prevent_destroy`. Then, in Workers & Pages > `leaving-denver` >
+   Settings > Variables and Secrets, delete `ACCESS_TEAM_DOMAIN` and `ACCESS_AUD` in production
+   and preview: Terraform never wrote them. The Pages project stays in Terraform, where
+   `prevent_destroy` keeps it (ADR-008).
 
-   The metrics token too: the same page > `leaving-denver-analytics-read` (Account Analytics
+3. Revoke the Cloudflare API tokens, and forget the email. Cloudflare dashboard > My Profile >
+   API Tokens: delete the Pages deploy token and the Terraform token (or Roll, then discard). The
+   encrypted copies in `data/private.sops.yaml` are dead from
+   then on; `make secrets` and delete `cloudflare_terraform_token` and `owner_email`. Delete
+   the local state, which holds the email:
+
+   ```
+   cd infra/terraform/cloudflare && rm -f terraform.tfstate* plan.tfplan ids.auto.tfvars
+   ```
+
+   The metrics token (not in Terraform, so nothing here removes it) too: the same page > `leaving-denver-analytics-read` (Account Analytics
    Read, created with a TTL that ends on 2026-11-15) > Delete. It is not in GitHub or in the
    encrypted file, only in n8n's Header Auth credential, which step 8 above removes.
    `/api/hit` stays deployed with the project and answers as before; the end page does not call it.
    The Analytics Engine data (dataset `leaving_denver_sale_events`) expires by itself after three
    months, and there is nothing to delete.
 
-3. Keep the Pages project. Do not delete it: ADR-008 says why.
-
-4. Optional: remove the Access app. Zero Trust dashboard (`one.dash.cloudflare.com`) > Access >
-   Applications > the `leaving-denver` app for `/seller` > Delete. Workers & Pages >
-   `leaving-denver` > Settings > Variables and Secrets: delete `ACCESS_TEAM_DOMAIN` and
-   `ACCESS_AUD` in production and preview. `/seller/` is no longer built, so this is tidying.
+4. Keep the Pages project. Do not delete it: ADR-008 says why.
 
 5. The number needs no release: the listing number is the owner's work phone (#29, a Google
    Voice number, was closed as not planned), so there is nothing to give back. The listings are

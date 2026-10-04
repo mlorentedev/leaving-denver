@@ -1,0 +1,58 @@
+[
+  {
+    "id": "OPS-014-cloudflare-terraform-f1",
+    "behavior": "AC1: no email or token in any .tf/tfvars file; state, plans, variable files, .terraform/ and crash logs are ignored",
+    "verification": "uv run pytest -q tests/test_infra_terraform.py -k 'scanner or holds_an_email or ignored or tracked'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "OPS-014-cloudflare-terraform-f2",
+    "behavior": "AC2: the token and the email reach Terraform in its environment, never on argv or in output; a missing secret stops before Terraform",
+    "verification": "uv run pytest -q tests/test_infra_terraform.py -k 'environment_never_on_argv or missing_owner_email or wider_token'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "OPS-014-cloudflare-terraform-f3",
+    "behavior": "AC3: infra-apply applies only the saved plan and refuses in CI",
+    "verification": "uv run pytest -q tests/test_infra_terraform.py -k saved_plan",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "OPS-014-cloudflare-terraform-f4",
+    "behavior": "AC4: make check fails on Terraform that does not fmt/validate and only skips, with a notice, without Terraform",
+    "verification": "uv run pytest -q tests/test_infra_terraform.py -k 'check_runs or check_skips or make_check_includes'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "OPS-014-cloudflare-terraform-f5",
+    "behavior": "AC5: every managed resource has an import block; the Pages project cannot be destroyed and its deployment configuration is ignored",
+    "verification": "uv run pytest -q tests/test_infra_terraform.py -k 'import_block or pages_project or access_ or audience or owner_email'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "OPS-014-cloudflare-terraform-f6",
+    "behavior": "AC6: infra-ids refuses a token that cannot read Access and stops unless each object is found exactly once",
+    "verification": "uv run pytest -q tests/test_infra_terraform.py -k ids",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "OPS-014-cloudflare-terraform-f7",
+    "behavior": "AC7: the Pages project plans as 1 to import, 0 to add, 0 to change, 0 to destroy (read-only, deploy token; owner command in the runbook)",
+    "verification": "cd infra/terraform/cloudflare && CLOUDFLARE_API_TOKEN=\"$(sops -d --extract '[\"cloudflare_pages_token\"]' ../../../data/private.sops.yaml)\" TF_VAR_account_id=76967f5ede1ce50efce34d90b7e94958 TF_VAR_owner_email=unused TF_VAR_access_idp_id=unused TF_VAR_access_app_id=unused TF_VAR_access_policy_id=unused terraform plan -input=false -no-color -target=cloudflare_pages_project.site | grep -q 'Plan: 1 to import, 0 to add, 0 to change, 0 to destroy'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "OPS-014-cloudflare-terraform-f8",
+    "behavior": "AC8: runbooks name the targets, the manual leftovers and the decommission order",
+    "verification": "uv run pytest -q tests/test_ops_runbook.py tests/test_decommission_runbook.py",
+    "state": "pending",
+    "evidence": ""
+  }
+]

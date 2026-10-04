@@ -24,6 +24,7 @@ A privacy-focused inventory management, automated photo ingestion, and multi-por
 - Node.js 24+ and npm (locked Tailwind v4 CLI; CSS is built locally, not loaded from a runtime CDN)
 - `ffmpeg` (for iPhone HEIC conversion)
 - `git-lfs`, and `sops` + an age key for the private data
+- [Terraform](https://developer.hashicorp.com/terraform/install) 1.9+ (optional: only for `make infra-*`; `make check` skips its part without it)
 - `make install` (`uv sync --extra dev` and `npm ci`) installs locked deps and the `leaving-denver` CLI
 
 ### 2. Common Commands
@@ -95,6 +96,12 @@ repository-wide secret. Both environments accept deployments only from `main`;
 manual previews select a Pages branch while running the trusted workflow from
 `main`. Re-run `make ci-secrets` after rotating the token. `make deploy
 BRANCH=<name>` deploys from this machine as a fallback.
+The Pages project and the Cloudflare Access application in front of `/seller/` are Terraform in
+`infra/terraform/cloudflare/` (local, gitignored state; ADR-012): `make infra-plan`, read it,
+`make infra-apply`. `make infra-fmt` (format and validate, no credentials) runs as part of
+`make check` when `terraform` is installed. Setup, the first import and what stays manual are in
+[site operations](docs/runbooks/ops.md#cloudflare-configuration-terraform).
+
 For rollbacks, inventory and phone changes, key recovery, and monitoring, see
 [site operations](docs/runbooks/ops.md).
 For the listing calendar, platform rules and buyer scripts, see the
@@ -154,6 +161,8 @@ When running `uv run leaving-denver serve`:
 │   └── public/                    # Public sanitized distribution (Deploy to Cloudflare):
 │       │                          #   catalog (/, /es/), item share pages (/i/<id>/, /es/i/<id>/),
 │       │                          #   the building flyer (/flyer/) and the seller tool (/seller/)
+├── infra/
+│   └── terraform/cloudflare/      # Pages project and Access as Terraform (ADR-012); state is local
 ├── integrations/
 │   └── n8n/                       # Kubelab n8n workflow (Craigslist bump reminder)
 ├── docs/

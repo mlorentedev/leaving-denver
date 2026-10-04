@@ -1,0 +1,5 @@
+# `make infra-ids` writes the real ids.auto.tfvars (gitignored), found read-only through
+# the API. This file only shows the shape; it holds no real value.
+access_idp_id    = "00000000-0000-0000-0000-000000000000"
+access_app_id    = "00000000-0000-0000-0000-000000000000"
+access_policy_id = "00000000-0000-0000-0000-000000000000"

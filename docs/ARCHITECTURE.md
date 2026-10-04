@@ -49,6 +49,8 @@ leaving-denver/
 │   │   ├── robots.txt             <-- Allow-list: link-preview fetchers and assistants, every other crawler disallowed
 │   │   ├── catalog/               <-- EXIF-scrubbed JPEGs (capped at 1600 px) plus WebP width variants
 │   │   └── seller/index.html      <-- Seller tool: public copy tools, plus the sealed envelope (ciphertext)
+├── infra/
+│   └── terraform/cloudflare/      <-- Pages project and Access as Terraform; local, gitignored state (ADR-012)
 ├── integrations/
 │   └── n8n/                       <-- Kubelab integration workflows
 │       └── workflows/
