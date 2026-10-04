@@ -5,6 +5,7 @@ answer with the catalog's index.html, as Pages does for any path it has no file 
 import functools
 import http.server
 import os
+import re
 import subprocess
 import threading
 from pathlib import Path
@@ -23,6 +24,14 @@ class FreshDeployment(MissingPath, http.server.SimpleHTTPRequestHandler):
     seller_status = 503
     seller_body = b"Seller access is not configured"
     fallback = {}  # times each path answers with index.html (200) before its own file
+    bare_404s = 0  # 404s answered with the server's own body before the not-found page
+    stale_home = 0  # times / answers with an og:image the deployment no longer has
+
+    def send_error(self, code, message=None, explain=None):
+        if code == 404 and FreshDeployment.bare_404s > 0:
+            FreshDeployment.bare_404s -= 1
+            return http.server.SimpleHTTPRequestHandler.send_error(self, code, message, explain)
+        return super().send_error(code, message, explain)
 
     def end_headers(self):
         self.send_header("X-Content-Type-Options", "nosniff")
@@ -41,6 +50,20 @@ class FreshDeployment(MissingPath, http.server.SimpleHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(self.seller_body)
             return
+        if self.path == "/" and FreshDeployment.stale_home > 0:
+            # The previous deployment's page, naming a cover photo this one has deleted.
+            FreshDeployment.stale_home -= 1
+            body = re.sub(
+                r'(<meta property="og:image" content="https://[^/]+/)[^"]+',
+                r"\1catalog/deleted-cover.jpg",
+                (Path(self.directory) / "index.html").read_text(encoding="utf-8"),
+            ).encode()
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
         if self.fallback.get(self.path, 0) > 0:
             self.fallback[self.path] -= 1
             self.path = "/index.html"
@@ -50,9 +73,18 @@ class FreshDeployment(MissingPath, http.server.SimpleHTTPRequestHandler):
         pass
 
 
-def smoke(retries, seller=(503, b"Seller access is not configured"), not_ready=None, fallback=None):
+def smoke(
+    retries,
+    seller=(503, b"Seller access is not configured"),
+    not_ready=None,
+    fallback=None,
+    bare_404s=0,
+    stale_home=0,
+):
     FreshDeployment.not_ready = {"/es/": 2} if not_ready is None else not_ready
     FreshDeployment.fallback = fallback or {}
+    FreshDeployment.bare_404s = bare_404s
+    FreshDeployment.stale_home = stale_home
     FreshDeployment.seller_status, FreshDeployment.seller_body = seller
     handler = functools.partial(FreshDeployment, directory=str(PUBLIC))
     with http.server.ThreadingHTTPServer(("127.0.0.1", 0), handler) as server:
@@ -119,6 +151,28 @@ def test_a_404_that_is_not_the_not_found_page_fails(monkeypatch):
     result = smoke(retries=3)
     assert result.returncode != 0
     assert "the 404 is not the not-found page" in result.stderr
+
+
+def test_a_404_with_another_body_first_is_retried():
+    # CI run 37169206079 (#173): a fresh deployment answered 404 with its own body, a second
+    # after / was 200, and smoke failed on the first reply instead of asking again.
+    result = smoke(retries=3, not_ready={}, bare_404s=2)
+    assert result.returncode == 0, result.stderr
+    assert "smoke OK" in result.stdout
+
+
+def test_a_page_still_naming_a_deleted_cover_is_fetched_again():
+    # #166: the deploy that replaced the cover failed on the old page's og:image, which the new
+    # deployment had deleted. The page is fetched again, so the image checked is the current one.
+    result = smoke(retries=3, not_ready={}, stale_home=2)
+    assert result.returncode == 0, result.stderr
+    assert "smoke OK" in result.stdout
+
+
+def test_a_cover_that_stays_missing_fails():
+    result = smoke(retries=1, not_ready={}, stale_home=9)
+    assert result.returncode != 0
+    assert "catalog og:image" in result.stderr
 
 
 def test_robots_txt_served_as_the_catalog_is_retried():
