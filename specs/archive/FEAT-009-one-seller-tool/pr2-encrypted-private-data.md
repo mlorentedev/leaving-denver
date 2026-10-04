@@ -5,7 +5,7 @@ created: "2026-10-01"
 
 # FEAT-009 PR 2: private data in `/seller/`, as ciphertext
 
-> **Where this goes.** This is the PR 2 section of `specs/FEAT-009-one-seller-tool/proposal.md`.
+> **Where this goes.** This is the PR 2 section of `specs/archive/FEAT-009-one-seller-tool/proposal.md`.
 > That proposal is on `feat/one-seller-tool-copy` (PR #142), not on `main`, so the section lives
 > in its own file for now. Fold it into `proposal.md` once #142 merges.
 >

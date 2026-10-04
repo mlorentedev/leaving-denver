@@ -50,6 +50,6 @@ Buyers read the catalog on phones in bright light and inside Facebook's in-app b
 ## References
 
 - Bitácora board: issue #15
-- Related spec: `specs/BUG-001-catalog-data-driven/` (AC10, one-line bundle offer)
+- Related spec: `specs/archive/BUG-001-catalog-data-driven/` (AC10, one-line bundle offer)
 
 <!-- archived 2026-09-30 — PRs: https://github.com/mlorentedev/leaving-denver/pull/94 https://github.com/mlorentedev/leaving-denver/pull/95 https://github.com/mlorentedev/leaving-denver/pull/96 https://github.com/mlorentedev/leaving-denver/pull/108 -->

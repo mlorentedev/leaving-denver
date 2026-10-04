@@ -107,6 +107,6 @@ After this change, from the data in `data/inventory.yaml`:
 ## References
 
 - Bitácora: #19. Thresholds from clearlist (48 in / 50 lb / 75 lb).
-- `specs/FEAT-008-verify-the-car/` (same data-driven pattern), `docs/runbooks/ops.md` (Price).
+- `specs/archive/FEAT-008-verify-the-car/` (same data-driven pattern), `docs/runbooks/ops.md` (Price).
 
 <!-- archived 2026-10-03 — PR: https://github.com/mlorentedev/leaving-denver/pull/183 -->
