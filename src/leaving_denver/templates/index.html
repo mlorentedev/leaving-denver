@@ -420,6 +420,45 @@
       return `sms:${getSellerPhone()}${body ? SMS_BODY + encodeURIComponent(body) : ''}`;
     }
 
+    // First-party events (ADR-011): which channel a visit came from, which item was opened, which
+    // text link was tapped. Same-origin, no cookie, no id, never the phone number (ADR-002). A
+    // beacon is queued by the browser and cannot delay or cancel the link that triggered it, and
+    // nothing here may throw into the page.
+    const SOURCE_KEY = 'ld-source';
+    let landingSource = null;
+    function currentSource() {
+      try { return sessionStorage.getItem(SOURCE_KEY) || landingSource || 'direct'; } catch (err) { return landingSource || 'direct'; }
+    }
+    function track(event, fields) {
+      try {
+        navigator.sendBeacon('/api/hit', JSON.stringify(
+          { event, source: currentSource(), locale: document.documentElement.lang, ...fields }));
+      } catch (err) { /* metrics are never the buyer's problem */ }
+    }
+    // A link with a utm_source is one visit; its utm parameters then leave the address
+    // bar, so a link the buyer shares from there does not carry them. The hash stays: it is the
+    // item a share page asked for.
+    function trackLanding() {
+      const params = new URLSearchParams(location.search);
+      const source = (params.get('utm_source') || '').toLowerCase().slice(0, 32);
+      if (!source) return;
+      landingSource = source;
+      try { sessionStorage.setItem(SOURCE_KEY, source); } catch (err) { /* kept in landingSource */ }
+      track('visit', {});
+      Array.from(params.keys()).filter(key => key.startsWith('utm_')).forEach(key => params.delete(key));
+      const query = params.toString();
+      history.replaceState(history.state, '', location.pathname + (query ? '?' + query : '') + location.hash);
+    }
+    // What a text link is about: a bundle (its sheet, or the offer in an item's sheet), the open
+    // item, or nothing (the sticky "Text me").
+    function trackTextTap(link) {
+      const sheet = link.closest('[data-bundle-sheet]');
+      const bundle = link.dataset.bundle || (sheet && sheet.dataset.bundleSheet);
+      if (bundle) return track('text_tap', { bundle });
+      if (link.closest('#itemSheet') && sheetItem) return track('text_tap', { item: sheetItem });
+      track('text_tap', {});
+    }
+
     function initDynamicContacts() {
       document.querySelectorAll('[data-sms-role="sticky-text"]').forEach(el => {
         el.href = buildSmsUri(UI.sms_generic);
@@ -439,6 +478,7 @@
     function openModal(itemId) {
       const item = INVENTORY.items.find(i => i.id === itemId);
       if (!item) return;
+      track('view_item', { item: itemId });
 
       document.getElementById('modalTitle').textContent = item.title;
       document.getElementById('modalCategory').textContent = item.category_label + ' · ' + item.brand;
@@ -517,6 +557,7 @@
       const upsellBox = document.getElementById('modalUpsell');
       if (bundle) {
         document.getElementById('upsellText').textContent = bundle.short_name + ' · $' + bundle.bundle_price + ' · ' + UI.save + ' $' + bundle.savings;
+        document.getElementById('upsellLink').dataset.bundle = bundle.id;
         document.getElementById('upsellLink').href = buildSmsUri(UI.sms_bundle_prefix + ' ' + bundle.short_name + ' ' + UI.sms_bundle_word + ' ($' + bundle.bundle_price + ') ' + UI.sms_in_dtc + ' ' + UI.sms_pickup_ask);
         upsellBox.classList.remove('hidden');
       } else {
@@ -706,9 +747,12 @@
       // A reload keeps a sheet's history entry but no sheet is open: neutralise it, or the
       // next close would go back onto it and Back would need two presses.
       if (history.state && history.state.sheet) history.replaceState(null, '');
+      trackLanding();
       initDynamicContacts();
       document.addEventListener('click', e => {
         const link = e.target.closest('a[href^="sms:"]');
+        // The contact sheet's own hand-off follows a tap already counted.
+        if (link && !link.hasAttribute('data-native-sms')) trackTextTap(link);
         if (!link || link.hasAttribute('data-native-sms') || !desktop.matches) return;
         e.preventDefault();
         openContactSheet(link);

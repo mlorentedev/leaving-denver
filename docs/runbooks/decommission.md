@@ -175,6 +175,13 @@ that replaces it fail.
    paste `https://leaving-denver.pages.dev/` into the Facebook Sharing Debugger
    (`https://developers.facebook.com/tools/debug/`) and press Scrape Again.
 
+8. Switch the sale-metrics digest off. n8n on kubelab > the "Moving Sale - Daily Metrics Digest"
+   workflow (`integrations/n8n/workflows/sale_metrics_daily_digest.json`, ops.md "Sale metrics") >
+   Active off (or Delete). Left on, it emails every morning about a sale that is over. Its
+   credentials (`cloudflare-analytics-read`, `sale-digest-smtp`) and the variables
+   `SALE_DIGEST_TO`, `SALE_DIGEST_FROM`, `CF_WEB_ANALYTICS_SITE_TAG` can go from n8n and from the
+   kubelab repository with it.
+
 ## By Nov 15: remove the credentials and the number
 
 Only after step 3 of "By Nov 9" passed. From here the CI deploy cannot run again: it needs
@@ -202,6 +209,13 @@ new token (ADR-008).
 2. Revoke the Cloudflare API token. Cloudflare dashboard > My Profile > API Tokens > the
    Pages deploy token > Delete (or Roll, then discard). The encrypted copy in
    `data/private.sops.yaml` is dead from then on.
+
+   The metrics token too: the same page > `leaving-denver-analytics-read` (Account Analytics
+   Read, created with a TTL that ends on 2026-11-15) > Delete. It is not in GitHub or in the
+   encrypted file, only in n8n's Header Auth credential, which step 8 above removes.
+   `/api/hit` stays deployed with the project and answers as before; the end page does not call it.
+   The Analytics Engine data (dataset `leaving_denver_sale_events`) expires by itself after three
+   months, and there is nothing to delete.
 
 3. Keep the Pages project. Do not delete it: ADR-008 says why.
 

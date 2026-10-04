@@ -3,3 +3,10 @@
 name = "leaving-denver"
 pages_build_output_dir = "build/public"
 compatibility_date = "2026-09-26"
+
+# First-party event metrics (ADR-011): functions/api/hit.js writes one data point per event here.
+# Cloudflare creates the dataset on the first write; the digest queries it by this name. The
+# binding cannot be used locally and a preview deployment writes to the same dataset.
+[[analytics_engine_datasets]]
+binding = "SALE_METRICS"
+dataset = "leaving_denver_sale_events"
