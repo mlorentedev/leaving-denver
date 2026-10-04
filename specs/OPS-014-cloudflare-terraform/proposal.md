@@ -45,7 +45,7 @@ with Terraform, local gitignored state (it holds the owner's email), driven from
 - The repository's deploy token has no Access scope: the Access resources cannot be planned from
   here. The first plan is the owner's, with a new token (ADR-012). Resolved by stating it, by
   `make infra-ids` refusing a token that cannot read Access, and by the runbook's reconcile loop.
-- Access lists are empty, not forbidden, for a token without scope (lesson-028).
+- Access lists are empty, not forbidden, for a token without scope (lesson-030).
 
 ## Acceptance criteria
 

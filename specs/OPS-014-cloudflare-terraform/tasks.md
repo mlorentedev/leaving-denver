@@ -21,7 +21,7 @@ created: "2026-10-03"
 - [x] [AC2] [AC3] [AC4] Makefile targets and their tests against stubbed `sops` and `terraform`.
 - [x] [AC6] `scripts/infra-ids.sh` and its tests against a stubbed API.
 - [x] CI: `hashicorp/setup-terraform` pinned by commit.
-- [x] [AC8] ADR-012, ADR-005 and ADR-007 notes, ops and decommission runbooks, README, architecture, lesson-028.
+- [x] [AC8] ADR-012, ADR-005 and ADR-007 notes, ops and decommission runbooks, README, architecture, lesson-030.
 
 ## Closing
 

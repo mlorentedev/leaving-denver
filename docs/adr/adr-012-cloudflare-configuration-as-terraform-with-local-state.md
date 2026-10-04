@@ -43,7 +43,7 @@ What was observed on 2026-10-03, read-only, with the repo's own deploy token:
   with `[]`, while `/seller/` really does redirect to the Access login. The deploy token has no
   Access scope, and Cloudflare filters such a list to empty instead of refusing. Only
   `/access/organizations` answers `403`. "The list is empty" therefore proves nothing here
-  (lesson-028).
+  (lesson-030).
 - `GET /rum/site_info/list` answers `403` too: the Web Analytics site behind the Pages setting
   cannot be read with that token either.
 
@@ -168,5 +168,5 @@ the next `make infra-plan` adopts what exists again.
 - ADR-005, ADR-007, ADR-008
 - Issue: `mlorentedev/leaving-denver#178`; spec `specs/OPS-014-cloudflare-terraform/`
 - Runbook: `docs/runbooks/ops.md`, "Cloudflare configuration (Terraform)"
-- `docs/lessons/lesson-028-a-token-without-access-scope-lists-access-as-empty.md`
+- `docs/lessons/lesson-030-a-token-without-access-scope-lists-access-as-empty.md`
 - `infra/terraform/cloudflare/`, `scripts/infra-ids.sh`, `tests/test_infra_terraform.py`

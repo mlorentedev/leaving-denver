@@ -35,7 +35,7 @@ Not verified here, and said so: the Access objects. The deploy token has no Acce
 
 ## Promotion candidates
 
-- [x] Lesson for the repo's `docs/lessons/`? yes: docs/lessons/lesson-028-a-token-without-access-scope-lists-access-as-empty.md
+- [x] Lesson for the repo's `docs/lessons/`? yes: docs/lessons/lesson-030-a-token-without-access-scope-lists-access-as-empty.md
 - [x] ADR-worthy decision for the repo's `docs/adr/adr-XXX.md`? yes: docs/adr/adr-012-cloudflare-configuration-as-terraform-with-local-state.md
 - [x] New pattern candidate for `00_meta/patterns/`? no: one project so far, no recurrence
 
