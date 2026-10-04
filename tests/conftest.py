@@ -139,6 +139,13 @@ CATALOG_TESTS = {
         "test_the_budget_catches_a_card_sized_to_the_viewport",
         "test_vehicle_hero_loads_first",
     ),
+    # They open the live catalog, its share pages and /flyer/; the end pages run under the policy
+    # in test_the_end_pages_run_under_the_policy, which stays.
+    "test_public_csp.py": (
+        "test_the_catalog_works_under_its_policy",
+        "test_a_share_page_still_sends_the_buyer_to_the_item",
+        "test_the_flyer_and_the_404_page_run_under_the_policy",
+    ),
     "test_richer_item_fields.py": (
         "test_every_real_item_shows_its_own_discount_on_the_card",
         "test_the_page_shows_the_scale_label_in_its_language",
@@ -193,6 +200,11 @@ CATALOG_TESTS = {
         "test_a_404_with_another_body_first_is_retried",
         "test_a_page_still_naming_a_deleted_cover_is_fetched_again",
         "test_a_cover_that_stays_missing_fails",
+        # The security headers on the catalog's deployment; the end build's are checked in
+        # test_smoke_end_of_sale.py.
+        "test_a_deployment_that_stops_sending_a_security_header_fails",
+        "test_a_policy_that_does_not_list_the_pages_inline_script_fails",
+        "test_pages_wildcard_cors_header_is_a_warning_not_a_failure",
     ),
     "test_verify_sheet_browser.py": (
         "test_a_press_on_the_backdrop_closes_the_sheet",

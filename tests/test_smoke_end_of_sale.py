@@ -16,7 +16,7 @@ from pathlib import Path
 
 import pytest
 import yaml
-from pages_stub import MissingPath
+from pages_stub import AppliesHeadersFile, MissingPath
 
 from leaving_denver import site_builder
 from leaving_denver.config import DATA_DIR
@@ -26,12 +26,16 @@ BUILT = ROOT / "build" / "public"
 pytestmark = pytest.mark.skipif(not (BUILT / "styles.css").exists(), reason="site not built")
 
 
-class EndDeployment(MissingPath, http.server.SimpleHTTPRequestHandler):
+class EndDeployment(AppliesHeadersFile, MissingPath, http.server.SimpleHTTPRequestHandler):
     redirects: dict[str, str] = {}
+    drop: tuple[str, ...] = ()  # header names the deployment fails to send
 
-    def end_headers(self):
-        self.send_header("X-Content-Type-Options", "nosniff")
-        super().end_headers()
+    def added_headers(self):
+        return {
+            name: value
+            for name, value in super().added_headers().items()
+            if name.lower() not in {d.lower() for d in self.drop}
+        }
 
     def do_GET(self):
         for prefix, target in self.redirects.items():
@@ -56,8 +60,10 @@ def read_redirects(root):
     return rules
 
 
-def smoke(root):
+def smoke(root, drop=()):
+    EndDeployment.drop = drop
     EndDeployment.redirects = read_redirects(root)
+    EndDeployment.headers_file = (root / "_headers").read_text(encoding="utf-8")
     handler = functools.partial(EndDeployment, directory=str(root))
     with http.server.ThreadingHTTPServer(("127.0.0.1", 0), handler) as server:
         threading.Thread(target=server.serve_forever, daemon=True).start()
@@ -166,3 +172,13 @@ def test_smoke_fails_when_the_end_build_has_no_not_found_page(end_site):
     result = smoke(end_site)
     assert result.returncode != 0
     assert "the 404 is not the not-found page" in result.stderr
+
+
+@pytest.mark.parametrize(
+    "header", ["Strict-Transport-Security", "Content-Security-Policy", "Permissions-Policy"]
+)
+def test_an_end_deployment_that_stops_sending_a_security_header_fails(end_site, header):
+    """ADR-010: the end pages are public too, and the headers are checked on them."""
+    result = smoke(end_site, drop=[header])
+    assert result.returncode != 0
+    assert f"{header} is not served" in result.stderr

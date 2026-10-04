@@ -245,6 +245,25 @@ Owner setup (dashboards; this repository cannot enable either). Both are in plac
     before relying on UTMs; otherwise use its referrer data.
   - Do not put personal data in URL parameters.
 
+## Security headers
+
+ADR-010. `_headers` is written by the build, last, and its Content-Security-Policy lists the
+inline scripts of the pages it was written with. `scripts/smoke.sh` checks the served `/`:
+HSTS, the permissions policy, COOP, a policy that lets the beacon in, and that every inline
+script of the served page is in it.
+
+- Look at the live headers: `curl -sI https://leaving-denver.pages.dev/ | grep -iE
+  'strict-transport|content-security|permissions-policy|cross-origin|access-control'`.
+  `access-control-allow-origin` should be absent; if it is there, Pages did not honour the
+  `! Access-Control-Allow-Origin` detach (the smoke prints `SMOKE WARN`), which is harmless and
+  worth a ticket.
+- A deploy that fails with "does not list an inline script": the page the edge served is not the
+  page that was built. Check Cloudflare for an HTML-rewriting feature (Rocket Loader, Auto
+  Minify) on the zone or project and turn it off.
+- A page that loads blank after a deploy: open the browser console; a CSP violation names the
+  directive and the blocked source.
+- Web Analytics (above) is in the policy; nothing to do when it is switched on or off.
+
 ## End of the sale
 
 The sale has two deadlines: household items by Oct 23 (the unsold ones come off the catalog that day) and the car by Nov 9. Once the car is handed over, and no later than Nov 9, the site becomes one "the sale is over" page; the steps, and what to remove by Nov 15, are in the [decommission runbook](decommission.md).

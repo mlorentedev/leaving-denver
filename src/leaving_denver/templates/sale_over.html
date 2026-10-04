@@ -5,15 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
   <title>{{ og.title }} · {{ t.site_name }}</title>
+  <meta name="description" content="{{ og.description }}">
 {% include "_og.html" %}
   <link rel="icon" type="image/svg+xml" href="{{ asset_prefix }}favicon.svg">
-  <link rel="alternate" hreflang="en" href="{{ language_links.en }}">
-  <link rel="alternate" hreflang="es" href="{{ language_links.es }}">
+  <link rel="alternate" hreflang="en" href="{{ alternates.en }}">
+  <link rel="alternate" hreflang="es" href="{{ alternates.es }}">
+  <link rel="alternate" hreflang="x-default" href="{{ alternates.en }}">
   <link rel="preload" href="{{ asset_prefix }}fonts/plus-jakarta-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="{{ asset_prefix }}styles.css">
-  <style>
-    body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
-  </style>
 </head>
 <body class="bg-[#fbfbfb] text-[#1c1c1c] antialiased min-h-screen flex flex-col">
   <header class="w-full border-b border-neutral-200/80 bg-white">

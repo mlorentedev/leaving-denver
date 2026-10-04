@@ -1,0 +1,10 @@
+/* The flyer's own rules (FEAT-010), a file of its own so the page needs no inline <style>
+   (ADR-010). Linked after styles.css: its `body` padding must outrank the catalog's (lesson-020,
+   lesson-022), and `@page` would otherwise reach the catalog's printout. */
+body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; padding: 0; }
+.qr svg { display: block; width: 100%; height: auto; }
+@page { size: letter; margin: 0.5in; }
+@media print {
+  html, body { background: #fff; }
+  .sheet { width: 100%; padding: 0; }
+}

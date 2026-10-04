@@ -94,6 +94,7 @@ class Page:
     def __init__(self, to_chrome, from_chrome, log):
         self._out, self._in, self._buffer, self._next = to_chrome, from_chrome, b"", 0
         self._events, self._log, self.session = [], log, None
+        self.logged = []  # every Log.entryAdded Chrome sent, whoever was waiting for what
 
     def _read(self, end):
         while b"\0" not in self._buffer:
@@ -104,7 +105,18 @@ class Page:
                 raise AssertionError(f"Chrome stopped answering: the page never reported\n{log}")
             self._buffer += chunk
         message, self._buffer = self._buffer.split(b"\0", 1)
-        return json.loads(message)
+        message = json.loads(message)
+        if message.get("method") == "Log.entryAdded":
+            self.logged.append(message["params"]["entry"])
+        return message
+
+    def errors(self):
+        """The messages of the error-level entries Chrome logged, not counting a failed
+        request: a blocked script, an unknown Permissions-Policy feature, an uncaught error."""
+        self.run("return 0;")  # a round trip, so whatever Chrome queued has been read
+        return [
+            e["text"] for e in self.logged if e["level"] == "error" and e["source"] != "network"
+        ]
 
     def send(self, method, deadline=DEADLINE, **params):
         end = time.monotonic() + deadline
@@ -264,6 +276,7 @@ def open_page(tmp_path, page, setup="", fragment="", public=PUBLIC, url=None):
         attached = browser.send("Target.attachToTarget", targetId=target, flatten=True)
         browser.session = attached["sessionId"]
         browser.send("Page.enable")
+        browser.send("Log.enable")
         target_url = url or staged.as_uri()
         if url is not None and setup:
             browser.send("Page.addScriptToEvaluateOnNewDocument", source=setup)

@@ -12,14 +12,20 @@ from pathlib import Path
 
 import pytest
 from conftest import sale_is_over
-from pages_stub import MissingPath
+from pages_stub import AppliesHeadersFile, MissingPath
 
 ROOT = Path(__file__).resolve().parents[1]
 PUBLIC = ROOT / "build" / "public"
 pytestmark = pytest.mark.skipif(not (PUBLIC / "index.html").exists(), reason="site not built")
 
 
-class FreshDeployment(MissingPath, http.server.SimpleHTTPRequestHandler):
+class FreshDeployment(AppliesHeadersFile, MissingPath, http.server.SimpleHTTPRequestHandler):
+    # What the build asked Pages to add: the stub serves the file the build wrote, so the smoke
+    # is run against the real headers, not a copy of them.
+    headers_file = (PUBLIC / "_headers").read_text(encoding="utf-8") if PUBLIC.exists() else ""
+    drop = ()  # header names the deployment fails to send
+    extra = {}  # header name -> value it sends in addition (Pages' own defaults)
+
     not_ready = {"/es/": 2}  # 404s each path gives before it is ready
     seller_status = 503
     seller_body = b"Seller access is not configured"
@@ -33,9 +39,13 @@ class FreshDeployment(MissingPath, http.server.SimpleHTTPRequestHandler):
             return http.server.SimpleHTTPRequestHandler.send_error(self, code, message, explain)
         return super().send_error(code, message, explain)
 
-    def end_headers(self):
-        self.send_header("X-Content-Type-Options", "nosniff")
-        super().end_headers()
+    def added_headers(self):
+        sent = {
+            name: value
+            for name, value in super().added_headers().items()
+            if name.lower() not in {d.lower() for d in self.drop}
+        }
+        return {**sent, **self.extra}
 
     def do_GET(self):
         if self.not_ready.get(self.path, 0) > 0:
@@ -80,7 +90,10 @@ def smoke(
     fallback=None,
     bare_404s=0,
     stale_home=0,
+    drop=(),
+    extra=None,
 ):
+    FreshDeployment.drop, FreshDeployment.extra = drop, extra or {}
     FreshDeployment.not_ready = {"/es/": 2} if not_ready is None else not_ready
     FreshDeployment.fallback = fallback or {}
     FreshDeployment.bare_404s = bare_404s
@@ -186,3 +199,41 @@ def test_robots_txt_that_stays_the_catalog_fails_as_such():
     result = smoke(retries=1, not_ready={}, fallback={"/robots.txt": 5})
     assert result.returncode != 0
     assert "robots.txt is served as a page" in result.stderr
+
+
+# The security headers (ADR-010): the first deployment that stops sending one fails here, not
+# in a buyer's browser.
+
+
+@pytest.mark.parametrize(
+    "header", ["Strict-Transport-Security", "Content-Security-Policy", "Permissions-Policy"]
+)
+def test_a_deployment_that_stops_sending_a_security_header_fails(header):
+    result = smoke(retries=3, not_ready={}, drop=[header])
+    assert result.returncode != 0
+    assert f"{header} is not served" in result.stderr
+
+
+def test_a_policy_that_does_not_list_the_pages_inline_script_fails():
+    """The page is what the build wrote, the policy a copy of its hashes: if the edge rewrites
+    the page, the hash no longer matches and the browser would run nothing."""
+    policy = FreshDeployment.headers_file
+    stale = re.sub(r"'sha256-[^']+'", "'sha256-AAAA'", policy)
+    result = smoke(
+        retries=3,
+        not_ready={},
+        drop=["Content-Security-Policy"],
+        extra={
+            "Content-Security-Policy": re.search(r"Content-Security-Policy: (.*)", stale).group(1)
+        },
+    )
+    assert result.returncode != 0
+    assert "does not list an inline script" in result.stderr
+
+
+def test_pages_wildcard_cors_header_is_a_warning_not_a_failure():
+    """The `! Access-Control-Allow-Origin` detach is Cloudflare's to honour and no test here can
+    see it, so a deployment that still sends the header is reported and still ships."""
+    result = smoke(retries=3, not_ready={}, extra={"Access-Control-Allow-Origin": "*"})
+    assert result.returncode == 0, result.stderr
+    assert "SMOKE WARN" in result.stderr

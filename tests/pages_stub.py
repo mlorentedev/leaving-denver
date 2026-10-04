@@ -1,5 +1,7 @@
-"""How Cloudflare Pages answers a path it has no file for, for the smoke tests' stub servers."""
+"""How Cloudflare Pages answers a path it has no file for, and what its `_headers` file adds, for the
+stub servers of the smoke and policy tests."""
 
+import re
 from pathlib import Path
 
 
@@ -22,3 +24,61 @@ class MissingPath:
         self.end_headers()
         if self.command != "HEAD":
             self.wfile.write(body)
+
+
+def parse_headers_file(text):
+    """A Pages `_headers` file as [(pattern, [(name, value)])]. A `! Name` line (detach) has
+    the value None."""
+    rules = []
+    for line in text.splitlines():
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        if not line[0].isspace():
+            rules.append((line.strip(), []))
+        elif line.strip().startswith("!"):
+            rules[-1][1].append((line.strip()[1:].strip(), None))
+        else:
+            name, _, value = line.strip().partition(":")
+            rules[-1][1].append((name.strip(), value.strip()))
+    return rules
+
+
+def pages_headers_for(text, path):
+    """What Pages adds to a static response at `path`: every matching rule applies, a header
+    named twice is joined with a comma, and a detached header is gone. Splats only."""
+    path = path.split("?")[0]
+    added, detached = {}, set()
+    for pattern, headers in parse_headers_file(text):
+        if not re.fullmatch(re.escape(pattern).replace(r"\*", ".*"), path):
+            continue
+        for name, value in headers:
+            if value is None:
+                detached.add(name.lower())
+                continue
+            key = next((key for key in added if key.lower() == name.lower()), name)
+            added[key] = f"{added[key]}, {value}" if key in added else value
+    return {name: value for name, value in added.items() if name.lower() not in detached}
+
+
+def policy_directives(policy):
+    """A Content-Security-Policy as {directive: [sources]}."""
+    parsed = {}
+    for part in filter(str.strip, policy.split(";")):
+        name, *sources = part.split()
+        parsed[name.lower()] = sources
+    return parsed
+
+
+class AppliesHeadersFile:
+    """Mix in before `SimpleHTTPRequestHandler`: each response carries what the build's own
+    `_headers` file says Pages would add at the requested path."""
+
+    headers_file = ""
+
+    def added_headers(self):
+        return pages_headers_for(self.headers_file, self.path)
+
+    def end_headers(self):
+        for name, value in self.added_headers().items():
+            self.send_header(name, value)
+        super().end_headers()

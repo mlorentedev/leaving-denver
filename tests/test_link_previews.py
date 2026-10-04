@@ -83,7 +83,12 @@ def test_each_published_item_has_a_share_page(public_dir, prefix, locale):
     # JS only: a crawler that followed a meta refresh or an HTTP redirect would read the
     # catalog's tags at `/`, where the hash is lost.
     assert "http-equiv" not in html.lower()
-    assert 'location.replace("../../#shown-lamp")' in html
+    # The script is the same on every share page (one hash in the policy, ADR-010) and takes
+    # its target from the link below it.
+    assert (
+        "<script>location.replace(document.querySelector('a').getAttribute('href'));</script>"
+        in html
+    )
     assert 'href="../../#shown-lamp"' in html
     assert "noindex" in html
 

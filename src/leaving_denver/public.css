@@ -7,6 +7,20 @@
 @source "./templates/flyer.html";
 @source "./assets/seller.mjs";
 
+body {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+/* The filter chips scroll sideways without a scrollbar. */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* Item and bundle sheets: native modal dialogs docked to the bottom edge. */
 dialog.sheet {
   margin: auto auto 0;
