@@ -6,10 +6,10 @@ seller:
     - Cash
     - Venmo
     - Zelle
-    # The car takes only payments that cannot be clawed back (owner, 2026-09-30; runbook vehicle-sale).
+    # The car takes one payment only, which cannot be clawed back and needs none of my bank
+    # details (owner, 2026-10-03; runbook vehicle-sale). No wire: the owner dropped it.
     vehicle:
     - Cashier's check issued at the buyer's bank
-    - wire transfer
   pickup_policy: Buyer must self-load and bring appropriate transportation. Fully
     assembled, sold AS-IS.
   # Two deadlines (owner, 2026-10-02): household items go by the first, the car by the second.
@@ -23,11 +23,11 @@ seller:
     clear_floors: '2026-10-16'
     giveaway: '2026-10-20'
   # Hero strip; the full facts follow in `pickup` (owner, 2026-09-28).
-  pickup_summary: First floor, one flight of stairs, no elevator
+  pickup_summary: Second floor, one flight of stairs, no elevator
   # Shown one per line under "How pickup works".
   pickup:
   - Denver Tech Center (DTC), near I-25 and Belleview.
-  - First floor, one flight of stairs, no elevator.
+  - Second floor, one flight of stairs, no elevator.
   - Park right by the door. I help you carry and load.
   - See and test anything in person before you pay.
   es:
@@ -832,8 +832,8 @@ items:
   - Original Key Fobs
   - New Colorado emissions certificate, from a test taken before handover
   - Standard Bill of Sale & Signed Clean Title
-  pickup_note: Inspection in Denver Tech Center (DTC). Payment by cashier's check issued
-    at the buyer's bank or by wire transfer, final before the title is signed.
+  pickup_note: Inspection in Denver Tech Center (DTC). Payment only by cashier's check issued
+    at the buyer's bank, final before the title is signed.
   # "Verify it yourself" (FEAT-008): official lookups for the public VIN, then my own papers.
   # One list entry is one link; its Spanish copy is under es.verify, by id. A `url` must be
   # https on an official host (OFFICIAL_CHECK_HOSTS in site_builder.py) and a `photo` must be
@@ -905,7 +905,7 @@ items:
     - Controles originales
     - Certificado de emisiones de Colorado nuevo, de una prueba hecha antes de la entrega
     - Contrato de compraventa y título limpio firmado
-    pickup_note: Inspección en Denver Tech Center. Pago con cheque de caja emitido en el banco del comprador o por transferencia bancaria, definitivo antes de firmar el título.
+    pickup_note: Inspección en Denver Tech Center. Pago solo con cheque de caja emitido en el banco del comprador, definitivo antes de firmar el título.
     verify:
       nhtsa:
         label: Recalls de NHTSA

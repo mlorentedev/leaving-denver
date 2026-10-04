@@ -27,8 +27,8 @@ description, tags and price. It covers:
   Craigslist in Spanish.** Spanish copy comes from each item's `es` overlay in
   `data/inventory.yaml`.
 - **The car.** Mileage, title status and VIN, and a payment line that is only the car's bank
-  payments from the data (cashier's check issued at the buyer's bank, or wire transfer). It
-  never offers cash, Venmo or Zelle; see [vehicle-sale.md](vehicle-sale.md).
+  payment from the data (a cashier's check issued at the buyer's bank, nothing else). It
+  never offers cash, Venmo, Zelle or a wire; see [vehicle-sale.md](vehicle-sale.md).
 - **Flaws** from the item's `flaws:`, listed after the good points.
 - **Limits.** The page shows the counts: Facebook title 100 and description 5000, Craigslist
   title 70, OfferUp title 60. A red count means the text is too long for that platform.
