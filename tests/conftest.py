@@ -194,6 +194,9 @@ CATALOG_TESTS = {
         # A positive control for the catalog's smoke path (the end smoke needs the redirects a
         # static stub cannot serve); the leak test beside it still runs in both modes.
         "test_a_redirect_in_front_of_the_seller_page_passes_the_smoke",
+        "test_a_404_with_another_body_first_is_retried",
+        "test_a_cover_that_stays_missing_fails",
+        "test_a_page_still_naming_a_deleted_cover_is_fetched_again",
         "test_robots_txt_served_as_the_catalog_is_retried",
         "test_robots_txt_that_stays_the_catalog_fails_as_such",
         # The catalog smoke path (the 404 body, the og:image cover); the end smoke never reaches it.
