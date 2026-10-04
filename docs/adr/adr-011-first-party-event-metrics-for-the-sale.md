@@ -55,7 +55,7 @@ Verified against Cloudflare's documentation (2026-10-03):
   URL has `utm_source`, after which the utm parameters leave the address bar), `view_item` (a sheet
   opens) and `text_tap` (any text link). The source is kept in `sessionStorage` for the tab and is
   `direct` without one. No cookie, no IP, no user id, no phone, no other origin, no new inline
-  handler: a Content-Security-Policy with `connect-src 'self'` lets it through.
+  handler: a Content-Security-Policy with `connect-src 'self'` lets it through (ADR-010's policy does; test_the_beacon_fires_under_the_sites_real_content_security_policy runs the beacon under it).
 - **The share page forwards its query string** to the catalog. The seller tool's links are
   `/i/<id>/?utm_source=<channel>`, and the page used to drop the query on its way to `/#<id>`, so no
   channel but the flyer would have shown.
