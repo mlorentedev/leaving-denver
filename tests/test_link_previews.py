@@ -85,10 +85,11 @@ def test_each_published_item_has_a_share_page(public_dir, prefix, locale):
     assert "http-equiv" not in html.lower()
     # The script is the same on every share page (one hash in the policy, ADR-010) and takes
     # its target from the link below it.
+    # The query string goes along, so a seller-tool link's utm_source reaches the catalog (ADR-011).
     assert (
-        "<script>location.replace(document.querySelector('a').getAttribute('href'));</script>"
-        in html
-    )
+        "<script>var to = document.querySelector('a').getAttribute('href').split('#'); "
+        "location.replace(to[0] + location.search + '#' + to[1]);</script>"
+    ) in html
     assert 'href="../../#shown-lamp"' in html
     assert "noindex" in html
 

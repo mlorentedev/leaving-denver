@@ -12,7 +12,8 @@
   {# JavaScript only: a crawler following a meta refresh or an HTTP redirect would land on
      the catalog, where the hash is lost, and preview the catalog instead of this item. The
      script is the same on every share page, so the Content-Security-Policy lists one hash
-     for all of them (ADR-010); the target is the link above, not a value in the script. #}
-  <script>location.replace(document.querySelector('a').getAttribute('href'));</script>
+     for all of them (ADR-010); the target is the link above, not a value in the script. The
+     query string goes along, so a seller-tool link's utm_source reaches the catalog (ADR-011). #}
+  <script>var to = document.querySelector('a').getAttribute('href').split('#'); location.replace(to[0] + location.search + '#' + to[1]);</script>
 </body>
 </html>

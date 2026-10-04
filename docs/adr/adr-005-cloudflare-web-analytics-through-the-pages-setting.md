@@ -19,6 +19,8 @@ blocks the beacon there and only there, because that page holds decrypted privat
 public pages now carry a policy, which allows `static.cloudflareinsights.com` in `script-src` and
 `cloudflareinsights.com` in `connect-src`, as negative consequence 1 below required.
 
+Amended by ADR-011: Web Analytics does not log query strings, so it cannot tell a flyer scan from a direct visit, and it has no custom events. A first-party event beacon (same origin, no cookie) covers visits by source and item interest; Web Analytics stays as it is.
+
 ## Date
 
 2026-09-30
@@ -38,7 +40,7 @@ What the repo says today:
 - Web Analytics is switched on by the owner in the Cloudflare Pages project (Workers & Pages > `leaving-denver` > Metrics > Web Analytics). Cloudflare then adds the beacon to the HTML it serves.
 - **The repository ships no beacon.** No template carries a `<script>` for it and no build step injects one. `tests/test_ops_runbook.py` fails if `cloudflareinsights` appears in a template: a copy there would count every visit twice and survive turning the setting off.
 - The beacon never reads the page's contact data. ADR-002 is unaffected: the phone is still assembled in the browser from data attributes, and nothing in the beacon's reports carries it.
-- Channels are told apart by referrer, and by the UTM parameters on the links the seller tool builds (`utm_source`, `utm_campaign`) if the dashboard reports them. The runbook has the owner check that before relying on it. No personal data goes into a URL.
+- Channels are told apart by referrer. UTM parameters on the links the seller tool builds (`utm_source`, `utm_campaign`) are not reported by the dashboard (its FAQ: it does not log query strings); ADR-011 counts them first-party. No personal data goes into a URL.
 
 ## Consequences
 

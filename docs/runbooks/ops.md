@@ -240,9 +240,12 @@ Owner setup (dashboards; this repository cannot enable either). Both are in plac
     appeared.
   - Verify with `curl -s https://leaving-denver.pages.dev/ | grep -c cloudflareinsights`
     and a test visit that shows in the dashboard.
-  - Share distinct campaign links, e.g. `?utm_source=nextdoor&utm_campaign=moving-sale` (the
-    seller tool builds them). Check whether the dashboard reports channel attribution
-    before relying on UTMs; otherwise use its referrer data.
+  - It does not report UTM parameters: its FAQ says it does not log query strings. A flyer scan
+    shows there as a direct visit and an item's views are not shown at all. The first-party
+    metrics below count both; use the dashboard for page views, countries, devices and referrers.
+  - To see the flyer's effect without them: Workers & Pages > `leaving-denver` > Metrics > Web
+    Analytics, set the range to each day, and compare visits per day before and after the
+    dates the flyers went up, and the referrer list (a scan has none, so "direct" rises).
   - Do not put personal data in URL parameters.
 
 ## Security headers
@@ -263,6 +266,92 @@ script of the served page is in it.
 - A page that loads blank after a deploy: open the browser console; a CSP violation names the
   directive and the blocked source.
 - Web Analytics (above) is in the policy; nothing to do when it is switched on or off.
+
+## Sale metrics
+
+Which channel a visit came from (the flyer included) and which items people open and text about.
+The page sends a small event to its own `/api/hit` (`functions/api/hit.js`), which writes it to a
+Workers Analytics Engine dataset; an n8n workflow emails a digest every morning. ADR-011 has the
+decision. What is and is not collected:
+
+- Three events: `visit` (only when the link has `utm_source`: `flyer`, `facebook`, `craigslist`,
+  `nextdoor`, `offerup`, `activebuilding`, `carscom`; any other value reads as `other`), `view_item`
+  and `text_tap` (the item button, the car's button, the bundle button and offer, the sticky
+  "Text me"). Each carries the source, the language and the item or bundle id.
+- Never: a cookie, an IP address, a user agent, a country, a visitor id or the phone number. Counts
+  are events, not people: one buyer opening three items is three views.
+- A visit with no `utm_source` is not sent (Web Analytics counts it). The utm parameters leave the
+  address bar after the visit is counted, so a link a buyer shares from there does not carry them.
+- The numbers are yours. They are shown nowhere on the page and do not belong in a listing
+  ("12 people looked at this" is the invented scarcity lesson-008 rules out).
+
+### Owner setup
+
+1. **Deploy check.** The binding (`[[analytics_engine_datasets]]`, `SALE_METRICS`) is declared in
+   `wrangler.toml`, and a Pages project's `wrangler.toml` is the source of truth for its
+   configuration, so after the first deploy that carries it check that nothing else moved. None of
+   these writes a data point:
+
+   ```
+   curl -s -o /dev/null -w '%{http_code}\n' -X POST https://leaving-denver.pages.dev/api/hit -d '{}'   # 400: the function is live
+   curl -s -o /dev/null -w '%{http_code}\n' https://leaving-denver.pages.dev/api/hit                   # 405
+   curl -sI https://leaving-denver.pages.dev/seller/ | head -1      # 302 to the Access login, not 503
+   ```
+
+   A 503 on `/seller/` means the Access variables (`ACCESS_TEAM_DOMAIN`, `ACCESS_AUD`) were dropped
+   by the deploy: set them again (Workers & Pages > `leaving-denver` > Settings > Variables and
+   Secrets) before anything else. If the function answers 404, the deploy did not carry
+   `functions/`.
+2. **One real event.** Open `https://leaving-denver.pages.dev/?utm_source=facebook` in a browser (it
+   counts as one `facebook` visit; the address bar loses the parameter), open an item, then wait a
+   minute for the dataset to appear.
+3. **The token.** Cloudflare dashboard > My Profile > API Tokens > Create Token > Create Custom
+   Token. Name `leaving-denver-analytics-read`. Permission: Account | Account Analytics | Read.
+   Account Resources: this account only. TTL: end it on 2026-11-15. Copy the token once, into the
+   n8n credential below; never paste it in a chat, a ticket or a file in this repository.
+4. **Try both queries once** (this is the only run against the live APIs; the dataset's table is
+   named in `wrangler.toml`). The token is read without echo and goes to `curl` and nowhere else:
+
+   ```
+   read -rs CF_TOKEN
+   curl -s "https://api.cloudflare.com/client/v4/accounts/76967f5ede1ce50efce34d90b7e94958/analytics_engine/sql" \
+     -H "Authorization: Bearer $CF_TOKEN" \
+     --data "SELECT blob1 AS event, blob2 AS source, SUM(_sample_interval) AS n FROM leaving_denver_sale_events GROUP BY event, source FORMAT JSON"
+   curl -s https://leaving-denver.pages.dev/ | grep -o '"token": *"[^"]*"'     # the Web Analytics site tag
+   curl -s https://api.cloudflare.com/client/v4/graphql -H "Authorization: Bearer $CF_TOKEN" \
+     -H 'Content-Type: application/json' \
+     --data '{"query":"query($a:String!,$s:String!,$t:Time!,$u:Time!){viewer{accounts(filter:{accountTag:$a}){totals:rumPageloadEventsAdaptiveGroups(limit:1,filter:{siteTag:$s,datetime_geq:$t,datetime_leq:$u}){count sum{visits}}}}}","variables":{"a":"76967f5ede1ce50efce34d90b7e94958","s":"<site tag from above>","t":"2026-10-03T00:00:00Z","u":"2026-10-05T00:00:00Z"}}'
+   unset CF_TOKEN
+   ```
+
+   The first answer lists your test visit under `data`. The second prints the site tag; the third
+   prints `"accounts":[{"totals":[...` with a count. `"accounts":null` or `errors` means the token or
+   the site tag is wrong. Web Analytics' GraphQL dataset is not documented by Cloudflare; if it
+   changed, the digest still goes out and says "unavailable" for that part. Tell the repository
+   (open an issue) rather than editing the workflow in n8n.
+5. **n8n on kubelab.** Credentials (n8n > Credentials), by these exact names: a **Header Auth**
+   credential `cloudflare-analytics-read` (name `Authorization`, value `Bearer ` followed by the
+   token) and an **SMTP** credential `sale-digest-smtp` for the mailbox that sends the digest.
+   Variables, set in the n8n deployment's environment in the kubelab repository (not by hand on the
+   server), beside `TELEGRAM_CHAT_ID`: `SALE_DIGEST_TO` (the address that reads it),
+   `SALE_DIGEST_FROM` (the sending address) and `CF_WEB_ANALYTICS_SITE_TAG` (from step 4). n8n 2
+   blocks `$env` in nodes unless `N8N_BLOCK_ENV_ACCESS_IN_NODE=false`.
+6. **Import and activate.** n8n > Workflows > Import from file >
+   `integrations/n8n/workflows/sale_metrics_daily_digest.json`. Open the three request nodes and the
+   email node and pick the credentials above if n8n shows them unset. Execute workflow once: the
+   email arrives with the test visit in it. Then switch Active on. It runs at 08:00 America/Denver.
+
+### Reading the digest
+
+The digest has the last 24 hours (not a calendar day), the whole sale, Web Analytics' page views,
+visits and top referrers, and the repricing candidates: items with at least five views and no text
+tap in the whole sale. They are candidates, not verdicts: a price is one reason among photos and
+timing. Reprice with `make reprice ID=<item> PRICE=<usd>` (the private tracking records it). The
+flyer's effect is the `flyer` row of "Visits from a tracked link" and the texts that follow from
+it ("Text taps, by source").
+
+When the sale ends the workflow, the token and the data go: [decommission.md](decommission.md),
+"By Nov 9" and "By Nov 15".
 
 ## End of the sale
 

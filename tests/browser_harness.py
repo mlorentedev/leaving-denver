@@ -214,13 +214,14 @@ def inline_modules(html, folder):
 
 
 @contextmanager
-def open_page(tmp_path, page, setup="", fragment="", public=PUBLIC, url=None):
+def open_page(tmp_path, page, setup="", fragment="", public=PUBLIC, url=None, query=""):
     """Opens a page of `public` (the real build by default; a test may pass a build of its own,
     such as one sealed with a fixture envelope).
 
     With `url` the page is fetched from there instead (a test serving a build over HTTP, for
     what only a response header can show, such as a Content-Security-Policy); `setup` then runs
-    on the new document before its own scripts."""
+    on the new document before its own scripts. `query` is appended to a staged page's address,
+    before the fragment (a landing from a tracked link, `utm_source=flyer`)."""
     staged = None
     if url is None:
         html = inline_modules((public / page).read_text(encoding="utf-8"), (public / page).parent)
@@ -280,7 +281,10 @@ def open_page(tmp_path, page, setup="", fragment="", public=PUBLIC, url=None):
         target_url = url or staged.as_uri()
         if url is not None and setup:
             browser.send("Page.addScriptToEvaluateOnNewDocument", source=setup)
-        browser.send("Page.navigate", url=target_url + (f"#{fragment}" if fragment else ""))
+        browser.send(
+            "Page.navigate",
+            url=target_url + (f"?{query}" if query else "") + (f"#{fragment}" if fragment else ""),
+        )
         browser.wait_for("Page.loadEventFired")
         # The load event carries no frame: make sure it was the page, not about:blank.
         scheme = "http:" if url is not None else "file:"
@@ -299,6 +303,6 @@ def open_page(tmp_path, page, setup="", fragment="", public=PUBLIC, url=None):
         os.close(from_chrome_r)
 
 
-def run_page(tmp_path, page, steps, setup="", fragment="", public=PUBLIC, url=None):
-    with open_page(tmp_path, page, setup, fragment, public, url) as browser:
+def run_page(tmp_path, page, steps, setup="", fragment="", public=PUBLIC, url=None, query=""):
+    with open_page(tmp_path, page, setup, fragment, public, url, query) as browser:
         return browser.run(steps)

@@ -124,6 +124,27 @@ CATALOG_TESTS = {
         "test_the_sheet_renders_every_spec_the_details_and_the_included_list",
         "test_the_spanish_sheet_has_spanish_details",
     ),
+    "test_metrics_beacon_browser.py": (
+        "test_a_flyer_scan_reaches_the_endpoint_under_connect_src_self",
+        "test_a_flyer_scan_sends_one_visit_and_leaves_no_utm_in_the_address",
+        "test_a_linked_item_is_a_view_with_the_source_of_the_landing",
+        "test_a_page_whose_beacon_throws_still_works",
+        "test_a_page_with_no_sendbeacon_still_works",
+        "test_a_page_with_no_utm_sends_nothing_on_load",
+        "test_a_reload_after_the_strip_is_not_a_second_visit",
+        "test_a_seller_tool_share_link_keeps_its_source_to_the_catalog",
+        "test_a_session_without_storage_still_reports_the_source",
+        "test_a_share_link_keeps_its_source_under_the_real_policy",
+        "test_a_tap_on_a_desktop_is_one_count_and_the_contact_sheets_hand_off_is_not_another",
+        "test_an_unknown_item_is_not_a_view",
+        "test_each_way_to_text_reports_one_tap_and_keeps_its_link",
+        "test_no_payload_holds_the_phone_or_an_sms_uri",
+        "test_only_the_utm_parameters_leave_the_address",
+        "test_opening_an_item_is_a_view_with_the_landing_source",
+        "test_the_beacon_fires_under_the_sites_real_content_security_policy",
+        "test_the_check_notices_a_beacon_to_another_origin",
+        "test_the_spanish_page_says_so",
+    ),
     "test_native_dialogs.py": (
         "test_backdrop_close_needs_a_press_on_the_backdrop",
         "test_every_sheet_is_a_labelled_dialog",
@@ -190,6 +211,9 @@ CATALOG_TESTS = {
         "test_the_spanish_page_shares_the_spanish_share_page",
     ),
     "test_smoke_script.py": (
+        "test_a_404_with_another_body_first_is_retried",
+        "test_a_cover_that_stays_missing_fails",
+        "test_a_page_still_naming_a_deleted_cover_is_fetched_again",
         "test_a_path_that_is_not_ready_yet_is_retried",
         # A positive control for the catalog's smoke path (the end smoke needs the redirects a
         # static stub cannot serve); the leak test beside it still runs in both modes.
@@ -233,6 +257,9 @@ SKIPPED_DESPITE_ITS_NAME = {
     "test_responsive_images.py::test_cards_ask_for_half_a_phone_screen": "a phone screen",
     "test_responsive_images.py::test_phone_downloads_a_third_of_the_full_covers": "a phone screen",
     "test_seller_layout_browser.py::test_the_seller_page_keeps_a_gutter_on_a_phone": "a phone screen",
+    "test_metrics_beacon_browser.py::test_no_payload_holds_the_phone_or_an_sms_uri": (
+        "reads the catalog page's beacon; the end page has no beacon and no number (test_end_of_sale.py)"
+    ),
     "test_seller_copy.py::test_the_copy_is_singular_plain_and_phone_free": "reads /seller/, not built",
 }
 
