@@ -33,9 +33,25 @@ robots_txt() {
 # otherwise leave a deployment whose scripts a browser refuses to run. The wildcard CORS header
 # Pages adds is detached by `_headers`, but that is Cloudflare's to honour and nothing offline
 # shows it, so a deployment that still sends it is reported and not failed.
+# Right after the production alias moves, the edge can answer / with the previous deployment's page
+# under the new deployment's headers (CI run 37176954819: the candidate passed, production failed
+# on an inline-script hash, and the same URL passed minutes later). So the policy and the page are
+# read from one response, and a mismatch is fetched again; one that stays still fails.
 security_headers() {
-  local headers value stale
-  headers=$(get -I "$url/") || fail "$url/ headers unreachable"
+  local stale
+  for _ in $(seq 0 "${SMOKE_RETRIES:-6}"); do
+    stale=$(policy_mismatch) || exit 1  # policy_mismatch has said why
+    [ -z "$stale" ] && return 0
+    sleep "${SMOKE_RETRY_DELAY:-5}"
+  done
+  fail "the Content-Security-Policy does not list an inline script of $url/ ($stale)"
+}
+
+# Prints the inline-script hashes of / that its own Content-Security-Policy does not list.
+policy_mismatch() {
+  local headers value body
+  body=$(mktemp)
+  headers=$(get -D - -o "$body" "$url/") || { rm -f "$body"; fail "$url/ unreachable"; }
   header() { { grep -i "^$1:" <<<"$headers" || true; } | head -1 | cut -d: -f2- | tr -d '\r' | sed 's/^ //'; }
   grep -qi '^x-content-type-options: nosniff' <<<"$headers" || fail "_headers not applied"
   [ "$(header Strict-Transport-Security)" = "max-age=31536000; includeSubDomains" ] \
@@ -47,7 +63,7 @@ security_headers() {
   [ -n "$value" ] || fail "Content-Security-Policy is not served"
   grep -q "script-src 'self' https://static.cloudflareinsights.com" <<<"$value" \
     || fail "the Content-Security-Policy does not let the Web Analytics beacon in (ADR-005)"
-  stale=$(printf '%s' "$page" | python3 -c '
+  python3 -c '
 import base64, hashlib, re, sys
 for attrs, body in re.findall(r"<script\b([^>]*)>(.*?)</script>", sys.stdin.read(), re.S):
     kind = re.search(r"\btype=\"([^\"]*)\"", attrs)
@@ -57,8 +73,8 @@ for attrs, body in re.findall(r"<script\b([^>]*)>(.*?)</script>", sys.stdin.read
     source = "\x27sha256-" + base64.b64encode(digest).decode() + "\x27"
     if source not in sys.argv[1]:
         print(source)
-' "$value") || fail "could not read the inline scripts of $url/"
-  [ -z "$stale" ] || fail "the Content-Security-Policy does not list an inline script of $url/ ($stale)"
+' "$value" <"$body" || { rm -f "$body"; fail "could not read the inline scripts of $url/"; }
+  rm -f "$body"
   [ -z "$(header Access-Control-Allow-Origin)" ] \
     || echo "SMOKE WARN: Access-Control-Allow-Origin is still sent; Pages did not honour the detach" >&2
   return 0

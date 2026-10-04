@@ -32,6 +32,7 @@ class FreshDeployment(AppliesHeadersFile, MissingPath, http.server.SimpleHTTPReq
     fallback = {}  # times each path answers with index.html (200) before its own file
     bare_404s = 0  # 404s answered with the server's own body before the not-found page
     stale_home = 0  # times / answers with an og:image the deployment no longer has
+    stale_page = 0  # GETs of / answered with the previous deployment's page (other inline script)
 
     def send_error(self, code, message=None, explain=None):
         if code == 404 and FreshDeployment.bare_404s > 0:
@@ -48,6 +49,22 @@ class FreshDeployment(AppliesHeadersFile, MissingPath, http.server.SimpleHTTPReq
         return {**sent, **self.extra}
 
     def do_GET(self):
+        if self.path == "/" and FreshDeployment.stale_page > 0:
+            # The alias has moved and the edge mixes two deployments: the previous page, whose
+            # inline script hashes differently, under this deployment's policy.
+            FreshDeployment.stale_page -= 1
+            body = re.sub(
+                r"<script>",
+                "<script>// previous deployment\n",
+                (Path(self.directory) / "index.html").read_text(encoding="utf-8"),
+                count=1,
+            ).encode()
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
         if self.not_ready.get(self.path, 0) > 0:
             self.not_ready[self.path] -= 1
             self.send_error(404)
@@ -90,6 +107,7 @@ def smoke(
     fallback=None,
     bare_404s=0,
     stale_home=0,
+    stale_page=0,
     drop=(),
     extra=None,
 ):
@@ -98,6 +116,7 @@ def smoke(
     FreshDeployment.fallback = fallback or {}
     FreshDeployment.bare_404s = bare_404s
     FreshDeployment.stale_home = stale_home
+    FreshDeployment.stale_page = stale_page
     FreshDeployment.seller_status, FreshDeployment.seller_body = seller
     handler = functools.partial(FreshDeployment, directory=str(PUBLIC))
     with http.server.ThreadingHTTPServer(("127.0.0.1", 0), handler) as server:
@@ -227,6 +246,20 @@ def test_a_policy_that_does_not_list_the_pages_inline_script_fails():
             "Content-Security-Policy": re.search(r"Content-Security-Policy: (.*)", stale).group(1)
         },
     )
+    assert result.returncode != 0
+    assert "does not list an inline script" in result.stderr
+
+
+def test_a_page_from_the_previous_deployment_is_fetched_again():
+    """Production run 37176954819: right after the alias moved, / came back with an inline
+    script its policy did not list, and minutes later the same URL passed. The page and its
+    policy come from one response, and a mismatch is read again."""
+    result = smoke(retries=6, not_ready={}, stale_page=6)
+    assert result.returncode == 0, result.stderr
+
+
+def test_a_mixed_policy_without_retries_fails():
+    result = smoke(retries=0, not_ready={}, stale_page=6)
     assert result.returncode != 0
     assert "does not list an inline script" in result.stderr
 
