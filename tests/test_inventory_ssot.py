@@ -255,7 +255,7 @@ def test_no_unbacked_vehicle_claims(path):
 # into English as "first floor", which in the US is the street level.
 # Strip natural English and Spanish denials, then reject any remaining elevator claim.
 ELEVATOR_DENIALS = re.compile(
-    r"\b(?:no elevators?(?: in the building)?|"
+    r"\b(?:no[- ]elevators?(?: in the building)?|"
     r"(?:do not|don't|does not|doesn't) have (?:an? )?elevators?|"
     r"sin (?:ascensor|elevador)(?:es)?|"
     r"no hay (?:ascensor|elevador)(?:es)?(?: disponible(?:s)?)?|"
