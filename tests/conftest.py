@@ -225,6 +225,7 @@ CATALOG_TESTS = {
         # The catalog's inline script under a policy from another deployment.
         "test_a_page_from_the_previous_deployment_is_fetched_again",
         "test_a_mixed_policy_without_retries_fails",
+        "test_the_policy_is_read_from_the_response_curl_kept",
         "test_a_page_still_naming_a_deleted_cover_is_fetched_again",
         "test_a_cover_that_stays_missing_fails",
         # The security headers on the catalog's deployment; the end build's are checked in

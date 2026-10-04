@@ -52,6 +52,8 @@ policy_mismatch() {
   local headers value body
   body=$(mktemp)
   headers=$(get -D - -o "$body" "$url/") || { rm -f "$body"; fail "$url/ unreachable"; }
+  # curl --retry prints every attempt's headers; the body is the last attempt's, so are these.
+  headers=$(awk '/^HTTP\//{block=""} {block=block $0 "\n"} END{printf "%s", block}' <<<"$headers")
   header() { { grep -i "^$1:" <<<"$headers" || true; } | head -1 | cut -d: -f2- | tr -d '\r' | sed 's/^ //'; }
   grep -qi '^x-content-type-options: nosniff' <<<"$headers" || fail "_headers not applied"
   [ "$(header Strict-Transport-Security)" = "max-age=31536000; includeSubDomains" ] \

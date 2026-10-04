@@ -33,6 +33,8 @@ class FreshDeployment(AppliesHeadersFile, MissingPath, http.server.SimpleHTTPReq
     bare_404s = 0  # 404s answered with the server's own body before the not-found page
     stale_home = 0  # times / answers with an og:image the deployment no longer has
     stale_page = 0  # GETs of / answered with the previous deployment's page (other inline script)
+    flaky_home = False  # every other GET of / is a 503 under the previous deployment's policy
+    flaky_turn = 0
 
     def send_error(self, code, message=None, explain=None):
         if code == 404 and FreshDeployment.bare_404s > 0:
@@ -46,9 +48,24 @@ class FreshDeployment(AppliesHeadersFile, MissingPath, http.server.SimpleHTTPReq
             for name, value in super().added_headers().items()
             if name.lower() not in {d.lower() for d in self.drop}
         }
+        if getattr(self, "previous_policy", False):
+            sent = {
+                name: re.sub(r"'sha256-[^']+'", "'sha256-AAAA'", value)
+                if name.lower() == "content-security-policy"
+                else value
+                for name, value in sent.items()
+            }
         return {**sent, **self.extra}
 
     def do_GET(self):
+        if self.path == "/" and FreshDeployment.flaky_home:
+            FreshDeployment.flaky_turn += 1
+            if FreshDeployment.flaky_turn % 2:
+                # A failed attempt curl retries: its headers stay in the -D output before the
+                # good response's, and they carry another deployment's policy.
+                self.previous_policy = True
+                self.send_error(503)
+                return
         if self.path == "/" and FreshDeployment.stale_page > 0:
             # The alias has moved and the edge mixes two deployments: the previous page, whose
             # inline script hashes differently, under this deployment's policy.
@@ -108,6 +125,7 @@ def smoke(
     bare_404s=0,
     stale_home=0,
     stale_page=0,
+    flaky_home=False,
     drop=(),
     extra=None,
 ):
@@ -117,6 +135,7 @@ def smoke(
     FreshDeployment.bare_404s = bare_404s
     FreshDeployment.stale_home = stale_home
     FreshDeployment.stale_page = stale_page
+    FreshDeployment.flaky_home, FreshDeployment.flaky_turn = flaky_home, 0
     FreshDeployment.seller_status, FreshDeployment.seller_body = seller
     handler = functools.partial(FreshDeployment, directory=str(PUBLIC))
     with http.server.ThreadingHTTPServer(("127.0.0.1", 0), handler) as server:
@@ -255,6 +274,13 @@ def test_a_page_from_the_previous_deployment_is_fetched_again():
     script its policy did not list, and minutes later the same URL passed. The page and its
     policy come from one response, and a mismatch is read again."""
     result = smoke(retries=6, not_ready={}, stale_page=6)
+    assert result.returncode == 0, result.stderr
+
+
+def test_the_policy_is_read_from_the_response_curl_kept():
+    """`curl --retry -D -` prints the headers of every attempt. When a 503 under another policy
+    comes before the 200, the policy checked is the 200's, not the first one printed."""
+    result = smoke(retries=3, not_ready={}, flaky_home=True)
     assert result.returncode == 0, result.stderr
 
 
