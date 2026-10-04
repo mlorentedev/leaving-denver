@@ -53,7 +53,8 @@ with Terraform, local gitignored state (it holds the owner's email), driven from
   variable files, `.terraform/` and crash logs are ignored by git.
 - [ ] AC2: `make infra-*` give Terraform the token and the email through its environment, never on
   argv or in the output, and stop before Terraform when a secret is missing.
-- [ ] AC3: `infra-apply` applies only the saved plan and refuses in CI.
+- [ ] AC3: `infra-apply` applies only the saved plan, refuses in CI, applies an import-only plan,
+  needs `CHANGES=1` for a real change (not for a sensitivity-only update), `DESTROY=1` for a plan that only deletes, and never applies a replacement.
 - [ ] AC4: `make check` fails on Terraform that does not format or validate, and only skips, with a
   notice, when Terraform is not installed.
 - [ ] AC5: every managed resource has an import block; the Pages project is protected from

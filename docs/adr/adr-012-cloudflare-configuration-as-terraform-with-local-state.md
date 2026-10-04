@@ -115,7 +115,13 @@ the next `make infra-plan` adopts what exists again.
   unless the token can read Access (the organization endpoint is the probe, see Context).
 - `infra-plan` saves the plan; `infra-apply` applies **that saved plan** and nothing else, with no
   prompt, and refuses to run when `CI` is set. CI never applies. The review is the plan the owner
-  read, not a keystroke.
+  read, not a keystroke. Before applying it reads the plan (`terraform show -json`,
+  `scripts/infra-plan-guard.py`): an import-only plan goes through, a create or an update needs
+  `CHANGES=1`, a plan that only deletes needs `DESTROY=1` (the decommission step), and a
+  replacement is refused always (a replaced Access application has a new audience and closes
+  `/seller/`). An `update` whose before and after are identical, with nothing unknown, is a
+  change in sensitivity marking only (the sensitive owner email marks the whole policy
+  `include`) and counts as the import it is: the owner's real first plan showed exactly that.
 - `infra-fmt` (format check and `validate`) needs no credential. `make check` runs it when
   Terraform is installed and prints a notice when it is not. CI installs Terraform, so a malformed
   module fails the build.
@@ -131,15 +137,22 @@ the next `make infra-plan` adopts what exists again.
 
 ### Negative
 
-- **The first plan cannot be certified from the repository's own token.** It has no Access scope,
-  so the first plan, and any difference it shows in the Access resources (the application's name,
-  its session duration, the order of its destinations), is the owner's to reconcile against the
-  live object. The Pages project was planned with the deploy token and shows `1 to import,
-  0 to add, 0 to change, 0 to destroy`.
+- **The Access objects could not be planned from the repository's own token.** It has no Access
+  scope, so the first real plan was the owner's, with the new token: 4 to import, 3 to change, 0
+  to destroy. Every difference was an attribute the dashboard had set (names, an empty `rdp` rule,
+  cookie options), and `access.tf` was reconciled to the live objects before the first apply. The
+  Pages project had been planned with the deploy token: `1 to import, 0 to add, 0 to change, 0 to
+  destroy`.
+- **Two settings stay as the dashboard made them** so the first apply is import-only: every
+  identity provider is allowed (`allowed_idps` unset) and the Access cookie is not HttpOnly.
+  Tightening both is a separate, deliberate apply (issue #184, `CHANGES=1`).
+- The audience can only be read from state after the first apply, since a plan writes none: before
+  applying it is compared from the plan's import block with the dashboard's AUD tag, after
+  applying with `terraform output -raw access_aud` against `ACCESS_AUD`.
 - A second token exists, with a wider scope. It is a credential to hold and to revoke.
 - State is one file on one machine. Its backup is the automatic `terraform.tfstate.backup` beside
   it and the import blocks.
-- `prevent_destroy` makes removal an edit: the decommission runbook says which blocks to delete.
+- `prevent_destroy` makes removal an edit: the decommission runbook says which blocks to delete, then `make infra-apply DESTROY=1`.
 
 ### Neutral
 

@@ -211,7 +211,8 @@ new token (ADR-008).
    `infra/terraform/cloudflare/access.tf` and `outputs.tf`, the three Access `import` blocks in
    `imports.tf`, and the three `access_*_id` variables in `variables.tf`; then
    `make infra-plan` (it must say `0 to add, 0 to change, 3 to destroy`: the application, its
-   policy and the identity provider, never the Pages project) and `make infra-apply`; commit the deletion (the repository is
+   policy and the identity provider, never the Pages project) and `make infra-apply DESTROY=1`
+   (the guard lets a plan that only deletes through with that switch alone); commit the deletion (the repository is
    archived last). Removing
    a block also removes its `prevent_destroy`. Then, in Workers & Pages > `leaving-denver` >
    Settings > Variables and Secrets, delete `ACCESS_TEAM_DOMAIN` and `ACCESS_AUD` in production

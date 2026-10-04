@@ -38,6 +38,11 @@ resource "cloudflare_zero_trust_access_policy" "owner_only" {
 
 # /seller and /seller/*, on production and on every preview hostname. A path ending /* does
 # not cover its parent, so the bare path is listed too (ops.md).
+#
+# Known open exposure (issue #184): the dashboard allowed every identity provider
+# (`allowed_idps` unset) and set the cookie without HttpOnly. They are left as they are so the
+# first apply only imports. Tighten both in a separate apply (`make infra-apply CHANGES=1`):
+# allowed_idps = [the one-time PIN provider above], http_only_cookie_attribute = true.
 resource "cloudflare_zero_trust_access_application" "seller" {
   account_id       = var.account_id
   name             = "leaving-denver.pages.dev"

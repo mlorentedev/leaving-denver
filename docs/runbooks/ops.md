@@ -56,7 +56,8 @@ To enable it, an administrator of the Cloudflare Zero Trust account must:
    identity provider and a self-hosted Access application for `leaving-denver.pages.dev/seller`
    **and** `/seller/*`, with an **Allow** policy for the owner's **exact email address only**
    (not the whole domain), covering the preview hostnames (`*.leaving-denver.pages.dev`) with
-   the same paths. A path ending `/*` does not cover its parent.
+   the same paths. A path ending `/*` does not cover its parent. Access covers only the
+   `pages.dev` hostnames: a future custom domain needs its own destinations in `access.tf`.
    *Fallback, if Terraform cannot be used:* the same in the Zero Trust dashboard (Access >
    Applications > Add an application > Self-hosted), by hand, and then bring it under Terraform
    with `make infra-ids` and `make infra-plan` before the next change.
@@ -107,24 +108,40 @@ The Pages project and the Access objects of "Owner-only mobile listing copy" are
    (gitignored). It stops with "this token cannot read Zero Trust Access" for a token without the
    Access scopes, and unless each object is found exactly once.
 4. `make infra-plan`. The import blocks adopt the four existing objects; you want
-   `Plan: 4 to import, 0 to add, 0 to change, 0 to destroy`. The Pages project alone was checked
-   against the live one: `1 to import, 0 to add, 0 to change, 0 to destroy`. The Access objects
-   were not, because the repository's own token cannot read them, so expect to reconcile some
-   attributes the first time: the application's name, its session duration, the order of its
-   destinations, `allowed_idps` (the dashboard's "all providers" comes back empty) and
-   `auto_redirect_to_identity`. If `make infra-ids` warns that the policy is not reusable, make it
-   reusable in the dashboard first: the import adopts a reusable policy only. Edit `access.tf` to match the live object (never apply a change to make the
-   dashboard match the file on the first run) and plan again until it shows nothing to change.
-   The plan hides the email, but do not paste it anywhere. Check the audience too:
-   `terraform -chdir=infra/terraform/cloudflare output -raw access_aud` must equal the
-   `ACCESS_AUD` binding. If it does not, the wrong application was imported: stop.
-5. `make infra-apply` applies the saved plan and nothing else. With only imports in it, it
-   changes nothing in Cloudflare.
+   `Plan: 4 to import, 0 to add, 0 to change, 0 to destroy`. Expect `1 to change` on
+   `cloudflare_zero_trust_access_policy.owner_only` as well: Terraform says "The value is
+   unchanged" there. Before and after are identical and only the sensitivity marking differs (the
+   sensitive `owner_email` marks the whole `include` list), so it is the import, not a change, and
+   `make infra-apply` treats it so. The plan hides the email, but do not paste it anywhere. If `make infra-ids` warned that the policy is not reusable, make it
+   reusable in the dashboard first: the import adopts a reusable policy only.
+   - **Reconciled once already.** The owner's first real plan was 4 to import, 3 to change, 0 to
+     destroy, and every difference was an attribute the dashboard had set (the identity
+     provider's name, the policy's empty `rdp` rule, the application's name and cookie options).
+     `access.tf` now declares them as the dashboard made them. A new difference in a later plan
+     is drift: edit `access.tf` to match the live object, never apply a change just to make the
+     dashboard match the file for the first time, and plan again until nothing changes.
+   - **Check the audience before applying.** `terraform output` prints nothing yet (a plan writes
+     no state). Compare the `aud` the plan shows in the import block of
+     `cloudflare_zero_trust_access_application.seller` with "Application Audience (AUD) Tag" in
+     Zero Trust > Access > Applications > that application. A mismatch means the wrong
+     application was imported: stop.
+5. `make infra-apply`. It reads the saved plan first and refuses unless it is import-only (every
+   change a no-op, or the unchanged-value update above), printing what would change when it
+   refuses; a replacement is refused always. With only imports it changes nothing in Cloudflare. Then check the audience
+   again, now from state: `terraform -chdir=infra/terraform/cloudflare output -raw access_aud`
+   must equal the `ACCESS_AUD` binding. An empty output or a mismatch means stop.
 
-**Routine.** Change the `.tf` file, `make infra-plan`, read it, `make infra-apply`. `make infra-fmt`
+**Routine.** Change the `.tf` file, `make infra-plan`, read it, then `make infra-apply CHANGES=1`
+(a routine change needs the explicit override; an import-only plan does not). `make infra-fmt`
 (format and validate, no credentials) is part of `make check`, and CI runs it. CI never applies.
-Do not apply when the plan shows a destroy: `prevent_destroy` stops it anyway, and a replaced
-application would have a new audience and close `/seller/` until `ACCESS_AUD` is set again.
+Do not apply when the plan shows a destroy or a replacement: the guard and `prevent_destroy` both
+stop it, and a replaced application would have a new audience and close `/seller/` until
+`ACCESS_AUD` is set again. Removing a resource on purpose is the decommission runbook's step,
+with `DESTROY=1` (a plan that only deletes; `CHANGES=1` never lets a delete through).
+
+**A fresh clone needs the ids first.** The three `access_*_id` variables have no default, so every
+plan and apply reads them from the gitignored `ids.auto.tfvars`. On a new clone or a new machine run
+`make infra-ids` before `make infra-plan` (the next paragraph does the same).
 
 **Lost state or a new machine.** Restore the age key ("New machine" below), then
 `make infra-init`, `make infra-ids` and `make infra-plan`: the import blocks adopt what exists.

@@ -154,6 +154,42 @@ def test_access_allows_the_owner_address_alone():
         assert wider not in policy
 
 
+def resource_block(kind: str, name: str) -> str:
+    return re.search(
+        rf'resource "{kind}" "{name}" \{{(.*?)\n\}}', tf_text(), flags=re.DOTALL
+    ).group(1)
+
+
+def test_every_resource_that_closes_or_opens_seller_cannot_be_destroyed():
+    """The Pages project (ADR-008) and the three Access objects: destroying or replacing any of
+    them closes /seller/, or changes the audience the middleware checks."""
+    resources = declared("resource")
+    assert len(resources) == 4
+    for kind, name in resources:
+        assert "prevent_destroy = true" in resource_block(kind, name), f"{kind}.{name}"
+
+
+def test_the_policy_has_one_include_entry_an_email_and_no_require_or_exclude():
+    """`require` narrows and `exclude` carves out, but either one is a second rule to read.
+    Exactly one address is the whole policy."""
+    policy = resource_block("cloudflare_zero_trust_access_policy", "owner_only")
+    flat = " ".join(policy.split())
+    assert "include = [{ email = { email = var.owner_email } }]" in flat
+    assert not re.search(r"^\s*(require|exclude)\s*=", policy, flags=re.MULTILINE)
+
+
+def test_the_application_only_ever_allows_the_one_time_pin_provider():
+    """Absent is the dashboard's "all providers"; present must be the one provider this module
+    manages, never an id typed in or a provider added by hand."""
+    app = resource_block("cloudflare_zero_trust_access_application", "seller")
+    found = re.search(r"allowed_idps\s*=\s*\[(.*?)\]", app, flags=re.DOTALL)
+    if found:
+        assert (
+            found.group(1).strip()
+            == "cloudflare_zero_trust_access_identity_provider.one_time_pin.id"
+        )
+
+
 def test_access_covers_the_seller_paths_on_production_and_preview_hostnames():
     """A path ending /* does not cover its parent, and a preview is another hostname."""
     app = re.search(
@@ -217,6 +253,9 @@ def toolbox(tmp_path):
         printf 'email_in_env: %s\\n' "${{TF_VAR_owner_email:-unset}}" >> "{log}"
         printf 'account_in_env: %s\\n' "${{TF_VAR_account_id:-unset}}" >> "{log}"
         [ -n "$TF_FAIL" ] && exit 1
+        case " $* " in
+          *" show "*) if [ -n "$PLAN_JSON" ]; then cat "$PLAN_JSON"; else echo '{{"resource_changes": []}}'; fi ;;
+        esac
         exit 0
         """,
     )
@@ -271,26 +310,174 @@ def test_the_wider_token_can_be_swapped_for_the_deploy_one_for_a_pages_only_plan
     assert done.returncode == 0, done.stderr
 
 
+def saved_plan(tmp_path, *changes):
+    """A saved plan in a scratch TF_DIR (the owner's own saved plan in the real directory must
+    neither fail a test nor be deleted by it) and the `terraform show -json` the stub gives for
+    it. A change is (address, actions[, importing[, extra keys of `change`]])."""
+    (tmp_path / "plan.tfplan").write_text("saved by the stub", encoding="utf-8")
+    resource_changes = []
+    for address, actions, *rest in changes:
+        change = {"actions": actions}
+        if rest and rest[0]:
+            change["importing"] = {"id": "x"}
+        if len(rest) > 1:
+            change.update(rest[1])
+        resource_changes.append({"address": address, "change": change})
+    shown = tmp_path / "plan.json"
+    shown.write_text(json.dumps({"resource_changes": resource_changes}), encoding="utf-8")
+    return {"PLAN_JSON": str(shown)}
+
+
 @needs_bash_tools
 def test_apply_applies_only_a_saved_plan_and_never_in_ci(toolbox, tmp_path):
-    # A scratch TF_DIR: the owner's own saved plan in the real directory must neither fail
-    # this test nor be deleted by it.
     tf_dir = f"TF_DIR={tmp_path}"
     plan = tmp_path / "plan.tfplan"
     refused = make(["infra-apply", tf_dir], toolbox)
     assert refused.returncode != 0 and "make infra-plan" in refused.stderr
     assert not toolbox[1].exists()
 
-    plan.write_text("saved by the stub", encoding="utf-8")
-    in_ci = make(["infra-apply", tf_dir], toolbox, CI="true")
+    env = saved_plan(tmp_path, ("cloudflare_pages_project.site", ["no-op"], True))
+    in_ci = make(["infra-apply", tf_dir], toolbox, CI="true", **env)
     assert in_ci.returncode != 0 and "never by CI" in in_ci.stderr
     assert not toolbox[1].exists()
 
-    applied = make(["infra-apply", tf_dir], toolbox)
+    applied = make(["infra-apply", tf_dir], toolbox, **env)
     assert applied.returncode == 0, applied.stderr
     assert re.search(r"^argv: .*apply .*plan\.tfplan$", toolbox[1].read_text(), re.MULTILINE)
     assert "-auto-approve" not in toolbox[1].read_text()
     assert not plan.exists(), "a plan is applied once"
+
+
+def applied(toolbox) -> bool:
+    return toolbox[1].exists() and "apply " in toolbox[1].read_text(encoding="utf-8")
+
+
+@needs_bash_tools
+def test_an_import_only_plan_applies_without_an_override(toolbox, tmp_path):
+    env = saved_plan(
+        tmp_path,
+        ("cloudflare_pages_project.site", ["no-op"], True),
+        ("cloudflare_zero_trust_access_application.seller", ["no-op"], True),
+    )
+    done = make(["infra-apply", f"TF_DIR={tmp_path}"], toolbox, **env)
+    assert done.returncode == 0, done.stderr
+    assert applied(toolbox)
+
+
+@needs_bash_tools
+def test_a_plan_that_changes_something_is_refused_until_the_override_and_says_what(
+    toolbox, tmp_path
+):
+    """The first apply is meant to adopt, so an update in it is the owner's cue to stop: the
+    audience check and the reconcile loop come first. Routine changes say so with CHANGES=1."""
+    env = saved_plan(
+        tmp_path,
+        ("cloudflare_pages_project.site", ["no-op"], True),
+        ("cloudflare_zero_trust_access_application.seller", ["update"]),
+    )
+    plan = tmp_path / "plan.tfplan"
+    refused = make(["infra-apply", f"TF_DIR={tmp_path}"], toolbox, **env)
+    assert refused.returncode != 0
+    assert "cloudflare_zero_trust_access_application.seller" in refused.stderr
+    assert "update" in refused.stderr and "CHANGES=1" in refused.stderr
+    assert not applied(toolbox), "refused means terraform apply never ran"
+    assert plan.exists(), "a refused plan is kept to be read again"
+
+    allowed = make(["infra-apply", f"TF_DIR={tmp_path}", "CHANGES=1"], toolbox, **env)
+    assert allowed.returncode == 0, allowed.stderr
+    assert applied(toolbox)
+
+
+POLICY_ADDRESS = "cloudflare_zero_trust_access_policy.owner_only"
+VALUES = {"decision": "allow", "include": [{"email": {"email": "owner@example.test"}}]}
+
+
+@needs_bash_tools
+def test_an_update_that_only_changes_the_sensitivity_marking_is_not_a_change(toolbox, tmp_path):
+    """The owner's first real plan showed "1 to change" on the policy: before and after are
+    identical and only `*_sensitive` differs, because the sensitive owner_email marks the whole
+    include list. That is the import, not a change, and it must not need the override."""
+    same = {
+        "before": VALUES,
+        "after": VALUES,
+        "after_unknown": {},
+        "before_sensitive": {"include": [{"email": {}}]},
+        "after_sensitive": {"include": True},
+    }
+    env = saved_plan(tmp_path, (POLICY_ADDRESS, ["update"], True, same))
+    done = make(["infra-apply", f"TF_DIR={tmp_path}"], toolbox, **env)
+    assert done.returncode == 0, done.stderr
+    assert applied(toolbox)
+
+
+@needs_bash_tools
+@pytest.mark.parametrize(
+    "change",
+    [
+        {"before": VALUES, "after": {**VALUES, "decision": "deny"}, "after_unknown": {}},
+        {
+            "before": VALUES,
+            "after": {**VALUES, "include": [{"email": {"email": "other@example.test"}}]},
+            "after_unknown": {},
+        },
+        {"before": VALUES, "after": VALUES, "after_unknown": {"id": True}},
+    ],
+    ids=["a value", "the address", "something unknown until apply"],
+)
+def test_an_update_with_a_real_difference_still_needs_the_override(toolbox, tmp_path, change):
+    env = saved_plan(tmp_path, (POLICY_ADDRESS, ["update"], True, change))
+    refused = make(["infra-apply", f"TF_DIR={tmp_path}"], toolbox, **env)
+    assert refused.returncode != 0 and "CHANGES=1" in refused.stderr
+    assert "example.test" not in refused.stderr, "the plan's values never reach the output"
+    assert not applied(toolbox)
+    assert make(["infra-apply", f"TF_DIR={tmp_path}", "CHANGES=1"], toolbox, **env).returncode == 0
+
+
+@needs_bash_tools
+def test_a_destroy_goes_through_only_with_its_own_explicit_switch(toolbox, tmp_path):
+    """Decommission (runbook) removes the Access objects through the same guarded command, with
+    DESTROY=1 and nothing else in the plan. CHANGES=1 does not stand in for it."""
+    env = saved_plan(tmp_path, ("cloudflare_zero_trust_access_application.seller", ["delete"]))
+    plan = [f"TF_DIR={tmp_path}"]
+    assert make(["infra-apply", *plan, "CHANGES=1"], toolbox, **env).returncode != 0
+    assert not applied(toolbox)
+    done = make(["infra-apply", *plan, "DESTROY=1"], toolbox, **env)
+    assert done.returncode == 0, done.stderr
+    assert applied(toolbox)
+
+
+@needs_bash_tools
+def test_the_destroy_switch_does_not_wave_through_a_change_or_a_replacement(toolbox, tmp_path):
+    for changes in (
+        [("cloudflare_pages_project.site", ["update"], False, {"before": {}, "after": {"a": 1}})],
+        [("cloudflare_zero_trust_access_application.seller", ["delete", "create"])],
+    ):
+        env = saved_plan(tmp_path, *changes)
+        done = make(["infra-apply", f"TF_DIR={tmp_path}", "DESTROY=1"], toolbox, **env)
+        assert done.returncode != 0
+        assert not applied(toolbox)
+
+
+@needs_bash_tools
+@pytest.mark.parametrize("actions", [["delete"], ["delete", "create"], ["create", "delete"]])
+def test_a_destroy_or_a_replacement_is_refused_even_with_the_override(toolbox, tmp_path, actions):
+    """A replaced Access application has a new audience and closes /seller/ until ACCESS_AUD
+    is set again, and `prevent_destroy` already refuses the rest. Removing a resource on purpose
+    is the decommission runbook's step, with its own switch (DESTROY=1)."""
+    env = saved_plan(tmp_path, ("cloudflare_zero_trust_access_application.seller", actions))
+    done = make(["infra-apply", f"TF_DIR={tmp_path}", "CHANGES=1"], toolbox, **env)
+    assert done.returncode != 0
+    assert "cloudflare_zero_trust_access_application.seller" in done.stderr
+    assert "destroy" in done.stderr
+    assert not applied(toolbox)
+
+
+@needs_bash_tools
+def test_a_plan_terraform_cannot_show_is_not_applied(toolbox, tmp_path):
+    saved_plan(tmp_path)
+    done = make(["infra-apply", f"TF_DIR={tmp_path}"], toolbox, TF_FAIL="1")
+    assert done.returncode != 0
+    assert not applied(toolbox)
 
 
 @needs_bash_tools

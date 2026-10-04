@@ -15,8 +15,8 @@
   },
   {
     "id": "OPS-014-cloudflare-terraform-f3",
-    "behavior": "AC3: infra-apply applies only the saved plan and refuses in CI",
-    "verification": "uv run pytest -q tests/test_infra_terraform.py -k saved_plan",
+    "behavior": "AC3: infra-apply applies only the saved plan, refuses in CI, applies an import-only plan, needs CHANGES=1 for a change and never applies a destroy or replacement",
+    "verification": "uv run pytest -q tests/test_infra_terraform.py -k 'saved_plan or import_only or changes_something or destroy_or_a_replacement or cannot_show'",
     "state": "pending",
     "evidence": ""
   },

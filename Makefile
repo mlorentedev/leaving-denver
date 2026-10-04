@@ -170,9 +170,13 @@ infra-ids: ## Find the ids of the existing Access objects for the import blocks 
 infra-plan: ## Show what Terraform would change in Cloudflare; saves the plan for infra-apply (needs the sops key)
 	$(call tf_run,plan -input=false -out=plan.tfplan)
 
-infra-apply: ## Apply the plan `make infra-plan` saved: owner only, refused in CI, asks for nothing
+# The saved plan is read first: an import-only plan applies, a change needs CHANGES=1, a plan that
+# only deletes needs DESTROY=1 (decommission) and a replacement never goes through here
+# (scripts/infra-plan-guard.py).
+infra-apply: ## Apply the saved plan (imports only; CHANGES=1 for a change, DESTROY=1 to decommission): owner only, refused in CI, asks for nothing
 	@test -z "$$CI" || { echo "infra-apply is run by the owner, never by CI" >&2; exit 1; }
 	@test -f $(TF_DIR)/plan.tfplan || { echo "no saved plan: run make infra-plan and read it first" >&2; exit 1; }
+	$(call tf_run,show -json plan.tfplan) | python3 scripts/infra-plan-guard.py $(if $(CHANGES),--allow-changes) $(if $(DESTROY),--allow-destroy)
 	$(call tf_run,apply -input=false plan.tfplan)
 	@rm -f $(TF_DIR)/plan.tfplan
 

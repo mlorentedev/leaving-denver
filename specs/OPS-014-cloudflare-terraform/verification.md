@@ -16,7 +16,9 @@ created: "2026-10-03"
 - [x] AC7 -> read-only plan with the deploy token, `-target=cloudflare_pages_project.site`: `Plan: 1 to import, 0 to add, 0 to change, 0 to destroy.` (the `features.json` command re-runs it, exit 0).
 - [x] AC8 -> `tests/test_ops_runbook.py`, `tests/test_decommission_runbook.py` (new test for the Terraform order).
 
-Not verified here, and said so: the Access objects. The deploy token has no Access scope, so their import and a `0 to change` plan are the owner's, with the Terraform token (runbook, "Cloudflare configuration (Terraform)").
+Not verifiable from here, and said so: the Access objects. The deploy token has no Access scope, so their plan is the owner's, with the Terraform token. The owner's first real plan was 4 to import, 3 to change, 0 to destroy, only dashboard-made attribute differences; `access.tf` was reconciled to the live objects (d5e147b). Follow-up for two settings left as the dashboard made them (all identity providers allowed, cookie not HttpOnly): #184.
+- [x] Owner evidence, 2026-10-04, with the Terraform token after d5e147b: `make infra-ids` OK; `make infra-plan` -> `Plan: 4 to import, 0 to add, 1 to change, 0 to destroy`. The one change is the policy `include` sensitivity marking only (`terraform show -json`: zero value differences). The `aud` of `cloudflare_zero_trust_access_application.seller` in the plan (`894b144e...b2060`) matches the dashboard's Application Audience (AUD) Tag (owner-confirmed), and `/seller/` loaded after an Access login the same day (FEAT-009 AC9), so the middleware accepted that audience. No apply has been run: it waits for review approval and the merge.
+- [x] `infra-apply` reads the saved plan (`scripts/infra-plan-guard.py`): import-only applies, an update needs `CHANGES=1`, a sensitivity-only update (identical before/after, as in the owner's second real plan: 4 import, 1 change on the policy) applies without it, a plan that only deletes needs `DESTROY=1` (decommission), a replacement is never applied (tests in `tests/test_infra_terraform.py`).
 
 ## Test status
 
