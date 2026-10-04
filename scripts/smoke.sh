@@ -40,14 +40,16 @@ page=$(get "$url/")
 # path with the catalog and a 200 (BUG-013). A fresh deployment can lag, so retry like `get`.
 not_found() {
   local reply code body
+  # The body is part of the wait too: CI run 37169206079 got a 404 with another body a second
+  # after / was 200, and the same deployment served the not-found page minutes later (#173).
   for _ in $(seq 0 "${SMOKE_RETRIES:-6}"); do
     reply=$(curl -sS -w '\n%{http_code}' "$url/smoke-not-found-$RANDOM/") || reply=$'\nunreachable'
     code=${reply##*$'\n'}
-    [ "$code" = 404 ] && break
+    body=${reply%$'\n'*}
+    [ "$code" = 404 ] && grep -Fq 'data-role="not-found"' <<<"$body" && break
     sleep "${SMOKE_RETRY_DELAY:-5}"
   done
   [ "$code" = 404 ] || fail "an unknown path answers $code, not 404"
-  body=${reply%$'\n'*}
   grep -Fq 'data-role="not-found"' <<<"$body" || fail "the 404 is not the not-found page"
   grep -qE 'const _C = |data-item=|\b(sms|tel):' <<<"$body" && fail "the 404 page carries contact or item data"
   return 0
@@ -114,6 +116,14 @@ check_image() {
   get -I "$url/${1#https://*/}" | grep -qi '^content-type: image/jpeg' \
     || fail "$2 og:image ${1#https://*/} does not answer as a JPEG"
 }
+# A deploy that replaces the cover can still be served the previous page, naming a photo this
+# deployment deleted (#166): fetch the page again until the image it names answers.
+for _ in $(seq 0 "${SMOKE_RETRIES:-6}"); do
+  cover=$(og image <<<"$page")
+  [[ "$cover" == https://* ]] && curl -fsSI "$url/${cover#https://*/}" | grep -qi '^content-type: image/jpeg' && break
+  sleep "${SMOKE_RETRY_DELAY:-5}"
+  page=$(get "$url/")
+done
 check_image "$(og image <<<"$page")" "catalog"
 share_page() {
   local share
