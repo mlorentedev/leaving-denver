@@ -287,6 +287,12 @@ decision. What is and is not collected:
 
 ### Owner setup
 
+0. **Enable Workers Analytics Engine on the account, once, before the first deploy that carries
+   the binding.** Without it, Pages refuses the whole deployment ("Failed to publish your
+   Function. Got error: You need to enable Analytics Engine"), and production stays on the
+   previous deployment. That is what happened to #182's deploy (CI run 37178134775). In the
+   dashboard, go to Storage & Databases > Analytics Engine and choose Set up. It is free on the
+   Workers free plan. Then re-run the failed `deploy` job. No code change is needed.
 1. **Deploy check.** The binding (`[[analytics_engine_datasets]]`, `SALE_METRICS`) is declared in
    `wrangler.toml`, and a Pages project's `wrangler.toml` is the source of truth for its
    configuration, so after the first deploy that carries it check that nothing else moved. None of
