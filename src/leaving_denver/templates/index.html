@@ -334,8 +334,12 @@
           <h3 id="modalTitle" class="text-xl font-bold text-neutral-900 mt-0.5">{{ t.item_title }}</h3>
         </div>
 
-        <div class="aspect-4/3 bg-neutral-100 rounded-xl overflow-hidden flex items-center justify-center p-2">
-          <img id="modalMainImg" src="" alt="{{ t.main_photo }}" class="max-h-full max-w-full object-contain">
+        <!-- touch-action: pan-y leaves vertical scrolling to the browser and sideways swipes to the gallery. -->
+        <div id="modalPhotoFrame" class="relative aspect-4/3 bg-neutral-100 rounded-xl overflow-hidden flex items-center justify-center p-2 touch-pan-y select-none">
+          <img id="modalMainImg" src="" alt="{{ t.main_photo }}" draggable="false" class="max-h-full max-w-full object-contain">
+          <button type="button" id="modalPrevPhoto" onclick="stepPhoto(-1)" aria-label="{{ t.previous_photo }}" class="absolute top-1/2 -translate-y-1/2 left-2 w-10 h-10 rounded-full bg-white/85 hover:bg-white shadow flex items-center justify-center text-neutral-800 text-xl leading-none">‹</button>
+          <button type="button" id="modalNextPhoto" onclick="stepPhoto(1)" aria-label="{{ t.next_photo }}" class="absolute top-1/2 -translate-y-1/2 right-2 w-10 h-10 rounded-full bg-white/85 hover:bg-white shadow flex items-center justify-center text-neutral-800 text-xl leading-none">›</button>
+          <span id="modalPhotoCount" class="absolute bottom-2 right-2 px-2 py-0.5 rounded-full bg-neutral-900/70 text-white text-xs font-semibold tabular-nums"></span>
         </div>
 
         <div id="modalThumbStrip" class="flex gap-2 overflow-x-auto hide-scrollbar py-1"></div>
@@ -468,16 +472,7 @@
       document.getElementById('modalRetail').textContent = item.retail ? UI.original + ': $' + item.retail.toLocaleString() : '';
       document.getElementById('modalPickup').textContent = item.pickup || UI.default_pickup;
 
-      // srcset before src, so the browser never starts fetching the full JPEG first.
-      const mainImg = document.getElementById('modalMainImg');
-      const showPhoto = p => {
-        mainImg.srcset = p ? p.srcset : '';
-        mainImg.sizes = '(min-width: 672px) 620px, 100vw';
-        mainImg.src = p ? p.src : '';
-      };
       const photos = item.photos || [];
-      showPhoto(photos[0]);
-
       const strip = document.getElementById('modalThumbStrip');
       strip.innerHTML = '';
       photos.forEach((p, idx) => {
@@ -485,18 +480,16 @@
         thumb.srcset = p.srcset;
         thumb.sizes = '48px';
         thumb.src = p.src;
-        thumb.className = `w-12 h-12 object-contain bg-white rounded-lg border p-1 cursor-pointer transition-all ${idx === 0 ? 'border-neutral-900' : 'border-neutral-200 opacity-60 hover:opacity-100'}`;
-        thumb.onclick = () => {
-          showPhoto(p);
-          strip.querySelectorAll('img').forEach(t => {
-            t.classList.remove('border-neutral-900');
-            t.classList.add('border-neutral-200', 'opacity-60');
-          });
-          thumb.classList.add('border-neutral-900');
-          thumb.classList.remove('opacity-60');
-        };
+        thumb.className = 'w-12 h-12 shrink-0 object-contain bg-white rounded-lg border p-1 cursor-pointer transition-all hover:opacity-100';
+        thumb.onclick = () => showPhoto(idx);
         strip.appendChild(thumb);
       });
+      gallery = photos;
+      const several = photos.length > 1;
+      document.getElementById('modalPrevPhoto').hidden = !several;
+      document.getElementById('modalNextPhoto').hidden = !several;
+      document.getElementById('modalPhotoCount').hidden = !several;
+      showPhoto(0);
 
       // The whole item: the card shows four specs, the sheet all of them (FEAT-011).
       const summary = document.getElementById('modalSummary');
@@ -544,6 +537,70 @@
 
       openSheet(document.getElementById('itemSheet'));
     }
+
+    // The open item's photos. Arrows, a sideways swipe and the arrow keys step through them,
+    // wrapping at both ends; the counter and the thumbnail strip follow the photo shown.
+    let gallery = [];
+    let galleryAt = 0;
+    const PHOTO_SIZES = '(min-width: 672px) 620px, 100vw';
+
+    function showPhoto(idx) {
+      const p = gallery[idx];
+      galleryAt = idx;
+      // srcset before src, so the browser never starts fetching the full JPEG first.
+      const mainImg = document.getElementById('modalMainImg');
+      mainImg.srcset = p ? p.srcset : '';
+      mainImg.sizes = PHOTO_SIZES;
+      mainImg.src = p ? p.src : '';
+      document.getElementById('modalPhotoCount').textContent = `${idx + 1} / ${gallery.length}`;
+      const strip = document.getElementById('modalThumbStrip');
+      [...strip.children].forEach((thumb, i) => {
+        thumb.classList.toggle('border-neutral-900', i === idx);
+        thumb.classList.toggle('border-neutral-200', i !== idx);
+        thumb.classList.toggle('opacity-60', i !== idx);
+      });
+      // Keep the current thumbnail in view, centred, without scrolling the sheet itself.
+      const thumb = strip.children[idx];
+      if (thumb) {
+        const s = strip.getBoundingClientRect();
+        const t = thumb.getBoundingClientRect();
+        strip.scrollLeft += t.left - s.left - (s.width - t.width) / 2;
+      }
+      // Fetch the neighbours now, so the next swipe shows a photo already in the cache.
+      for (const near of [gallery[idx + 1], gallery[idx - 1]]) {
+        if (!near) continue;
+        const ahead = new Image();
+        ahead.sizes = PHOTO_SIZES;
+        ahead.srcset = near.srcset;
+        ahead.src = near.src;
+      }
+    }
+
+    function stepPhoto(by) {
+      const n = gallery.length;
+      if (n > 1) showPhoto((galleryAt + by + n) % n);
+    }
+
+    (() => {
+      const frame = document.getElementById('modalPhotoFrame');
+      let start = null;
+      frame.addEventListener('pointerdown', e => { start = e.isPrimary ? { x: e.clientX, y: e.clientY } : null; });
+      frame.addEventListener('pointercancel', () => { start = null; });
+      frame.addEventListener('pointerup', e => {
+        if (!start) return;
+        const dx = e.clientX - start.x;
+        const dy = e.clientY - start.y;
+        start = null;
+        // A swipe is long enough not to be a tap and mostly sideways, so a scroll is not one.
+        if (Math.abs(dx) > 40 && Math.abs(dx) > 1.5 * Math.abs(dy)) stepPhoto(dx < 0 ? 1 : -1);
+      });
+      document.getElementById('itemSheet').addEventListener('keydown', e => {
+        if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+        if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+        e.preventDefault();
+        stepPhoto(e.key === 'ArrowRight' ? 1 : -1);
+      });
+    })();
 
     // Shares the item's share page, not /#<id>: a link to the catalog previews the catalog.
     // The catalog's og:url is the locale's root, and the share page sits at i/<id>/ under it.

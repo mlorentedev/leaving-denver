@@ -201,11 +201,18 @@ def test_item_dialog_uses_srcset(page):
         check_srcset(page, photo["srcset"])
     # The script hands those srcsets over as they are, with a sizes it can resolve.
     assignments = dict(re.findall(r"(\w+)\.srcset = ([^;]+);", html))
-    assert assignments == {"mainImg": "p ? p.srcset : ''", "thumb": "p.srcset"}, assignments
-    sizes = dict(re.findall(r"(\w+)\.sizes = '([^']*)';", html))
-    assert set(sizes) == {"mainImg", "thumb"}, sizes
-    assert resolve_sizes(sizes["mainImg"], 390) == 390
-    assert resolve_sizes(sizes["thumb"], 390) == 48
+    assert assignments == {
+        "mainImg": "p ? p.srcset : ''",
+        "thumb": "p.srcset",
+        "ahead": "near.srcset",
+    }, assignments
+    sizes = dict(re.findall(r"(\w+)\.sizes = ([^;]+);", html))
+    # The neighbour fetched ahead takes the main photo's sizes, so the browser picks the same
+    # candidate it will show: any other sizes would download a second, unused file.
+    assert sizes == {"mainImg": "PHOTO_SIZES", "ahead": "PHOTO_SIZES", "thumb": "'48px'"}, sizes
+    photo_sizes = re.search(r"const PHOTO_SIZES = '([^']*)';", html).group(1)
+    assert resolve_sizes(photo_sizes, 390) == 390
+    assert resolve_sizes("48px", 390) == 48
 
 
 def pick(srcset, needed):

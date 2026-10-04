@@ -169,6 +169,23 @@ class Page:
             self.mouse("mouseMoved", *end)
         self.mouse("mouseReleased", *end)
 
+    def swipe(self, start, end, steps=5):
+        """A finger put down at start, moved to end in steps, and lifted: a real touch, so the
+        page sees touch-action and pointerType 'touch' as on a phone."""
+        self.send(
+            "Input.dispatchTouchEvent",
+            type="touchStart",
+            touchPoints=[{"x": start[0], "y": start[1]}],
+        )
+        for i in range(1, steps + 1):
+            point = [a + (b - a) * i / steps for a, b in zip(start, end, strict=True)]
+            self.send(
+                "Input.dispatchTouchEvent",
+                type="touchMove",
+                touchPoints=[{"x": point[0], "y": point[1]}],
+            )
+        self.send("Input.dispatchTouchEvent", type="touchEnd", touchPoints=[])
+
 
 MODULE_SCRIPT = re.compile(r'<script type="module" src="([^"]+)"></script>')
 

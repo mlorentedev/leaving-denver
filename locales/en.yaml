@@ -30,6 +30,8 @@ text_us: Text me
 category: Category
 item_title: Item Title
 main_photo: Main photo
+previous_photo: Previous photo
+next_photo: Next photo
 original: Original
 details: Details & Specifications
 included: What's included
