@@ -7,11 +7,11 @@ A privacy-focused inventory management, automated photo ingestion, and multi-por
 ## Key Features
 
 - **Single Source of Truth (`data/inventory.yaml`):** Human-readable YAML configuration managing all 14 items, value bundles, pricing tiers, and descriptions.
-- **Folder-Convention Media Pipeline:** Drop any photo (including iPhone HEIC) into `content/photos/<item_id>/` and run `leaving-denver build` to auto-discover, strip GPS EXIF metadata, optimize (<300 KB), and compile.
+- **Folder-Convention Media Pipeline:** Drop any photo (including iPhone HEIC) into `content/photos/<item_id>/` and run `leaving-denver build` to auto-discover, strip GPS EXIF metadata and compile. Each photo becomes one JPEG capped at 1600 px on its longer side (quality 85) plus WebP copies at 480, 800, 1200 and 1600 px wide that the page's `srcset` picks from (never upscaled); a photo whose source and settings have not changed is skipped.
 - **Data & Privacy Isolation:** Public build in `build/public/` is completely stripped of internal reserve floor prices, negotiation notes, and seller admin tools.
-- **Bot & Scraper Defense:** Telephone numbers are obfuscated and assembled dynamically via client JS. Static HTML attributes contain no harvestable numbers. `robots.txt` enforces `Disallow: /`.
-- **Two Deadlines and a Written-Down Price Schedule:** household items go by `seller.household_deadline` and the car by `seller.vehicle_deadline`; `leaving-denver drops` prints the drop, floor and giveaway windows from `seller.price_schedule`, and prices come from the inventory and encrypted reserve data.
-- **Multi-Portal Copy Generator:** Instant copy-paste listings tailored for Facebook Marketplace, Craigslist Denver, OfferUp, and Nextdoor.
+- **Bot & Scraper Defense:** Telephone numbers are obfuscated and assembled dynamically via client JS. Static HTML attributes contain no harvestable numbers. `robots.txt` disallows every crawler except link-preview fetchers (Facebook, X, Telegram, WhatsApp; ADR-004) and the assistants a person asked to read a page (ChatGPT-User, Claude-User, Perplexity-User, MistralAI-User; ADR-009); every response also carries `X-Robots-Tag: noindex`.
+- **Two Deadlines and a Written-Down Price Schedule (seller-only, never shown publicly):** household items go by `seller.household_deadline` and the car by `seller.vehicle_deadline`; no public page, the flyer or a listing shows either date (FEAT-014), they only drive the seller tool, the price windows and the end-of-sale switch; `leaving-denver drops` prints the drop, floor and giveaway windows from `seller.price_schedule`, and prices come from the inventory and encrypted reserve data.
+- **Multi-Portal Copy Generator:** Instant copy-paste listings tailored for Facebook Marketplace, Craigslist Denver, OfferUp, Nextdoor and the car's vehicle form, written at `/seller/`. The complex portal (ActiveBuilding) is tracked as a channel too.
 - **Bilingual Catalog:** The same sanitized inventory renders in English at `/` and neutral Latin American Spanish at `/es/`, with localized SMS intents.
 - **Craigslist Bump Reminder:** A ready-to-import n8n workflow that sends a Telegram reminder to renew listings every 48 hours.
 
@@ -29,13 +29,13 @@ A privacy-focused inventory management, automated photo ingestion, and multi-por
 ### 2. Common Commands
 
 ```bash
-# Compile SSOT, process new photos, build public & private sites
+# Compile SSOT, process new photos, build the public site (one output: build/public/)
 uv run leaving-denver build
 
 # Auto-discover photos and update data/inventory.yaml
 uv run leaving-denver sync
 
-# View date-derived schedule windows and inventory/reserve-based price tiers
+# View the written price windows (seller.price_schedule) and inventory/reserve-based price tiers
 uv run leaving-denver drops
 
 # Mark an item as sold and trigger automatic site rebuild
@@ -44,6 +44,16 @@ uv run leaving-denver sold sofa-sleeper 200
 # Reserve an item for an agreed pickup, or put it back on sale
 uv run leaving-denver pending sofa-sleeper
 uv run leaving-denver available sofa-sleeper
+
+# Record a posting or renewal, and an asking-price change (written to the encrypted private file)
+make post ID=sofa-sleeper CHANNEL=facebook   # channels: facebook, craigslist, offerup, nextdoor, activebuilding, carscom (the car only)
+make reprice ID=sofa-sleeper PRICE=190
+
+# Seal the private data for /seller/ and set SELLER_SEALED (needs a terminal)
+uv run leaving-denver seal
+
+# Edit the encrypted floors, targets, notes, phone and deploy token
+make secrets
 
 # Start local preview server (Port 8088)
 uv run leaving-denver serve --port 8088
@@ -123,23 +133,49 @@ When running `uv run leaving-denver serve`:
 ```text
 ├── data/
 │   ├── inventory.yaml             # SSOT (Item specifications, pricing, bundles)
-│   └── inventory.json             # Internal compiled inventory with floor prices
+│   ├── private.sops.yaml          # Encrypted floors, targets, tracking, phone (sops + age)
+│   └── seller-replies.yaml        # Scam-reply texts shown at /seller/
 ├── content/
 │   └── photos/                    # Drop photos here by item ID
-├── locales/                       # English and Spanish public UI strings
+├── locales/                       # Public UI strings: en.yaml, es.yaml, flyer.yaml, not_found.yaml
+├── functions/
+│   └── _middleware.js             # Pages Function: Cloudflare Access on /seller/*, its CSP, the end-of-sale redirects
 ├── src/
 │   └── leaving_denver/
 │       ├── cli.py                 # Master orchestration CLI
 │       ├── config.py              # Core configuration & secrets
-│       ├── image_processor.py     # HEIC decoder & EXIF metadata scrubber
+│       ├── channels.py            # Listing channels, takedown steps and renewal rules
+│       ├── pricing.py             # Staged price tiers
+│       ├── private_data.py        # Reads and writes the encrypted private file through sops
+│       ├── seal.py                # `seal`: encrypts the private data for /seller/
+│       ├── image_processor.py     # HEIC decoder, EXIF metadata scrubber, JPEG + WebP variants
 │       └── site_builder.py        # Site compiler with leak detection
 ├── build/
-│   └── public/                    # Public sanitized distribution (Deploy to Cloudflare)
+│   └── public/                    # Public sanitized distribution (Deploy to Cloudflare):
+│       │                          #   catalog (/, /es/), item share pages (/i/<id>/, /es/i/<id>/),
+│       │                          #   the building flyer (/flyer/) and the seller tool (/seller/)
 ├── integrations/
 │   └── n8n/                       # Kubelab n8n workflow (Craigslist bump reminder)
-├── docs/                          # Architecture, Playbooks, and Kubelab guide
+├── docs/
+│   ├── adr/                       # Architecture decision records
+│   ├── lessons/                   # Lessons learned
+│   └── runbooks/                  # Ops, seller playbook, vehicle sale, decommission, Kubelab guide
 └── tests/                         # Integrity & security regression tests
 ```
+
+---
+
+## Maintenance mode
+
+The build phase is over; what is left is running the sale and closing it:
+
+- [site operations](docs/runbooks/ops.md): marking items sold, pending or available again, repricing,
+  recording a posting (`make sold`, `uv run leaving-denver pending`, `make reprice`, `make post`),
+  deploys, rollbacks and key recovery.
+- [decommission](docs/runbooks/decommission.md): the end of the sale, dated: the household
+  close-out on Oct 23, turning the sale off by Nov 9 and removing the credentials and the number.
+- [vehicle sale](docs/runbooks/vehicle-sale.md): screening, test drive, payment (a cashier's
+  check at the buyer's bank, no deposit) and the Colorado paperwork for the car.
 
 ---
 

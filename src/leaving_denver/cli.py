@@ -14,7 +14,7 @@ from datetime import date
 from pathlib import Path
 
 from leaving_denver import seal
-from leaving_denver.channels import CHANNELS, takedown_steps
+from leaving_denver.channels import CHANNELS, VEHICLE_ONLY, takedown_steps
 from leaving_denver.config import DIST_DIR
 from leaving_denver.pricing import price_tiers
 from leaving_denver.private_data import (
@@ -120,9 +120,12 @@ def offer_seller_update():
 
 
 def cmd_post(args):
-    known_item(args.id)
+    item = known_item(args.id)
     if args.channel not in CHANNELS:
         print(f"Error: unknown channel '{args.channel}' (one of: {', '.join(CHANNELS)}).")
+        sys.exit(1)
+    if args.channel in VEHICLE_ONLY and item.get("category") != "Vehicle":
+        print(f"Error: '{args.channel}' is only for the vehicle, not '{args.id}'.")
         sys.exit(1)
     on = day_arg(args.on)
     record_privately(record_post, args.id, args.channel, on)
@@ -144,7 +147,7 @@ def cmd_reprice(args):
 
 
 def cmd_sold(args):
-    known_item(args.id)
+    item = known_item(args.id)
     today = date.today()
     # The repo is public: the sale goes to the encrypted file first, or nothing changes.
     if args.price is not None:
@@ -160,7 +163,7 @@ def cmd_sold(args):
     )
     print("\n" + "=" * 60)
     print("TAKE THE LISTING DOWN:")
-    for step in takedown_steps(args.id, load_private()):
+    for step in takedown_steps(args.id, load_private(), item.get("category") == "Vehicle"):
         print(f"- {step}")
     print("=" * 60)
     offer_seller_update()
@@ -205,7 +208,7 @@ def cmd_drops(args):
             w1, w2, w3 = price_tiers(it, reserve.get(it["id"]))
             print(f"{it['id']:<24} ${w1:<14} ${w2:<14} ${w3:<14}")
     print("-" * 80)
-    print("Hormozi Protocol: If 0 inquiries within 4-7 days on an item, lower to Week 2 tier.")
+    print("Rule of thumb: if an item draws no inquiries in 4-7 days, lower it to the Week 2 tier.")
 
 
 def resolve_request_path(path: str) -> Path | None:
@@ -288,7 +291,10 @@ def main():
     available_p.add_argument("id", help="Item ID (e.g. sofa-sleeper)")
     available_p.set_defaults(func=cmd_available)
 
-    drops_p = subparsers.add_parser("drops", help="Calculate Hormozi 3-week staged pricing drops")
+    drops_p = subparsers.add_parser(
+        "drops",
+        help="Show the written price windows and each item's staged price tiers (seller only)",
+    )
     drops_p.set_defaults(func=cmd_drops)
 
     seal_p = subparsers.add_parser(

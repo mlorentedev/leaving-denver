@@ -17,6 +17,7 @@ import pytest
 import yaml
 
 from leaving_denver import cli, private_data
+from leaving_denver.channels import CHANNELS
 
 TODAY = date(2026, 10, 7)
 ROOT = Path(__file__).resolve().parents[1]
@@ -144,6 +145,7 @@ def commands(monkeypatch, fixture_private):
         "items": [
             {"id": "sofa-sleeper", "title": "Sofa", "status": "Available"},
             {"id": "lamp", "title": "Lamp", "status": "Available"},
+            {"id": "escape", "title": "Escape", "status": "Available", "category": "Vehicle"},
         ],
     }
     calls = []
@@ -178,6 +180,48 @@ def test_post_refuses_an_unknown_item_channel_or_date_and_records_nothing(comman
     with pytest.raises(SystemExit):
         cli.cmd_post(post_args(**bad))
     assert commands.calls == []
+
+
+def test_the_car_can_be_posted_on_carscom(commands):
+    cli.cmd_post(post_args(id="escape", channel="carscom"))
+    assert commands.calls == [("record_post", "escape", "carscom", date.today())]
+
+
+def test_a_household_item_cannot_be_posted_on_a_vehicle_channel(commands, capsys):
+    with pytest.raises(SystemExit):
+        cli.cmd_post(post_args(id="lamp", channel="carscom"))
+    assert commands.calls == []
+    assert "only for the vehicle" in capsys.readouterr().out
+
+
+def test_sold_car_posted_on_carscom_lists_it_for_takedown(commands, fixture_private, capsys):
+    fixture_private["tracking"]["escape"] = {"channels": {"carscom": ["2026-10-04"]}}
+    cli.cmd_sold(SimpleNamespace(id="escape", price=11950))
+    out = capsys.readouterr().out
+    assert "Cars.com" in out
+    assert "Facebook" not in out
+
+
+def test_sold_car_with_nothing_recorded_checks_carscom_too(commands, capsys):
+    cli.cmd_sold(SimpleNamespace(id="escape", price=11950))
+    assert "Cars.com" in capsys.readouterr().out
+
+
+def test_sold_household_item_never_sends_the_seller_to_carscom(commands, capsys):
+    cli.cmd_sold(SimpleNamespace(id="lamp", price=20))
+    assert "Cars.com" not in capsys.readouterr().out
+
+
+def test_the_make_post_usage_names_every_channel():
+    """The Makefile hard-codes the channel list in its usage line; a channel added to
+    CHANNELS but not there (Cars.com was) cannot be found from `make post`."""
+    usage = next(
+        line
+        for line in (ROOT / "Makefile").read_text(encoding="utf-8").splitlines()
+        if "usage: make post" in line
+    )
+    for channel in CHANNELS:
+        assert channel in usage, f"make post usage omits {channel}"
 
 
 def test_reprice_records_the_new_price(commands):

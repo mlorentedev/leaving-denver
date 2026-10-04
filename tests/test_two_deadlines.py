@@ -240,8 +240,8 @@ def test_moved_dates_still_never_reach_a_public_page(public_dir):
 
 def test_the_hero_strip_says_the_sale_is_on_without_a_date(public_dir):
     pages = build(public_dir, catalog_inventory())
-    assert role(pages["en"], "sale-status") == "Available now"
-    assert role(pages["es"], "sale-status") == "Disponible ahora"
+    assert role(pages["en"], "sale-status") == "Ready for pickup"
+    assert role(pages["es"], "sale-status") == "Listo para recoger"
     assert "deadlineCountdown" not in pages["en"]
     assert "data-countdown-date" not in pages["en"]
 

@@ -60,12 +60,13 @@ git push -u origin chore/household-close-out
 gh pr create --fill
 ```
 
-After the owner merges, the push to `main` deploys. The page now counts down to the car's date
-(`seller.vehicle_deadline`), says only that the car is for sale, and the flyer names only the
-car. Check it:
+After the owner merges, the push to `main` deploys. The page now sells only the car: its title
+is the vehicle one, it still says "Ready for pickup" (it never shows a date, FEAT-014), and the
+flyer names only the car. Check it:
 
 ```
-curl -s https://leaving-denver.pages.dev/ | grep -o 'Car available until [A-Za-z]* [0-9]*'
+curl -s https://leaving-denver.pages.dev/ | grep -o '<title>[^<]*'                 # <title>Denver Tech Center Relocation Sale — AWD SUV
+curl -s https://leaving-denver.pages.dev/ | grep -o 'data-role="sale-status">[^<]*' # data-role="sale-status">Ready for pickup
 curl -sI https://leaving-denver.pages.dev/i/sofa-sleeper/ | head -1   # 404
 ```
 
@@ -153,6 +154,7 @@ that replaces it fail.
    - OfferUp: Profile > My items > each item > Remove.
    - Nextdoor: For Sale & Free > My listings > each listing > Delete.
    - ActiveBuilding (the complex portal): remove the post.
+   - Cars.com (the car only): My Listings > the listing > delete.
    - The building flyer: take the paper down; its QR code now opens the end page.
 
    Where each item was posted is the `tracking` section of the encrypted file: `make secrets`
@@ -163,6 +165,11 @@ that replaces it fail.
 6. Pause the uptime monitor (ops.md, "Minimal monitoring"). Its keyword was the catalog title,
    which the end page does not carry, so it alerts from its next check. Uptime Kuma on the
    homelab > the `leaving-denver` monitor > Pause (or Delete).
+
+   Deactivate the Craigslist bump reminder on kubelab too (`integrations/n8n/workflows/craigslist_48h_bump_reminder.json`,
+   described in [kubelab-integration.md](kubelab-integration.md)): n8n > the "Moving Sale - Craigslist 48h Bump Reminder"
+   workflow > switch Active off (or Delete). Left on, it keeps sending a Telegram message
+   every 48 hours about listings that no longer exist.
 
 7. Optional: platforms cache link previews for about 30 days. To show "The sale is over" sooner,
    paste `https://leaving-denver.pages.dev/` into the Facebook Sharing Debugger
@@ -203,8 +210,9 @@ new token (ADR-008).
    `leaving-denver` > Settings > Variables and Secrets: delete `ACCESS_TEAM_DOMAIN` and
    `ACCESS_AUD` in production and preview. `/seller/` is no longer built, so this is tidying.
 
-5. Release the Google Voice number. voice.google.com > Settings > Account > the Google Voice
-   number > Delete. Do it after the listings are gone, so no reply lands on a dead number.
+5. The number needs no release: the listing number is the owner's work phone (#29, a Google
+   Voice number, was closed as not planned), so there is nothing to give back. The listings are
+   gone, so no new message reaches it from the sale.
 
 6. Delete the Bitwarden item `leaving-denver-seller`, which holds `SELLER_PASSPHRASE`, and
    remove the `SELLER_PASSPHRASE` entry from the dotfiles secrets registry with a dotfiles pull
@@ -253,5 +261,5 @@ make audit-deploy        # deploy audit OK
 scripts/smoke.sh https://leaving-denver.pages.dev   # smoke OK (sale over)
 ```
 
-Then the manual ones: the Google Voice number is gone, the token is gone from My Profile > API
+Then the manual ones: the token is gone from My Profile > API
 Tokens, and no marketplace listing is left (search each site for the item titles).

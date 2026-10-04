@@ -31,6 +31,15 @@ furniture".
   (`Bundle ... names unknown items`). `published: false` already hides an item, its bundles, photos
   and share page without pretending it sold.
 
+Update 2026-10-03 (FEAT-014, #165): the dates this lesson made true to the data then left the
+public pages altogether. The hero countdown became a dateless "Available now", the car card lost
+"Available until", the flyer lost its date line, the meta description is the hero line alone and
+the seller tool's listings no longer name a month. The deadlines and the written schedule stay in
+the data, where they still drive the seller tool, the price windows and the end-of-sale switch;
+only the public readers dropped them. The countdown switch and the flyer's date line named under
+Guard no longer exist, and `tests/test_two_deadlines.py` now fails on either deadline in any
+written form on a public page.
+
 ## Guard
 
 `tests/test_two_deadlines.py` pins the windows, every validation failure, the countdown switch
