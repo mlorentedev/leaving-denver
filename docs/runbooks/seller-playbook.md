@@ -150,7 +150,7 @@ app, or at the bank for the car, and only for the exact price at local pickup.
 For household items, count cash when you receive it. Count in-person
 Venmo/Zelle only after the payment appears in **your own** app. Do not request
 deposits. Give the precise address
-only after confirming a time; disclose first-floor pickup, one flight of
+only after confirming a time; disclose second-floor pickup, one flight of
 stairs and no elevator before scheduling. Meet in daylight when possible,
 stage small items at the door, have another adult present for furniture, and
 do not let a stranger enter while you are alone. Meet car buyers away from

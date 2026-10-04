@@ -263,7 +263,7 @@ ELEVATOR_DENIALS = re.compile(
     re.I,
 )
 WRONG_PICKUP_FACTS = re.compile(
-    r"elevators?|(?:ascensor|elevador)(?:es)?|ground floor|first floor|segundo piso|"
+    r"elevators?|(?:ascensor|elevador)(?:es)?|ground[- ]floor|first[- ]floor|segundo piso|"
     r"everything was bought new",
     re.I,
 )
@@ -313,7 +313,11 @@ def test_pickup_floor_matches_owner(inventory):
     assert "Primer piso, un tramo de escaleras, sin ascensor." in seller["es"]["pickup"]
 
 
-@pytest.mark.parametrize("path", CLAIM_SOURCES, ids=lambda p: p.name)
+# The runbooks tell the seller what to disclose before a pickup, so they are checked too.
+PICKUP_SOURCES = CLAIM_SOURCES + sorted((BASE_DIR / "docs" / "runbooks").glob("*.md"))
+
+
+@pytest.mark.parametrize("path", PICKUP_SOURCES, ids=lambda p: p.name)
 def test_no_stale_or_unbacked_pickup_facts(path):
     hits = wrong_pickup_facts(path.read_text(encoding="utf-8"))
     assert not hits, f"{path.name} states a wrong pickup fact: {hits}"
