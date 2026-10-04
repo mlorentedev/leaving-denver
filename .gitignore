@@ -38,3 +38,19 @@ node_modules/
 .ruff_cache/
 .lfs-assets-id
 .wrangler/
+
+# Terraform (infra/terraform/cloudflare). State is local: it holds the owner's email (OPS-014).
+# .terraform.lock.hcl is committed on purpose; a saved plan holds the same values as state.
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfvars
+*.tfvars.json
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+!*.tfvars.example

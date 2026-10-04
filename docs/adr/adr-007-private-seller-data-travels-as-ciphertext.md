@@ -20,6 +20,10 @@ Accepted (owner decisions of 2026-09-30, open questions answered 2026-10-01). It
 - **ADR-005**, negative consequence 1 (a CSP must allow the beacon everywhere);
 - the rule in `docs/runbooks/ops.md`, "Never put floors ... under `build/public/`, even behind Access".
 
+ADR-012 amends how the Access application is made: Terraform (`make infra-apply`) creates the
+one-time PIN provider, the application and the owner-only policy that "Context" describes, and
+the dashboard steps in the runbook are the fallback. The bindings and the middleware are unchanged.
+
 ## Date
 
 2026-10-01

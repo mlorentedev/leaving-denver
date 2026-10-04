@@ -45,6 +45,12 @@ jobs:
           node-version: '24'
           cache: npm
       - run: make install
+      # `make check` runs fmt and validate on infra/terraform/cloudflare when terraform is on
+      # PATH (OPS-014): no credentials, and apply is never run by CI.
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: 1.15.3
+          terraform_wrapper: false
       - run: make check
 
   deploy:

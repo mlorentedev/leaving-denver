@@ -42,3 +42,4 @@ tags: [lessons, index, docs, leaving-denver]
 | [lesson-027](lesson-027-one-date-was-three-facts.md) | One Date Was Three Facts | 2026-10-02 | [data, copy, testing, yaml] |
 | [lesson-028](lesson-028-two-policies-are-an-intersection-and-chrome-logs-unknown-features.md) | Two Policies Are an Intersection, and Chrome Logs Unknown Permissions-Policy Features | 2026-10-03 | [csp, cloudflare, headers, lighthouse, testing] |
 | [lesson-029](lesson-029-a-redirect-that-rebuilds-the-url-drops-the-query.md) | A Redirect That Rebuilds the URL Drops the Query | 2026-10-03 | [analytics, utm, redirects, testing, cloudflare] |
+| [lesson-030](lesson-030-a-token-without-access-scope-lists-access-as-empty.md) | A Token Without Access Scope Lists Access as Empty | 2026-10-03 | [cloudflare, access, terraform, tokens, testing] |

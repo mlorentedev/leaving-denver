@@ -51,16 +51,21 @@ configured, the Pages middleware responds `503` rather than serving the tool.
 
 To enable it, an administrator of the Cloudflare Zero Trust account must:
 
-1. Enable the **One-time PIN** identity provider. Create a self-hosted
-   Cloudflare Access application for
-   `leaving-denver.pages.dev/seller` **and** `/seller/*`, with an **Allow**
-   policy for the owner's **exact email address only** (not the whole domain).
-   Cover preview hostnames (`*.leaving-denver.pages.dev`) and any future custom
-   domains with the same paths. A path ending `/*` does not cover its parent.
+1. Create the Access objects with Terraform: `make infra-plan`, read it, then `make infra-apply`
+   ("Cloudflare configuration (Terraform)" below, ADR-012). They are the **One-time PIN**
+   identity provider and a self-hosted Access application for `leaving-denver.pages.dev/seller`
+   **and** `/seller/*`, with an **Allow** policy for the owner's **exact email address only**
+   (not the whole domain), covering the preview hostnames (`*.leaving-denver.pages.dev`) with
+   the same paths. A path ending `/*` does not cover its parent. Access covers only the
+   `pages.dev` hostnames: a future custom domain needs its own destinations in `access.tf`.
+   *Fallback, if Terraform cannot be used:* the same in the Zero Trust dashboard (Access >
+   Applications > Add an application > Self-hosted), by hand, and then bring it under Terraform
+   with `make infra-ids` and `make infra-plan` before the next change.
 2. In Workers & Pages > `leaving-denver` > Settings > Variables and Secrets,
    set `ACCESS_TEAM_DOMAIN` to the HTTPS Access team origin
    (`https://<team>.cloudflareaccess.com`) and `ACCESS_AUD` to that application's
-   64-character audience. Configure both production and preview environments;
+   64-character audience (`terraform -chdir=infra/terraform/cloudflare output -raw access_aud`
+   prints it; Terraform never writes the binding). Configure both production and preview environments;
    these values are runtime bindings, **not** fields in public inventory.
 3. Deploy from tested `main`. From an anonymous browser and a preview URL,
    request `/seller/`, `/seller/index.html`, and `/seller/seller.mjs`: none
@@ -76,6 +81,73 @@ The one exception is ADR-007's sealed ciphertext, made on the owner's machine
 under a passphrase only the owner knows, and only inside `/seller/`. The buyer
 catalog must stay reachable anonymously. The old local workspace (its page, its
 folder and its PIN) is gone, and `make serve` serves `build/public/` only.
+
+## Cloudflare configuration (Terraform)
+
+The Pages project and the Access objects of "Owner-only mobile listing copy" are Terraform in
+`infra/terraform/cloudflare/` (ADR-012). State is a local file, gitignored: it holds your email.
+
+| Managed by Terraform | Left manual, on purpose |
+|---|---|
+| Pages project `leaving-denver` (exists, production branch `main`, cannot be destroyed) | Deployment settings and bindings (`wrangler.toml` owns them) |
+| Access one-time PIN provider, the `/seller` application, the owner-only Allow policy | `ACCESS_TEAM_DOMAIN` and `ACCESS_AUD` (secret Pages variables) |
+| | Web Analytics (the Pages setting, ADR-005) |
+| | The read-only API token of the n8n metrics digest |
+
+**One-time setup.**
+
+1. Create a Cloudflare API token for Terraform (My Profile > API Tokens): this account only, with
+   Cloudflare Pages: Edit, Access: Apps and Policies: Edit and Access: Organizations, Identity
+   Providers, and Groups: Edit. It is not the deploy token, which must stay a token that can only
+   deploy.
+2. `make secrets` and add two keys to `data/private.sops.yaml`: `cloudflare_terraform_token` (that
+   token) and `owner_email` (the address Access lets in, the one you receive the one-time PIN on).
+   Neither is ever written anywhere else, and no command here prints them.
+3. `make infra-init`, then `make infra-ids`. The second reads the ids of the existing Access
+   objects through the API (read-only, ids only) into `infra/terraform/cloudflare/ids.auto.tfvars`
+   (gitignored). It stops with "this token cannot read Zero Trust Access" for a token without the
+   Access scopes, and unless each object is found exactly once.
+4. `make infra-plan`. The import blocks adopt the four existing objects; you want
+   `Plan: 4 to import, 0 to add, 0 to change, 0 to destroy`. Expect `1 to change` on
+   `cloudflare_zero_trust_access_policy.owner_only` as well: Terraform says "The value is
+   unchanged" there. Before and after are identical and only the sensitivity marking differs (the
+   sensitive `owner_email` marks the whole `include` list), so it is the import, not a change, and
+   `make infra-apply` treats it so. The plan hides the email, but do not paste it anywhere. If `make infra-ids` warned that the policy is not reusable, make it
+   reusable in the dashboard first: the import adopts a reusable policy only.
+   - **Reconciled once already.** The owner's first real plan was 4 to import, 3 to change, 0 to
+     destroy, and every difference was an attribute the dashboard had set (the identity
+     provider's name, the policy's empty `rdp` rule, the application's name and cookie options).
+     `access.tf` now declares them as the dashboard made them. A new difference in a later plan
+     is drift: edit `access.tf` to match the live object, never apply a change just to make the
+     dashboard match the file for the first time, and plan again until nothing changes.
+   - **Check the audience before applying.** `terraform output` prints nothing yet (a plan writes
+     no state). Compare the `aud` the plan shows in the import block of
+     `cloudflare_zero_trust_access_application.seller` with "Application Audience (AUD) Tag" in
+     Zero Trust > Access > Applications > that application. A mismatch means the wrong
+     application was imported: stop.
+5. `make infra-apply`. It reads the saved plan first and refuses unless it is import-only (every
+   change a no-op, or the unchanged-value update above), printing what would change when it
+   refuses; a replacement is refused always. With only imports it changes nothing in Cloudflare. Then check the audience
+   again, now from state: `terraform -chdir=infra/terraform/cloudflare output -raw access_aud`
+   must equal the `ACCESS_AUD` binding. An empty output or a mismatch means stop.
+
+**Routine.** Change the `.tf` file, `make infra-plan`, read it, then `make infra-apply CHANGES=1`
+(a routine change needs the explicit override; an import-only plan does not). `make infra-fmt`
+(format and validate, no credentials) is part of `make check`, and CI runs it. CI never applies.
+Do not apply when the plan shows a destroy or a replacement: the guard and `prevent_destroy` both
+stop it, and a replaced application would have a new audience and close `/seller/` until
+`ACCESS_AUD` is set again. Removing a resource on purpose is the decommission runbook's step,
+with `DESTROY=1` (a plan that only deletes; `CHANGES=1` never lets a delete through).
+
+**A fresh clone needs the ids first.** The three `access_*_id` variables have no default, so every
+plan and apply reads them from the gitignored `ids.auto.tfvars`. On a new clone or a new machine run
+`make infra-ids` before `make infra-plan` (the next paragraph does the same).
+
+**Lost state or a new machine.** Restore the age key ("New machine" below), then
+`make infra-init`, `make infra-ids` and `make infra-plan`: the import blocks adopt what exists.
+
+**Fallback.** Everything above can be done in the dashboards. After a manual change, `make infra-plan`
+shows it as drift; reconcile the `.tf` file to what you want and apply, or revert the dashboard.
 
 ## The sealed private data (`SELLER_SEALED`)
 
@@ -133,7 +205,7 @@ the new one. Rotate the same way if the secret itself leaks.
 
 **Decommission by 2026-11-09.** After the car is handed over (the car deadline, `seller.vehicle_deadline`, is the latest), deploy the end page
 (`seller.sale_over: true`) and pass the live checks in [decommission.md](decommission.md). Then delete the
-earlier Pages deployments and the Access application for `/seller`, and only then delete the `SELLER_SEALED`
+earlier Pages deployments and the Access application for `/seller` (Terraform: see the decommission runbook), and only then delete the `SELLER_SEALED`
 secret from both environments (`gh secret delete SELLER_SEALED --env production`, and `--env preview`).
 Do not redeploy afterwards: the deploy job needs the secrets until the end page is live.
 
@@ -234,7 +306,8 @@ Owner setup (dashboards; this repository cannot enable either). Both are in plac
   - On an alert, run `scripts/smoke.sh https://leaving-denver.pages.dev`, check Cloudflare
     Pages status, and roll back if a deploy caused it.
 - **Web Analytics.** Enabled in Workers & Pages > `leaving-denver` > Metrics > Web Analytics
-  (ADR-005: the repo ships no beacon, and no CSP blocks it).
+  (ADR-005: the repo ships no beacon, and no CSP blocks it). Terraform leaves this setting
+  alone (ADR-012), so it is still a dashboard step.
   - Pages injects the beacon only from the next deployment on. On 2026-10-01 a production
     redeploy (`gh workflow run ci.yml --ref main -f branch=main`) was needed before it
     appeared.

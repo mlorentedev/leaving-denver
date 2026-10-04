@@ -154,3 +154,14 @@ def test_the_sale_is_turned_off_with_the_car_not_on_a_fixed_day():
     by_nov_9 = " ".join(section("By Nov 9").split())
     assert "as soon as the car is handed over" in by_nov_9
     assert "no later than Nov 9" in by_nov_9
+
+
+def test_the_terraform_objects_go_before_the_token_that_removes_them_and_the_state_goes_last():
+    """ADR-012: the Access objects are destroyed with the Terraform token, so that token is
+    revoked after; the n8n digest's token is not in Terraform, and the state holds the email."""
+    by_nov_15 = section("By Nov 15")
+    assert by_nov_15.index("make infra-apply") < by_nov_15.index("Terraform token")
+    assert "3 to destroy" in by_nov_15 and "never the Pages project" in by_nov_15
+    assert "leaving-denver-analytics-read" in by_nov_15 and "not in Terraform" in by_nov_15
+    assert "terraform.tfstate*" in by_nov_15 and "owner_email" in by_nov_15
+    assert by_nov_15.index("Terraform token") < by_nov_15.index("terraform.tfstate*")
