@@ -27,8 +27,8 @@ description, tags and price. It covers:
   Craigslist in Spanish.** Spanish copy comes from each item's `es` overlay in
   `data/inventory.yaml`.
 - **The car.** Mileage, title status and VIN, and a payment line that is only the car's bank
-  payments from the data (cashier's check issued at the buyer's bank, or wire transfer). It
-  never offers cash, Venmo or Zelle; see [vehicle-sale.md](vehicle-sale.md).
+  payment from the data (a cashier's check issued at the buyer's bank, nothing else). It
+  never offers cash, Venmo, Zelle or a wire; see [vehicle-sale.md](vehicle-sale.md).
 - **Flaws** from the item's `flaws:`, listed after the good points.
 - **Limits.** The page shows the counts: Facebook title 100 and description 5000, Craigslist
   title 70, OfferUp title 60. A red count means the text is too long for that platform.
@@ -150,7 +150,7 @@ app, or at the bank for the car, and only for the exact price at local pickup.
 For household items, count cash when you receive it. Count in-person
 Venmo/Zelle only after the payment appears in **your own** app. Do not request
 deposits. Give the precise address
-only after confirming a time; disclose first-floor pickup, one flight of
+only after confirming a time; disclose second-floor pickup, one flight of
 stairs and no elevator before scheduling. Meet in daylight when possible,
 stage small items at the door, have another adult present for furniture, and
 do not let a stranger enter while you are alone. Meet car buyers away from

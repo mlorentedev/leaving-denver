@@ -19,7 +19,7 @@ INVENTORY = {
         },
         "payment_methods": {
             "household": ["Cash", "Venmo", "Zelle"],
-            "vehicle": ["Cashier's check issued at the buyer's bank", "wire transfer"],
+            "vehicle": ["Cashier's check issued at the buyer's bank"],
         },
     },
     "items": [

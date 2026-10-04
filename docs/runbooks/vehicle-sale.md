@@ -6,14 +6,12 @@ Owner decisions are marked **[OWNER]**. Everything else is procedure. Sources ar
 
 ## The rules
 
-**Payment.** Payment is only one of these two, and both are final once done right:
+**Payment.** Payment is a cashier's check issued at the buyer's bank, and nothing else (owner, 2026-10-03: no wire either, so the buyer never needs your account details):
 
 | Method | How | Why it cannot be clawed back |
 |---|---|---|
-| **Cashier's check (default)** | At the buyer's bank, the teller prints it in front of you, payable to you. Deposit it in your own account the same day. | It is the bank's own obligation, so the buyer has no right to stop payment. A "lost check" claim cannot take effect until 90 days after the check's date, and it has no effect on a check that has already been paid. The only real risk is a fake check, and watching the teller print it removes that. |
-| **Wire** | Sent from the buyer's bank to your account. It counts only once it shows as posted in *your* banking app. | Once credited, a domestic wire is final (UCC 4A), and a recall is only a request your bank may refuse. It means giving the buyer your account details. |
+| **Cashier's check** | At the buyer's bank, the teller prints it in front of you, payable to you. Deposit it in your own account the same day. | It is the bank's own obligation, so the buyer has no right to stop payment. A "lost check" claim cannot take effect until 90 days after the check's date, and it has no effect on a check that has already been paid. The only real risk is a fake check, and watching the teller print it removes that. |
 
-- If you both bank at the same bank, an in-branch transfer done at the counter is the simplest option.
 - **Never accept:**
   - a check the buyer brings already printed;
   - a personal check;
@@ -110,7 +108,6 @@ Plan it early in the window, not on its last day: Nov 9 is the limit, not the ta
 
 1. **At the buyer's bank:**
    - Watch the teller issue a cashier's check drawn on that bank, payable to you, for the balance.
-   - The alternative is a wire to your account. It only counts once it shows as *posted* in your own banking app, not as pending, and not in an email.
    - Never accept a cashier's check the buyer brings already printed. If you must, verify it by calling the issuing branch on a number you looked up yourself.
 2. **Only now, the title:**
    - Sign as seller, with the date, the price and the odometer reading from the dashboard that day.
@@ -166,7 +163,7 @@ credited toward the price. Balance due at handover: $________ .
 
 Handover: ____ / ____ / 2026 at ______ ; fallback date ____ / ____ / 2026.
 Balance paid at handover by cashier's check issued in the Seller's presence at
-the Buyer's bank, or by wire posted to the Seller's account before the title is signed.
+the Buyer's bank, before the title is signed.
 
 Condition: sold AS-IS. Pre-purchase inspection done on ____ / ____ / 2026 at
 ______________________. Odometer today: ________ mi; handover allowance: ______ mi.
@@ -185,7 +182,6 @@ Buyer signature / date:  ____________________
 ## Sources
 
 - UCC 3-411 and 3-312, cashier's checks (Cornell LII): https://www.law.cornell.edu/ucc/3/3-411 , https://www.law.cornell.edu/ucc/3/3-312
-- UCC 4A, wire finality: https://www.certifid.com/article/can-a-wire-transfer-be-reversed
 - Denver PD Safe Trade Zones (2019 launch; District 3 still listed in 2025): https://www.wpena.org/neighborhood-news/denver-police-dept-district-3-news-updates , https://denverite.com/2019/12/06/denver-police-are-creating-areas-for-you-to-safely-exchange-that-toaster-you-sold-on-craigslist/
 - SafeTrade Stations, Douglas County: https://www.safetradestations.com/safetrade-station-news/category/co-safety-zones
 - KBB, exchanging funds in a private sale: https://www.kbb.com/car-advice/exchange-funds-private-sale/

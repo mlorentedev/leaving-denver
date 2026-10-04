@@ -34,10 +34,10 @@ def test_seller_metadata(inventory):
 
 
 def test_the_car_takes_only_payments_that_cannot_be_clawed_back(inventory):
-    """Cashier's check or wire, nothing else (owner, 2026-09-30; docs/runbooks/vehicle-sale.md)."""
+    """A cashier's check issued at the buyer's bank, nothing else: no wire either (owner,
+    2026-10-03, narrowing 2026-09-30; docs/runbooks/vehicle-sale.md)."""
     assert inventory["seller"]["payment_methods"]["vehicle"] == [
         "Cashier's check issued at the buyer's bank",
-        "wire transfer",
     ]
     for code in ("en", "es"):
         labels = yaml.safe_load((BASE_DIR / "locales" / f"{code}.yaml").read_text(encoding="utf-8"))
@@ -45,10 +45,10 @@ def test_the_car_takes_only_payments_that_cannot_be_clawed_back(inventory):
             assert method in labels["payment_methods"], f"{code}: no label for {method}"
     car = next(i for i in inventory["items"] if i["category"] == "Vehicle")
     copy = " ".join([car["pickup_note"], car["es"]["pickup_note"]]).lower()
-    for banned in ("cash", "efectivo", "venmo", "zelle"):
+    for banned in ("cash", "efectivo", "venmo", "zelle", "wire", "transferencia"):
         assert not re.search(rf"\b{banned}\b", copy), f"the car's payment copy mentions {banned}"
-    assert "wire" in car["pickup_note"].lower()
-    assert "transferencia" in car["es"]["pickup_note"].lower()
+    assert "cashier's check" in car["pickup_note"].lower()
+    assert "cheque de caja" in car["es"]["pickup_note"].lower()
 
 
 # Only the car is paid by cashier's check, so a line that offers cash next to a cashier's check
@@ -249,11 +249,13 @@ def test_no_unbacked_vehicle_claims(path):
     assert not hits, f"{path.name} states a claim the seller cannot back: {hits}"
 
 
-# Owner correction, 2026-09-28: first floor, one flight of stairs, no elevator; the car was
-# bought used, so "everything was bought new" is false (#48).
+# Owner correction, 2026-09-28: one flight of stairs, no elevator; the car was bought used, so
+# "everything was bought new" is false (#48). The floor is the second in US terms (owner,
+# 2026-10-03): #78 carried the Spanish "primer piso" (one flight up, as in Spain and Mexico)
+# into English as "first floor", which in the US is the street level.
 # Strip natural English and Spanish denials, then reject any remaining elevator claim.
 ELEVATOR_DENIALS = re.compile(
-    r"\b(?:no elevators?(?: in the building)?|"
+    r"\b(?:no[- ]elevators?(?: in the building)?|"
     r"(?:do not|don't|does not|doesn't) have (?:an? )?elevators?|"
     r"sin (?:ascensor|elevador)(?:es)?|"
     r"no hay (?:ascensor|elevador)(?:es)?(?: disponible(?:s)?)?|"
@@ -261,7 +263,7 @@ ELEVATOR_DENIALS = re.compile(
     re.I,
 )
 WRONG_PICKUP_FACTS = re.compile(
-    r"elevators?|(?:ascensor|elevador)(?:es)?|ground floor|second floor|segundo piso|"
+    r"elevators?|(?:ascensor|elevador)(?:es)?|ground[- ]floor|first[- ]floor|segundo piso|"
     r"everything was bought new",
     re.I,
 )
@@ -305,13 +307,17 @@ def test_pickup_guard_allows_spanish_elevator_denials(fact):
 
 def test_pickup_floor_matches_owner(inventory):
     seller = inventory["seller"]
-    assert seller["pickup_summary"] == "First floor, one flight of stairs, no elevator"
-    assert "First floor, one flight of stairs, no elevator." in seller["pickup"]
+    assert seller["pickup_summary"] == "Second floor, one flight of stairs, no elevator"
+    assert "Second floor, one flight of stairs, no elevator." in seller["pickup"]
     assert seller["es"]["pickup_summary"] == "Primer piso, un tramo de escaleras, sin ascensor"
     assert "Primer piso, un tramo de escaleras, sin ascensor." in seller["es"]["pickup"]
 
 
-@pytest.mark.parametrize("path", CLAIM_SOURCES, ids=lambda p: p.name)
+# The runbooks tell the seller what to disclose before a pickup, so they are checked too.
+PICKUP_SOURCES = CLAIM_SOURCES + sorted((BASE_DIR / "docs" / "runbooks").glob("*.md"))
+
+
+@pytest.mark.parametrize("path", PICKUP_SOURCES, ids=lambda p: p.name)
 def test_no_stale_or_unbacked_pickup_facts(path):
     hits = wrong_pickup_facts(path.read_text(encoding="utf-8"))
     assert not hits, f"{path.name} states a wrong pickup fact: {hits}"

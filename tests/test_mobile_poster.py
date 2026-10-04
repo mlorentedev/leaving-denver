@@ -9,7 +9,7 @@ from leaving_denver import site_builder
 ROOT = Path(__file__).resolve().parents[1]
 # Nothing the private tool owns may reach /seller/: floors, reserve, notes, the PIN, the phone.
 # The phone's digits come from the SELLER_PHONE the tests set; "floor" alone is not listed
-# because "First floor, one flight of stairs" is public pickup copy.
+# because "Second floor, one flight of stairs" is public pickup copy.
 PRIVATE_MARKERS = (
     "private sentinel",
     "firm_floor_price",
