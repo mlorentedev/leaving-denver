@@ -119,7 +119,8 @@ the next `make infra-plan` adopts what exists again.
   `scripts/infra-plan-guard.py`): an import-only plan goes through, a create or an update needs
   `CHANGES=1`, a plan that only deletes needs `DESTROY=1` (the decommission step), and a
   replacement is refused always (a replaced Access application has a new audience and closes
-  `/seller/`). An `update` whose before and after are identical, with nothing unknown, is a
+  `/seller/`). Deleting the Pages project is refused with every switch (ADR-008), so that does not rest on
+  `prevent_destroy` alone. An `update` whose before and after are identical, with nothing unknown, is a
   change in sensitivity marking only (the sensitive owner email marks the whole policy
   `include`) and counts as the import it is: the owner's real first plan showed exactly that.
 - `infra-fmt` (format check and `validate`) needs no credential. `make check` runs it when

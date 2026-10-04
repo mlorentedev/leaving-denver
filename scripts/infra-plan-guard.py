@@ -14,6 +14,8 @@ Prints addresses and actions only, never a value: the plan holds the owner's ema
   and create) never passes: a replaced Access application has a new audience and closes /seller/
   until ACCESS_AUD is set again.
 
+- Deleting the Pages project never passes, with any switch (ADR-008).
+
 Exit 0 to go on, 1 to refuse, 2 for input it cannot read (which refuses too).
 """
 
@@ -21,6 +23,7 @@ import json
 import sys
 
 QUIET = (["no-op"], ["read"])
+PAGES_PROJECT = "cloudflare_pages_project."
 
 
 def has_unknown(value) -> bool:
@@ -60,6 +63,15 @@ def main(argv: list[str]) -> int:
 
     for address, actions in pending:
         print(f"infra-apply: {address} would {'+'.join(actions)}", file=sys.stderr)
+    kept = [a for a, actions in pending if "delete" in actions and PAGES_PROJECT in a]
+    if kept:
+        print(
+            f"infra-apply: refusing: the plan would delete {', '.join(kept)}. ADR-008 keeps the "
+            "Pages project: a deleted pages.dev name can be claimed by anyone. No switch allows "
+            "it here; this does not rest on prevent_destroy, which an edit of main.tf removes.",
+            file=sys.stderr,
+        )
+        return 1
     replaced = [a for _, a in pending if "delete" in a and len(a) > 1]
     only_deletes = pending and all(a == ["delete"] for _, a in pending)
     if replaced or (

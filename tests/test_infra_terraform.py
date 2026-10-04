@@ -646,3 +646,68 @@ def test_ids_warns_when_the_policy_is_not_a_reusable_one(tmp_path):
     assert "not a reusable policy" in done.stderr
     quiet, _ = run_ids(tmp_path, access_state())
     assert "warning" not in quiet.stderr
+
+
+GUARD = ROOT / "scripts/infra-plan-guard.py"
+
+
+def guard(stdin: str, *flags: str):
+    return subprocess.run(
+        [shutil.which("python3") or "python3", str(GUARD), *flags],
+        input=stdin,
+        capture_output=True,
+        text=True,
+    )
+
+
+@pytest.mark.parametrize(
+    "stdin",
+    ["", "not json", "{}", '{"format_version": "1.2"}', '{"resource_changes": null}'],
+    ids=["empty", "malformed", "empty object", "no resource_changes", "null resource_changes"],
+)
+def test_the_guard_does_not_read_a_plan_without_resource_changes_as_an_empty_one(stdin):
+    """A show that failed or printed something else must not look like "nothing to change"."""
+    done = guard(stdin, "--allow-changes", "--allow-destroy")
+    assert done.returncode == 2
+    assert "could not read the saved plan" in done.stderr
+
+
+def test_the_guard_passes_a_plan_that_lists_no_changes():
+    assert guard('{"resource_changes": []}').returncode == 0
+
+
+@pytest.mark.parametrize(
+    "address", ["cloudflare_pages_project.site", "module.x.cloudflare_pages_project.site"]
+)
+def test_the_guard_never_lets_the_pages_project_be_deleted(address):
+    """ADR-008 keeps the project: a deleted pages.dev name can be claimed by anyone. That must
+    not rest on `prevent_destroy` alone, which an edit of the .tf file removes."""
+    plan = json.dumps(
+        {"resource_changes": [{"address": address, "change": {"actions": ["delete"]}}]}
+    )
+    done = guard(plan, "--allow-changes", "--allow-destroy")
+    assert done.returncode == 1
+    assert "ADR-008" in done.stderr and address in done.stderr
+    both = json.dumps(
+        {
+            "resource_changes": [
+                {"address": address, "change": {"actions": ["delete"]}},
+                {
+                    "address": "cloudflare_zero_trust_access_application.seller",
+                    "change": {"actions": ["delete"]},
+                },
+            ]
+        }
+    )
+    assert guard(both, "--allow-destroy").returncode == 1, "not even among other deletes"
+    only_access = json.dumps(
+        {
+            "resource_changes": [
+                {
+                    "address": "cloudflare_zero_trust_access_application.seller",
+                    "change": {"actions": ["delete"]},
+                }
+            ]
+        }
+    )
+    assert guard(only_access, "--allow-destroy").returncode == 0
