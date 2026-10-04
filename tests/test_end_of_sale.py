@@ -138,6 +138,14 @@ def test_no_file_names_an_item(end_dir):
     assert "INVENTORY" not in text
 
 
+def test_the_end_pages_collect_nothing(end_dir):
+    """The sale metrics (ADR-011) end with the sale: no end page carries the beacon, so the
+    phone-leak guard that is skipped in this mode has nothing to guard."""
+    text = everything_under(end_dir)
+    assert "sendBeacon" not in text
+    assert "/api/hit" not in text
+
+
 def test_nothing_but_the_end_page_and_its_plumbing_is_published(end_dir):
     assert files_under(end_dir) == ALLOWED
 
