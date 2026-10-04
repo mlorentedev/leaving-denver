@@ -352,6 +352,7 @@ def access_state(**over):
             {"id": "44444444-4444-4444-4444-444444444444", "domain": "kuma.example.test"},
         ],
         "idps": [{"id": IDP, "type": "onetimepin"}, {"id": "x", "type": "github"}],
+        "policies": [{"id": POLICY}],
     }
     state.update(over)
     return state
@@ -381,7 +382,7 @@ def run_ids(tmp_path, state):
                 sys.exit(22)
             print(json.dumps({{"success": True, "result": {{"name": "team"}}}}))
         else:
-            key = {{"apps": "apps", "identity_providers": "idps"}}[name]
+            key = {{"apps": "apps", "identity_providers": "idps", "policies": "policies"}}[name]
             print(json.dumps({{"success": True, "result": state[key]}}))
         PY
         """,
@@ -447,3 +448,15 @@ def test_ids_stops_unless_each_object_is_found_exactly_once(tmp_path, change):
     assert done.returncode != 0
     assert done.stdout == ""
     assert "expected exactly one" in done.stderr
+
+
+@needs_jq
+def test_ids_warns_when_the_policy_is_not_a_reusable_one(tmp_path):
+    """The import block adopts a reusable policy. An application-scoped one would only fail at
+    the import, so the owner is told here and the ids still come out."""
+    done, _ = run_ids(tmp_path, access_state(policies=[]))
+    assert done.returncode == 0, done.stderr
+    assert f'access_policy_id = "{POLICY}"' in done.stdout
+    assert "not a reusable policy" in done.stderr
+    quiet, _ = run_ids(tmp_path, access_state())
+    assert "warning" not in quiet.stderr

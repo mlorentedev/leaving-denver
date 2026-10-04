@@ -111,7 +111,9 @@ The Pages project and the Access objects of "Owner-only mobile listing copy" are
    against the live one: `1 to import, 0 to add, 0 to change, 0 to destroy`. The Access objects
    were not, because the repository's own token cannot read them, so expect to reconcile some
    attributes the first time: the application's name, its session duration, the order of its
-   destinations. Edit `access.tf` to match the live object (never apply a change to make the
+   destinations, `allowed_idps` (the dashboard's "all providers" comes back empty) and
+   `auto_redirect_to_identity`. If `make infra-ids` warns that the policy is not reusable, make it
+   reusable in the dashboard first: the import adopts a reusable policy only. Edit `access.tf` to match the live object (never apply a change to make the
    dashboard match the file on the first run) and plan again until it shows nothing to change.
    The plan hides the email, but do not paste it anywhere. Check the audience too:
    `terraform -chdir=infra/terraform/cloudflare output -raw access_aud` must equal the

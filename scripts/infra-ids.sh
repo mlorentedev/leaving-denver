@@ -45,6 +45,11 @@ app_id=$(only "Access application for $HOSTNAME_PART" $(jq -r --arg host "$HOSTN
   | .id' <<<"$apps"))
 policy_id=$(only "policy on that application" $(jq -r --arg app "$app_id" '
   .result[] | select(.id == $app) | .policies[]?.id' <<<"$apps"))
+# imports.tf adopts the policy as a reusable one. A policy that is scoped to the application
+# alone does not answer there, so say so now rather than at the import.
+if reusable=$(get policies) && ! jq -e --arg id "$policy_id" 'any(.result[]; .id == $id)' >/dev/null <<<"$reusable"; then
+  echo "infra-ids: warning: policy $policy_id is not a reusable policy (it is scoped to the application): make it reusable in the dashboard, or define it inline in access.tf and drop its import block" >&2
+fi
 idps=$(get identity_providers) || fail "could not list the identity providers"
 idp_id=$(only "one-time PIN identity provider" $(jq -r '
   .result[] | select(.type == "onetimepin") | .id' <<<"$idps"))
