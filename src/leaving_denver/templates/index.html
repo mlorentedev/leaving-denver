@@ -591,7 +591,11 @@
       const frame = document.getElementById('modalPhotoFrame');
       let start = null;
       frame.addEventListener('pointerdown', e => { start = e.isPrimary ? { x: e.clientX, y: e.clientY } : null; });
-      frame.addEventListener('pointercancel', () => { start = null; });
+      // A mouse has no implicit capture: a press released off the photo must not leave a start
+      // behind for a later drag that ends on it. A finger keeps its capture, so no leave fires.
+      const forget = () => { start = null; };
+      frame.addEventListener('pointercancel', forget);
+      frame.addEventListener('pointerleave', forget);
       frame.addEventListener('pointerup', e => {
         if (!start) return;
         const dx = e.clientX - start.x;
@@ -602,6 +606,7 @@
       });
       document.getElementById('itemSheet').addEventListener('keydown', e => {
         if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+        if (e.target.closest('input, textarea, select, [contenteditable]')) return;
         if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
         e.preventDefault();
         stepPhoto(e.key === 'ArrowRight' ? 1 : -1);

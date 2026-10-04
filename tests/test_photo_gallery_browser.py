@@ -59,6 +59,33 @@ def test_the_arrows_step_and_wrap(tmp_path, page):
         assert at(state(), 0)
 
 
+def test_a_real_press_on_an_arrow_steps_once(tmp_path):
+    # Pointer handlers sit on the frame around the arrows: a press on one is a click, not a swipe.
+    with open_page(tmp_path, "index.html") as browser:
+        state = open_car(browser)
+        point = browser.run(
+            "const r = document.getElementById('modalNextPhoto').getBoundingClientRect();"
+            "return [r.left + r.width / 2, r.top + r.height / 2];"
+        )
+        browser.drag(tuple(point), tuple(point))
+        assert at(state(), 1)
+        browser.swipe(tuple(point), tuple(point))
+        assert at(state(), 2)
+
+
+def test_a_mouse_press_released_off_the_photo_leaves_no_swipe_behind(tmp_path):
+    with open_page(tmp_path, "index.html") as browser:
+        state = open_car(browser)
+        x, y, width = browser.run(FRAME)
+        title = browser.run(
+            "const r = document.getElementById('modalTitle').getBoundingClientRect();"
+            "return [r.left + 5, r.top + r.height / 2];"
+        )
+        browser.drag((x, y), tuple(title))
+        browser.drag((x - width / 3, title[1]), (x + width / 3, y))
+        assert at(state(), 0)
+
+
 def test_the_arrow_keys_step_through_the_photos(tmp_path):
     with open_page(tmp_path, "index.html") as browser:
         state = open_car(browser)
@@ -101,7 +128,8 @@ def test_an_item_with_one_photo_shows_no_arrows(tmp_path):
         single = browser.run("return (INVENTORY.items.find(i => i.photos.length === 1) || {}).id;")
         if not single:
             pytest.skip("no item has exactly one photo")
-        state = open_car(browser, single)()
-        assert state["arrows"] == [False, False]
+        state = open_car(browser, single)
+        assert state()["arrows"] == [False, False]
         browser.key("ArrowRight", 39)
-        assert at(open_car(browser, single)(), 0)
+        assert at(state(), 0)
+        assert browser.run("return sheets();") == ["itemSheet"]
