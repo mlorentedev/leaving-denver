@@ -36,7 +36,8 @@ original: Original
 details: Details & Specifications
 included: What's included
 pickup_note: Pickup note
-text_about_this: Text about this
+text_about_this: I want it — text me
+text_about_vehicle: I'm interested — text me
 close: Close
 contact_heading: Text me from your phone
 contact_hint: "Suggested message:"
@@ -52,16 +53,19 @@ open_messages: Open in Messages instead
 see_included: See what's included
 free: Free
 separately: Separately
-text_about_bundle: Text about this bundle
+text_about_bundle: I want this bundle — text me
 unavailable: No longer available
 availability_line: "{available} of {total} available"
 sold_count: "{n} sold"
 default_pickup: Pickup in Denver Tech Center (DTC). Buyer must self-load.
 sms_generic: Hi! I saw your DTC Moving Sale catalog and had a question.
-sms_bundle_prefix: Hi! I am interested in the
+sms_bundle_prefix: Hi! I want the
 sms_bundle_word: bundle
-sms_item_prefix: Hi! I am interested in inspecting the
+sms_item_prefix: Hi! I want the
+sms_vehicle_prefix: Hi! I'm interested in the
 sms_in_dtc: in DTC.
+sms_pickup_ask: When could I pick it up?
+sms_vehicle_ask: When could I see it?
 verify_heading: Verify it yourself
 verify_intro: "Check the car without taking my word for it: paste the VIN into these official sites."
 verify_vin: VIN
