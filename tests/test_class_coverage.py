@@ -27,8 +27,8 @@ PAGES = {
 }
 SOURCES = {"seller.mjs": ROOT / "src" / "leaving_denver" / "assets" / "seller.mjs"}
 
-# Classes that only name elements for scripts or for the template's own <style>;
-# they have no Tailwind rule on purpose.
+# Classes that only name elements for scripts or for a page's own stylesheet (the flyer's
+# flyer.css); they have no Tailwind rule on purpose.
 HOOKS = {
     "bundle-card",
     "bundle-sheet",
@@ -36,6 +36,7 @@ HOOKS = {
     "filter-btn",
     "item-card",
     "platform-tab",
+    "qr",
     "week-tab",
 }
 

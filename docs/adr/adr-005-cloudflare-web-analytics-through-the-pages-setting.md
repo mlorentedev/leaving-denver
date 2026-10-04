@@ -15,7 +15,9 @@ created: "2026-09-30"
 
 Accepted. Amended by ADR-007: `/seller/*` carries its own Content-Security-Policy, which
 blocks the beacon there and only there, because that page holds decrypted private data.
-`test_no_csp_stops_the_cloudflare_beacon` checks every other path.
+`test_no_csp_stops_the_cloudflare_beacon` checks every other path. Amended by ADR-010: the
+public pages now carry a policy, which allows `static.cloudflareinsights.com` in `script-src` and
+`cloudflareinsights.com` in `connect-src`, as negative consequence 1 below required.
 
 ## Date
 

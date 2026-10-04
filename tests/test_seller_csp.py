@@ -125,10 +125,14 @@ def test_a_response_with_no_body_or_immutable_headers_still_gets_the_policy(serv
     assert served["immutable"]["status"] == 302
 
 
-def test_the_policy_is_in_the_middleware_not_in_the_static_headers():
-    from leaving_denver.site_builder import PAGES_HEADERS
+def test_the_seller_policy_is_in_the_middleware_not_in_the_static_headers(served):
+    """The static headers carry the public policy (ADR-010) and none of the seller's: a response
+    through the middleware must never hold two policies, which a browser enforces together."""
+    from leaving_denver.site_builder import pages_headers
 
-    assert "Content-Security-Policy" not in PAGES_HEADERS
+    static = pages_headers(["'sha256-x'"])
+    assert served["seller"]["csp"] not in static
+    assert "connect-src 'none'" not in static
 
 
 # The page runs under exactly this policy

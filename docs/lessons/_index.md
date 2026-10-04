@@ -40,3 +40,4 @@ tags: [lessons, index, docs, leaving-denver]
 | [lesson-025](lesson-025-pages-answers-a-missing-file-with-the-home-page.md) | Pages Answers a Missing File With the Home Page | 2026-10-01 | [cloudflare, ci, smoke, testing] |
 | [lesson-026](lesson-026-one-404-page-is-served-at-every-missing-url.md) | One 404 Page Is Served at Every Missing URL | 2026-10-01 | [cloudflare, html, testing, i18n] |
 | [lesson-027](lesson-027-one-date-was-three-facts.md) | One Date Was Three Facts | 2026-10-02 | [data, copy, testing, yaml] |
+| [lesson-028](lesson-028-two-policies-are-an-intersection-and-chrome-logs-unknown-features.md) | Two Policies Are an Intersection, and Chrome Logs Unknown Permissions-Policy Features | 2026-10-03 | [csp, cloudflare, headers, lighthouse, testing] |

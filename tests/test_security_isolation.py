@@ -145,6 +145,7 @@ def test_template_sees_only_sanitized_data(tmp_path, monkeypatch):
         "asset_prefix",
         "build_sha",
         "language_links",
+        "alternates",
         "seller",
         "copy",
         "vehicle",

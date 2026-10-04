@@ -148,8 +148,18 @@ def test_the_qr_is_labelled_for_a_screen_reader(flyer):
 # AC1: the page.
 
 
-def test_the_page_is_one_letter_sheet_in_print(flyer):
-    css = "".join(re.findall(r"<style>(.*?)</style>", flyer, flags=re.DOTALL))
+FLYER_CSS = ROOT / "src" / "leaving_denver" / "assets" / "flyer.css"
+
+
+def test_the_page_takes_its_rules_from_a_file_beside_it_not_an_inline_style(flyer, public_dir):
+    """An inline <style> would need `style-src 'unsafe-inline'` (ADR-010)."""
+    assert "<style" not in flyer
+    assert '<link rel="stylesheet" href="flyer.css">' in head_of(flyer)
+    assert (public_dir / "flyer" / "flyer.css").read_text() == FLYER_CSS.read_text()
+
+
+def test_the_page_is_one_letter_sheet_in_print():
+    css = FLYER_CSS.read_text(encoding="utf-8")
     page_rule = re.search(r"@page\s*\{([^}]*)\}", css).group(1)
     assert re.search(r"size:\s*letter\b", page_rule)
     assert re.search(r"margin:\s*0\.5in\b", page_rule)
@@ -164,8 +174,11 @@ def test_the_page_needs_no_script_image_or_other_host(flyer):
 
 def test_the_page_resets_the_catalogs_bottom_padding(flyer):
     # public.css pads <body> 6rem for the sticky bar, unlayered, so a utility would lose to it
-    # (lesson-020): on paper that padding would push the page onto a second sheet.
-    css = "".join(re.findall(r"<style>(.*?)</style>", flyer, flags=re.DOTALL))
+    # (lesson-020): on paper that padding would push the page onto a second sheet. flyer.css
+    # is linked after styles.css, so its rule wins on equal specificity.
+    css = FLYER_CSS.read_text(encoding="utf-8")
+    head = head_of(flyer)
+    assert head.index("styles.css") < head.index("flyer.css")
     assert re.search(r"body\s*\{[^}]*padding:\s*0\b", css)
 
 

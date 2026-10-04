@@ -119,7 +119,10 @@ def test_reopening_starts_at_the_first_photo(tmp_path):
     with open_page(tmp_path, "index.html") as browser:
         open_car(browser)
         browser.key("ArrowRight", 39)
-        browser.run("closeModal(); await until(() => !sheets().length);")
+        browser.run(
+            "document.querySelector('#itemSheet [data-close-sheet]').click();"
+            "await until(() => !sheets().length);"
+        )
         assert at(open_car(browser)(), 0)
 
 

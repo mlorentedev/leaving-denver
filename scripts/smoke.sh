@@ -28,6 +28,42 @@ robots_txt() {
   fail "robots.txt is served as a page, not as robots rules"
 }
 
+# The security headers (ADR-010), read where buyers reach the site. The policy is the build's, so
+# every inline script of the page as served must be in it: an edge that rewrote the page would
+# otherwise leave a deployment whose scripts a browser refuses to run. The wildcard CORS header
+# Pages adds is detached by `_headers`, but that is Cloudflare's to honour and nothing offline
+# shows it, so a deployment that still sends it is reported and not failed.
+security_headers() {
+  local headers value stale
+  headers=$(get -I "$url/") || fail "$url/ headers unreachable"
+  header() { { grep -i "^$1:" <<<"$headers" || true; } | head -1 | cut -d: -f2- | tr -d '\r' | sed 's/^ //'; }
+  grep -qi '^x-content-type-options: nosniff' <<<"$headers" || fail "_headers not applied"
+  [ "$(header Strict-Transport-Security)" = "max-age=31536000; includeSubDomains" ] \
+    || fail "Strict-Transport-Security is not served as max-age=31536000; includeSubDomains"
+  [ -n "$(header Permissions-Policy)" ] || fail "Permissions-Policy is not served"
+  [ "$(header Cross-Origin-Opener-Policy)" = "same-origin" ] \
+    || fail "Cross-Origin-Opener-Policy is not served as same-origin"
+  value=$(header Content-Security-Policy)
+  [ -n "$value" ] || fail "Content-Security-Policy is not served"
+  grep -q "script-src 'self' https://static.cloudflareinsights.com" <<<"$value" \
+    || fail "the Content-Security-Policy does not let the Web Analytics beacon in (ADR-005)"
+  stale=$(printf '%s' "$page" | python3 -c '
+import base64, hashlib, re, sys
+for attrs, body in re.findall(r"<script\b([^>]*)>(.*?)</script>", sys.stdin.read(), re.S):
+    kind = re.search(r"\btype=\"([^\"]*)\"", attrs)
+    if "src=" in attrs or (kind and kind.group(1) not in ("module", "text/javascript")):
+        continue
+    digest = hashlib.sha256(body.replace("\r\n", "\n").encode("utf-8")).digest()
+    source = "\x27sha256-" + base64.b64encode(digest).decode() + "\x27"
+    if source not in sys.argv[1]:
+        print(source)
+' "$value") || fail "could not read the inline scripts of $url/"
+  [ -z "$stale" ] || fail "the Content-Security-Policy does not list an inline script of $url/ ($stale)"
+  [ -z "$(header Access-Control-Allow-Origin)" ] \
+    || echo "SMOKE WARN: Access-Control-Allow-Origin is still sent; Pages did not honour the detach" >&2
+  return 0
+}
+
 # A fresh deployment can take a few seconds to answer everywhere.
 for _ in 1 2 3 4 5 6; do
   code=$(curl -s -o /dev/null -w '%{http_code}' "$url/") && [ "$code" = 200 ] && break
@@ -82,7 +118,7 @@ if grep -Fq 'data-role="sale-over"' <<<"$page"; then
   }
   redirected /i/anything/ /
   redirected /es/i/anything/ /es/
-  get -I "$url/" | grep -qi '^x-content-type-options: nosniff' || fail "_headers not applied"
+  security_headers
   robots=$(robots_txt) || exit 1  # robots_txt has said why; do not lean on set -e
   grep -A1 -x 'User-agent: \*' <<<"$robots" | grep -qx 'Disallow: /' || fail "robots.txt is permissive"
   for path in /inventory.json /poster_assistant.html /private/inventory.json; do
@@ -149,7 +185,7 @@ for item in $items; do
   done
 done
 [ -n "$pictured" ] || fail "no share page has an og:image"
-get -I "$url/" | grep -qi '^x-content-type-options: nosniff' || fail "_headers not applied"
+security_headers
 
 # An unknown path is a 404 (not_found above), so the body is the not-found page, never a private file.
 for path in /inventory.json /poster_assistant.html /private/inventory.json; do

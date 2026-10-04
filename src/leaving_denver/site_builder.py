@@ -13,6 +13,8 @@ With `seller.sale_over: true` the public build is one "the sale is over" page pe
 instead (OPS-011), and the seller tool is not built.
 """
 
+import base64
+import hashlib
 import json
 import os
 import re
@@ -472,15 +474,105 @@ def for_sale(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 # Cloudflare Pages reads _headers from the output root. Photos keep their names
 # when replaced, so they get a day of cache rather than `immutable`.
-PAGES_HEADERS = """/*
+#
+# The public pages' security headers (ADR-010). /seller/* is also matched by `/*`: its own
+# Content-Security-Policy is set by functions/_middleware.js on the response (ADR-007), and the
+# static policy carries none of its directives.
+HSTS = "max-age=31536000; includeSubDomains"
+# Powerful features no page of the site uses are denied. The share button (web-share) and every
+# "copy" button (clipboard-write) are allowed for the page's own origin, which is their default;
+# Chrome logs an error for a feature name it does not know on its platform, and web-share and
+# bluetooth are unknown on desktop Linux, which is where Lighthouse runs, so neither is named.
+DENIED_FEATURES = (
+    "accelerometer",
+    "autoplay",
+    "browsing-topics",
+    "camera",
+    "display-capture",
+    "geolocation",
+    "gyroscope",
+    "hid",
+    "idle-detection",
+    "magnetometer",
+    "microphone",
+    "midi",
+    "payment",
+    "publickey-credentials-get",
+    "screen-wake-lock",
+    "serial",
+    "usb",
+    "xr-spatial-tracking",
+)
+KEPT_FEATURES = ("clipboard-write",)
+PERMISSIONS_POLICY = ", ".join(
+    [f"{feature}=()" for feature in DENIED_FEATURES]
+    + [f"{feature}=(self)" for feature in KEPT_FEATURES]
+)
+# Cloudflare Web Analytics is switched on in the Pages dashboard and injects its beacon at the
+# edge (ADR-005): the policy has to let it load and report.
+BEACON_SCRIPT_SRC = "https://static.cloudflareinsights.com"
+BEACON_CONNECT_SRC = "https://cloudflareinsights.com"
+SCRIPT_TAG = re.compile(r"<script\b([^>]*)>(.*?)</script>", re.S)
+
+
+def inline_script_hashes(root: Path) -> list[str]:
+    """The CSP source (`'sha256-...'`) of every script a browser would run from a page of
+    `root`, as the build emitted it. /seller/ is left out: the middleware gives it a policy of
+    its own. The script's exact text counts, whitespace included."""
+    hashes = set()
+    for page in root.rglob("*.html"):
+        if "seller" in page.relative_to(root).parts:
+            continue
+        for attrs, body in SCRIPT_TAG.findall(page.read_text(encoding="utf-8")):
+            kind = re.search(r'\btype="([^"]*)"', attrs)
+            if "src=" in attrs or (kind and kind.group(1) not in ("module", "text/javascript")):
+                continue  # an external file, or a data block the browser never runs
+            digest = hashlib.sha256(body.replace("\r\n", "\n").encode("utf-8")).digest()
+            hashes.add(f"'sha256-{base64.b64encode(digest).decode()}'")
+    return sorted(hashes)
+
+
+def content_security_policy(script_hashes: list[str]) -> str:
+    """One policy for every public path. Scripts: the site's own files, the beacon, and exactly
+    the inline scripts the build wrote. Nothing inline in styles, nothing from elsewhere in
+    images and fonts, no framing, no forms, no plugins, no `<base>`."""
+    return "; ".join(
+        [
+            "default-src 'none'",
+            " ".join(["script-src 'self'", BEACON_SCRIPT_SRC, *script_hashes]),
+            "style-src 'self'",
+            "img-src 'self'",
+            "font-src 'self'",
+            f"connect-src 'self' {BEACON_CONNECT_SRC}",
+            "frame-ancestors 'none'",
+            "base-uri 'none'",
+            "object-src 'none'",
+            "form-action 'none'",
+        ]
+    )
+
+
+def pages_headers(script_hashes: list[str]) -> str:
+    return f"""/*
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
   X-Robots-Tag: noindex
+  Strict-Transport-Security: {HSTS}
+  Permissions-Policy: {PERMISSIONS_POLICY}
+  Cross-Origin-Opener-Policy: same-origin
+  Content-Security-Policy: {content_security_policy(script_hashes)}
+  ! Access-Control-Allow-Origin
 
 /catalog/*
   Cache-Control: public, max-age=86400
 """
+
+
+def write_headers() -> None:
+    """`_headers`, the last file of a build: its policy lists the inline scripts of every page
+    already written, so a page made after it would run nothing."""
+    PUBLIC_HEADERS.write_text(pages_headers(inline_script_hashes(DIST_DIR)), encoding="utf-8")
 
 
 # Link-preview fetchers (ADR-004). They build the card a shared link shows and index
@@ -545,6 +637,12 @@ def item_description(item: dict[str, Any], t: dict[str, Any]) -> str:
 def locale_path(locale: str) -> str:
     """A locale's path under the site root: "" for English, "es/" for Spanish."""
     return "" if locale == "en" else f"{locale}/"
+
+
+def alternate_urls(origin: str) -> dict[str, str]:
+    """Each language's page as an absolute URL: a relative hreflang is invalid and search
+    engines and Lighthouse ignore it. The English page is also the `x-default`."""
+    return {locale: f"{origin}/{locale_path(locale)}" for locale in ("en", "es")}
 
 
 def og_common(locale: str) -> dict[str, Any]:
@@ -1006,6 +1104,7 @@ def build_end_site() -> None:
             locale=locale,
             t=translations,
             og=og,
+            alternates=alternate_urls(origin),
             asset_prefix="" if locale == "en" else "../",
             language_links=(
                 {"en": "index.html", "es": "es/"} if locale == "en" else {"en": "../", "es": "./"}
@@ -1015,10 +1114,10 @@ def build_end_site() -> None:
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(html, encoding="utf-8")
     PUBLIC_ROBOTS_TXT.write_text(ROBOTS_TXT, encoding="utf-8")
-    PUBLIC_HEADERS.write_text(PAGES_HEADERS, encoding="utf-8")
     (DIST_DIR / "_redirects").write_text(END_REDIRECTS, encoding="utf-8")
     write_not_found()
     sweep_to_end_site()
+    write_headers()
 
 
 # The building flyer (FEAT-010): one printable page whose QR code carries its own UTM tags (ADR-005),
@@ -1059,6 +1158,7 @@ def write_flyer(public_data: dict[str, Any], origin: str) -> None:
     target = DIST_DIR / "flyer" / "index.html"
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(html, encoding="utf-8")
+    shutil.copy2(Path(__file__).parent / "assets" / "flyer.css", target.parent / "flyer.css")
 
 
 def build_public_site(full_data: dict[str, Any]) -> None:
@@ -1104,6 +1204,7 @@ def build_public_site(full_data: dict[str, Any]) -> None:
             contact_json=contact_json,
             seller=localize_seller(seller, full_data, locale, translations),
             og=og,
+            alternates=alternate_urls(origin),
             copy=page_copy(sections["vehicle"], sections["items"]),
             chips=category_chips(sections["items"], translations["categories"]),
             language_links=(
@@ -1123,14 +1224,14 @@ def build_public_site(full_data: dict[str, Any]) -> None:
 
     PUBLIC_ROBOTS_TXT.write_text(ROBOTS_TXT, encoding="utf-8")
 
-    PUBLIC_HEADERS.write_text(PAGES_HEADERS, encoding="utf-8")
-
     write_not_found()
 
     # Photo sync copies every content/photos/<id>/, so drop the unpublished ones,
     # including any left from a build when the item was still published.
     for item_id in unpublished_ids(full_data):
         shutil.rmtree(DIST_DIR / "catalog" / item_id, ignore_errors=True)
+
+    write_headers()
 
 
 # Text no public page may carry: the plaintext of the private data. The sealed envelope has none

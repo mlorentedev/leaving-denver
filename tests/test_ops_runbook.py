@@ -212,10 +212,15 @@ def test_no_csp_stops_the_cloudflare_beacon():
     beacon at the edge. A CSP added later would silently break it, so it must allow it.
 
     Every path but /seller/* (ADR-007): the static headers and the page templates may carry no
-    policy that blocks it, and the middleware sends none outside /seller/."""
-    from leaving_denver.site_builder import PAGES_HEADERS
+    policy that blocks it, and the middleware sends none outside /seller/. The public policy
+    (ADR-010) is read from the headers file the build wrote, as Pages would serve it, and must
+    exist: a build that dropped it would pass this vacuously."""
+    from leaving_denver.site_builder import pages_headers
 
-    policies = re.findall(r"Content-Security-Policy:\s*(.+)", PAGES_HEADERS, flags=re.IGNORECASE)
+    policies = re.findall(
+        r"Content-Security-Policy:\s*(.+)", pages_headers([]), flags=re.IGNORECASE
+    )
+    assert policies, "the public pages have no policy (ADR-010)"
     for template in TEMPLATES.rglob("*.html"):
         policies += csp_meta_policies(template.read_text(encoding="utf-8"))
     for policy in policies:

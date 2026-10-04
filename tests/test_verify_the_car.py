@@ -96,7 +96,7 @@ def test_the_checks_open_from_a_button_on_the_car_card_and_are_not_inline(locale
     assert heading in text_of(button.group(1))
     # On the car card's action row: after its specs button, before its payment line.
     assert (
-        html.index("openModal('" + CAR_ID + "')")
+        html.index(f'data-open-item="{CAR_ID}"')
         < button.start()
         < html.index('data-role="vehicle-payment"')
     )
@@ -113,11 +113,11 @@ def test_the_car_card_offers_only_specs_and_verify(locale):
     """Owner decision, 2026-10-01: no "Schedule Test Drive" on the card. The sticky bar and the
     details sheet already text the seller, so the card keeps the two buttons that inform."""
     html = (PUBLIC / PAGES[locale]).read_text(encoding="utf-8")
-    start = html.rindex("<div", 0, html.index("openModal('" + CAR_ID + "')"))
+    start = html.rindex("<div", 0, html.index(f'data-open-item="{CAR_ID}"'))
     row = html[start : html.index('data-role="vehicle-payment"')]
     controls = re.findall(r"<(?:a|button)\b[^>]*>", row)
     assert len(controls) == 2, f"{locale}: {controls}"
-    assert "openModal('" + CAR_ID + "')" in controls[0]
+    assert f'data-open-item="{CAR_ID}"' in controls[0]
     assert 'data-open-sheet="verifySheet"' in controls[1]
     assert "data-sms-intent" not in row
     assert not re.search(r"test drive|prueba de manejo", html, re.IGNORECASE)
