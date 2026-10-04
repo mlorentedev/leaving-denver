@@ -74,7 +74,7 @@ created: "2026-09-26"
 - [x] [AC9] Add an optional `es:` block per item and bundle in `data/inventory.yaml` (`title`, `short_title`, `specs`, `pickup_note`, `included`), falling back field by field to English. `test_spanish_fallbacks_and_asset_paths` lists missing required translations.
 - [x] [AC9] SMS intents are written in the page's language. The poster tool gets Spanish Marketplace and Craigslist variants.
 - [x] [AC9] `test_no_unbacked_vehicle_claims` covers the Spanish page, with the Spanish forms of the same claims.
-- [ ] The owner reviews the Spanish copy: neutral Latin American Spanish, `usted`, "auto"/"carro".
+- [x] The owner reviews the Spanish copy: neutral Latin American Spanish, `usted`, "auto"/"carro". Accepted by the owner on 2026-10-03.
 
 ## Closing
 

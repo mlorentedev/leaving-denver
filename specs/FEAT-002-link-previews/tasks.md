@@ -30,5 +30,5 @@ created: "2026-09-30"
 
 ## Closing
 
-- [ ] After deploy: Facebook Sharing Debugger shows the item card for one share page
+- [x] After deploy: Facebook Sharing Debugger shows the item card for one share page (owner, 2026-10-04: PASS on https://leaving-denver.pages.dev/i/2019-ford-escape-sel-awd/ after "Fetch new information"; the only warning, the missing optional `fb:app_id`, is declined as out of scope)
 - [ ] Independent adversarial review before archive

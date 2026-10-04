@@ -38,6 +38,13 @@ created: "2026-10-01"
 - Copy in `locales/not_found.yaml`, as the flyer's is in `locales/flyer.yaml`, so the catalog's inline `ui_json` does not grow.
 - `404.html` is built from a template with no inventory input: there is nothing to sanitize because nothing is passed in.
 
+## Independent review (2026-10-03)
+
+The owner chose an independent reviewer subagent for these archives (the repo has no reviewer pool, so `dotf spec review` cannot run). The reviewer was not the implementer, worked read-only on main at 2cdc798, and ran the `features.json` commands plus the full suite on a clean copy (1042 passed, 2 skipped).
+
+- Verdict: archive. AC1-AC7 hold; the live 404 answers with `x-robots-tag: noindex` and the bilingual page, which closes the open item above.
+- The smoke flake the reviewer found (a fresh deployment answering 404 with another body) was ticketed as #173 and fixed in #175.
+
 ## Promotion candidates
 
 - [x] Lesson for the repo's `docs/lessons/`? yes: docs/lessons/lesson-026-one-404-page-is-served-at-every-missing-url.md

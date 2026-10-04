@@ -30,11 +30,19 @@ created: "2026-09-30"
   All 9 were caught. A `className = cls + '...'` was rejected as `Unresolved`. The templates were restored afterwards.
 - The current templates have zero gaps: every token maps to a rule, to the template's own `<style>`, or to one of seven declared hooks.
 
+## Independent review (2026-10-03)
+
+The owner chose an independent reviewer subagent for these archives (the repo has no reviewer pool, so `dotf spec review` cannot run). The reviewer was not the implementer, worked read-only on main at 2cdc798, and ran the `features.json` commands plus the full suite on a clean copy (1042 passed, 2 skipped).
+
+- Verdict: archive with a note. AC1-AC6 hold with their named tests.
+- Superseded wording: AC1 names `poster_assistant.html`, which #146 deleted. Coverage now runs over `seller.html`, `sale_over.html`, `not_found.html`, `flyer.html` and `seller.mjs`.
+- `features.json` f6 selected no test (`-k engines`); the archive PR points it at `test_package_declares_the_node_it_needs`.
+
 ## Promotion candidates
 
-- Lesson: yes: `docs/lessons/lesson-015-check-classes-against-the-compiled-css.md`
-- ADR: no, no decision changed
-- Pattern: no
+- [x] Lesson for the repo's `docs/lessons/`? yes: docs/lessons/lesson-015-check-classes-against-the-compiled-css.md
+- [x] ADR-worthy decision for the repo's `docs/adr/adr-XXX.md`? no: no decision changed
+- [x] New pattern candidate for `00_meta/patterns/`? no: one-project test guard
 
 ## Archive checklist
 

@@ -111,12 +111,12 @@ created: "2026-09-30"
 - [x] AC9 (repository half) -> `tests/test_seller_csp.py`: the middleware sets the policy on every
   `/seller` response and no other path, and the page unlocks under it in headless Chrome served over
   HTTP with no violation; `tests/test_ops_runbook.py::test_no_csp_stops_the_cloudflare_beacon`
-  covers every other path. **Owner slot, not done:** the header on the served response after an
-  Access login (below).
+  covers every other path. Owner slot: the header on the served response after an Access login,
+  done 2026-10-04 (below).
 - [x] AC10 -> `tests/test_seal_command.py::test_the_python_side_hands_the_node_child_stdin_and_nothing_else`,
   `::test_the_command_without_a_terminal_exits_non_zero_and_touches_nothing`,
   `::test_the_workflows_hold_no_age_key_and_never_mention_sops`
-- [ ] AC11 -> **owner slot**: unlock time on the phone (below).
+- [x] AC11 -> owner slot: unlock time on the phone, done 2026-10-04 (below).
 - [x] AC12 -> `tests/test_private_isolation.py::test_nothing_in_src_or_the_build_refers_to_the_retired_workspace`
   and the plaintext-marker and stray-envelope tests in the same file
 - [x] AC13 -> `tests/test_ops_runbook.py::test_the_runbook_covers_the_sealed_private_data`
@@ -153,10 +153,17 @@ created: "2026-09-30"
 
 ### Owner slots
 
-- [ ] AC9: `curl -sI -H "cf-access-token: ..." https://leaving-denver.pages.dev/seller/` after an
+- [x] AC9: `curl -sI -H "cf-access-token: ..." https://leaving-denver.pages.dev/seller/` after an
   Access login shows `content-security-policy` with `script-src 'self'`, `connect-src 'none'`,
-  `frame-ancestors 'none'`. Result: ____
-- [ ] AC11: unlock time on the owner's phone, with 1,000,000 iterations, 3 s or less. Result: ____
+  `frame-ancestors 'none'`. Result (owner, 2026-10-04 03:25:32 GMT, Chrome DevTools after Access
+  OTP login, GET /seller/, cf-ray a4511473a984e671-DEN): `content-security-policy: default-src
+  'none'; script-src 'self'; connect-src 'none'; frame-ancestors 'none'; img-src 'self'; style-src
+  'self'; font-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'` -> contains
+  script-src 'self', connect-src 'none', frame-ancestors 'none'. PASS. (Also observed
+  `access-control-allow-origin: *`, which PR #181 detaches.)
+- [x] AC11: unlock time on the owner's phone, with 1,000,000 iterations, 3 s or less. Result
+  (owner, 2026-10-04): unlock on the owner's phone with 1,000,000 iterations is within 3 s. PASS;
+  `iter` unchanged.
   (over 3 s: lower `iter`, never below 600,000, and amend ADR-007)
 
 ### PR 2 test status
@@ -201,13 +208,20 @@ created: "2026-09-30"
   for the unlock; the key is still derived, used once and dropped.
 - **`gh` gets no stdin unless it is passing a secret**, so a recording cannot hang on a prompt.
 
+## Independent review (2026-10-03)
+
+The owner chose an independent reviewer subagent for these archives (the repo has no reviewer pool, so `dotf spec review` cannot run). The reviewer was not the implementer, worked read-only on main at 2cdc798, and ran the `features.json` commands plus the full suite on a clean copy (1042 passed, 2 skipped).
+
+- Verdict: blocked on the two owner checks, now cleared. PR 1 AC1-AC10 and PR 2 AC1-AC8, AC10 and AC12-AC16 hold with their named tests; the deploy job's `make check` passes with `SELLER_SEALED` set.
+- Owner checks (2026-10-04): AC9 (served CSP after an Access login) and AC11 (unlock within 3 s at 1,000,000 iterations) both PASS; see Owner slots above.
+- Superseded or stale text: PR 1 AC11 (`poster_assistant.html` unchanged) was removed by PR 2 AC12 (#146); AC2 and AC3 say "cashier's check or wire", and #167 dropped wire (payment is data-driven, so the ACs hold).
+- This spec also produced lesson-023 (`docs/lessons/lesson-023-a-wordlist-separator-must-not-be-in-a-word.md`).
+
 ## Promotion candidates
 
-- [ ] Lesson for the repo's `docs/lessons/`? no: the lesson (a class named only in a script is
-  never compiled) is already lesson-015; this change extended its guard to the seller page.
-- [x] ADR-worthy decision for the repo's `docs/adr/adr-XXX.md`? PR 2 implements ADR-007 (already
-  merged) and amends it for the 7,772-word list; lessons 021 and 022 added.
-- [ ] New pattern candidate for `00_meta/patterns/`? no.
+- [x] Lesson for the repo's `docs/lessons/`? yes: docs/lessons/lesson-024-csp-needs-an-http-served-test-and-no-inline-script.md
+- [x] ADR-worthy decision for the repo's `docs/adr/adr-XXX.md`? yes: docs/adr/adr-007-private-seller-data-travels-as-ciphertext.md
+- [x] New pattern candidate for `00_meta/patterns/`? no: this sale only
 
 ## Archive checklist
 

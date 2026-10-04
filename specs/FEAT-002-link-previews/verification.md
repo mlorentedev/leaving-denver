@@ -70,6 +70,15 @@ No blocker. Dispositions, applied in the next commit unless noted:
 | 6 | `aria-live` on the button is unreliable; "Link copied" never reverts | **Declined** for now. It is the pattern the contact sheet's Copy button already uses, and reopening the sheet resets it. |
 | 7 | No `whitespace-nowrap`/`shrink-0` on the button | **Applied**, pinned by `test_share_button_keeps_its_width`. |
 
+## Independent review (2026-10-03)
+
+The owner chose an independent reviewer subagent for these archives (the repo has no reviewer pool, so `dotf spec review` cannot run). The reviewer was not the implementer, worked read-only on main at 2cdc798, and ran the `features.json` commands plus the full suite on a clean copy (1042 passed, 2 skipped).
+
+- Verdict: blocked on one owner check, now cleared. AC1-AC8 hold with their named tests; the live share page answers `facebookexternalhit` with its og tags and a 200 `image/jpeg` preview.
+- Owner check (2026-10-04): the Facebook Sharing Debugger renders the card for `/i/2019-ford-escape-sel-awd/`. PASS. The missing `fb:app_id` warning is optional (Facebook Insights only) and declined as out of scope.
+- `features.json` f8 always failed (`echo 'PR 2' && exit 1`); the archive PR points it at the share-button tests.
+- AC1 widened since: `robots.txt` also admits the user-fetch agents of ADR-009 (#160), without contradicting AC1.
+
 ## Promotion candidates
 
 Answer each line `yes: <path>`, naming the file you promoted, or `no: <reason>`. `dotf spec archive` refuses a line left unanswered, a `no` without a reason, and a `yes` whose file does not exist; a `00_meta/` path is looked up in the vault.

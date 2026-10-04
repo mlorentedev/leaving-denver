@@ -30,6 +30,14 @@ created: "2026-10-01"
 - `tests/conftest.py` skips the catalog tests one by one when the switch is committed on, because `make check` is the gate of the PR that flips it. Not by module: the Access guard, the phone and realized-price isolation tests stay on. Tests that build a scratch site from the committed inventory get the switch stripped (an autouse fixture), so they keep testing the catalog; a guard fails if a phone, private, isolation, access or secret test is on the skip list.
 - The runbook sequences Nov 8 (flip, deploy, delete old deployments) before Nov 15 (secrets): the deploy job refuses to run without `SELLER_PHONE`.
 
+## Independent review (2026-10-03)
+
+The owner chose an independent reviewer subagent for these archives (the repo has no reviewer pool, so `dotf spec review` cannot run). The reviewer was not the implementer, worked read-only on main at 2cdc798, and ran the `features.json` commands plus the full suite on a clean copy (1042 passed, 2 skipped).
+
+- Verdict: archive with a note. AC1-AC7 hold; the end build carries no phone, item or share page.
+- Superseded: the "Nov 8" section and "Nov 8 / by Nov 15" in AC7 (OPS-013: "By Nov 9" and "By Nov 15").
+- "`make check` passes in both modes" failed at 2cdc798 (the gallery tests were missing from the end-of-sale skip list); fixed in the archive PR and re-run in both modes.
+
 ## Promotion candidates
 
 - [x] Lesson for the repo's `docs/lessons/`? yes: docs/lessons/lesson-021-a-switch-that-retires-a-feature-retires-its-tests.md

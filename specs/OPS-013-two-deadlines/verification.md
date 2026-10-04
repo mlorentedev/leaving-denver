@@ -32,11 +32,20 @@ created: "2026-10-02"
 - The car gets no dated next-drop suggestion in `/seller/`; `leaving-denver drops` keeps printing its price tiers.
 - Archived specs and lessons, and ADR-007/008, keep the single date (history).
 
+## Independent review (2026-10-03)
+
+The owner chose an independent reviewer subagent for these archives (the repo has no reviewer pool, so `dotf spec review` cannot run). The reviewer was not the implementer, worked read-only on main at 2cdc798, and ran the `features.json` commands plus the full suite on a clean copy (1042 passed, 2 skipped).
+
+- Verdict: blocked on AC8, now cleared. The archive PR adds the gallery and CTA browser tests to `CATALOG_TESTS`, and `make check` passes with `sale_over: true`.
+- AC1, AC2, AC6 and AC7 hold.
+- Superseded by #165 (FEAT-014): AC3 (countdown, meta month), AC4 partly (the car card "Available until"), AC5 (flyer dates) and the "in November" listing clause. Their replacements: `test_no_public_page_shows_a_sale_date`, `test_the_car_card_claims_no_until_date`, `test_the_flyer_has_no_date_line_and_no_everything_claim`.
+- Stale citations above: the countdown and deadline-month tests no longer exist.
+
 ## Promotion candidates
 
 - [x] Lesson for the repo's `docs/lessons/`? yes: docs/lessons/lesson-027-one-date-was-three-facts.md
 - [x] ADR-worthy decision for the repo's `docs/adr/adr-XXX.md`? no: a data shape local to this repo, recorded in the proposal.
-- [x] New pattern candidate for `00_meta/patterns/`? no.
+- [x] New pattern candidate for `00_meta/patterns/`? no: a data shape local to this sale.
 
 ## Archive checklist
 

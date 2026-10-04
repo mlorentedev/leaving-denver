@@ -27,7 +27,7 @@ created: "2026-09-30"
 
 ## PR 2 — hide sold
 
-- [ ] Hide-sold toggle, once real sales push available items down
+- [x] ~~Hide-sold toggle, once real sales push available items down~~ won't do: the owner declined it on #18 (2026-10-01)
 
 ## Closing
 

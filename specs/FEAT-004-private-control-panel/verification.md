@@ -97,11 +97,19 @@ Declined, with reasons:
 - Future dates, duplicate posts and an unquoted `$(ID)`: owner-only inputs on a local tool.
   A non-positive price is already refused by `reprice`.
 
+## Independent review (2026-10-03)
+
+The owner chose an independent reviewer subagent for these archives (the repo has no reviewer pool, so `dotf spec review` cannot run). The reviewer was not the implementer, worked read-only on main at 2cdc798, and ran the `features.json` commands plus the full suite on a clean copy (1042 passed, 2 skipped).
+
+- Verdict: archive with a note. AC2-AC6 and AC9 hold, with the tests moved to `tests/test_seller_private_logic.py`.
+- Superseded by #146 (ADR-007): AC1 as an artifact (the row logic lives in `assets/seller.mjs`), AC7 and AC8 (no panel and no `build/private/` remain; `verify_security_guarantees` guards the build).
+- `features.json` f1-f4, f8 and f9 point at the deleted panel tests; they stay `pending` as the record of the original plan.
+
 ## Promotion candidates
 
-- [x] Lesson for the repo's `docs/lessons/`? yes: lesson-019.
-- [x] ADR-worthy decision? yes: ADR-006.
-- [ ] New pattern candidate for `00_meta/patterns/`? no: single project.
+- [x] Lesson for the repo's `docs/lessons/`? yes: docs/lessons/lesson-019-an-unreadable-file-is-not-an-empty-one.md
+- [x] ADR-worthy decision? yes: docs/adr/adr-006-seller-tracking-stays-private.md
+- [x] New pattern candidate for `00_meta/patterns/`? no: single project.
 
 ## Archive checklist
 

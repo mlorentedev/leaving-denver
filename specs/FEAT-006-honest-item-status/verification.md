@@ -36,13 +36,21 @@ Brief log of non-obvious trade-offs or course corrections taken during the work.
 - A pending item keeps its text link: a backup buyer is worth having when a pickup falls through. Its bundles still go off sale, since the offer cannot be honoured while it is reserved.
 - "Take everything" goes off sale with the first reservation or sale. Re-pricing it as "take what's left" is an owner decision in the data, not a derived figure.
 
+## Independent review (2026-10-03)
+
+The owner chose an independent reviewer subagent for these archives (the repo has no reviewer pool, so `dotf spec review` cannot run). The reviewer was not the implementer, worked read-only on main at 2cdc798, and ran the `features.json` commands plus the full suite on a clean copy (1042 passed, 2 skipped).
+
+- Verdict: archive with a note. AC1, AC3-AC6 hold; AC2 holds for "sold last".
+- Superseded: AC2 "the relative order of the rest is unchanged" (FEAT-007 AC6, #136, sorts by price).
+- Declined: the hide-sold toggle (What item 3, tasks.md PR 2). The owner declined it on #18 on 2026-10-01; it was never an AC.
+
 ## Promotion candidates
 
 Answer each line `yes: <path>`, naming the file you promoted, or `no: <reason>`. `dotf spec archive` refuses a line left unanswered, a `no` without a reason, and a `yes` whose file does not exist; a `00_meta/` path is looked up in the vault.
 
-- [ ] Lesson for the repo's `docs/lessons/`? <yes: path / no: reason>
-- [ ] ADR-worthy decision for the repo's `docs/adr/adr-XXX.md`? <yes: path / no: reason>
-- [ ] New pattern candidate for `00_meta/patterns/`? Only if this recurs in >1 project. <yes: path / no: reason>
+- [x] Lesson for the repo's `docs/lessons/`? no: lessons 008 and 012 already carry the reasoning
+- [x] ADR-worthy decision for the repo's `docs/adr/adr-XXX.md`? no: statuses extend the static catalog, no architectural change
+- [x] New pattern candidate for `00_meta/patterns/`? Only if this recurs in >1 project. no: single project
 
 ## Archive checklist
 

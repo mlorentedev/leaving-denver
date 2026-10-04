@@ -53,11 +53,21 @@ Brief log of non-obvious trade-offs or course corrections taken during the work.
 - PR 6: Spanish pages reference the shared root catalog with `../catalog/...`; photos are not duplicated under `es/`.
 - PR 6: Facebook and Craigslist Spanish variants read the item's `es` block from the private inventory, while English and other platform variants retain their existing copy.
 
+## Independent review (2026-10-03)
+
+The owner chose an independent reviewer subagent for these archives (the repo has no reviewer pool, so `dotf spec review` cannot run). The reviewer was not the implementer, worked read-only on main at 2cdc798, and ran the `features.json` commands plus the full suite on a clean copy (1042 passed, 2 skipped).
+
+- Verdict: blocked on one clause, now cleared. AC1-AC9 and the rest of AC10 hold with their named tests.
+- AC10 tap-target clause: the EN car card button "View Full Specs & Photos" measured 36 px at 390 px. Fixed in the archive PR: the button carries `min-h-10`, and `test_build_contract.py` now guards it with the other 40 px markers.
+- Owner check: the owner reviewed the Spanish copy and accepted it on 2026-10-03.
+- Superseded by later owner decisions: AC7 "cash or a cashier's check" (#123, then #167: cashier's check only); the AC10 four-fact cap on the item sheet (FEAT-011, #120); the departure date and countdown (#157, then #165: no public dates).
+- Stale citations above: `test_sale_schedule_comes_from_departure_date` and `test_drops_prints_windows_from_departure_date` no longer exist (#157, #165).
+
 ## Promotion candidates
 
 Before archiving, flag what (if anything) should be promoted to the vault. If all three are "no", archive in repo is the only persistence.
 
-- [x] Lesson for the repo's `docs/lessons/`? `lesson-012-template-contexts-are-public-data-contracts.md`
+- [x] Lesson for the repo's `docs/lessons/`? yes: docs/lessons/lesson-012-template-contexts-are-public-data-contracts.md
 - [x] ADR-worthy decision for the repo's `docs/adr/adr-XXX.md`? no: implementation guard within ADR-002's existing isolation boundary
 - [x] New pattern candidate for `00_meta/patterns/`? no: one-project evidence
 

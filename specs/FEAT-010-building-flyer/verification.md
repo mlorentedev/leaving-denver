@@ -32,6 +32,13 @@ created: "2026-10-01"
 - `tests/browser_harness.py:open_page` puts its setup before the first `<script>`, and now falls back to the end of `<head>` for a page with none.
 - The two print tests read the live `build/public` and are on `tests/conftest.py`'s end-of-sale skip list; every other flyer test builds a scratch copy and runs in both modes.
 
+## Independent review (2026-10-03)
+
+The owner chose an independent reviewer subagent for these archives (the repo has no reviewer pool, so `dotf spec review` cannot run). The reviewer was not the implementer, worked read-only on main at 2cdc798, and ran the `features.json` commands plus the full suite on a clean copy (1042 passed, 2 skipped).
+
+- Verdict: archive with a note. AC1-AC8 hold; the live `/flyer/` has no date.
+- Superseded: the AC4 date clause and "the real departure date" (#157, then #165: no public dates). `test_the_date_is_the_departure_date_in_the_data` cited above no longer exists.
+
 ## Promotion candidates
 
 - [x] Lesson for the repo's `docs/lessons/`? yes: docs/lessons/lesson-022-a-printed-page-inherits-the-catalogs-body-padding.md

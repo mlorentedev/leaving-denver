@@ -62,11 +62,17 @@ All tests are in `tests/test_verify_the_car.py` unless noted.
   was not reachable from the build host (403), so flood is unconfirmed. The issue lists it;
   the owner can add it once checked on the site.
 
+## Independent review (2026-10-03)
+
+The owner chose an independent reviewer subagent for these archives (the repo has no reviewer pool, so `dotf spec review` cannot run). The reviewer was not the implementer, worked read-only on main at 2cdc798, and ran the `features.json` commands plus the full suite on a clean copy (1042 passed, 2 skipped).
+
+- Verdict: archive. AC1-AC6 hold; #145 removed the test-drive link and kept the verify button.
+
 ## Promotion candidates
 
-- [ ] Lesson for the repo's `docs/lessons/`? no: nothing surprising; the allow-list reasoning is in the spec and the code comment.
-- [ ] ADR-worthy decision for the repo's `docs/adr/adr-XXX.md`? no: a new section on the existing static catalog, no architectural change.
-- [ ] New pattern candidate for `00_meta/patterns/`? no: single project.
+- [x] Lesson for the repo's `docs/lessons/`? no: nothing surprising; the allow-list reasoning is in the spec and the code comment.
+- [x] ADR-worthy decision for the repo's `docs/adr/adr-XXX.md`? no: a new section on the existing static catalog, no architectural change.
+- [x] New pattern candidate for `00_meta/patterns/`? no: single project.
 
 ## Archive checklist
 

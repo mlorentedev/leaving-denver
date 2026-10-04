@@ -66,6 +66,12 @@ No blocker. Dispositions, applied in the next commit unless noted:
 | 7 | "Poll instead of fixed sleeps" overstated | **Applied.** The proposal's Risks name where fixed waits remain and why. |
 | 8 | `--disable-dev-shm-usage` absent | **Declined.** Only needed in containers with a small `/dev/shm`; the suite runs on GitHub's VM runners and on hosts. |
 
+## Independent review (2026-10-03)
+
+The owner chose an independent reviewer subagent for these archives (the repo has no reviewer pool, so `dotf spec review` cannot run). The reviewer was not the implementer, worked read-only on main at 2cdc798, and ran the `features.json` commands plus the full suite on a clean copy (1042 passed, 2 skipped).
+
+- Verdict: archive. AC1-AC7 hold; AC7 was reproduced on the built page (the `popstate` mutation turns 3 tests red, the backdrop mutation 1).
+
 ## Promotion candidates
 
 - [x] Lesson for the repo's `docs/lessons/`? yes: docs/lessons/lesson-017-virtual-time-starves-dialog-close-events.md

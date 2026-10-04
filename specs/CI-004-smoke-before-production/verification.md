@@ -27,11 +27,18 @@ created: "2026-09-30"
 - **The canonical site is smoked, not the production hash URL.** That is the address buyers use. The checks are invariants, so if the edge still serves the previous deployment for a moment, the smoke passes; the candidate smoke has already checked this build.
 - **The secret check is local.** The workflow token cannot list repository secrets, so the scheduled audit checks the environments only, and `make audit-deploy` with the owner's `gh` checks both.
 
+## Independent review (2026-10-03)
+
+The owner chose an independent reviewer subagent for these archives (the repo has no reviewer pool, so `dotf spec review` cannot run). The reviewer was not the implementer, worked read-only on main at 2cdc798, and ran the `features.json` commands plus the full suite on a clean copy (1042 passed, 2 skipped).
+
+- Verdict: archive. AC1-AC7 hold; `make audit-deploy` passes live.
+- The open item above is answered by CI history: run 37162381292 smoked the candidate and production; run 37169206079 failed the candidate smoke and skipped the production deploy, so the gate works as specified.
+
 ## Promotion candidates
 
-- [ ] Lesson for the repo's `docs/lessons/`? no: the change applies the CI-003 review; the procedure lives in `docs/runbooks/ops.md`
-- [ ] ADR-worthy decision for the repo's `docs/adr/adr-XXX.md`? no: it keeps the CI-003 deploy design and adds a gate in front of it
-- [ ] New pattern candidate for `00_meta/patterns/`? Only if this recurs in >1 project. no: specific to this Pages project
+- [x] Lesson for the repo's `docs/lessons/`? no: the change applies the CI-003 review; the procedure lives in `docs/runbooks/ops.md`
+- [x] ADR-worthy decision for the repo's `docs/adr/adr-XXX.md`? no: it keeps the CI-003 deploy design and adds a gate in front of it
+- [x] New pattern candidate for `00_meta/patterns/`? Only if this recurs in >1 project. no: specific to this Pages project
 
 ## Archive checklist
 

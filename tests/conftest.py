@@ -101,10 +101,20 @@ CATALOG_TESTS = {
         "test_the_flyer_fits_the_letter_content_box",
         "test_the_flyer_prints_on_exactly_one_letter_sheet",
     ),
+    "test_photo_gallery_browser.py": (
+        "test_a_mouse_press_released_off_the_photo_leaves_no_swipe_behind",
+        "test_a_real_press_on_an_arrow_steps_once",
+        "test_a_sideways_swipe_steps_and_a_vertical_drag_does_not",
+        "test_an_item_with_one_photo_shows_no_arrows",
+        "test_reopening_starts_at_the_first_photo",
+        "test_the_arrow_keys_step_through_the_photos",
+        "test_the_arrows_step_and_wrap",
+    ),
     "test_inventory_ssot.py": (
         "test_no_stale_or_unbacked_pickup_facts",
         "test_no_unbacked_vehicle_claims",
     ),
+    "test_item_cta_browser.py": ("test_the_button_and_text_say_what_the_buyer_wants",),
     "test_item_sheet_browser.py": ("test_the_sheet_shows_the_whole_item",),
     "test_item_sheet_detail.py": (
         "test_every_item_publishes_all_its_specs_and_what_is_included",
@@ -179,6 +189,10 @@ CATALOG_TESTS = {
         "test_a_redirect_in_front_of_the_seller_page_passes_the_smoke",
         "test_robots_txt_served_as_the_catalog_is_retried",
         "test_robots_txt_that_stays_the_catalog_fails_as_such",
+        # The catalog smoke path (the 404 body, the og:image cover); the end smoke never reaches it.
+        "test_a_404_with_another_body_first_is_retried",
+        "test_a_page_still_naming_a_deleted_cover_is_fetched_again",
+        "test_a_cover_that_stays_missing_fails",
     ),
     "test_verify_sheet_browser.py": (
         "test_a_press_on_the_backdrop_closes_the_sheet",

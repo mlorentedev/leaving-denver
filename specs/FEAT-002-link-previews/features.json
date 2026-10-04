@@ -50,8 +50,8 @@
   },
   {
     "id": "FEAT-002-link-previews-f8",
-    "behavior": "AC8: Share button shares or copies the share page URL (PR 2)",
-    "verification": "echo 'PR 2' && exit 1",
+    "behavior": "AC8: Share button shares or copies the share page URL",
+    "verification": "uv run -q --extra dev pytest tests -q -k 'test_item_sheet_has_a_share_button or test_the_shared_url_is_the_items_share_page or test_share_button_keeps_its_width'",
     "state": "pending",
     "evidence": ""
   }

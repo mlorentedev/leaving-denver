@@ -82,11 +82,17 @@ Tests are in `tests/test_richer_item_fields.py` (builder and built pages) and
   English public items, which carry flags but no labels. The old private poster tool is untouched
   except that it keeps getting `es.condition`, now filled from the locale in the private build.
 
+## Independent review (2026-10-03)
+
+The owner chose an independent reviewer subagent for these archives (the repo has no reviewer pool, so `dotf spec review` cannot run). The reviewer was not the implementer, worked read-only on main at 2cdc798, and ran the `features.json` commands plus the full suite on a clean copy (1042 passed, 2 skipped).
+
+- Verdict: archive. AC1-AC7 hold; the later price changes (#158) are intended and guarded data-to-page.
+
 ## Promotion candidates
 
-- [ ] Lesson for the repo's `docs/lessons/`? no: nothing surprising.
-- [ ] ADR-worthy decision for the repo's `docs/adr/adr-XXX.md`? no: new derived fields on the existing static catalog.
-- [ ] New pattern candidate for `00_meta/patterns/`? no: single project.
+- [x] Lesson for the repo's `docs/lessons/`? no: nothing surprising.
+- [x] ADR-worthy decision for the repo's `docs/adr/adr-XXX.md`? no: new derived fields on the existing static catalog.
+- [x] New pattern candidate for `00_meta/patterns/`? no: single project.
 
 ## Archive checklist
 
