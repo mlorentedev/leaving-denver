@@ -1,7 +1,7 @@
 ---
 id: "BUG-013-not-found-page"
 type: spec
-status: verifying # draft | implementing | verifying | archived
+status: archived # draft | implementing | verifying | archived
 review: waived
 review_waived_reason: "Owner waived the launcher review on 2026-10-03: the repo has no harness/reviewer-pool.json, so dotf spec review cannot run. The owner chose an independent reviewer subagent instead; its verdict is in verification.md (Independent review, 2026-10-03)."
 created: "2026-10-01"
@@ -77,3 +77,5 @@ The build writes a top-level `404.html`, in the catalog build and in the end-of-
 
 - Issue #152; lesson-025 (Pages answers a missing file with the home page), lesson-026
 - OPS-011 (end-of-sale: `END_SITE_FILES`, `END_REDIRECTS`), ADR-004 (link-preview crawlers)
+
+<!-- archived 2026-10-03 — PR: https://github.com/mlorentedev/leaving-denver/pull/183 -->

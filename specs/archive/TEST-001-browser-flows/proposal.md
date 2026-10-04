@@ -1,7 +1,7 @@
 ---
 id: "TEST-001-browser-flows"
 type: spec
-status: implementing # draft | implementing | verifying | archived
+status: archived # draft | implementing | verifying | archived
 review: waived
 review_waived_reason: "Owner waived the launcher review on 2026-10-03: the repo has no harness/reviewer-pool.json, so dotf spec review cannot run. The owner chose an independent reviewer subagent instead; its verdict is in verification.md (Independent review, 2026-10-03)."
 created: "2026-09-30"
@@ -69,3 +69,5 @@ The FEAT-002 harness used `--dump-dom --virtual-time-budget`. Under virtual time
 - Bitácora board: #99. From the FEAT-003 review (#15).
 - lesson-014 (headless Chrome has no pointer)
 - FEAT-002 harness: `tests/test_share_button_browser.py`
+
+<!-- archived 2026-10-03 — PR: https://github.com/mlorentedev/leaving-denver/pull/183 -->

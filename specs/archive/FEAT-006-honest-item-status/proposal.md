@@ -1,7 +1,7 @@
 ---
 id: "FEAT-006-honest-item-status"
 type: spec
-status: implementing # draft | implementing | verifying | archived
+status: archived # draft | implementing | verifying | archived
 review: waived
 review_waived_reason: "Owner waived the launcher review on 2026-10-03: the repo has no harness/reviewer-pool.json, so dotf spec review cannot run. The owner chose an independent reviewer subagent instead; its verdict is in verification.md (Independent review, 2026-10-03)."
 created: "2026-09-30"
@@ -62,3 +62,5 @@ Three statuses in `data/inventory.yaml`: `Available`, `Pending` (reserved, await
 
 - Bitácora board: issue #18
 - Related: lesson-008 (honest urgency), lesson-011 (derive figures), lesson-012 (template contexts are public data contracts), #19 (price field collapse)
+
+<!-- archived 2026-10-03 — PR: https://github.com/mlorentedev/leaving-denver/pull/183 -->

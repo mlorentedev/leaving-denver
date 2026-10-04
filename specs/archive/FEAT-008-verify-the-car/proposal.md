@@ -1,7 +1,7 @@
 ---
 id: "FEAT-008-verify-the-car"
 type: spec
-status: implementing # draft | implementing | verifying | archived
+status: archived # draft | implementing | verifying | archived
 review: waived
 review_waived_reason: "Owner waived the launcher review on 2026-10-03: the repo has no harness/reviewer-pool.json, so dotf spec review cannot run. The owner chose an independent reviewer subagent instead; its verdict is in verification.md (Independent review, 2026-10-03)."
 created: "2026-09-30"
@@ -91,3 +91,5 @@ and shows the VIN to paste. A VIN query parameter is never guessed.
 - Bitácora: #37; pending owner tasks #28 (Carfax), #34 (dealer service history).
 - `docs/runbooks/vehicle-sale.md` (§2 "Your report, their link", §6 emissions)
 - `docs/lessons/lesson-010-redact-scanned-documents-on-pixels.md`
+
+<!-- archived 2026-10-03 — PR: https://github.com/mlorentedev/leaving-denver/pull/183 -->

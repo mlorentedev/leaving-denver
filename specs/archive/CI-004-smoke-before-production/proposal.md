@@ -1,7 +1,7 @@
 ---
 id: "CI-004-smoke-before-production"
 type: spec
-status: implementing # draft | implementing | verifying | archived
+status: archived # draft | implementing | verifying | archived
 review: waived
 review_waived_reason: "Owner waived the launcher review on 2026-10-03: the repo has no harness/reviewer-pool.json, so dotf spec review cannot run. The owner chose an independent reviewer subagent instead; its verdict is in verification.md (Independent review, 2026-10-03)."
 created: "2026-09-30"
@@ -54,3 +54,5 @@ The deploy job publishes to production first and smoke-tests it afterwards, so a
 
 - Issue #102, from the independent CI-003 review (`specs/archive/CI-003-auto-deploy-main/`)
 - `docs/runbooks/ops.md`
+
+<!-- archived 2026-10-03 — PR: https://github.com/mlorentedev/leaving-denver/pull/183 -->

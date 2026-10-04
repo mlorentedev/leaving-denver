@@ -2,7 +2,7 @@
 The not-found page (BUG-013): the build writes a top-level `404.html`, in the catalog build and in
 the end-of-sale build alike. Without one, Cloudflare Pages treats the site as a single-page app
 and answers every unknown path with the catalog and a 200 (the rule is in
-specs/BUG-013-not-found-page/proposal.md). Pages serves that one file for every missing path, at
+specs/archive/BUG-013-not-found-page/proposal.md). Pages serves that one file for every missing path, at
 the URL that was asked for, so it is bilingual, carries no contact or item data, and reaches its
 own assets by root-absolute paths.
 

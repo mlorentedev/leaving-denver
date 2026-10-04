@@ -1,7 +1,7 @@
 ---
 id: "BUG-009-class-coverage"
 type: spec
-status: implementing # draft | implementing | verifying | archived
+status: archived # draft | implementing | verifying | archived
 review: waived
 review_waived_reason: "Owner waived the launcher review on 2026-10-03: the repo has no harness/reviewer-pool.json, so dotf spec review cannot run. The owner chose an independent reviewer subagent instead; its verdict is in verification.md (Independent review, 2026-10-03)."
 created: "2026-09-30"
@@ -45,3 +45,5 @@ Tailwind v4 compiles only the classes it recognises and drops the rest without a
 - AC4: the v4 utility test no longer depends on minified byte order.
 - AC5: a missing CLI raises even when an old `styles.css` exists, and the old file is left untouched.
 - AC6: `package.json` declares `engines.node`.
+
+<!-- archived 2026-10-03 — PR: https://github.com/mlorentedev/leaving-denver/pull/183 -->

@@ -1,7 +1,7 @@
 ---
 id: "OPS-013-two-deadlines"
 type: spec
-status: verifying # draft | implementing | verifying | archived
+status: archived # draft | implementing | verifying | archived
 review: waived
 review_waived_reason: "Owner waived the launcher review on 2026-10-03: the repo has no harness/reviewer-pool.json, so dotf spec review cannot run. The owner chose an independent reviewer subagent instead; its verdict is in verification.md (Independent review, 2026-10-03)."
 created: "2026-10-02"
@@ -99,3 +99,5 @@ the household schedule by hand. Issue #156.
 ## References
 
 - Issue #156; OPS-011 (end of sale, `sale_over`), BUG-013 / #154 (the 404 for a removed share page), lesson-008 (no invented urgency), lesson-027
+
+<!-- archived 2026-10-03 — PR: https://github.com/mlorentedev/leaving-denver/pull/183 -->

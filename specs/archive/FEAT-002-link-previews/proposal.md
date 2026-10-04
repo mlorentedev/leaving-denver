@@ -1,7 +1,7 @@
 ---
 id: "FEAT-002-link-previews"
 type: spec
-status: implementing # draft | implementing | verifying | archived
+status: archived # draft | implementing | verifying | archived
 review: waived
 review_waived_reason: "Owner waived the launcher review on 2026-10-03: the repo has no harness/reviewer-pool.json, so dotf spec review cannot run. The owner chose an independent reviewer subagent instead; its verdict is in verification.md (Independent review, 2026-10-03)."
 created: "2026-09-30"
@@ -73,3 +73,5 @@ PR 2 (share button):
 - ADR-001 (crawlers blocked), amended by `docs/adr/adr-004-allow-link-preview-crawlers.md`
 - ADR-002 (contact obfuscation), ADR-003 (per-item share pages foreseen)
 - lesson-016 (freshness keyed on content)
+
+<!-- archived 2026-10-03 — PR: https://github.com/mlorentedev/leaving-denver/pull/183 -->

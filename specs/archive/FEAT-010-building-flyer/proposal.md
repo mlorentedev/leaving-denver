@@ -1,7 +1,7 @@
 ---
 id: "FEAT-010-building-flyer"
 type: spec
-status: verifying # draft | implementing | verifying | archived
+status: archived # draft | implementing | verifying | archived
 review: waived
 review_waived_reason: "Owner waived the launcher review on 2026-10-03: the repo has no harness/reviewer-pool.json, so dotf spec review cannot run. The owner chose an independent reviewer subagent instead; its verdict is in verification.md (Independent review, 2026-10-03)."
 created: "2026-10-01"
@@ -62,3 +62,5 @@ New dependency: `segno` (pure Python, no native code, no runtime dependencies), 
 - ADR-002 (phone obfuscation), ADR-004 (crawlers), ADR-005 (UTM attribution), ADR-008 (end of sale, the flyer's QR outlives the sale)
 - Lessons 008 (honest urgency), 020 (unlayered CSS outranks utilities)
 - `docs/runbooks/seller-playbook.md`, `docs/runbooks/decommission.md`
+
+<!-- archived 2026-10-03 — PR: https://github.com/mlorentedev/leaving-denver/pull/183 -->

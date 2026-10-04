@@ -142,7 +142,7 @@ Do not redeploy afterwards: the deploy job needs the secrets until the end page 
 - The served CSP. After an Access login, `curl -sI -H "cf-access-token: ..." https://leaving-denver.pages.dev/seller/`
   (or the browser's network tab) must show `content-security-policy` with `script-src 'self'`,
   `connect-src 'none'` and `frame-ancestors 'none'`. Record the result in
-  `specs/FEAT-009-one-seller-tool/verification.md`.
+  `specs/archive/FEAT-009-one-seller-tool/verification.md`.
 - The unlock time on the phone, 3 s or less (AC11). Record it there too. Over 3 s, lower `iter`
   in ADR-007, never below 600,000.
 

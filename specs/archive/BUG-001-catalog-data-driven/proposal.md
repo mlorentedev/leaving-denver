@@ -1,7 +1,7 @@
 ---
 id: "BUG-001-catalog-data-driven"
 type: spec
-status: implementing # draft | implementing | verifying | archived
+status: archived # draft | implementing | verifying | archived
 review: waived
 review_waived_reason: "Owner waived the launcher review on 2026-10-03: the repo has no harness/reviewer-pool.json, so dotf spec review cannot run. The owner chose an independent reviewer subagent instead; its verdict is in verification.md (Independent review, 2026-10-03)."
 created: "2026-09-26"
@@ -104,3 +104,5 @@ Each item below already has its own ticket and comes after this spec. None of th
 - Issues: #6 (gate), #41, #21, #32, #13, #9, #48, #10, #53
 - ADR: `docs/adr/adr-003-render-the-catalog-from-data-with-jinja2.md`
 - Lessons: `docs/lessons/lesson-008-honest-urgency-over-invented-scarcity.md`
+
+<!-- archived 2026-10-03 — PR: https://github.com/mlorentedev/leaving-denver/pull/183 -->

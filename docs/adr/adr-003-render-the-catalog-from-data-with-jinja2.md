@@ -51,7 +51,7 @@ The builder renders the public page, and later the per-item pages, from `data/in
 
 ### Negative
 - One more dependency to keep locked and updated.
-- The move to templates touches most of `index.html`, so it lands in several PRs, not one (see `specs/BUG-001-catalog-data-driven/`).
+- The move to templates touches most of `index.html`, so it lands in several PRs, not one (see `specs/archive/BUG-001-catalog-data-driven/`).
 
 ### Neutral
 - The hosting and privacy model of ADR-001 and ADR-002 is unchanged: a static site on Cloudflare Pages, the phone still fragmented in `_C`, and nothing private in `build/public/`.
@@ -65,4 +65,4 @@ The builder renders the public page, and later the per-item pages, from `data/in
 ## References
 - `docs/adr/adr-001-static-catalog-over-monolithic-attachment.md`
 - `docs/adr/adr-002-client-dom-phone-obfuscation-and-security-isolation.md`
-- `specs/BUG-001-catalog-data-driven/proposal.md`
+- `specs/archive/BUG-001-catalog-data-driven/proposal.md`

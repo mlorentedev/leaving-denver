@@ -304,7 +304,7 @@ input is mixed into the payload, so compressing before encrypting leaks only the
 ## References
 
 - ADR-002 (output isolation), ADR-005 (Web Analytics), ADR-006 (seller tracking)
-- Spec: `specs/FEAT-009-one-seller-tool/` (PR 2: `pr2-encrypted-private-data.md`)
+- Spec: `specs/archive/FEAT-009-one-seller-tool/` (PR 2: `pr2-encrypted-private-data.md`)
 - Runbook: `docs/runbooks/ops.md`, "Owner-only mobile listing copy (Cloudflare Access)"
 - `docs/lessons/lesson-006-extract-private-data-before-first-public-push.md`
 - `functions/_middleware.js`, `src/leaving_denver/private_data.py`, `tests/fixtures/private.example.yaml`
