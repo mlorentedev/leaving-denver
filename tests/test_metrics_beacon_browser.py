@@ -85,7 +85,7 @@ def test_only_the_utm_parameters_leave_the_address(tmp_path):
 
 def test_a_page_with_no_utm_sends_nothing_on_load(tmp_path):
     assert beacons(tmp_path / "plain", "await wait(100); return BEACONS;") == []
-    assert beacons(tmp_path / "other", "return BEACONS;", query="ref=keep") == []
+    assert beacons(tmp_path / "other", "await wait(100); return BEACONS;", query="ref=keep") == []
 
 
 def test_a_reload_after_the_strip_is_not_a_second_visit(tmp_path):
