@@ -20,7 +20,7 @@ Not verified here, and said so: the Access objects. The deploy token has no Acce
 
 ## Test status
 
-- `make check` -> exit 0: `1081 passed, 2 skipped`, then `terraform validate`: `Success! The configuration is valid.`
+- `make check` -> exit 0: `1098 passed, 2 skipped`, then `terraform validate`: `Success! The configuration is valid.`
 - No regressions in the existing suite: yes.
 - Nothing was applied and no Cloudflare resource was created or changed.
 
