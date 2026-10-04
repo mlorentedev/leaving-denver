@@ -162,6 +162,6 @@ def test_the_terraform_objects_go_before_the_token_that_removes_them_and_the_sta
     by_nov_15 = section("By Nov 15")
     assert by_nov_15.index("make infra-apply") < by_nov_15.index("Terraform token")
     assert "3 to destroy" in by_nov_15 and "never the Pages project" in by_nov_15
-    assert "n8n metrics digest" in by_nov_15 and "not in Terraform" in by_nov_15
+    assert "leaving-denver-analytics-read" in by_nov_15 and "not in Terraform" in by_nov_15
     assert "terraform.tfstate*" in by_nov_15 and "owner_email" in by_nov_15
     assert by_nov_15.index("Terraform token") < by_nov_15.index("terraform.tfstate*")
