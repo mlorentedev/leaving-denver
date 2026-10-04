@@ -21,8 +21,9 @@ created: "2026-10-03"
 
 ## Test status
 
-- `SELLER_PHONE=+13035550100 make check` -> exit 0, `1173 passed, 2 skipped in 201.70s` (after rebasing onto main at bd619d5), ruff clean.
-- `make check` with `seller.sale_over: true` in a scratch edit of `data/inventory.yaml` (reverted with `git checkout data/inventory.yaml`) -> exit 0, `964 passed, 211 skipped in 140.03s`. It first failed on tests of other changes that read the catalog and were missing from `CATALOG_TESTS` (`test_item_cta_browser.py`, `test_photo_gallery_browser.py`, three in `test_smoke_script.py`); they are added to the list here.
+- `SELLER_PHONE=+13035550100 make check` -> exit 0, `1228 passed, 8 skipped in 216.43s` (after rebasing onto main at 4830507, #181 and #183 in), ruff clean.
+- `make check` with `seller.sale_over: true` in a scratch edit of `data/inventory.yaml` (reverted with `git checkout data/inventory.yaml`) -> exit 0, `1007 passed, 229 skipped in 124.77s`. It first failed on tests of other changes that read the catalog and were missing from `CATALOG_TESTS` (`test_item_cta_browser.py`, `test_photo_gallery_browser.py`, three in `test_smoke_script.py`); the gallery ones were later added on main too, so only the smoke ones remain here.
+- Under #181's policy: `test_the_beacon_fires_under_the_sites_real_content_security_policy` and `test_a_share_link_keeps_its_source_under_the_real_policy` serve the build with its real `_headers` Content-Security-Policy and a recording `/api/hit`; the events arrive and no violation or console error is logged. `tests/test_public_csp.py` passes with the beacon in the page.
 
 ## Not run here
 
