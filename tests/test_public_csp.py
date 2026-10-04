@@ -355,6 +355,16 @@ def drive_catalog(browser):
     browser.run("document.querySelector('#itemSheet [data-close-sheet]').click();")
     browser.run("await until(() => sheets().length === 0);")
     assert browser.run("return sheets();") == []
+    # The car's card opens its sheet from data-open-item (it had an inline onclick): both the
+    # photo and the specs button.
+    for opener in ("div[data-open-item]", "button[data-open-item]"):
+        opened = browser.run(
+            f"document.querySelector({opener!r}).click(); await until(() => sheets().length);"
+            f"const title = document.getElementById('modalTitle').textContent;"
+            f"document.querySelector('#itemSheet [data-close-sheet]').click();"
+            f"await until(() => !sheets().length); return title;"
+        )
+        assert opened == browser.run(f"return INVENTORY.items.find(i => i.id === {CAR!r}).title;")
 
 
 @needs_chrome
