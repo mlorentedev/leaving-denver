@@ -666,7 +666,7 @@
     // interpolates, and a control that promises more is lying. A photo that has not loaded yet
     // falls back to 2, and 5 is a ceiling no frame here reaches.
     function scaleCeiling() {
-      const widest = Math.max(0, [...photoImage.srcset.matchAll(/(\d+)w/g)].map(m => Number(m[1])));
+      const widest = Math.max(0, ...[...photoImage.srcset.matchAll(/(\d+)w/g)].map(m => Number(m[1])));
       const shown = photoImage.clientWidth;
       return shown && widest ? Math.min(5, Math.max(2, widest / shown)) : 2;
     }

@@ -15,6 +15,7 @@ of tests selected (4, 6, 6, 2, 2, 1, 6).
 
 - [x] AC1 -> `tests/test_photo_zoom_browser.py::test_the_controls_are_labelled_buttons` (both
   locales), `::test_a_button_enlarges_and_fit_returns`, `::test_the_scale_never_leaves_its_range`
+  (the scale must *reach* the ceiling, not merely stay under it — see the review finding below)
 - [x] AC2 -> `::test_at_fit_the_frame_keeps_its_swipe_and_its_scroll` (touch-action `pan-y`, a
   swipe still steps), `::test_an_enlarged_photo_pans_instead_of_stepping` (the drag pans, the
   arrows still step), and the untouched `tests/test_photo_gallery_browser.py` (7 tests, all green)
@@ -63,6 +64,14 @@ of tests selected (4, 6, 6, 2, 2, 1, 6).
   the pinch needed no change to it.
 - **The scale stops at the photo's own pixels** — `widest / displayed`, clamped to `[2, 5]` — so
   the `+` control never promises detail the 1600 px build does not hold.
+- **pr-agent found that ceiling dead on the first review of PR #192** (fixed on the PR):
+  `Math.max(0, [...srcset.matchAll(/(\d+)w/g)].map(Number))` passes the *array* to `Math.max`, so it
+  was `NaN` and every photo stopped at the `2` fallback — a 1600 px source in a 580 px frame wanted
+  2.76. The spreading operator was missing. The test that should have caught it asserted only
+  `scale <= ceiling`, and it computed the ceiling correctly itself, so a page that was *more*
+  conservative than the test's bound passed. It now asserts the control reaches the ceiling
+  (`scale == approx(ceiling)`, 2.76 on the car's cover), which fails on the bug reintroduced
+  (checked: `2 == 2.7586 ± 0.01`). Fix: spread the mapped widths.
 - **The pan clamps to the frame's content box**, not to its outer box: the `p-2` padding is the
   mat the photo already sits inside at fit.
 - **A `const style = getComputedStyle(…)` in this script fails `test_public_csp.py`'s

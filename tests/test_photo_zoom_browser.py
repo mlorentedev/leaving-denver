@@ -122,7 +122,10 @@ def test_the_scale_never_leaves_its_range(tmp_path):
         for _ in range(10):
             browser.run("document.getElementById('modalZoomIn').click();")
         top = state()
-        assert 1 < top["scale"] <= ceiling(top)
+        # Not merely bounded by the ceiling: it must reach it. An assertion of `<=` passes for a
+        # page that always stops at 2, which is exactly the bug pr-agent found on PR #192 (a
+        # `Math.max(0, <array>)` that was NaN and silently disabled the dynamic ceiling).
+        assert top["scale"] == pytest.approx(ceiling(top), abs=0.01)
         for _ in range(12):
             browser.run("document.getElementById('modalZoomOut').click();")
         assert at_fit(state())  # never below 1, and the shift comes back with it
