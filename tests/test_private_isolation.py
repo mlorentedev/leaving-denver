@@ -46,8 +46,10 @@ def fixture_values(private):
 
 
 def text_of(root: Path) -> dict[str, str]:
+    # as_posix: the seller page's key must match on every OS, and a backslash key on
+    # Windows would silently dodge the "outside /seller/" comparisons (BUG-018 session).
     return {
-        str(p.relative_to(root)): p.read_text(encoding="utf-8", errors="ignore")
+        str(p.relative_to(root).as_posix()): p.read_text(encoding="utf-8", errors="ignore")
         for p in sorted(root.rglob("*"))
         if p.is_file() and p.suffix in TEXT_SUFFIXES
     }
@@ -127,6 +129,32 @@ def test_the_default_private_file_stays_out_of_git_and_the_deploy():
     assert "build/public" in (ROOT / "wrangler.toml").read_text(encoding="utf-8")
 
 
+def without_sealed_envelope(text: str) -> str:
+    """The sealed block is ciphertext by construction — its base64 is random bytes from
+    randomBytes on every seal — so a short fixture value landing inside it flanked by base64
+    punctuation is a draw of chance, not a plaintext leak (BUG-018, ~1 build in 260). The
+    envelope's SHAPE is guaranteed elsewhere; the scan looks at what is around it."""
+    return re.sub(r'<script type="application/json" id="sealed">.*?</script>', "", text, flags=re.S)
+
+
+def test_a_fixture_value_inside_the_sealed_envelope_is_not_a_leak():
+    """The carve-out: a value that appears ONLY between the sealed script tags is not
+    reported, while the same value in the page's plaintext (outside any envelope) still is."""
+    envelope_only = (
+        "<!doctype html><html><body>"
+        '<script type="application/json" id="sealed">{"salt":"ab59+/==","iv":"x59y","ct":"59"}'
+        "</script><p>price 60</p></body></html>"
+    )
+    plaintext = "<!doctype html><html><body><p>price 59</p></body></html>"
+    assert leaked({"59"}, {"seller/index.html": without_sealed_envelope(envelope_only)}) == []
+    # The draw that flaked CI: the same text, unstripped, does flag — that is the bug's shape.
+    assert leaked({"59"}, {"seller/index.html": envelope_only}) == [("59", "seller/index.html")]
+    # The carve-out must not blind the scan to real plaintext on the seller page.
+    assert leaked({"59"}, {"seller/index.html": without_sealed_envelope(plaintext)}) == [
+        ("59", "seller/index.html")
+    ]
+
+
 def test_no_private_fixture_value_reaches_a_public_build(tmp_path, monkeypatch):
     """Build twice, clean and with the sealed fixture loaded: every file but the seller page is
     identical, and none of the fixture's numbers or dates is in the second, seller page included
@@ -138,6 +166,9 @@ def test_no_private_fixture_value_reaches_a_public_build(tmp_path, monkeypatch):
     after = text_of(tmp_path / "loaded")
 
     seller = "seller/index.html"
+    # The sealed block is ciphertext; a short value landing inside it is chance, not a
+    # leak (BUG-018). The page is still scanned — with the envelope carved out.
+    after[seller] = without_sealed_envelope(after[seller])
     assert {k: v for k, v in after.items() if k != seller} == {
         k: v for k, v in baseline.items() if k != seller
     }, "private data changed the public build outside the seller page"
