@@ -61,7 +61,7 @@ case "$*" in
   *"contents/harness/review-attestation.json"*)
     # Bootstrap PRs only: the PR head carries the registry entry before main does.
     if [ "${HEAD_HAS_ENTRY:-0}" = "1" ] && case "$*" in *"ref=$HEAD_SHA"*) true ;; *) false ;; esac; then
-      printf '%s' "$REGISTRY" | base64; exit 0
+      printf '%s' "$HEAD_REGISTRY" | base64; exit 0
     fi
     case "$CONTENTS_BEHAVIOR" in
       timeout) echo "gh: api.github.com: read timed out" >&2; exit 1 ;;
@@ -91,7 +91,12 @@ esac
 
 
 def run_guard(
-    tmp_path: Path, contents: str, comments: str, head_sha: str = "", head_has_entry: str = "0"
+    tmp_path: Path,
+    contents: str,
+    comments: str,
+    head_sha: str = "",
+    head_has_entry: str = "0",
+    head_registry_marker: str | None = None,
 ):
     bin_dir = tmp_path / "bin"
     bin_dir.mkdir(exist_ok=True)
@@ -107,6 +112,17 @@ def run_guard(
         "STARTED": "2026-10-05T17:00:00Z",
         "HEAD_SHA": head_sha,
         "HEAD_HAS_ENTRY": head_sha and head_has_entry,
+        "HEAD_REGISTRY": (
+            json.dumps(
+                {
+                    "reviewers": [
+                        {"login": "github-actions", "review_markers": [head_registry_marker]}
+                    ]
+                }
+            )
+            if head_registry_marker
+            else REGISTRY
+        ),
         "RETRY_ATTEMPTS": "3",
         "RETRY_SLEEP_BASE": "0",  # the tests measure call counts, not wall clock
         "PATH": f"{bin_dir}{os.pathsep}{os.environ['PATH']}",
@@ -172,5 +188,21 @@ def test_the_bootstrap_fallback_reads_the_entry_from_the_pr_head(tmp_path):
     r = run_guard(
         tmp_path, contents="noentry", comments="review", head_sha="0123abcd", head_has_entry="1"
     )
-    assert r.returncode == 0, r.stderr
+    assert r.returncode == 0, r.stdout
     assert "PR head" in r.stdout
+
+
+def test_the_bootstrap_head_cannot_supply_the_marker(tmp_path):
+    """CWE-345 pin (pr-agent, #201): the head read proves the entry EXISTS; the marker
+    stays PR-Agent's own hardcoded heading. A head registry declaring an exotic marker
+    must not redirect the scan — the review is found by the real heading or not at all."""
+    r = run_guard(
+        tmp_path,
+        contents="noentry",
+        comments="review",
+        head_sha="0123abcd",
+        head_has_entry="1",
+        head_registry_marker="ZQXUNIQUE",
+    )
+    assert r.returncode == 0, r.stdout
+    assert "review published (marker: PR Reviewer Guide)" in r.stdout

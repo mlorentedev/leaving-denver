@@ -18,17 +18,21 @@ SLEEP_BASE=${RETRY_SLEEP_BASE:-2}
 FILE="harness/review-attestation.json"
 
 read_marker() { # $1 = ref; sets MARKER ("" when the entry is absent) and API_FAILURE:
-  # "" (every read answered), or the last attempt's error text.
+  # "" (every read answered), or the last attempt's own stderr. One gh call per attempt:
+  # the failed call's stderr is captured to a temp file, never by re-calling the API
+  # (a second call doubles an outage's cost and could answer, masking the failure).
   MARKER=""; API_FAILURE=""
-  local ref=$1 attempt=1 content
+  local ref=$1 attempt=1 content errfile
+  errfile=$(mktemp)
   while [ "$attempt" -le "$ATTEMPTS" ]; do
     if content=$(gh api "repos/${GITHUB_REPOSITORY}/contents/${FILE}?ref=${ref}" \
-                   --jq '.content' 2>/dev/null | base64 -d 2>/dev/null); then
+                   --jq '.content' 2>"$errfile" | base64 -d 2>"$errfile"); then
       MARKER=$(printf '%s' "$content" | jq -r \
         '.reviewers[] | select(.login == "github-actions") | .review_markers[0] // empty' 2>/dev/null || true)
+      rm -f "$errfile"
       return 0
     fi
-    API_FAILURE=$(gh api "repos/${GITHUB_REPOSITORY}/contents/${FILE}?ref=${ref}" 2>&1 >/dev/null || true)
+    API_FAILURE=$(cat "$errfile")
     if [ "$attempt" -lt "$ATTEMPTS" ]; then
       sleep $((SLEEP_BASE * attempt))
       attempt=$((attempt + 1))
@@ -36,6 +40,7 @@ read_marker() { # $1 = ref; sets MARKER ("" when the entry is absent) and API_FA
       break
     fi
   done
+  rm -f "$errfile"
   return 0
 }
 
@@ -55,7 +60,10 @@ if [ -z "$marker" ] && [ -n "${HEAD_SHA:-}" ]; then
   base_api_failure=$API_FAILURE
   read_marker "${HEAD_SHA}"
   if [ -n "$MARKER" ]; then
-    marker=$MARKER
+    # The head read only proves the entry EXISTS. The marker itself stays PR-Agent's own
+    # hardcoded heading, never text a PR could declare (a head-supplied marker such as " "
+    # would match any bot comment — CWE-345; pr-agent flagged the regression on #201).
+    marker="PR Reviewer Guide"
     echo "::notice::reviewer registry entry found only on the PR head;" \
       "using PR-Agent's own heading as the marker"
   fi
@@ -66,7 +74,6 @@ if [ -z "$marker" ] || [ "$marker" = "null" ]; then
     # real review to the wolves (BUG #163). Name the failure and the refs it hit.
     echo "::error::GitHub API call failed while reading ${FILE} (checked ${BASE_REF}" \
       "and the PR head); last error: ${API_FAILURE:-$base_api_failure}"
-    echo "::error::If this was a transient outage, re-run the job once the API answers."
     echo "::error::If this was a transient outage, re-run the job once the API answers."
   else
     echo "::error::no review marker declared for github-actions in ${FILE}" \
