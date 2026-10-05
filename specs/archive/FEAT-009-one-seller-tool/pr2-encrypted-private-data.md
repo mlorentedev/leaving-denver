@@ -6,8 +6,8 @@ created: "2026-10-01"
 # FEAT-009 PR 2: private data in `/seller/`, as ciphertext
 
 > **Where this goes.** This is the PR 2 section of `specs/archive/FEAT-009-one-seller-tool/proposal.md`.
-> That proposal is on `feat/one-seller-tool-copy` (PR #142), not on `main`, so the section lives
-> in its own file for now. Fold it into `proposal.md` once #142 merges.
+> It was written as its own file while that proposal was still on PR #142's branch, and it stayed
+> separate when the spec was archived (#183).
 >
 > Decided in **ADR-007** (`docs/adr/adr-007-private-seller-data-travels-as-ciphertext.md`).
 > This file sets acceptance criteria only; the decisions and their reasons are in the ADR.
