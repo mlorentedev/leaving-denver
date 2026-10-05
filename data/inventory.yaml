@@ -79,8 +79,8 @@ items:
   - Built-in pull-out sleeper mechanism
   - All fitted back cushions
   pickup_note: Currently assembled for in-person testing. Easily separates into 2
-    main modules in under 10 minutes for transport. Requires 2 people to carry. Fits
-    in pickup truck, cargo van, or large SUV.
+    main modules in under 10 minutes for transport. Requires 2 people to carry. Needs
+    a pickup truck or cargo van — does NOT fit in an SUV.
   es:
     color: Tela gris
     title: Sofá seccional reversible AFW Kent con cama extraíble y chaise con almacenamiento
@@ -96,7 +96,7 @@ items:
     - Sofá seccional AFW Kent en 2 módulos
     - Mecanismo de cama extraíble integrado
     - Todos los cojines de respaldo
-    pickup_note: Está armado para probarlo. Se separa en 2 módulos en menos de 10 minutos; se necesitan 2 personas y una camioneta, van o SUV grande.
+    pickup_note: Está armado para probarlo. Se separa en 2 módulos en menos de 10 minutos; se necesitan 2 personas y una pickup o camioneta de carga — NO cabe en un SUV.
   tags:
   - american furniture warehouse
   - afw sofa
@@ -254,8 +254,9 @@ items:
   included:
   - Convertible desk structure
   - Lower storage shelf
-  pickup_note: Already assembled. Fits in midsize SUV with seats folded or truck bed.
-    Tools available on site if you wish to disassemble.
+  pickup_from: Pickup from Oct 17
+  pickup_note: Available for pickup from Oct 17. Already assembled. Fits in midsize SUV with seats
+    folded or truck bed. Tools available on site if you wish to disassemble.
   es:
     color: Veta de nogal Canyon y metal negro
     title: Escritorio Mainstays convertible en L o recto
@@ -270,7 +271,9 @@ items:
     included:
     - Estructura del escritorio convertible
     - Estante inferior
-    pickup_note: Está armado. Cabe en un SUV mediano con los asientos abatidos o en una pickup; hay herramientas para desmontarlo.
+    pickup_from: Recogida desde el 17 de octubre
+    pickup_note: Disponible para recoger a partir del 17 de octubre. Está armado. Cabe en un SUV
+      mediano con los asientos abatidos o en una pickup; hay herramientas para desmontarlo.
   tags:
   - computer desk
   - l-shaped desk

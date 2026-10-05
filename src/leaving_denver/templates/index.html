@@ -173,6 +173,9 @@
             {% endif %}
           </span>
           {% endif %}
+          {% if item.pickup_from %}
+          <span class="px-1.5 py-0.5 rounded-md text-xs font-semibold bg-amber-50 text-amber-800 w-fit">{{ item.pickup_from }}</span>
+          {% endif %}
           {{ item_badges(item) }}
         </span>
       </button>
