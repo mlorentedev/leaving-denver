@@ -50,6 +50,9 @@ def test_the_pickup_from_date_ships_for_every_carrier_in_both_locales(locale):
         source = SOURCE[item_id]
         copy = source.get(locale, {}) if locale != "en" else source
         assert item["pickup_from"] == copy.get("pickup_from", ""), item_id
+        # Exclusivity, actually enforced (pr-agent on #200): a pickup claim on any item
+        # without the field in the SSOT would publish a date backed by nothing.
+        assert item_id in CARRIERS or not item["pickup_from"], item_id
     for item_id in CARRIERS:
         assert items[item_id]["pickup_from"], item_id
 
