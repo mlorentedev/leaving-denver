@@ -208,10 +208,19 @@ def test_item_dialog_uses_srcset(page):
     }, assignments
     sizes = dict(re.findall(r"(\w+)\.sizes = ([^;]+);", html))
     # The neighbour fetched ahead takes the main photo's sizes, so the browser picks the same
-    # candidate it will show: any other sizes would download a second, unused file.
-    assert sizes == {"mainImg": "PHOTO_SIZES", "ahead": "PHOTO_SIZES", "thumb": "'48px'"}, sizes
+    # candidate it will show: any other sizes would download a second, unused file. The main
+    # photo keeps those until it is enlarged, then asks for the widest candidate there is
+    # (FEAT-016): a photo drawn at 2.6x needs 2.6x the pixels, and `620px` would not fetch them.
+    assert sizes == {
+        "mainImg": "PHOTO_SIZES",
+        "ahead": "PHOTO_SIZES",
+        "thumb": "'48px'",
+        "photoImage": "enlarged ? ZOOM_SIZES : PHOTO_SIZES",
+    }, sizes
     photo_sizes = re.search(r"const PHOTO_SIZES = '([^']*)';", html).group(1)
     assert resolve_sizes(photo_sizes, 390) == 390
+    zoom_sizes = re.search(r"const ZOOM_SIZES = '([^']*)';", html).group(1)
+    assert resolve_sizes(zoom_sizes, 390) >= 1200  # at least the 1200w variant, and never a vw
     assert resolve_sizes("48px", 390) == 48
 
 

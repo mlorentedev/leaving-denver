@@ -181,6 +181,51 @@ class Page:
             self.mouse("mouseMoved", *end)
         self.mouse("mouseReleased", *end)
 
+    def click(self, point, count=1):
+        """A real click: press and release at one point. `count` is the click count Chrome
+        reads, so a second click with 2 is a double-click and fires `dblclick`."""
+        for kind in ("mousePressed", "mouseReleased"):
+            self.send(
+                "Input.dispatchMouseEvent",
+                type=kind,
+                x=point[0],
+                y=point[1],
+                button="left",
+                buttons=1 if kind == "mousePressed" else 0,
+                clickCount=count,
+            )
+
+    def double_click(self, point):
+        self.click(point)
+        self.click(point, count=2)
+
+    def wheel(self, point, delta_y):
+        """A wheel notch at a point. Chrome delivers it on the next round trip, not this one:
+        read the page back (`run("return 0;")`, as `errors()` does) before asserting on it."""
+        self.send(
+            "Input.dispatchMouseEvent",
+            type="mouseWheel",
+            x=point[0],
+            y=point[1],
+            deltaX=0,
+            deltaY=delta_y,
+        )
+
+    def pinch(self, centre, start, end, steps=5):
+        """Two fingers either side of centre, moving from `start` to `end` px apart: a real
+        pinch, with the second finger put down after the first, as a hand does."""
+        x, y = centre
+
+        def fingers(apart):
+            return [{"x": x - apart, "y": y}, {"x": x + apart, "y": y}]
+
+        self.send("Input.dispatchTouchEvent", type="touchStart", touchPoints=fingers(start)[:1])
+        self.send("Input.dispatchTouchEvent", type="touchStart", touchPoints=fingers(start))
+        for step in range(1, steps + 1):
+            apart = start + (end - start) * step / steps
+            self.send("Input.dispatchTouchEvent", type="touchMove", touchPoints=fingers(apart))
+        self.send("Input.dispatchTouchEvent", type="touchEnd", touchPoints=[])
+
     def swipe(self, start, end, steps=5):
         """A finger put down at start, moved to end in steps, and lifted: a real touch, so the
         page sees touch-action and pointerType 'touch' as on a phone."""
