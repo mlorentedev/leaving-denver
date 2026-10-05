@@ -112,6 +112,15 @@ jobs:
       - name: Stamp run start
         id: start
         run: echo "started=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+      # The guard step below is a script file, not inline bash, so its diagnosis rules
+      # are testable with a stub gh (BUG #163, scripts/verify-review-published.sh and
+      # tests/test_review_guard.py). The job otherwise has no checkout by design.
+      - name: Check out the guard script
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8  # v5.0.0
+        with:
+          persist-credentials: false
+          sparse-checkout: scripts/verify-review-published.sh
+          sparse-checkout-cone-mode: false
       # PR-Agent swallows an authentication failure and exits green, so without
       # this step a missing secret surfaces only as "published no review" with a
       # NaN-concurrency diagnosis that is wrong. Measured 2026-09-06 on the ten
@@ -212,50 +221,4 @@ jobs:
           BASE_REF: ${{ github.event.repository.default_branch }}
           STARTED: ${{ steps.start.outputs.started }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha || '' }}
-        run: |
-          set -euo pipefail
-          read_marker() { # $1 = ref; prints the marker or nothing; never aborts the step
-            gh api "repos/${GITHUB_REPOSITORY}/contents/harness/review-attestation.json?ref=$1" \
-              --jq '.content' 2>/dev/null | base64 -d 2>/dev/null \
-              | jq -r '.reviewers[] | select(.login == "github-actions") | .review_markers[0] // empty' 2>/dev/null || true
-          }
-          marker=$(read_marker "${BASE_REF}")
-          if [ -z "$marker" ] && [ -z "${HEAD_SHA:-}" ]; then
-            # issue_comment events carry no pull_request payload; ask the API for the head.
-            HEAD_SHA=$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" --jq '.head.sha' 2>/dev/null || true)
-          fi
-          if [ -z "$marker" ] && [ -n "${HEAD_SHA:-}" ]; then
-            # The default branch has no github-actions entry yet: this is the PR that
-            # introduces it. The head registry only proves the entry EXISTS; the marker
-            # itself is PR-Agent's own heading, never text a PR could choose (a head-
-            # supplied marker such as "#" would match any bot comment, CWE-345). Author
-            # and start-stamp binding below still apply. Without this fallback the
-            # bootstrap PR of every repository failed with a bare "exit code 1".
-            if [ -n "$(read_marker "${HEAD_SHA}")" ]; then
-              marker="PR Reviewer Guide"
-              echo "::notice::reviewer registry entry found only on the PR head;" \
-                "using PR-Agent's own heading as the marker"
-            fi
-          fi
-          if [ -z "$marker" ] || [ "$marker" = "null" ]; then
-            echo "::error::no review marker declared for github-actions in" \
-              "harness/review-attestation.json (checked ${BASE_REF} and the PR head)"
-            exit 1
-          fi
-          # --paginate emits one JSON array per page; `jq -s` slurps them into one
-          # array of arrays so the count spans every page (gh's own --slurp flag is
-          # not present on the runner's gh 2.46 and printed usage instead).
-          found=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" --paginate \
-            | jq -s --arg started "${STARTED}" --arg marker "${marker}" \
-                '[.[][] | select(.user.login == "github-actions[bot]"
-                                 and (.updated_at >= $started)
-                                 and (.body | contains($marker)))] | length')
-          if [ "$found" -gt 0 ]; then
-            echo "review published (marker: ${marker})"
-            exit 0
-          fi
-          echo "::error::PR-Agent reported success but published no review" \
-            "(no github-actions[bot] comment updated since ${STARTED} carries \"${marker}\")."
-          echo "::error::Most likely cause: NaN concurrency exhaustion — the cluster allows 5 simultaneous"
-          echo "::error::requests, shared with pi, qq and hive embeddings. See #1107."
-          exit 1
+        run: scripts/verify-review-published.sh
