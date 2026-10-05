@@ -48,3 +48,4 @@ tags: [lessons, index, docs, leaving-denver]
 | [lesson-033](lesson-033-a-double-tap-is-also-the-browsers-dblclick.md) | A Double-Tap Is Also the Browser's `dblclick` | 2026-10-04 | [browser, touch, gestures, testing, javascript] |
 | [lesson-034](lesson-034-a-skipped-deploy-is-not-a-failed-one.md) | A Skipped Deploy Is Not a Failed One | 2026-10-04 | [ci, github, deploy, testing, cloudflare] |
 | [lesson-035](lesson-035-make-check-fails-under-busybox-make.md) | `make check` Fails Under BusyBox make: Run the Parts or Trust CI | 2026-10-05 | [make, windows, busybox, ci, tooling] |
+| [lesson-036](lesson-036-command-substitution-discards-function-globals.md) | Command Substitution Discards a Function's Globals Under `set -u` | 2026-10-05 | [bash, ci, github-actions, testing, shell] |
