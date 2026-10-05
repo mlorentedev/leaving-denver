@@ -32,6 +32,11 @@ item_title: Item Title
 main_photo: Main photo
 previous_photo: Previous photo
 next_photo: Next photo
+# The item sheet's photo zoom (FEAT-016): the group's label and its three controls.
+zoom_controls: Photo zoom
+zoom_in: Zoom in
+zoom_out: Zoom out
+zoom_fit: Fit
 original: Original
 details: Details & Specifications
 included: What's included

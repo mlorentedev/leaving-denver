@@ -110,6 +110,24 @@ CATALOG_TESTS = {
         "test_the_arrow_keys_step_through_the_photos",
         "test_the_arrows_step_and_wrap",
     ),
+    "test_photo_zoom_browser.py": (
+        "test_a_button_enlarges_and_fit_returns",
+        "test_a_double_click_toggles_in_and_out",
+        "test_a_double_tap_zooms_on_a_phone",
+        "test_a_pan_cannot_open_a_gap",
+        "test_a_pinch_scales_by_the_spread",
+        "test_an_enlarged_photo_pans_instead_of_stepping",
+        "test_at_fit_the_frame_keeps_its_swipe_and_its_scroll",
+        "test_changing_the_photo_resets_the_zoom",
+        "test_closing_and_reopening_the_sheet_starts_fitted",
+        "test_ctrl_wheel_enlarges_from_fit_and_leaves_the_page_zoom_alone",
+        "test_enlarging_about_a_point_keeps_it_under_the_pointer",
+        "test_no_gesture_ever_throws",
+        "test_the_controls_are_labelled_buttons",
+        "test_the_enlarged_photo_asks_for_a_wider_variant",
+        "test_the_scale_never_leaves_its_range",
+        "test_the_wheel_scrolls_at_fit_and_zooms_when_enlarged",
+    ),
     "test_inventory_ssot.py": (
         "test_no_stale_or_unbacked_pickup_facts",
         "test_no_unbacked_vehicle_claims",
@@ -261,6 +279,7 @@ SKIPPED_DESPITE_ITS_NAME = {
     "test_responsive_images.py::test_cards_ask_for_half_a_phone_screen": "a phone screen",
     "test_responsive_images.py::test_phone_downloads_a_third_of_the_full_covers": "a phone screen",
     "test_seller_layout_browser.py::test_the_seller_page_keeps_a_gutter_on_a_phone": "a phone screen",
+    "test_photo_zoom_browser.py::test_a_double_tap_zooms_on_a_phone": "a phone screen",
     "test_metrics_beacon_browser.py::test_no_payload_holds_the_phone_or_an_sms_uri": (
         "reads the catalog page's beacon; the end page has no beacon and no number (test_end_of_sale.py)"
     ),

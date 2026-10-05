@@ -30,6 +30,11 @@ item_title: Artículo
 main_photo: Foto principal
 previous_photo: Foto anterior
 next_photo: Foto siguiente
+# El zoom de la foto en la ficha (FEAT-016).
+zoom_controls: Zoom de la foto
+zoom_in: Acercar
+zoom_out: Alejar
+zoom_fit: Ajustar
 original: Original
 details: Detalles y especificaciones
 included: Qué incluye

@@ -45,3 +45,4 @@ tags: [lessons, index, docs, leaving-denver]
 | [lesson-030](lesson-030-a-token-without-access-scope-lists-access-as-empty.md) | A Token Without Access Scope Lists Access as Empty | 2026-10-03 | [cloudflare, access, terraform, tokens, testing] |
 | [lesson-031](lesson-031-a-conflicting-pr-runs-no-ci.md) | A Conflicting PR Runs No CI | 2026-10-04 | [ci, github, review, process] |
 | [lesson-032](lesson-032-a-terraform-import-writes-state-only-at-apply.md) | A Terraform Import Writes State Only at Apply | 2026-10-04 | [terraform, cloudflare, access, testing] |
+| [lesson-033](lesson-033-a-double-tap-is-also-the-browsers-dblclick.md) | A Double-Tap Is Also the Browser's `dblclick` | 2026-10-04 | [browser, touch, gestures, testing, javascript] |
