@@ -25,6 +25,12 @@ from pages_stub import AppliesHeadersFile, MissingPath, pages_headers_for, polic
 from leaving_denver import site_builder
 
 ROOT = Path(__file__).resolve().parents[1]
+# An inline style or event handler is an attribute, so it only exists inside a tag. Anchoring
+# there (BUG-017) keeps the page script's own JS from failing the guard: `const style = …`,
+# `box.style.width = …` and `const online = …` are not markup, and `style-src 'self'` does not
+# govern them anyway. `[^>]*` crosses newlines, so a wrapped attribute still matches.
+STYLE_ATTR = re.compile(r"<[a-zA-Z][^>]*\sstyle\s*=")
+HANDLER_ATTR = re.compile(r"<[a-zA-Z][^>]*\son[a-z]+\s*=")
 CAR = "2019-ford-escape-sel-awd"
 BEACON_SCRIPT = "https://static.cloudflareinsights.com"
 BEACON_CONNECT = "https://cloudflareinsights.com"
@@ -239,9 +245,26 @@ def test_the_pages_carry_no_inline_style_handler_or_javascript_url(site):
         html = page.read_text(encoding="utf-8")
         where = page.relative_to(site)
         assert "<style" not in html, f"{where}: an inline <style>"
-        assert not re.search(r"\sstyle\s*=", html), f"{where}: a style attribute"
-        assert not re.search(r"\son[a-z]+\s*=", html), f"{where}: an inline event handler"
+        assert not STYLE_ATTR.search(html), f"{where}: a style attribute"
+        assert not HANDLER_ATTR.search(html), f"{where}: an inline event handler"
         assert "javascript:" not in html, where
+
+
+def test_the_attribute_guards_ignore_a_javascript_local_named_style():
+    """BUG-017: the guard wants markup, not the page script's own JS. `const style =` was a
+    false positive that forced a local rename in FEAT-016 (#190); `box.style.width =` and
+    `one =` are not inline style or an event handler and the policy does not govern them."""
+    js = "const style = getComputedStyle(photoFrame);\nstyle = box.style.width;\nconst online = true;"
+    assert not STYLE_ATTR.search(js)
+    assert not HANDLER_ATTR.search(js)
+
+
+def test_the_attribute_guards_still_flag_real_attributes():
+    """The anchor must narrow the guard, not empty it: both real attributes stay caught,
+    across newlines too."""
+    html = '<div class="a"\n  style="color:red" onclick="go()">x</div>'
+    assert STYLE_ATTR.search(html)
+    assert HANDLER_ATTR.search(html)
 
 
 def test_the_page_script_sets_no_style_attribute_or_markup():

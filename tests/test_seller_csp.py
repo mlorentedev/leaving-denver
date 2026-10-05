@@ -210,8 +210,8 @@ def test_the_seller_template_has_no_inline_code_or_style():
         assert 'type="application/json"' in tag or 'type="module"' in tag, tag
     assert not re.search(r"<script\b[^>]*type=\"module\"(?![^>]*\bsrc=)", html)
     assert "<style" not in html
-    assert not re.search(r"\sstyle\s*=", html)
-    assert not re.search(r"\son[a-z]+\s*=", html), "an inline event handler"
+    assert not re.search(r"<[a-zA-Z][^>]*\sstyle\s*=", html)
+    assert not re.search(r"<[a-zA-Z][^>]*\son[a-z]+\s*=", html), "an inline event handler"
 
 
 # Each is a way the page could reach the network, keep something, or run text as code.
