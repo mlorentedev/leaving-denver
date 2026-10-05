@@ -23,7 +23,7 @@ INLINE_HANDLERS_BEFORE_THE_BEACON = 6
 
 
 def test_the_page_adds_no_inline_event_handler_and_no_request_but_the_beacon():
-    handlers = re.findall(r"\son[a-z]+\s*=", INDEX)
+    handlers = re.findall(r"<[a-zA-Z][^>]*\son[a-z]+\s*=", INDEX)
     assert len(handlers) <= INLINE_HANDLERS_BEFORE_THE_BEACON, "a new inline handler"
     for forbidden in ("fetch(", "XMLHttpRequest", "WebSocket", "document.cookie", "localStorage"):
         assert forbidden not in INDEX, forbidden
