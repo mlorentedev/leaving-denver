@@ -47,3 +47,4 @@ tags: [lessons, index, docs, leaving-denver]
 | [lesson-032](lesson-032-a-terraform-import-writes-state-only-at-apply.md) | A Terraform Import Writes State Only at Apply | 2026-10-04 | [terraform, cloudflare, access, testing] |
 | [lesson-033](lesson-033-a-double-tap-is-also-the-browsers-dblclick.md) | A Double-Tap Is Also the Browser's `dblclick` | 2026-10-04 | [browser, touch, gestures, testing, javascript] |
 | [lesson-034](lesson-034-a-skipped-deploy-is-not-a-failed-one.md) | A Skipped Deploy Is Not a Failed One | 2026-10-04 | [ci, github, deploy, testing, cloudflare] |
+| [lesson-035](lesson-035-make-check-fails-under-busybox-make.md) | `make check` Fails Under BusyBox make: Run the Parts or Trust CI | 2026-10-05 | [make, windows, busybox, ci, tooling] |
