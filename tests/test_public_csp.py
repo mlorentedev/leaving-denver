@@ -26,9 +26,13 @@ from leaving_denver import site_builder
 
 ROOT = Path(__file__).resolve().parents[1]
 # An inline style or event handler is an attribute, so it only exists inside a tag. Anchoring
-# there (BUG-017) keeps the page script's own JS from failing the guard: `const style = …`,
-# `box.style.width = …` and `const online = …` are not markup, and `style-src 'self'` does not
-# govern them anyway. `[^>]*` crosses newlines, so a wrapped attribute still matches.
+# there (BUG-017) keeps the plain-JS idioms `const style = …`, `box.style.width = …` and
+# `const online = …` from failing the guard; `style-src 'self'` does not govern them anyway.
+# Known limit (pr-agent, THEORETICAL, #199): `<` is also a JS operator, so a space-free
+# comparison (`if (w<h) { const style = …`) still reads as a pseudo-tag — nothing in the
+# pages pairs one with a style/on* token today; if that ever bites, the durable fix is an
+# HTML-parser-based check, not a wider regex. `[^>]*` crosses newlines, so a wrapped
+# attribute still matches.
 STYLE_ATTR = re.compile(r"<[a-zA-Z][^>]*\sstyle\s*=")
 HANDLER_ATTR = re.compile(r"<[a-zA-Z][^>]*\son[a-z]+\s*=")
 CAR = "2019-ford-escape-sel-awd"
