@@ -508,7 +508,8 @@ items:
   - 275 lb weight capacity
   included:
   - Fully assembled ergonomic desk chair
-  pickup_note: Fits easily in any car back seat or trunk.
+  pickup_from: Pickup from Oct 17
+  pickup_note: Available for pickup from Oct 17. Fits easily in any car back seat or trunk.
   es:
     color: Malla y tela negras
     title: Silla ergonómica Mainstays de malla con brazos abatibles
@@ -523,7 +524,9 @@ items:
     - Capacidad de 275 lb
     included:
     - Silla de escritorio ergonómica completamente armada
-    pickup_note: Cabe fácilmente en el asiento trasero o la cajuela de cualquier auto.
+    pickup_from: Recogida desde el 17 de octubre
+    pickup_note: Disponible para recoger a partir del 17 de octubre. Cabe fácilmente en el asiento
+      trasero o la cajuela de cualquier auto.
   tags:
   - office chair
   - desk chair

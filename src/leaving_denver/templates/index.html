@@ -268,7 +268,7 @@
           {% else %}
           <span class="w-12 h-12 flex-none rounded-lg bg-neutral-100"></span>
           {% endif %}
-          <span class="flex-1 min-w-0 text-sm font-semibold text-neutral-900">{{ item.short_title }}</span>
+          <span class="flex-1 min-w-0 text-sm font-semibold text-neutral-900">{{ item.short_title }}{% if item.pickup_from %} · <span class="text-amber-800">{{ item.pickup_from }}</span>{% endif %}</span>
           <span class="text-sm text-neutral-600">{% if item.free %}{{ t.free }}{% else %}${{ item.price }}{% endif %}</span>
         </li>
         {% endfor %}
@@ -356,7 +356,10 @@
             <span id="modalPrice" class="text-2xl font-black text-neutral-900">$0</span>
             <span id="modalRetail" class="text-xs text-neutral-500 line-through ml-2"></span>
           </div>
-          <span id="modalStatus" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200"></span>
+          <span class="flex flex-col items-end gap-1">
+            <span id="modalStatus" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200"></span>
+            <span id="modalPickupFrom" class="text-xs font-semibold px-1.5 py-0.5 rounded-md bg-amber-50 text-amber-800" hidden></span>
+          </span>
         </div>
 
         <div id="modalBadges" class="flex flex-wrap gap-1.5" hidden></div>
@@ -496,6 +499,11 @@
       const status = document.getElementById('modalStatus');
       status.textContent = item.status_label;
       status.className = 'text-xs font-semibold px-2.5 py-0.5 rounded-full border ' + STATUS_PILL[item.status];
+      // The card pill repeats here, under the status: the same datum on every surface (BUG-017
+      // review finding; a bundle sheet says it per item too).
+      const from = document.getElementById('modalPickupFrom');
+      from.textContent = item.pickup_from || '';
+      from.hidden = !item.pickup_from;
       // "% off" and the size badges, as derived by the builder; none on a Sold item.
       const badges = document.getElementById('modalBadges');
       badges.replaceChildren();

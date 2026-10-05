@@ -38,6 +38,35 @@ def test_every_item_publishes_all_its_specs_and_what_is_included(locale):
         assert item["included"] == copy.get("included", source.get("included", [])), item_id
 
 
+CARRIERS = ("convertible-desk", "office-chair-ergonomic")
+
+
+@pytest.mark.parametrize("locale", PAGES)
+def test_the_pickup_from_date_ships_for_every_carrier_in_both_locales(locale):
+    """`pickup_from` (BUG: the desk and chair are not physically available until Oct 17) ships
+    on every carrier, in the locale's copy, and on no one else."""
+    _, items = inventory(PAGES[locale])
+    for item_id, item in items.items():
+        source = SOURCE[item_id]
+        copy = source.get(locale, {}) if locale != "en" else source
+        assert item["pickup_from"] == copy.get("pickup_from", ""), item_id
+    for item_id in CARRIERS:
+        assert items[item_id]["pickup_from"], item_id
+
+
+def test_the_sheet_and_the_bundle_sheet_repeat_the_pickup_from_date():
+    """The date lives on every surface that names the item: the card pill, the sheet (under
+    the status) and each bundle row that includes a carrier — a bundle cannot read
+    "available" while two of its items sit unavailable for two weeks."""
+    html = (PUBLIC / "index.html").read_text(encoding="utf-8")
+    assert 'id="modalPickupFrom"' in html, "the sheet has no pickup-from slot"
+    assert "item.pickup_from" in html, "the script never fills the slot"
+    wfh = html.split('id="sheet-title-bundle-wfh"')[1].split("</section>")[0]
+    assert "Pickup from Oct 17" in wfh, "bundle-wfh row for the desk lacks the date"
+    take_all = html.split('id="sheet-title-bundle-take-all"')[1].split("</section>")[0]
+    assert take_all.count("Pickup from Oct 17") >= 2, "take-all lacks desk and chair dates"
+
+
 def test_the_spanish_sheet_has_spanish_details():
     # The summary line shows these three; with no overlay the Spanish sheet shows English.
     _, items = inventory(PAGES["es"])
