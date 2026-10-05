@@ -734,6 +734,13 @@
       zoomTo(scale > 1 ? 1 : Math.min(ZOOM_TAP, scaleCeiling()), point);
     }
 
+    // A rotation, or a desktop window resize, changes the room the clamp was taken against while
+    // the transform stays: without this the photo's edge can sit inside the frame until the next
+    // pan. `zoomTo` re-caps the scale as well as the shift, so both follow the new room.
+    new ResizeObserver(() => {
+      if (scale > 1) zoomTo(scale);
+    }).observe(photoFrame);
+
     // The controls are the entry point a browser without a wheel, a mouse or a touch gets.
     document.getElementById('modalZoomIn').addEventListener('click', () => zoomTo(scale * ZOOM_STEP));
     document.getElementById('modalZoomOut').addEventListener('click', () => zoomTo(scale / ZOOM_STEP));

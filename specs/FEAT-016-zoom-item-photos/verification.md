@@ -24,7 +24,9 @@ of tests selected (4, 6, 6, 2, 2, 1, 6).
   `::test_ctrl_wheel_enlarges_from_fit_and_leaves_the_page_zoom_alone`,
   `::test_a_pinch_scales_by_the_spread`
 - [x] AC4 -> `::test_enlarging_about_a_point_keeps_it_under_the_pointer` (the same image pixel
-  under the pointer within 2 px), `::test_a_pan_cannot_open_a_gap`
+  under the pointer within 2 px), `::test_a_pan_cannot_open_a_gap`,
+  `::test_a_resize_re_clamps_the_pan` (a rotation or a window resize re-clamps the pan, so no
+  gap opens against a room the transform no longer fits)
 - [x] AC5 -> `::test_changing_the_photo_resets_the_zoom` (arrow button and arrow key),
   `::test_closing_and_reopening_the_sheet_starts_fitted`
 - [x] AC6 -> `::test_the_enlarged_photo_asks_for_a_wider_variant` (`sizes` becomes `1600px` and
@@ -72,6 +74,12 @@ of tests selected (4, 6, 6, 2, 2, 1, 6).
   conservative than the test's bound passed. It now asserts the control reaches the ceiling
   (`scale == approx(ceiling)`, 2.76 on the car's cover), which fails on the bug reintroduced
   (checked: `2 == 2.7586 ± 0.01`). Fix: spread the mapped widths.
+- **pr-agent's second finding on PR #192** (theoretical, low): nothing re-clamped the pan when the
+  frame's size changed, so rotating a phone left the photo's edge inside the frame until the next
+  pan. Applied, not just disclosed: a `ResizeObserver` on the frame re-runs `zoomTo(scale)`, which
+  re-caps the scale and re-clamps the shift. `::test_a_resize_re_clamps_the_pan` shrinks the
+  viewport under an enlarged, panned photo and fails without the observer (`432.5 <= 320.75 + 1` —
+  a 112 px gap), then passes with it.
 - **The pan clamps to the frame's content box**, not to its outer box: the `p-2` padding is the
   mat the photo already sits inside at fit.
 - **A `const style = getComputedStyle(…)` in this script fails `test_public_csp.py`'s

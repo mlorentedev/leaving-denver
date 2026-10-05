@@ -116,6 +116,7 @@ CATALOG_TESTS = {
         "test_a_double_tap_zooms_on_a_phone",
         "test_a_pan_cannot_open_a_gap",
         "test_a_pinch_scales_by_the_spread",
+        "test_a_resize_re_clamps_the_pan",
         "test_an_enlarged_photo_pans_instead_of_stepping",
         "test_at_fit_the_frame_keeps_its_swipe_and_its_scroll",
         "test_changing_the_photo_resets_the_zoom",

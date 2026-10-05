@@ -158,6 +158,33 @@ def test_a_pan_cannot_open_a_gap(tmp_path):
         assert room > 0 and 0 < panned["x"] <= room + 1
 
 
+def test_a_resize_re_clamps_the_pan(tmp_path):
+    with open_page(tmp_path, "index.html") as browser:
+        state = open_car(browser)
+        left, top, right, bottom, width, height = browser.run(BOX)
+        browser.double_click((left + width / 2, top + height / 2))
+        band = top + 40
+        browser.drag((left + 20, band), (right - 20, band))
+        before = state()
+        assert before["scale"] > 1 and before["x"] > 0
+        # Rotate the phone, or resize the desktop window: the room the clamp was taken against
+        # changes while the transform stays. Without a re-clamp the photo's edge would sit inside
+        # the frame until the next pan.
+        browser.send(
+            "Emulation.setDeviceMetricsOverride",
+            width=500,
+            height=900,
+            deviceScaleFactor=1,
+            mobile=True,
+        )
+        browser.run("await wait(250); return 0;")
+        after = state()
+        assert after["room"] != before["room"], "the frame's room did not change: nothing to test"
+        room = max(0, (after["box"] * after["scale"] - after["room"]) / 2)
+        assert abs(after["x"]) <= room + 1
+        assert abs(after["x"]) < before["x"]  # the pan followed the narrower room in
+
+
 def test_the_wheel_scrolls_at_fit_and_zooms_when_enlarged(tmp_path):
     with open_page(tmp_path, "index.html") as browser:
         state = open_car(browser)
