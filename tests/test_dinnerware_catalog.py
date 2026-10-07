@@ -7,7 +7,9 @@ def test_dinnerware_is_private_without_hiding_take_everything():
         item for item in inventory["items"] if item["id"] == "dinnerware-glassware-set"
     )
     assert dinnerware["published"] is False
-    assert all("dinnerware-glassware-set" not in bundle["items"] for bundle in inventory["bundles"])
+    assert all(
+        "dinnerware-glassware-set" not in bundle.get("items", []) for bundle in inventory["bundles"]
+    )
 
     public = sanitize_public_inventory(inventory)
     assert "dinnerware-glassware-set" not in {item["id"] for item in public["items"]}

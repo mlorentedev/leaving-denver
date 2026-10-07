@@ -288,7 +288,9 @@ def test_a_sold_car_is_not_mentioned(public_dir):
 def test_a_catalog_without_a_car_still_makes_a_flyer(public_dir):
     data = catalog_inventory()
     data["items"] = [i for i in data["items"] if i["category"] != "Vehicle"]
-    data["bundles"] = [b for b in data["bundles"] if "2019-ford-escape-sel-awd" not in b["items"]]
+    data["bundles"] = [
+        b for b in data["bundles"] if "2019-ford-escape-sel-awd" not in b.get("items", [])
+    ]
     assert "Escape" not in text_of(build_flyer(public_dir, data))
 
 

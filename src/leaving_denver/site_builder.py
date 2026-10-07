@@ -355,6 +355,31 @@ def public_item(item: dict[str, Any]) -> dict[str, Any]:
     return pub
 
 
+# "Take everything" rounds its price down to this many dollars (FEAT-018).
+EVERYTHING_ROUNDING = 5
+
+
+def everything_offer(bundle: dict[str, Any], public_items: list[dict[str, Any]]) -> list[str]:
+    """The items "Take everything" holds: every household item still Available. Its list and
+    price follow the sales, so the data may not type either; it gives the discount only."""
+    typed = [key for key in ("items", "bundle_price") if key in bundle]
+    if typed:
+        raise RuntimeError(f"Bundle {bundle['id']}: an everything bundle is derived; drop {typed}")
+    if not isinstance(bundle.get("discount_pct"), int):
+        raise RuntimeError(f"Bundle {bundle['id']}: an everything bundle needs discount_pct")
+    return [
+        item["id"]
+        for item in public_items
+        if item["category"] != "Vehicle" and item["status"] == "Available"
+    ]
+
+
+def everything_price(total: int, discount_pct: int) -> int:
+    """The sum at the discount, rounded down: the derived price never rounds up past it."""
+    discounted = total * (100 - discount_pct) // 100
+    return discounted // EVERYTHING_ROUNDING * EVERYTHING_ROUNDING
+
+
 def sanitize_public_inventory(full_data: dict[str, Any]) -> dict[str, Any]:
     """
     Strips internal seller secrets:
@@ -365,7 +390,7 @@ def sanitize_public_inventory(full_data: dict[str, Any]) -> dict[str, Any]:
     hidden = unpublished_ids(full_data)
     for bundle in full_data.get("bundles", []):
         # A string would be compared character by character and never match a hidden id.
-        if not isinstance(bundle.get("items"), list):
+        if not bundle.get("everything") and not isinstance(bundle.get("items"), list):
             raise RuntimeError(f"Bundle {bundle.get('id')}: items must be a list of item ids")
     # Cheapest first, Sold last; sorted() is stable, so equal prices keep the data's order. A free
     # item sorts by its list price (it is free only with a purchase) so it does not lead the grid.
@@ -378,26 +403,34 @@ def sanitize_public_inventory(full_data: dict[str, Any]) -> dict[str, Any]:
     statuses = {item["id"]: item["status"] for item in public_items}
     public_bundles = []
     for bundle in full_data.get("bundles", []):
-        if hidden & set(bundle["items"]):
+        if bundle.get("everything"):
+            items = everything_offer(bundle, public_items)
+            # One item is not a bundle: with less than two left there is nothing to offer.
+            if len(items) < 2:
+                continue
+            price = everything_price(sum(prices[i] for i in items), bundle["discount_pct"])
+        else:
+            items, price = bundle["items"], bundle["bundle_price"]
+        if hidden & set(items):
             continue
-        missing = [i for i in bundle["items"] if i not in prices]
+        missing = [i for i in items if i not in prices]
         if missing:
             raise RuntimeError(f"Bundle {bundle['id']} names unknown items: {missing}")
         # Totals and savings are derived here, never typed into the data.
-        total = sum(prices[i] for i in bundle["items"])
+        total = sum(prices[i] for i in items)
         public_bundles.append(
             {
                 "id": bundle["id"],
                 "name": bundle.get("name", ""),
                 "short_name": bundle.get("short_name", bundle.get("name", "")),
-                "items": list(bundle["items"]),
-                "bundle_price": bundle["bundle_price"],
+                "items": list(items),
+                "bundle_price": price,
                 "individual_total": total,
-                "savings": total - bundle["bundle_price"],
+                "savings": total - price,
                 "note": bundle.get("note", ""),
                 "everything": bool(bundle.get("everything")),
                 # One reserved or sold item and the bundle can no longer be bought as offered.
-                "available": all(statuses[i] == "Available" for i in bundle["items"]),
+                "available": all(statuses[i] == "Available" for i in items),
             }
         )
 

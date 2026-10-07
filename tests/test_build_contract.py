@@ -280,6 +280,26 @@ def on_sale(data, bundle):
     return all(status[i] == "Available" for i in bundle["items"])
 
 
+def offered(data, bundle):
+    """The bundle as offered: "Take everything" holds every household item still Available,
+    cheapest first like the grid, at its discount rounded down to $5 (FEAT-018)."""
+    if not bundle.get("everything"):
+        return bundle
+    items = sorted(
+        (
+            i
+            for i in data["items"]
+            if i["category"] != "Vehicle"
+            and i.get("published", True)
+            and i.get("status", "Available") == "Available"
+        ),
+        key=lambda i: i["recommended_list_price"],
+    )
+    total = sum(0 if i.get("free_with_purchase") else i["recommended_list_price"] for i in items)
+    price = total * (100 - bundle["discount_pct"]) // 100 // 5 * 5
+    return {**bundle, "items": [i["id"] for i in items], "bundle_price": price}
+
+
 def test_page_figures_match_the_data(public_dir):
     data, html = real_page(public_dir)
     # Figures computed here from the YAML, independently of the builder.
@@ -290,7 +310,7 @@ def test_page_figures_match_the_data(public_dir):
     }
     household = [i for i in data["items"] if i["category"] != "Vehicle" and i["id"] in price]
     savings = set()
-    for b in data["bundles"]:
+    for b in (offered(data, b) for b in data["bundles"]):
         save = sum(price[i] for i in b["items"]) - b["bundle_price"]
         savings.add(save)
         attr = "data-everything" if b.get("everything") else "data-bundle"
@@ -566,7 +586,7 @@ def test_pickup_facts_come_from_data_one_per_line(public_dir):
 def test_bundle_sheet_lists_what_is_in_it(public_dir):
     data, html = real_page(public_dir)
     items = {i["id"]: i for i in data["items"]}
-    for b in data["bundles"]:
+    for b in (offered(data, b) for b in data["bundles"]):
         # The card opens the sheet; it no longer texts the seller straight away.
         attr = "data-everything" if b.get("everything") else "data-bundle"
         assert re.search(rf'<button type="button" {attr}="{b["id"]}"', html), b["id"]

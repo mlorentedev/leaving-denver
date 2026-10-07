@@ -117,13 +117,15 @@ def page(tmp_path, monkeypatch):
     # Real sales would change what this fixture sets up, so it starts from nothing sold.
     for item in inv["items"]:
         item["status"] = "Available"
-    bundle = next(b for b in inv["bundles"] if not b.get("everything"))
+    curated = [b for b in inv["bundles"] if not b.get("everything")]
+    bundle = curated[0]
+    in_a_bundle = {i for b in curated for i in b["items"]}
     sold, pending = (
         bundle["items"][0],
         next(
             i["id"]
             for i in inv["items"]
-            if i["category"] != "Vehicle" and i["id"] not in bundle["items"]
+            if i["category"] != "Vehicle" and i["id"] not in in_a_bundle
         ),
     )
     for item in inv["items"]:
@@ -161,9 +163,16 @@ def test_bundle_with_a_sold_item_is_off_sale(page):
     assert 'data-available="false"' in card and "No longer available" in card
     sheet = re.search(rf'data-bundle-sheet="{page.bundle}".*?</section>', page.html, re.S).group(0)
     assert "data-sms-intent" not in sheet
-    # Every other bundle but "take everything" (which holds the sold item too) stays on sale.
+    # Every bundle without the sold item stays on sale.
     others = re.findall(r'data-bundle="([^"]+)"[^>]*data-available="true"', page.html)
-    assert page.bundle not in others and others
+    untouched = [
+        b["id"]
+        for b in page.inv["bundles"]
+        if not b.get("everything") and page.sold not in b["items"]
+    ]
+    assert page.bundle not in others and others == untouched and others
+    # "Take everything" leaves the sold and the reserved item out and stays on sale (FEAT-018).
+    assert re.search(r'data-everything="[^"]+" data-available="true"', page.html)
 
 
 def test_sheet_logic_follows_the_status(page):

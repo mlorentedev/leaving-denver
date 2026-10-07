@@ -180,6 +180,11 @@ def test_bundles_integrity(inventory):
         # Totals and savings are computed at build time; typed copies drift (#6).
         typed = {"individual_total", "savings"} & b.keys()
         assert not typed, f"{b['id']} types derived figures {sorted(typed)}"
+        if b.get("everything"):
+            # Derived from what is for sale (FEAT-018): a discount and nothing else.
+            assert not {"items", "bundle_price"} & b.keys(), f"{b['id']} types a derived list"
+            assert 0 < b["discount_pct"] < 100, f"{b['id']} has no positive discount"
+            continue
         assert all(i in prices for i in b["items"]), f"{b['id']} names an unknown item"
         total = sum(prices[i] for i in b["items"])
         assert 0 < b["bundle_price"] < total, f"{b['id']} has no positive discount"
