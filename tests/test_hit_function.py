@@ -16,6 +16,7 @@ from sealed_helpers import node
 ROOT = Path(__file__).resolve().parents[1]
 HIT = ROOT / "functions" / "api" / "hit.js"
 SELLER_MJS = ROOT / "src" / "leaving_denver" / "assets" / "seller.mjs"
+INDEX_HTML = ROOT / "src" / "leaving_denver" / "templates" / "index.html"
 
 RUN = """
 import { onRequestPost, onRequest } from './functions/api/hit.js';
@@ -226,6 +227,9 @@ def test_every_channel_the_site_can_link_from_is_a_known_source():
 
     sources = set(re.findall(r"source: '([a-z]+)'", SELLER_MJS.read_text(encoding="utf-8")))
     sources |= set(CHANNELS) | {"flyer"} | set(SOCIAL_SOURCES)
+    # The catalog's own Share links (FEAT-019).
+    sources |= set(re.findall(r"utm_source=([a-z]+)", INDEX_HTML.read_text(encoding="utf-8")))
+    assert "share" in sources, "stale pattern"
     assert {"facebook", "craigslist", "offerup", "nextdoor", "flyer"} <= sources, "stale pattern"
     probe = run(*[post({"event": "visit", "source": s}) for s in sorted(sources)])
     for source, answer in zip(sorted(sources), probe, strict=True):

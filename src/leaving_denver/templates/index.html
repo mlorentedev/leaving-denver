@@ -71,6 +71,12 @@
         <span>·</span>
         <span>{{ t.household_payment_summary }}</span>
       </div>
+      <div class="pt-2 flex flex-wrap items-center gap-3">
+        <button type="button" id="catalogShare" aria-live="polite" class="shrink-0 whitespace-nowrap py-2 px-3.5 rounded-xl border border-neutral-200 hover:bg-neutral-50 text-neutral-700 font-semibold text-xs transition-colors">
+          {{ t.share_sale }}
+        </button>
+        <p id="catalogShareUrl" hidden class="p-3 bg-neutral-50 rounded-xl border border-neutral-100 text-sm text-neutral-700 select-all break-all"></p>
+      </div>
     </div>
 
     {% if vehicle %}
@@ -859,17 +865,26 @@
       });
     })();
 
+    // Every shared link is word of mouth: its own utm_source, so the visit it brings is not
+    // read as direct (FEAT-019). The share page forwards its query string to the catalog.
+    const SHARED = '?utm_source=share&utm_medium=referral&utm_campaign=moving-sale';
+    const catalogUrl = () => document.querySelector('meta[property="og:url"]').content;
     // Shares the item's share page, not /#<id>: a link to the catalog previews the catalog.
     // The catalog's og:url is the locale's root, and the share page sits at i/<id>/ under it.
     let sheetItem = null;
     function shareItem() {
       const item = INVENTORY.items.find(i => i.id === sheetItem);
       if (!item) return;
-      const url = document.querySelector('meta[property="og:url"]').content + 'i/' + item.id + '/';
-      const button = document.getElementById('modalShare');
-      const shown = document.getElementById('modalShareUrl');
       // The answer can arrive after the sheet moved on to another item: drop it then.
-      const current = () => sheetItem === item.id;
+      shareLink(catalogUrl() + 'i/' + item.id + '/' + SHARED, item.title, 'modalShare', 'modalShareUrl',
+        () => sheetItem === item.id);
+    }
+    function shareCatalog() {
+      shareLink(catalogUrl() + SHARED, document.title, 'catalogShare', 'catalogShareUrl', () => true);
+    }
+    function shareLink(url, title, buttonId, shownId, current) {
+      const button = document.getElementById(buttonId);
+      const shown = document.getElementById(shownId);
       // No clipboard (plain http, permission denied): show the link, selected. The label
       // stays: the selected link is the cue, and phones offer Copy on a selection.
       const select = () => {
@@ -883,7 +898,7 @@
         navigator.clipboard.writeText(url).then(() => { if (current()) button.textContent = UI.link_copied; }, select);
       };
       // A cancelled share sheet is not a failure; anything else falls back to copying.
-      if (navigator.share) navigator.share({ title: item.title, url }).catch(err => { if (err.name !== 'AbortError') copy(); });
+      if (navigator.share) navigator.share({ title, url }).catch(err => { if (err.name !== 'AbortError') copy(); });
       else copy();
     }
 
@@ -968,6 +983,7 @@
       document.getElementById('contactCopy').addEventListener('click', copyNumber);
       document.getElementById('copyVin')?.addEventListener('click', copyVin);
       document.getElementById('modalShare').addEventListener('click', shareItem);
+      document.getElementById('catalogShare').addEventListener('click', shareCatalog);
       document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', () => applyFilter(btn.dataset.cat));
       });
