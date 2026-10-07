@@ -121,11 +121,6 @@ def load_inventory_yaml() -> dict[str, Any]:
         return yaml.safe_load(f)
 
 
-def save_inventory_yaml(data: dict[str, Any]) -> None:
-    with open(INVENTORY_YAML, "w", encoding="utf-8") as f:
-        yaml.dump(data, f, sort_keys=False, allow_unicode=True, indent=2)
-
-
 STATUS_LINE = re.compile(r"^  status:(?P<gap>[ \t]+)(?P<value>[^\s#]+)(?P<tail>[ \t]+#.*)?$")
 
 
@@ -200,6 +195,142 @@ def set_item_status(item_id: str, status: str) -> None:
         raise FileNotFoundError(f"SSOT inventory not found at {INVENTORY_YAML}")
     text = INVENTORY_YAML.read_bytes().decode("utf-8")
     edited = edit_item_status(text, item_id, status)
+    if edited != text:
+        INVENTORY_YAML.write_bytes(edited.encode("utf-8"))
+
+
+PRIMARY_LINE = re.compile(
+    r"^  primary_image:(?P<gap>[ \t]+)(?P<value>[^\s#'\"][^\s#]*)(?P<tail>[ \t]+#.*)?$"
+)
+IMAGES_LINE = re.compile(r"^  images:(?P<tail>[ \t]+#.*)?$")
+LIST_ENTRY = re.compile(r"^(?P<indent> *)- ")
+
+
+def yaml_scalar(value: str) -> str:
+    """`value` as a plain YAML scalar when it reads back as itself, else double-quoted."""
+    return (
+        value if yaml.safe_load(f"- {value}") == [value] else json.dumps(value, ensure_ascii=False)
+    )
+
+
+def only_line(lines: list[str], item_id: str, key: str) -> int | None:
+    """The index of the item's one `  <key>:` line, None without one; two are refused."""
+    start, stop = item_block(lines, item_id)
+    found = [n for n in range(start, stop) if lines[n].startswith(f"  {key}:")]
+    if len(found) > 1:
+        raise ValueError(
+            f"item '{item_id}' has {len(found)} `{key}:` lines in inventory.yaml; "
+            "keep one and run the command again."
+        )
+    return found[0] if found else None
+
+
+def insert_line(lines: list[str], item_id: str, at: int | None, new: list[str]) -> None:
+    """Insert `new` before line `at`, or at the end of the item's block when `at` is None."""
+    if at is None:
+        at = item_block(lines, item_id)[1]
+    if at > 0 and not lines[at - 1].endswith("\n"):
+        lines[at - 1] += "\r\n" if lines[at - 1].endswith("\r") else "\n"
+    lines[at:at] = new
+
+
+def edit_item_images(lines: list[str], item_id: str, images: list[str], newline: str) -> None:
+    """Make the item's `images:` list `images`, in place: replace its list, or add one."""
+    at = only_line(lines, item_id, "images")
+    if at is None:
+        after = only_line(lines, item_id, "primary_image")
+        entries = [f"  - {yaml_scalar(img)}{newline}" for img in images]
+        insert_line(
+            lines, item_id, None if after is None else after + 1, [f"  images:{newline}", *entries]
+        )
+        return
+    head = IMAGES_LINE.match(lines[at].rstrip("\r\n"))
+    if not head:
+        raise ValueError(
+            f"item '{item_id}': cannot rewrite the line {lines[at].strip()!r} in place; "
+            "make it a block list under `images:` and run the command again."
+        )
+    first = LIST_ENTRY.match(lines[at + 1]) if at + 1 < len(lines) else None
+    indent = first["indent"] if first else "  "
+    end = at + 1
+    while end < len(lines) and lines[end].startswith(f"{indent}- "):
+        end += 1
+    entries = [f"{indent}- {yaml_scalar(img)}{newline}" for img in images]
+    if end > at + 1 and not lines[end - 1].endswith("\n"):
+        entries[-1] = entries[-1].rstrip("\r\n")
+    elif end == at + 1 and not lines[at].endswith("\n"):
+        lines[at] += newline  # a bare `images:` ending the file: the entries start a new line
+    lines[at + 1 : end] = entries
+
+
+def edit_item_primary(lines: list[str], item_id: str, primary: str, newline: str) -> None:
+    """Make the item's `primary_image:` `primary`: its value only, or a new line before `images:`."""
+    at = only_line(lines, item_id, "primary_image")
+    if at is None:
+        insert_line(
+            lines,
+            item_id,
+            only_line(lines, item_id, "images"),
+            [f"  primary_image: {yaml_scalar(primary)}{newline}"],
+        )
+        return
+    body = lines[at].rstrip("\r\n")
+    match = PRIMARY_LINE.match(body)
+    if not match:
+        raise ValueError(
+            f"item '{item_id}': cannot rewrite the line {body.strip()!r} in place; "
+            "make it `primary_image: <path>` and run the command again."
+        )
+    lines[at] = (
+        f"  primary_image:{match['gap']}{yaml_scalar(primary)}{match['tail'] or ''}"
+        f"{lines[at][len(body) :]}"
+    )
+
+
+def load_text(text: str, item_id: str) -> Any:
+    """`text` parsed; a YAML error is a refusal naming the item, never a traceback."""
+    try:
+        return yaml.safe_load(text)
+    except yaml.YAMLError as err:
+        raise ValueError(
+            f"item '{item_id}': the inventory is not valid YAML here ({err.__class__.__name__}); "
+            "fix it and run the command again."
+        ) from err
+
+
+def edit_item_photos(text: str, item_id: str, images: list[str], primary: str) -> str:
+    """`text` with the item's `images:` list and `primary_image:` line set, nothing else touched.
+
+    A part that already holds the value is left alone, whatever its quoting; a block with
+    neither gets both at its end. Raises ValueError when a part is not a line or list it can
+    rewrite. The result is parsed back: only that item's photos may differ from the input."""
+    lines = text.splitlines(keepends=True)
+    start, _ = item_block(lines, item_id)
+    newline = "\r\n" if lines[start].endswith("\r\n") else "\n"
+    expected = load_text(text, item_id)
+    item = next(i for i in expected["items"] if i["id"] == item_id)
+    if item.get("images") != images:
+        edit_item_images(lines, item_id, images, newline)
+    if item.get("primary_image") != primary:
+        edit_item_primary(lines, item_id, primary, newline)
+    item["images"], item["primary_image"] = list(images), primary
+    edited = "".join(lines)
+    if load_text(edited, item_id) != expected:
+        raise ValueError(f"item '{item_id}': the edit would change more than its photos.")
+    return edited
+
+
+def set_inventory_photos(photos: dict[str, list[str]]) -> None:
+    """Persist each item's synced photos in inventory.yaml; the first is the cover.
+
+    Edits only the photo lines of those items, keeping every other byte (comments, layout), and
+    writes nothing when any block is refused or nothing changed."""
+    if not INVENTORY_YAML.exists():
+        raise FileNotFoundError(f"SSOT inventory not found at {INVENTORY_YAML}")
+    text = INVENTORY_YAML.read_bytes().decode("utf-8")
+    edited = text
+    for item_id, images in photos.items():
+        edited = edit_item_photos(edited, item_id, images, images[0])
     if edited != text:
         INVENTORY_YAML.write_bytes(edited.encode("utf-8"))
 

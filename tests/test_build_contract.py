@@ -161,15 +161,16 @@ def test_an_unpublished_item_is_not_in_the_seller_roster(monkeypatch):
     assert [row["id"] for row in roster] == ["shown-lamp"]
 
 
-def test_publish_flag_survives_yaml_round_trip(tmp_path, monkeypatch):
+def test_publish_flag_survives_a_photo_sync(tmp_path, monkeypatch):
     path = tmp_path / "inventory.yaml"
-    path.write_text(yaml.dump(inventory(), sort_keys=False))
+    path.write_text("items:\n- id: hidden-widget\n  published: false\n  title: Widget\n")
     monkeypatch.setattr(site_builder, "INVENTORY_YAML", path)
 
-    site_builder.save_inventory_yaml(site_builder.load_inventory_yaml())
+    site_builder.set_inventory_photos({"hidden-widget": ["catalog/hidden-widget/a.jpg"]})
 
-    hidden = yaml.safe_load(path.read_text())["items"][1]
+    [hidden] = yaml.safe_load(path.read_text())["items"]
     assert hidden["published"] is False
+    assert hidden["images"] == ["catalog/hidden-widget/a.jpg"]
 
 
 def test_bundle_items_must_be_a_list(public_dir):
