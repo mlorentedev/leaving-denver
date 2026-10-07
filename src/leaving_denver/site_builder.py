@@ -189,12 +189,25 @@ def edit_item_status(text: str, item_id: str, status: str) -> str:
     return edited
 
 
-def set_item_status(item_id: str, status: str) -> None:
-    """Set one item's status in inventory.yaml by editing its line, keeping every other byte."""
+def planned_status_edit(item_id: str, status: str) -> tuple[str, str]:
+    """(current text, edited text) of inventory.yaml for this status; ValueError if refused."""
     if not INVENTORY_YAML.exists():
         raise FileNotFoundError(f"SSOT inventory not found at {INVENTORY_YAML}")
     text = INVENTORY_YAML.read_bytes().decode("utf-8")
-    edited = edit_item_status(text, item_id, status)
+    return text, edit_item_status(text, item_id, status)
+
+
+def check_item_status(item_id: str, status: str) -> None:
+    """Dry run of `set_item_status`: raises the ValueError it would, writes nothing.
+
+    A command that records something else first asks this before it does, so a refused edit
+    cannot leave that record behind (#220)."""
+    planned_status_edit(item_id, status)
+
+
+def set_item_status(item_id: str, status: str) -> None:
+    """Set one item's status in inventory.yaml by editing its line, keeping every other byte."""
+    text, edited = planned_status_edit(item_id, status)
     if edited != text:
         INVENTORY_YAML.write_bytes(edited.encode("utf-8"))
 

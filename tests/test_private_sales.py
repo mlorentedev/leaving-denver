@@ -34,6 +34,7 @@ def test_sold_with_a_price_records_it_privately(monkeypatch):
     inv, edits, recorded = fake_inventory(), [], []
     monkeypatch.setattr(cli, "load_inventory_yaml", lambda: inv)
     monkeypatch.setattr(cli, "set_item_status", lambda *a: edits.append(a))
+    monkeypatch.setattr(cli, "check_item_status", lambda *a: None)
     monkeypatch.setattr(cli, "build_all", lambda: None)
     monkeypatch.setattr(
         cli, "record_sale", lambda item_id, price, on: recorded.append((item_id, price, on))
@@ -47,6 +48,7 @@ def test_sold_with_a_price_records_it_privately(monkeypatch):
 def test_sold_fails_before_touching_anything_if_the_price_cannot_be_kept(monkeypatch):
     monkeypatch.setattr(cli, "load_inventory_yaml", fake_inventory)
     monkeypatch.setattr(cli, "set_item_status", lambda *a: pytest.fail("edited"))
+    monkeypatch.setattr(cli, "check_item_status", lambda *a: None)
 
     def refuse(item_id, price, on):
         raise RuntimeError("sops unavailable")

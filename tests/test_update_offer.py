@@ -30,6 +30,7 @@ def commands(monkeypatch):
     calls = []
     monkeypatch.setattr(cli, "load_inventory_yaml", lambda: inventory)
     monkeypatch.setattr(cli, "set_item_status", lambda *args: None)
+    monkeypatch.setattr(cli, "check_item_status", lambda *args: None)
     monkeypatch.setattr(cli, "build_all", lambda: None)
     monkeypatch.setattr(cli, "load_private", fixture_private)
     for name in ("record_post", "record_price", "record_sale"):
@@ -179,6 +180,7 @@ def test_an_empty_passphrase_on_a_resealing_aborts_with_the_hint_and_rotates_not
     The real seal runs here, over the fakes."""
     monkeypatch.setattr(cli, "load_inventory_yaml", lambda: INVENTORY_OF_ONE)
     monkeypatch.setattr(cli, "set_item_status", lambda *args: None)
+    monkeypatch.setattr(cli, "check_item_status", lambda *args: None)
     monkeypatch.setattr(cli, "build_all", lambda: None)
     monkeypatch.setattr(cli, "load_private", fixture_private)
     for name in ("record_post", "record_price", "record_sale"):

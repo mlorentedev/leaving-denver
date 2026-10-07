@@ -26,6 +26,7 @@ from leaving_denver.private_data import (
 from leaving_denver.site_builder import (
     apply_photos,
     build_all,
+    check_item_status,
     load_inventory_yaml,
     sale_over,
     sale_schedule,
@@ -61,6 +62,15 @@ def cmd_sync(args):
     print("Sync complete. Run 'leaving-denver build' to recompile sites.")
 
 
+def refusing_edit(edit, item_id, status):
+    """Run an inventory status edit; a refusal is an error message and exit 1, never a traceback."""
+    try:
+        edit(item_id, status)
+    except ValueError as err:
+        print(f"Error: {err} Nothing changed.")
+        sys.exit(1)
+
+
 def set_status(item_id, status):
     """Set one item's status in the SSOT, rebuild; returns the item.
 
@@ -71,11 +81,7 @@ def set_status(item_id, status):
     if not target_item:
         print(f"Error: Item with ID '{item_id}' not found.")
         sys.exit(1)
-    try:
-        set_item_status(item_id, status)
-    except ValueError as err:
-        print(f"Error: {err} Nothing changed.")
-        sys.exit(1)
+    refusing_edit(set_item_status, item_id, status)
     target_item["status"] = status
     build_all()
     return target_item
@@ -165,6 +171,9 @@ def cmd_reprice(args):
 def cmd_sold(args):
     item = known_item(args.id)
     today = date.today()
+    # A refused inventory edit must not leave a sale recorded privately (a rerun would record it
+    # twice): ask the edit first, record second, write the inventory last (#220).
+    refusing_edit(check_item_status, args.id, "Sold")
     # The repo is public: the sale goes to the encrypted file first, or nothing changes.
     if args.price is not None:
         record_privately(record_sale, args.id, args.price, today)

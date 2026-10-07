@@ -83,6 +83,7 @@ def test_status_commands_set_the_status_and_rebuild(monkeypatch, command, status
     edits, built = [], []
     monkeypatch.setattr(cli, "load_inventory_yaml", lambda: inv)
     monkeypatch.setattr(cli, "set_item_status", lambda *a: edits.append(a))
+    monkeypatch.setattr(cli, "check_item_status", lambda *a: None)
     monkeypatch.setattr(cli, "build_all", lambda: built.append(True))
     # `sold` records the day and reads the tracking: never against the owner's real file.
     monkeypatch.setattr(cli, "record_sale", lambda *args: None)
