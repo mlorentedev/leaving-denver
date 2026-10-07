@@ -258,6 +258,8 @@ def edit_item_images(lines: list[str], item_id: str, images: list[str], newline:
     entries = [f"{indent}- {yaml_scalar(img)}{newline}" for img in images]
     if end > at + 1 and not lines[end - 1].endswith("\n"):
         entries[-1] = entries[-1].rstrip("\r\n")
+    elif end == at + 1 and not lines[at].endswith("\n"):
+        lines[at] += newline  # a bare `images:` ending the file: the entries start a new line
     lines[at + 1 : end] = entries
 
 
@@ -285,6 +287,17 @@ def edit_item_primary(lines: list[str], item_id: str, primary: str, newline: str
     )
 
 
+def load_text(text: str, item_id: str) -> Any:
+    """`text` parsed; a YAML error is a refusal naming the item, never a traceback."""
+    try:
+        return yaml.safe_load(text)
+    except yaml.YAMLError as err:
+        raise ValueError(
+            f"item '{item_id}': the inventory is not valid YAML here ({err.__class__.__name__}); "
+            "fix it and run the command again."
+        ) from err
+
+
 def edit_item_photos(text: str, item_id: str, images: list[str], primary: str) -> str:
     """`text` with the item's `images:` list and `primary_image:` line set, nothing else touched.
 
@@ -294,7 +307,7 @@ def edit_item_photos(text: str, item_id: str, images: list[str], primary: str) -
     lines = text.splitlines(keepends=True)
     start, _ = item_block(lines, item_id)
     newline = "\r\n" if lines[start].endswith("\r\n") else "\n"
-    expected = yaml.safe_load(text)
+    expected = load_text(text, item_id)
     item = next(i for i in expected["items"] if i["id"] == item_id)
     if item.get("images") != images:
         edit_item_images(lines, item_id, images, newline)
@@ -302,7 +315,7 @@ def edit_item_photos(text: str, item_id: str, images: list[str], primary: str) -
         edit_item_primary(lines, item_id, primary, newline)
     item["images"], item["primary_image"] = list(images), primary
     edited = "".join(lines)
-    if yaml.safe_load(edited) != expected:
+    if load_text(edited, item_id) != expected:
         raise ValueError(f"item '{item_id}': the edit would change more than its photos.")
     return edited
 

@@ -115,6 +115,36 @@ def test_an_item_ending_the_file_without_a_newline_still_gets_clean_lines():
     )
 
 
+def test_a_bare_images_key_ending_the_file_without_a_newline_gets_its_ending_back():
+    edited = edit("items:\n- id: a\n  title: A\n  images:", "a", ["catalog/a/x.jpg"])
+    assert edited == (
+        "items:\n- id: a\n  title: A\n  primary_image: catalog/a/x.jpg\n"
+        "  images:\n  - catalog/a/x.jpg\n"
+    )
+
+
+def test_a_file_yaml_cannot_read_after_the_edit_is_a_refusal_not_a_traceback():
+    # A tab in the indentation: the edit cannot make this parse, and the error is a ValueError.
+    with pytest.raises(ValueError, match="not valid YAML"):
+        edit("items:\n- id: a\n\ttitle: A\n", "a", ["catalog/a/x.jpg"])
+
+
+def test_the_command_refuses_a_file_yaml_cannot_read_without_a_traceback(
+    tmp_path, monkeypatch, capsys
+):
+    broken = "items:\n- id: a\n  title: A\n  images:\n  - x\n  - [unclosed\n"
+    path = tmp_path / "inventory.yaml"
+    path.write_text(broken, encoding="utf-8")
+    monkeypatch.setattr(site_builder, "INVENTORY_YAML", path)
+    monkeypatch.setattr(cli, "load_inventory_yaml", lambda: {"items": [{"id": "a"}]})
+    fake_sync(monkeypatch, {"a": ["catalog/a/x.jpg"]})
+    with pytest.raises(SystemExit) as stop:
+        cli.cmd_sync(None)
+    assert stop.value.code == 1
+    assert "Error:" in capsys.readouterr().out
+    assert path.read_text(encoding="utf-8") == broken
+
+
 def test_a_bundle_with_the_same_id_is_never_the_item():
     with pytest.raises(ValueError, match="'nothing'"):
         edit(SMALL, "nothing", LAMP_NEW)
@@ -232,13 +262,28 @@ def test_a_refused_block_writes_nothing_and_exits_with_the_reason(tmp_path, monk
 SOURCES = [*(BASE_DIR / "src").rglob("*.py"), *(BASE_DIR / "scripts").rglob("*.py")]
 
 
+YAML_WRITERS = {"dump", "safe_dump", "dump_all", "safe_dump_all"}
+
+
 def serializes_yaml(path: Path) -> list[str]:
-    """`yaml.dump`/`safe_dump`/`dump_all` calls and any `save_inventory_yaml` name in a file."""
+    """`yaml.dump`-style calls (also `from yaml import dump`) and any `save_inventory_yaml` name.
+
+    Only the `yaml` module counts: `json.dump` writes other files and is not this guard's."""
     found = []
     for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
-        name = getattr(node, "attr", None) or getattr(node, "id", None) or getattr(node, "name", "")
-        if name in {"dump", "safe_dump", "dump_all", "safe_dump_all", "save_inventory_yaml"}:
-            found.append(f"{path.name}:{node.lineno} {name}")
+        hit = ""
+        if isinstance(node, ast.Attribute) and node.attr in YAML_WRITERS:
+            if isinstance(node.value, ast.Name) and node.value.id == "yaml":
+                hit = f"yaml.{node.attr}"
+        elif isinstance(node, ast.ImportFrom) and node.module == "yaml":
+            hit = next((f"yaml.{a.name}" for a in node.names if a.name in YAML_WRITERS), "")
+        elif getattr(node, "id", None) == "save_inventory_yaml" or (
+            getattr(node, "attr", None) == "save_inventory_yaml"
+            or getattr(node, "name", None) == "save_inventory_yaml"
+        ):
+            hit = "save_inventory_yaml"
+        if hit:
+            found.append(f"{path.name}:{node.lineno} {hit}")
     return found
 
 
@@ -249,7 +294,18 @@ def test_no_command_writes_the_inventory_by_dumping_yaml():
     assert not hasattr(site_builder, "save_inventory_yaml")
 
 
-def test_the_guard_sees_a_dump(tmp_path):
+@pytest.mark.parametrize(
+    ("source", "expected"),
+    [
+        ("import yaml\nyaml.dump({}, f)\n", ["bad.py:2 yaml.dump"]),
+        ("import yaml\nyaml.safe_dump({}, f)\n", ["bad.py:2 yaml.safe_dump"]),
+        ("from yaml import dump\n", ["bad.py:1 yaml.dump"]),
+        ("from x import save_inventory_yaml\n", ["bad.py:1 save_inventory_yaml"]),
+        ("import json\njson.dump({}, f)\n", []),
+        ("from json import dump\ndump({}, f)\n", []),
+    ],
+)
+def test_the_guard_sees_a_yaml_dump_and_not_a_json_one(tmp_path, source, expected):
     sample = tmp_path / "bad.py"
-    sample.write_text("import yaml\nyaml.dump({}, open('x', 'w'))\n")
-    assert serializes_yaml(sample) == ["bad.py:2 dump"]
+    sample.write_text(source)
+    assert serializes_yaml(sample) == expected
