@@ -276,7 +276,7 @@ def test_the_car_has_no_discount_against_its_new_price():
 def test_every_real_item_shows_its_own_discount_on_the_card(locale):
     html, items = built(PAGES[locale])
     word = "off" if locale == "en" else "de descuento"
-    shown = 0
+    discounted = 0
     for item_id, item in items.items():
         source = ITEMS[item_id]
         if source["category"] == "Vehicle":
@@ -290,13 +290,15 @@ def test_every_real_item_shows_its_own_discount_on_the_card(locale):
         )
         assert item["discount_pct"] == expected, item_id
         badge = re.search(r'data-role="discount-badge"[^>]*>([^<]*)<', card(html, item_id))
-        if expected:
-            shown += 1
+        discounted += bool(expected)
+        # A sold card shows no discount badge, whatever its discount.
+        if expected and source.get("status", "Available") != "Sold":
             assert badge and badge.group(1).strip().startswith(f"{expected}%"), item_id
             assert word in badge.group(1)
         else:
             assert not badge, item_id
-    assert shown >= 10
+    # Counted before any sale, so selling items cannot empty this test.
+    assert discounted >= 10
 
 
 def test_a_sold_item_shows_no_discount_badge(public_dir):

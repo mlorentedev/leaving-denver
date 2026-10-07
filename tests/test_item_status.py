@@ -114,6 +114,9 @@ def page(tmp_path, monkeypatch):
     monkeypatch.setattr(site_builder, "PUBLIC_ROBOTS_TXT", dist / "robots.txt")
     monkeypatch.setattr(site_builder, "PUBLIC_HEADERS", dist / "_headers")
     inv = site_builder.load_inventory_yaml()
+    # Real sales would change what this fixture sets up, so it starts from nothing sold.
+    for item in inv["items"]:
+        item["status"] = "Available"
     bundle = next(b for b in inv["bundles"] if not b.get("everything"))
     sold, pending = (
         bundle["items"][0],

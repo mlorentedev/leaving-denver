@@ -274,6 +274,12 @@ def text_for_role(html, role):
     return re.sub(r"<[^>]+>", " ", unescape(match.group(1)))
 
 
+def on_sale(data, bundle):
+    """A bundle is on sale while every item in it is Available (FEAT-006)."""
+    status = {i["id"]: i.get("status", "Available") for i in data["items"]}
+    return all(status[i] == "Available" for i in bundle["items"])
+
+
 def test_page_figures_match_the_data(public_dir):
     data, html = real_page(public_dir)
     # Figures computed here from the YAML, independently of the builder.
@@ -290,7 +296,10 @@ def test_page_figures_match_the_data(public_dir):
         attr = "data-everything" if b.get("everything") else "data-bundle"
         text = card(html, attr, b["id"], "</button>")
         assert f"${b['bundle_price']}" in text, f"{b['id']} price"
-        assert f"Save ${save}" in text, f"{b['id']} savings"
+        if on_sale(data, b):
+            assert f"Save ${save}" in text, f"{b['id']} savings"
+        else:
+            assert "No longer available" in text, f"{b['id']} off sale"
         assert f"{len(b['items'])} items" in text, f"{b['id']} item count"
     assert f"All · {len(household)}" in html
     assert html.count('class="item-card') == len(household)
@@ -568,4 +577,4 @@ def test_bundle_sheet_lists_what_is_in_it(public_dir):
         for item_id in b["items"]:
             assert escape(items[item_id]["short_title"]) in sheet
         assert f"${b['bundle_price']}" in sheet
-        assert "data-sms-intent" in sheet
+        assert ("data-sms-intent" in sheet) == on_sale(data, b), b["id"]
