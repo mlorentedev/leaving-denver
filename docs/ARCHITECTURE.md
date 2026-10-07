@@ -9,7 +9,7 @@ This project implements an automated, privacy-first inventory management and sal
 1. **Single Source of Truth (SSOT):**  
    The file `data/inventory.yaml` is the authoritative definition of all 14 items, bundled packages, public copy, retail pricing, and recommended list prices. Internal firm floor prices, targets, sales, tracking and notes are sourced only from encrypted `data/private.sops.yaml`; the build never reads that file (ADR-007).
 2. **Folder-Convention Media Ingestion:**  
-   Dropping an image (JPEG, PNG, WebP, or iPhone HEIC) into `content/photos/<item_id>/` auto-triggers discovery, format conversion and EXIF scrubbing at build time. The build only reads the SSOT; `leaving-denver sync` is what writes the discovered photo paths into `data/inventory.yaml`.
+   Dropping an image (JPEG, PNG, WebP, or iPhone HEIC) into `content/photos/<item_id>/` auto-triggers discovery, format conversion and EXIF scrubbing at build time. The build only reads the SSOT; `leaving-denver sync` is what writes the discovered photo paths into `data/inventory.yaml`, editing only the `primary_image:` and `images:` lines of the items whose photos changed (comments and layout stay).
 3. **Strict Security Isolation:**  
    There is one build output, `build/public/`, and no private one. Firm reserve floor prices and the rest of the owner's private data are never compiled into it in the clear: they travel as one AES-256-GCM envelope, sealed on the owner's machine under a passphrase (ADR-007), held in the `SELLER_SEALED` CI secret, embedded in `/seller/index.html` only, and opened in the phone's browser. `/seller/` is also behind Cloudflare Access and carries its own CSP (`script-src 'self'`, `connect-src 'none'`).
 

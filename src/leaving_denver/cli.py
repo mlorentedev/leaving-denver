@@ -29,7 +29,7 @@ from leaving_denver.site_builder import (
     load_inventory_yaml,
     sale_over,
     sale_schedule,
-    save_inventory_yaml,
+    set_inventory_photos,
     set_item_status,
 )
 
@@ -45,11 +45,19 @@ def cmd_sync(args):
 
     photo_map = sync_all_photos()
     data = load_inventory_yaml()
+    synced = {}
     for item in data.get("items", []):
         item_id = item.get("id")
         if photo_map.get(item_id):
             apply_photos(item, photo_map[item_id])
-    save_inventory_yaml(data)
+            synced[item_id] = item["images"]
+    # Only those items' photo lines are edited, so the owner's comments and layout survive
+    # (a re-serialization drops every comment: #219).
+    try:
+        set_inventory_photos(synced)
+    except ValueError as err:
+        print(f"Error: {err} Nothing changed.")
+        sys.exit(1)
     print("Sync complete. Run 'leaving-denver build' to recompile sites.")
 
 
@@ -57,7 +65,7 @@ def set_status(item_id, status):
     """Set one item's status in the SSOT, rebuild; returns the item.
 
     Only that item's `status:` line is edited, so the owner's comments and layout survive
-    (a re-serialization with `save_inventory_yaml` drops every comment: #205)."""
+    (a re-serialization drops every comment: #205)."""
     data = load_inventory_yaml()
     target_item = next((item for item in data.get("items", []) if item["id"] == item_id), None)
     if not target_item:
