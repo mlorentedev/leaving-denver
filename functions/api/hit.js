@@ -13,7 +13,7 @@ const EVENTS = new Set(['visit', 'view_item', 'text_tap']);
 // tests/test_hit_function.py fails when one is.
 const SOURCES = new Set([
   'flyer', 'facebook', 'craigslist', 'offerup', 'nextdoor', 'activebuilding', 'carscom', 'direct',
-  'instagram', 'whatsapp',
+  'instagram', 'whatsapp', 'share',
 ]);
 const LOCALES = new Set(['en', 'es']);
 const SLUG = /^[a-z0-9-]{1,64}$/;

@@ -1,0 +1,23 @@
+[
+  {
+    "id": "FEAT-019-share-button-f1",
+    "behavior": "The item sheet's Share carries utm_source=share on / and /es/",
+    "verification": "uv run pytest -q tests/test_share_button_browser.py -k 'not hero'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-019-share-button-f2",
+    "behavior": "The hero's Share shares the catalog with utm_source=share, with the same fallbacks, EN and ES",
+    "verification": "uv run pytest -q tests/test_share_button_browser.py -k hero",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "FEAT-019-share-button-f3",
+    "behavior": "hit.js counts source share as share; the drift test reads the catalog's source",
+    "verification": "uv run pytest -q tests/test_hit_function.py -k known_source",
+    "state": "pending",
+    "evidence": ""
+  }
+]

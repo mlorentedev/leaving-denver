@@ -348,7 +348,8 @@ Workers Analytics Engine dataset; an n8n workflow emails a digest every morning.
 decision. What is and is not collected:
 
 - Three events: `visit` (only when the link has `utm_source`: `flyer`, `facebook`, `craigslist`,
-  `nextdoor`, `offerup`, `activebuilding`, `carscom`; any other value reads as `other`), `view_item`
+  `nextdoor`, `offerup`, `activebuilding`, `carscom`, `instagram`, `whatsapp`, and `share` for a
+  link a buyer sent with the catalog's Share buttons (FEAT-019); any other value reads as `other`), `view_item`
   and `text_tap` (the item button, the car's button, the bundle button and offer, the sticky
   "Text me"). Each carries the source, the language and the item or bundle id.
 - Never: a cookie, an IP address, a user agent, a country, a visitor id or the phone number. Counts
