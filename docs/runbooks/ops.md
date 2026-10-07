@@ -296,11 +296,16 @@ Owner setup (dashboards; this repository cannot enable either). Both are in plac
 2026-10-01:
 
 - **Uptime.** An Uptime Kuma monitor on the owner's homelab (kubelab), type
-  "HTTP(s) - Keyword", every 300 s, alerting to Telegram.
+  "HTTP(s) - Keyword", every 300 s. It alerts through the seed's default notification,
+  which is Slack and not Telegram (kubelab#2078): the seed can attach only that one.
   - URL: `https://leaving-denver.pages.dev/`.
   - Keyword: `Denver Tech Center Relocation Sale`. That is the page title; an error page
     or a Pages 5xx does not carry it.
-  - To rebuild the monitor, set the same fields and press the notification's Test.
+  - The monitor is declared as code in kubelab's seed, `infra/config/uptime-kuma/monitors.json`,
+    under the key `services-leaving-denver` (since 2026-10-06). Change it with a kubelab pull
+    request followed by `make monitoring-apply`. Never edit it in the Kuma UI:
+    `make monitoring-apply` deletes any live monitor that the seed lacks, which is how the
+    first, hand-built monitor was lost on 2026-10-06.
   - The monitor lives on the homelab, so a homelab outage silences it. That is accepted:
     the deploy smoke already guards the likelier failure, a bad deploy.
   - On an alert, run `scripts/smoke.sh https://leaving-denver.pages.dev`, check Cloudflare
