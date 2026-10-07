@@ -711,3 +711,67 @@ def test_the_guard_never_lets_the_pages_project_be_deleted(address):
         }
     )
     assert guard(only_access, "--allow-destroy").returncode == 0
+
+
+# --- BusyBox make (lesson-035) ----------------------------------------------------------------
+
+# What a POSIX make (BusyBox's, on the Windows machine) cannot parse or expand. GNU make accepts
+# all of them, so CI stays green while `make` on that machine dies with "expected separator".
+GNU_ONLY = re.compile(
+    r"^ *(define|endef|ifeq|ifneq|ifdef|ifndef|else|endif)\b"
+    r"|\$\((call|eval|if|foreach|shell|MAKEFILE_LIST)\b"
+    r"|^\.(ONESHELL|SECONDEXPANSION)\b"
+)
+
+
+def test_the_makefile_uses_only_what_a_posix_make_can_parse():
+    """The recipe that runs Terraform is scripts/tf-run.sh, not a `define` block: BusyBox make
+    rejects `define` at parse time, so every `make` target failed there, not just infra-*."""
+    for number, line in enumerate((ROOT / "Makefile").read_text(encoding="utf-8").splitlines(), 1):
+        if line.lstrip().startswith("#"):
+            continue
+        assert not GNU_ONLY.search(line), f"Makefile:{number} is GNU make only: {line}"
+
+
+def run_tf_script(shell, toolbox, **env):
+    return subprocess.run(
+        [shell, "scripts/tf-run.sh", "plan", "-input=false"],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        env={
+            **os.environ,
+            "PATH": f"{toolbox[0]}{os.pathsep}{os.environ['PATH']}",
+            **env,
+        },
+    )
+
+
+@pytest.mark.skipif(not shutil.which("dash"), reason="needs dash, the strictest common sh")
+@pytest.mark.parametrize("shell", ["dash", "bash"])
+def test_the_terraform_script_is_posix_sh_and_hands_over_its_secrets_in_the_environment(
+    shell, toolbox
+):
+    done = run_tf_script(
+        shell,
+        toolbox,
+        TF_DIR="somewhere",
+        TF_TOKEN_KEY="cloudflare_terraform_token",
+        SOPS_FILE=SOPS_FILE,
+        CF_ACCOUNT_ID="acct-id",
+    )
+    assert done.returncode == 0, done.stderr
+    recorded = toolbox[1].read_text(encoding="utf-8")
+    assert "argv: -chdir=somewhere plan -input=false" in recorded
+    assert f"token_in_env: {TOKEN_VALUE}" in recorded
+    assert f"email_in_env: {EMAIL_VALUE}" in recorded
+    assert "account_in_env: acct-id" in recorded
+    assert TOKEN_VALUE not in done.stdout + done.stderr
+
+
+@pytest.mark.skipif(not shutil.which("dash"), reason="needs dash")
+def test_the_terraform_script_refuses_to_run_without_what_make_passes_it(toolbox):
+    done = run_tf_script("dash", toolbox, TF_DIR="x")
+    assert done.returncode != 0
+    assert "TF_TOKEN_KEY" in done.stderr
+    assert not toolbox[1].exists(), "terraform must not have been started"
