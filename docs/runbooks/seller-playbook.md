@@ -105,6 +105,12 @@ Record what happens as it happens; each command writes to `data/private.sops.yam
 | You change an asking price | edit `recommended_list_price` in `data/inventory.yaml`, then `make reprice ID=sofa-sleeper PRICE=195` (the private views flag a log that differs from the asking price) |
 | An item sells | `make sold ID=sofa-sleeper PRICE=180` records price and date and lists the channels to take it down from |
 
+**Social posts.** Open `https://leaving-denver.pages.dev/social/` on the phone. Press and hold
+each image to save it (`post.jpg` for the feed, `story.png` for a story), copy the caption, and
+use the link for that network: Instagram's bio or link sticker, Facebook, WhatsApp. Each link
+counts as its own channel in the dashboard. The images are rebuilt on every deploy, so sold items
+drop out of the collage; save them again after a sale before the next post.
+
 The next drop is the first window the price log does not cover yet (first drop, second drop,
 clear floors). The first two step halfway to the floor from the asking price in force, to the
 nearest $5 ($100 for the car); the last is the floor. Afterwards, compare each item's price log

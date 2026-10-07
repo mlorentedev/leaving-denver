@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+  <title>{{ t.title }} · {{ site_name }}</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="social.css">
+</head>
+<body class="bg-[#fbfbfb] text-neutral-900 antialiased">
+  <main class="mx-auto max-w-2xl px-4 py-8">
+    <h1 class="text-3xl font-extrabold">{{ t.heading }}</h1>
+    <p class="mt-2 text-sm text-neutral-700">{{ t.save_hint }}</p>
+    <div class="mt-6 grid gap-6 sm:grid-cols-2">
+      <figure>
+        <img src="post.jpg" width="1080" height="1350" alt="{{ t.post_label }}" class="w-full h-auto rounded-xl border border-neutral-200">
+        <figcaption class="mt-2 text-sm font-semibold">{{ t.post_label }}</figcaption>
+      </figure>
+      <figure>
+        <img src="story.png" width="1080" height="1920" alt="{{ t.story_label }}" class="w-full h-auto rounded-xl border border-neutral-200">
+        <figcaption class="mt-2 text-sm font-semibold">{{ t.story_label }}</figcaption>
+      </figure>
+    </div>
+    <h2 class="mt-8 text-xl font-bold">{{ t.caption_label }}</h2>
+    <pre class="mt-2 whitespace-pre-wrap rounded-xl border border-neutral-200 bg-white p-4 text-sm font-sans">{{ caption }}</pre>
+    <h2 class="mt-8 text-xl font-bold">{{ t.links_label }}</h2>
+    <p class="mt-1 text-sm text-neutral-700">{{ t.links_hint }}</p>
+    <ul class="mt-2 space-y-3">
+{% for label, url in links %}
+      <li><span class="block text-sm font-semibold">{{ label }}</span><span class="block break-all text-sm text-neutral-700">{{ url }}</span></li>
+{% endfor %}
+    </ul>
+  </main>
+</body>
+</html>

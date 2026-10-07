@@ -1,0 +1,3 @@
+/* The social page's own rules (FEAT-017), a file of its own so the page needs no inline <style>
+   (ADR-010). Linked after styles.css: its `body` padding must outrank the catalog's (lesson-020). */
+body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; padding: 0; }

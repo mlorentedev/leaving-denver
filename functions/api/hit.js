@@ -8,10 +8,12 @@
 // a failure, so a missing or failing dataset still answers 204.
 
 const EVENTS = new Set(['visit', 'view_item', 'text_tap']);
-// The channels the seller tool and `make post` emit, plus the printed flyer. A channel that is
-// missing here reads as `other` in the digest; tests/test_hit_function.py fails when one is.
+// The channels the seller tool and `make post` emit, the printed flyer and the social page's
+// links. A channel that is missing here reads as `other` in the digest;
+// tests/test_hit_function.py fails when one is.
 const SOURCES = new Set([
   'flyer', 'facebook', 'craigslist', 'offerup', 'nextdoor', 'activebuilding', 'carscom', 'direct',
+  'instagram', 'whatsapp',
 ]);
 const LOCALES = new Set(['en', 'es']);
 const SLUG = /^[a-z0-9-]{1,64}$/;

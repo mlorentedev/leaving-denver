@@ -31,11 +31,13 @@ from jinja2 import Environment, FileSystemLoader, StrictUndefined
 from markupsafe import Markup
 from PIL import Image
 
+from leaving_denver import social
 from leaving_denver.channels import RENEW_AFTER_DAYS
 from leaving_denver.config import (
     BASE_DIR,
     DIST_DIR,
     INVENTORY_YAML,
+    JPEG_QUALITY,
     LOCALES_DIR,
     PUBLIC_HEADERS,
     PUBLIC_INDEX_HTML,
@@ -628,7 +630,9 @@ OG_LOCALES = {"en": "en_US", "es": "es_ES"}
 
 # The end-of-sale build (OPS-011): shared links to an item land on the end page, not a 404.
 # The flyer too (FEAT-010): the paper outlives the sale, and its QR code opens the end page.
-END_REDIRECTS = "/i/* / 302\n/es/i/* /es/ 302\n/flyer / 302\n/flyer/* / 302\n"
+END_REDIRECTS = (
+    "/i/* / 302\n/es/i/* /es/ 302\n/flyer / 302\n/flyer/* / 302\n/social / 302\n/social/* / 302\n"
+)
 # What an end build leaves in the output root. The stylesheet step runs before the page build,
 # so `styles.css` and `fonts/` are already there.
 END_SITE_FILES = {
@@ -1196,6 +1200,45 @@ def write_flyer(public_data: dict[str, Any], origin: str) -> None:
     shutil.copy2(Path(__file__).parent / "assets" / "flyer.css", target.parent / "flyer.css")
 
 
+def write_social(public_data: dict[str, Any], origin: str) -> None:
+    """`social/` (FEAT-017): the feed collage, the QR story and the page with the caption and
+    one link per network, from the sanitized data only. Sold items are left out, like the flyer."""
+    en = load_locale("en")
+    copy = yaml.safe_load((LOCALES_DIR / "social.yaml").read_text(encoding="utf-8"))
+    on_sale = for_sale(public_data["items"])
+    household = [i for i in on_sale if i["category"] != "Vehicle"]
+    car = next((i["short_title"] for i in on_sale if i["category"] == "Vehicle"), None)
+    categories = [label for _, label in category_chips(household, en["categories"])]
+    address = urlsplit(origin).netloc
+    target = DIST_DIR / "social"
+    target.mkdir(parents=True, exist_ok=True)
+
+    lines = social.post_lines(copy, address, categories, car)
+    photos = [DIST_DIR / i["images"][0] for i in social.collage_items(on_sale)]
+    photos = [path for path in photos if path.is_file()]
+    social.render_post(photos, lines, FONT_FILE).save(
+        target / "post.jpg", "JPEG", quality=JPEG_QUALITY, optimize=True
+    )
+    story_url = social.social_url(origin, "instagram")
+    story = social.render_story(story_url, social.story_lines(copy, address), FONT_FILE)
+    story.save(target / "story.png", "PNG", optimize=True)
+
+    t = copy["en"]
+    # The caption repeats the post: heading, what is for sale, then where to look.
+    caption = [f"{t['heading']} {t['sub']}."]
+    caption += [text for text, *_ in lines[2:-2]]
+    caption += [t["pickup"].format(address=address), copy["es"]["caption"].format(address=address)]
+    html = render(
+        "social.html",
+        t=t,
+        site_name=en["site_name"],
+        caption="\n".join(caption),
+        links=[(t["networks"][s], social.social_url(origin, s)) for s in social.SOURCES],
+    )
+    (target / "index.html").write_text(html, encoding="utf-8")
+    shutil.copy2(Path(__file__).parent / "assets" / "social.css", target / "social.css")
+
+
 def build_public_site(full_data: dict[str, Any]) -> None:
     if sale_over(full_data):
         build_end_site()
@@ -1256,6 +1299,7 @@ def build_public_site(full_data: dict[str, Any]) -> None:
         write_share_pages(locale, translations, localized_data["items"], previews, origin)
 
     write_flyer(public_data, origin)
+    write_social(public_data, origin)
 
     PUBLIC_ROBOTS_TXT.write_text(ROBOTS_TXT, encoding="utf-8")
 
