@@ -273,7 +273,7 @@ def test_the_hero_names_what_is_still_for_sale(public_dir):
 def test_the_page_without_the_car_still_says_furniture_and_tech(public_dir):
     data = catalog_inventory()
     data["items"] = household(data)
-    data["bundles"] = [b for b in data["bundles"] if CAR not in b["items"]]
+    data["bundles"] = [b for b in data["bundles"] if CAR not in b.get("items", [])]
     text = role(build(public_dir, data)["en"], "hero-copy")
     assert "furniture and tech" in text and "SUV" not in text
 

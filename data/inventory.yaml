@@ -961,36 +961,25 @@ bundles:
   es:
     name: Estación completa para oficina en casa
     short_name: Oficina en casa
-- id: bundle-living-room
-  name: Living Room Media & Entertainment Suite
-  short_name: Living room media
+# Replaces "Living room media" once the C-shaped table sold (owner, 2026-10-06; FEAT-018).
+- id: bundle-sofa-tv-table
+  name: Sleeper Sofa + 43" 4K TV + Lift-Top Coffee Table
+  short_name: Sofa + TV + coffee table
   items:
+  - sofa-sleeper
   - onn-43-4k-tv
-  - tv-stand-canyon-walnut
   - coffee-table-lift-top
-  - auxiliary-c-table
-  bundle_price: 145
+  bundle_price: 300
   es:
-    name: Conjunto multimedia para la sala
-    short_name: Sala multimedia
+    name: Sofá cama, TV 4K de 43" y mesa de centro elevable
+    short_name: Sofá + TV + mesa de centro
 - id: bundle-take-all
   name: Whole Apartment Relocation Liquidation
   short_name: Take everything
   everything: true
-  items:
-  - sofa-sleeper
-  - dell-monitor-32
-  - onn-43-4k-tv
-  - convertible-desk
-  - coffee-table-lift-top
-  - ikea-mattress-topper
-  - bar-stools-pair
-  - tv-stand-canyon-walnut
-  - office-chair-ergonomic
-  - nightstand-espresso
-  - air-mattress-twin-pump
-  - auxiliary-c-table
-  bundle_price: 540
+  # Derived at build time (FEAT-018): every household item still Available, at this discount,
+  # rounded down to $5. The list and the price follow the sales, so neither is typed here.
+  discount_pct: 20
   es:
     name: Liquidación completa del departamento
     short_name: Llévese todo
