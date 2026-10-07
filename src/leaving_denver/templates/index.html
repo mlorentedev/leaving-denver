@@ -970,11 +970,14 @@
     // phone's ~110 ms handler) and for the sheet's first style pass inside `showModal`. Both are
     // paid here, once the page has loaded and the browser is idle, so the tap does not. Safari has
     // no requestIdleCallback: a short timer after load stands in for it. Once the visitor has
-    // pressed anything the warm-up is skipped: that press already paid, and a timer firing next to
-    // it would only add to its delay.
+    // pressed something that opens the item sheet the warm-up is skipped: that press already paid,
+    // and a timer firing next to it would only add to its delay. A scroll or any other press does
+    // not pay, so it leaves the warm-up armed.
     let pressed = false;
     for (const kind of ['pointerdown', 'keydown']) {
-      addEventListener(kind, () => { pressed = true; }, { capture: true, once: true, passive: true });
+      addEventListener(kind, e => {
+        if (e.target instanceof Element && e.target.closest('.item-card, [data-open-item]')) pressed = true;
+      }, { capture: true, passive: true });
     }
     function whenIdle(work) {
       if ('requestIdleCallback' in window) requestIdleCallback(work, { timeout: 2000 });

@@ -91,12 +91,16 @@ def test_a_warmed_sheet_opens_with_the_same_content(tmp_path):
     assert result["title"] == result["expectedTitle"]
 
 
-# A press before the page is idle: the warm-up stands down rather than run next to it.
+# A press on a card before the page is idle: the warm-up stands down rather than run next to it.
+# A press anywhere else (a scroll starts with one on a phone) pays nothing and leaves it armed.
 PRESSED_EARLY = """
 document.addEventListener('DOMContentLoaded', () => {
-  dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+  const target = %s;
+  target.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
 });
 """
+ON_A_CARD = "document.querySelector('.item-card')"
+ELSEWHERE = "document.body"
 
 NOT_WARMED = """
 await until(() => window.__fmtAtLoad !== null, 8000);
@@ -105,7 +109,13 @@ return { formatted: window.__fmt, formattedAtLoad: window.__fmtAtLoad, layouts: 
 """
 
 
-def test_a_press_before_idle_skips_the_warm_up(tmp_path):
-    result = run_page(tmp_path, "index.html", NOT_WARMED, setup=SPY + PRESSED_EARLY)
+def test_a_card_press_before_idle_skips_the_warm_up(tmp_path):
+    result = run_page(tmp_path, "index.html", NOT_WARMED, setup=SPY + PRESSED_EARLY % ON_A_CARD)
     assert result["layouts"] == 0
     assert result["formatted"] == result["formattedAtLoad"]
+
+
+def test_a_press_elsewhere_before_idle_leaves_the_warm_up_armed(tmp_path):
+    result = run_page(tmp_path, "index.html", WARMED, setup=SPY + PRESSED_EARLY % ELSEWHERE)
+    assert result["formatted"] > result["formattedAtLoad"]
+    assert result["layouts"] > 0
