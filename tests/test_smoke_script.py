@@ -35,6 +35,8 @@ class FreshDeployment(AppliesHeadersFile, MissingPath, http.server.SimpleHTTPReq
     stale_page = 0  # GETs of / answered with the previous deployment's page (other inline script)
     flaky_home = False  # every other GET of / is a 503 under the previous deployment's policy
     flaky_turn = 0
+    flaky_after = 0  # GETs of / served whole before the flapping starts
+    home_codes = []  # status of each next GET of / (#232: edges flap 200/404 while propagating)
 
     def send_error(self, code, message=None, explain=None):
         if code == 404 and FreshDeployment.bare_404s > 0:
@@ -58,9 +60,15 @@ class FreshDeployment(AppliesHeadersFile, MissingPath, http.server.SimpleHTTPReq
         return {**sent, **self.extra}
 
     def do_GET(self):
+        if self.path == "/" and FreshDeployment.home_codes:
+            code = FreshDeployment.home_codes.pop(0)
+            if code != 200:
+                self.send_error(code)
+                return
         if self.path == "/" and FreshDeployment.flaky_home:
             FreshDeployment.flaky_turn += 1
-            if FreshDeployment.flaky_turn % 2:
+            turn = FreshDeployment.flaky_turn - FreshDeployment.flaky_after
+            if turn > 0 and turn % 2:
                 # A failed attempt curl retries: its headers stay in the -D output before the
                 # good response's, and they carry another deployment's policy.
                 self.previous_policy = True
@@ -126,6 +134,8 @@ def smoke(
     stale_home=0,
     stale_page=0,
     flaky_home=False,
+    flaky_after=0,
+    home_codes=(),
     drop=(),
     extra=None,
 ):
@@ -136,6 +146,8 @@ def smoke(
     FreshDeployment.stale_home = stale_home
     FreshDeployment.stale_page = stale_page
     FreshDeployment.flaky_home, FreshDeployment.flaky_turn = flaky_home, 0
+    FreshDeployment.flaky_after = flaky_after
+    FreshDeployment.home_codes = list(home_codes)
     FreshDeployment.seller_status, FreshDeployment.seller_body = seller
     handler = functools.partial(FreshDeployment, directory=str(PUBLIC))
     with http.server.ThreadingHTTPServer(("127.0.0.1", 0), handler) as server:
@@ -157,6 +169,23 @@ def test_a_path_that_is_not_ready_yet_is_retried():
     result = smoke(retries=3)
     assert result.returncode == 0, result.stderr
     assert "smoke OK" in result.stdout
+
+
+# #232 (CI run 37599450879): / answered 200 once, then 404 for the whole retry budget of the next
+# fetch, and the same deployment served every path minutes later. One 200 is not "ready".
+FLAPPING_HOME = (200, 404, 404, 404, 404)
+
+
+def test_a_home_that_flaps_after_its_first_200_is_waited_out():
+    result = smoke(retries=3, home_codes=FLAPPING_HOME)
+    assert result.returncode == 0, result.stderr
+    assert "smoke OK" in result.stdout
+
+
+def test_a_home_that_never_settles_fails_naming_it():
+    result = smoke(retries=3, home_codes=(200, 404) * 40)
+    assert result.returncode != 0
+    assert "did not answer 200 3 times in a row" in result.stderr
 
 
 def test_without_retries_the_same_deployment_fails():
@@ -279,8 +308,9 @@ def test_a_page_from_the_previous_deployment_is_fetched_again():
 
 def test_the_policy_is_read_from_the_response_curl_kept():
     """`curl --retry -D -` prints the headers of every attempt. When a 503 under another policy
-    comes before the 200, the policy checked is the 200's, not the first one printed."""
-    result = smoke(retries=3, not_ready={}, flaky_home=True)
+    comes before the 200, the policy checked is the 200's, not the first one printed. The alias
+    moves after the smoke saw the deployment ready (3 GETs in a row) and read its page (1 more)."""
+    result = smoke(retries=3, not_ready={}, flaky_home=True, flaky_after=4)
     assert result.returncode == 0, result.stderr
 
 
