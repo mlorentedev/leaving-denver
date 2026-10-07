@@ -10,7 +10,7 @@ fail() { echo "SMOKE FAIL: $*" >&2; exit 1; }
 # seconds after / was 200, and the same deployment passed minutes later. Every fetch
 # retries, so only a path that stays missing fails.
 get() {
-  curl -fsS --retry "${SMOKE_RETRIES:-6}" --retry-delay "${SMOKE_RETRY_DELAY:-5}" \
+  curl -fsS --retry "${SMOKE_RETRIES:-10}" --retry-delay "${SMOKE_RETRY_DELAY:-5}" \
     --retry-all-errors "$@"
 }
 
@@ -20,7 +20,7 @@ get() {
 # reads as robots rules.
 robots_txt() {
   local body
-  for _ in $(seq 0 "${SMOKE_RETRIES:-6}"); do
+  for _ in $(seq 0 "${SMOKE_RETRIES:-10}"); do
     body=$(get "$url/robots.txt") || fail "robots.txt missing"
     grep -q '^User-agent:' <<<"$body" && { printf '%s\n' "$body"; return 0; }
     sleep "${SMOKE_RETRY_DELAY:-5}"
@@ -39,7 +39,7 @@ robots_txt() {
 # read from one response, and a mismatch is fetched again; one that stays still fails.
 security_headers() {
   local stale
-  for _ in $(seq 0 "${SMOKE_RETRIES:-6}"); do
+  for _ in $(seq 0 "${SMOKE_RETRIES:-10}"); do
     stale=$(policy_mismatch) || exit 1  # policy_mismatch has said why
     [ -z "$stale" ] && return 0
     sleep "${SMOKE_RETRY_DELAY:-5}"
@@ -82,21 +82,27 @@ for attrs, body in re.findall(r"<script\b([^>]*)>(.*?)</script>", sys.stdin.read
   return 0
 }
 
-# A fresh deployment can take a few seconds to answer everywhere.
-for _ in 1 2 3 4 5 6; do
-  code=$(curl -s -o /dev/null -w '%{http_code}' "$url/") && [ "$code" = 200 ] && break
-  sleep 5
+# A fresh deployment does not become ready at one instant: while it propagates, edges answer
+# the same path 200 or 404 (#232: one 200, then 404 for the next fetch's whole budget). Ready
+# is $streak 200s in a row, waited for over a few retry budgets.
+streak=${SMOKE_READY_STREAK:-3}
+in_a_row=0
+for _ in $(seq 1 $(((${SMOKE_RETRIES:-10} + 1) * 2 + streak))); do
+  code=$(curl -s -o /dev/null -w '%{http_code}' "$url/") || code=000
+  if [ "$code" = 200 ]; then in_a_row=$((in_a_row + 1)); else in_a_row=0; fi
+  [ "$in_a_row" -ge "$streak" ] && break
+  sleep "${SMOKE_RETRY_DELAY:-5}"
 done
-[ "$code" = 200 ] || fail "$url/ returned $code"
+[ "$in_a_row" -ge "$streak" ] || fail "$url/ did not answer 200 $streak times in a row (last: $code)"
 
-page=$(get "$url/")
+page=$(get "$url/") || fail "$url/ unreachable after it answered 200 $streak times in a row"
 # Without a top-level 404.html Pages runs the site as a single-page app and answers any unknown
 # path with the catalog and a 200 (BUG-013). A fresh deployment can lag, so retry like `get`.
 not_found() {
   local reply code body
   # The body is part of the wait too: CI run 37169206079 got a 404 with another body a second
   # after / was 200, and the same deployment served the not-found page minutes later (#173).
-  for _ in $(seq 0 "${SMOKE_RETRIES:-6}"); do
+  for _ in $(seq 0 "${SMOKE_RETRIES:-10}"); do
     reply=$(curl -sS -w '\n%{http_code}' "$url/smoke-not-found-$RANDOM/") || reply=$'\nunreachable'
     code=${reply##*$'\n'}
     body=${reply%$'\n'*}
@@ -127,7 +133,7 @@ if grep -Fq 'data-role="sale-over"' <<<"$page"; then
   # Old share links redirect to the end page of their language; a fresh deployment can lag.
   redirected() {
     local got
-    for _ in $(seq 0 "${SMOKE_RETRIES:-6}"); do
+    for _ in $(seq 0 "${SMOKE_RETRIES:-10}"); do
       got=$(curl -sS -o /dev/null -w '%{http_code} %{redirect_url}' "$url$1") || got="unreachable"
       [ "$got" = "302 $url$2" ] && return 0
       sleep "${SMOKE_RETRY_DELAY:-5}"
@@ -172,7 +178,7 @@ check_image() {
 }
 # A deploy that replaces the cover can still be served the previous page, naming a photo this
 # deployment deleted (#166): fetch the page again until the image it names answers.
-for _ in $(seq 0 "${SMOKE_RETRIES:-6}"); do
+for _ in $(seq 0 "${SMOKE_RETRIES:-10}"); do
   cover=$(og image <<<"$page")
   [[ "$cover" == https://* ]] && curl -fsSI "$url/${cover#https://*/}" | grep -qi '^content-type: image/jpeg' && break
   sleep "${SMOKE_RETRY_DELAY:-5}"
