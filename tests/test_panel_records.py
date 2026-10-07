@@ -152,6 +152,7 @@ def commands(monkeypatch, fixture_private):
     edits = []
     monkeypatch.setattr(cli, "load_inventory_yaml", lambda: inventory)
     monkeypatch.setattr(cli, "set_item_status", lambda *a: edits.append(a))
+    monkeypatch.setattr(cli, "check_item_status", lambda *a: None)
     monkeypatch.setattr(cli, "build_all", lambda: None)
     monkeypatch.setattr(cli, "load_private", lambda: fixture_private)
     for name in ("record_post", "record_price", "record_sale"):

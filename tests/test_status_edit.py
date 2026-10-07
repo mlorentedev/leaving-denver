@@ -201,3 +201,53 @@ def test_a_status_line_it_cannot_rewrite_in_place_is_refused(line):
     text = SMALL.replace("  status: Available  # trailing note", line)
     with pytest.raises(ValueError, match="cannot rewrite"):
         site_builder.edit_item_status(text, "lamp", "Sold")
+
+
+@pytest.fixture
+def twice_status(tmp_path, monkeypatch):
+    """An inventory whose `lamp` has two `status:` lines, so the edit is refused (#220)."""
+    twice = SMALL.replace("  title: Lamp\n", "  title: Lamp\n  status: Pending\n")
+    path = tmp_path / "inventory.yaml"
+    path.write_text(twice, encoding="utf-8")
+    monkeypatch.setattr(site_builder, "INVENTORY_YAML", path)
+    monkeypatch.setattr(cli, "load_inventory_yaml", lambda: {"items": [{"id": "lamp"}]})
+    monkeypatch.setattr(cli, "build_all", lambda: pytest.fail("rebuilt"))
+    return path, twice
+
+
+@pytest.mark.parametrize("price", [150, None])
+def test_a_refused_inventory_edit_leaves_the_private_store_untouched(
+    twice_status, monkeypatch, capsys, price
+):
+    path, twice = twice_status
+    recorded = []
+    monkeypatch.setattr(cli, "record_sale", lambda *args: recorded.append(args))
+    with pytest.raises(SystemExit) as stop:
+        cli.cmd_sold(argparse.Namespace(id="lamp", price=price))
+    assert stop.value.code == 1
+    assert recorded == []
+    assert "2 `status:` lines" in capsys.readouterr().out
+    assert path.read_text(encoding="utf-8") == twice
+
+
+def test_the_sale_is_recorded_before_the_inventory_is_written(real_copy, monkeypatch):
+    item_id, _ = an_item_not("Sold")
+    before = real_copy.read_bytes()
+    seen = []
+    monkeypatch.setattr(cli, "record_sale", lambda *args: seen.append(real_copy.read_bytes()))
+    cli.cmd_sold(argparse.Namespace(id=item_id, price=100))
+    assert seen == [before]
+    assert real_copy.read_bytes() != before
+
+
+def test_a_refused_private_write_leaves_the_inventory_untouched(real_copy, monkeypatch):
+    item_id, _ = an_item_not("Sold")
+    before = real_copy.read_bytes()
+
+    def refuse(*args):
+        raise RuntimeError("no key")
+
+    monkeypatch.setattr(cli, "record_sale", refuse)
+    with pytest.raises(SystemExit):
+        cli.cmd_sold(argparse.Namespace(id=item_id, price=100))
+    assert real_copy.read_bytes() == before
