@@ -50,3 +50,4 @@ tags: [lessons, index, docs, leaving-denver]
 | [lesson-035](lesson-035-make-check-fails-under-busybox-make.md) | `make check` Fails Under BusyBox make: Run the Parts or Trust CI | 2026-10-05 | [make, windows, busybox, ci, tooling] |
 | [lesson-036](lesson-036-command-substitution-discards-function-globals.md) | Command Substitution Discards a Function's Globals Under `set -u` | 2026-10-05 | [bash, ci, github-actions, testing, shell] |
 | [lesson-037](lesson-037-the-first-real-sale-breaks-tests-that-read-live-data.md) | The First Real Sale Breaks Tests That Read Live Data | 2026-10-06 | [testing, data, ci, catalog] |
+| [lesson-038](lesson-038-waiting-for-a-change-reads-the-state-in-between.md) | Waiting for "Changed" Reads the State In Between | 2026-10-06 | [testing, browser, flaky, ci, race] |

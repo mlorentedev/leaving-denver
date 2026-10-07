@@ -308,19 +308,55 @@ def test_closing_and_reopening_the_sheet_starts_fitted(tmp_path):
         assert at_fit(open_car(browser)())
 
 
-def test_the_enlarged_photo_asks_for_a_wider_variant(tmp_path):
+# While the browser switches candidates, `currentSrc` can read as something that is no variant at
+# all (empty, or a URL mid-update): this is that window, made long enough to be hit every time.
+BLIND = """
+const img = document.getElementById('modalMainImg');
+const real = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'currentSrc').get;
+window.__blind = 0;
+Object.defineProperty(img, 'currentSrc', {
+  configurable: true,
+  get() { return performance.now() < window.__blind ? '' : real.call(this); },
+});
+"""
+
+
+def variant_now(browser):
+    """The width of the WebP variant the photo currently resolves to: 0 while `currentSrc` is no
+    variant (empty, mid-update, or the JPEG itself), which is not the same as 'has changed'."""
+    return browser.run(
+        "const m = document.getElementById('modalMainImg').currentSrc.match(/-(\\d+)w\\./);"
+        "return m ? Number(m[1]) : 0;"
+    )
+
+
+def wait_for_variant(browser, wider_than, ms=5000):
+    """Polls until the photo resolves to a known variant wider than `wider_than`; returns the
+    width it settled on, or what it last read once `ms` is up. Waiting only for `currentSrc` to
+    differ reads the transient 0 in between (#202), and a bare `until` swallows its own timeout."""
+    browser.run(
+        "await until(() => {"
+        " const m = document.getElementById('modalMainImg').currentSrc.match(/-(\\d+)w\\./);"
+        f" return m && Number(m[1]) > {wider_than}; }}, {ms});"
+    )
+    return variant_now(browser)
+
+
+@pytest.mark.parametrize("transient", [False, True], ids=["as_it_loads", "through_a_blind_window"])
+def test_the_enlarged_photo_asks_for_a_wider_variant(tmp_path, transient):
     with open_page(tmp_path, "index.html") as browser:
         state = open_car(browser)
-        current = "return document.getElementById('modalMainImg').currentSrc;"
-        fitted, fitted_src = state(), browser.run(current)
+        fitted = state()
         assert fitted["widest"] > 0
+        # The fitted photo is a known variant too, or "wider than it" proves nothing.
+        fitted_variant = wait_for_variant(browser, 0)
+        assert fitted_variant > 0
+        if transient:
+            browser.run(BLIND + "window.__blind = performance.now() + 300;")
         browser.run("document.getElementById('modalZoomIn').click();")
         assert state()["sizes"] == "1600px"
         # The frame asks for the widest candidate there is, and the browser fetches it.
-        browser.run(
-            f"await until(() => document.getElementById('modalMainImg').currentSrc !== {fitted_src!r});"
-        )
-        assert state()["variant"] > fitted["variant"]
+        assert wait_for_variant(browser, fitted_variant) > fitted_variant
         browser.run("document.getElementById('modalZoomFit').click();")
         assert state()["sizes"] != "1600px"
 
