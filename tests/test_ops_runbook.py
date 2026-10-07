@@ -26,7 +26,7 @@ TEMPLATES = ROOT / "src" / "leaving_denver" / "templates"
 
 # Targets of the kubelab repository's Makefile that a runbook tells the owner to run from the kubelab
 # checkout (the sale digest is imported there, kubelab#2088), so this Makefile cannot define them.
-KUBELAB_MAKE_TARGETS = {"import-n8n"}
+KUBELAB_MAKE_TARGETS = {"import-n8n", "monitoring-apply"}
 
 # Hosts Cloudflare Web Analytics loads from and reports to (ADR-005).
 BEACON_SCRIPT_HOST = "static.cloudflareinsights.com"
