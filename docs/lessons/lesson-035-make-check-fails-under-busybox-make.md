@@ -1,7 +1,7 @@
 # Lesson 035 — `make` Fails Under BusyBox make: Keep the Makefile POSIX
 
 **Date:** 2026-10-05
-**Status:** fixed by #198 (`fix/makefile-busybox`); the guard is `test_the_makefile_uses_only_what_a_posix_make_can_parse`
+**Status:** fixed by PR #217 (closes #198); the guard is `test_the_makefile_uses_only_what_a_posix_make_can_parse`
 **Tags:** [make, windows, busybox, ci, tooling]
 
 ## What happened
@@ -86,4 +86,4 @@ machine and reopen #198 if either still fails.
 
 - Lesson 018: an earlier BusyBox make difference on the same machine (immediate vs
   recursive expansion of `CF_ENV`).
-- #198, the tracking issue; `scripts/tf-run.sh`; `tests/test_infra_terraform.py`.
+- #198, the tracking issue; PR #217; `scripts/tf-run.sh`; `tests/test_infra_terraform.py`.
