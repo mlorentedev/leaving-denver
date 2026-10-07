@@ -241,6 +241,9 @@ CATALOG_TESTS = {
     ),
     "test_smoke_script.py": (
         "test_a_404_with_another_body_first_is_retried",
+        # #232: a positive control that runs the catalog smoke to its end; the never-settles
+        # case beside it fails at readiness and runs in both modes.
+        "test_a_home_that_flaps_after_its_first_200_is_waited_out",
         "test_a_cover_that_stays_missing_fails",
         "test_a_page_still_naming_a_deleted_cover_is_fetched_again",
         "test_a_path_that_is_not_ready_yet_is_retried",
