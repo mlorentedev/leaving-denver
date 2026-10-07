@@ -52,7 +52,7 @@ leaving-denver/
 ├── infra/
 │   └── terraform/cloudflare/      <-- Pages project and Access as Terraform; local, gitignored state (ADR-012)
 ├── integrations/
-│   └── n8n/                       <-- Kubelab integration workflows
+│   └── n8n/                       <-- Kubelab integration workflows (Craigslist reminder; the metrics digest is owned by kubelab)
 │       └── workflows/
 ├── docs/
 │   ├── adr/                       <-- Architecture decision records

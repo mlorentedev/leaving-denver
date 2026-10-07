@@ -17,6 +17,17 @@ Accepted. It amends ADR-005: Cloudflare Web Analytics stays on and unchanged, an
 event beacon now covers what it cannot see. ADR-002 (the phone is never sent anywhere), ADR-007
 (`/seller/*` has no network at all) and ADR-008 (the project outlives the sale) hold.
 
+Amended 2026-10-07 (kubelab#2088, kubelab#2090): delivery stays email, and it now goes through
+kubelab's shared SMTP credential `kubelab-smtp`, which replaces the hand-made `sale-digest-smtp`.
+The workflow is owned and imported as code by the kubelab repository
+(`infra/n8n/workflows/sale-metrics-daily-digest.json`, prod only, live at import by
+`make import-n8n ENV=prod`); `integrations/n8n/workflows/sale_metrics_daily_digest.json`, named in
+the Decision below, is gone from this repository so there is one copy. The recipient, the Web
+Analytics site tag and the Cloudflare token are no longer n8n variables or credentials made by hand:
+they are kubelab SOPS secrets under `apps.services.automation.n8n.sale_digest.*`, filled in at
+import, and the token is a Cloudflare user token. The data point, the dataset and the decision
+itself are unchanged.
+
 ## Date
 
 2026-10-03

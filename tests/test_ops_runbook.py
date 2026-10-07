@@ -24,6 +24,10 @@ OPS = ROOT / "docs/runbooks/ops.md"
 PUBLIC = ROOT / "build" / "public"
 TEMPLATES = ROOT / "src" / "leaving_denver" / "templates"
 
+# Targets of the kubelab repository's Makefile that a runbook tells the owner to run from the kubelab
+# checkout (the sale digest is imported there, kubelab#2088), so this Makefile cannot define them.
+KUBELAB_MAKE_TARGETS = {"import-n8n"}
+
 # Hosts Cloudflare Web Analytics loads from and reports to (ADR-005).
 BEACON_SCRIPT_HOST = "static.cloudflareinsights.com"
 BEACON_REPORT_HOST = "cloudflareinsights.com"
@@ -52,7 +56,8 @@ def referenced(pattern: str, text: str) -> set[str]:
 @pytest.mark.parametrize("runbook", RUNBOOKS, ids=lambda p: p.name)
 def test_make_targets_named_in_a_runbook_exist(runbook):
     named = referenced(r"`make ([a-z][\w-]*)", runbook.read_text(encoding="utf-8"))
-    assert not named - make_targets(), f"{runbook.name} names a make target that does not exist"
+    missing = named - make_targets() - KUBELAB_MAKE_TARGETS
+    assert not missing, f"{runbook.name} names a make target that does not exist: {missing}"
 
 
 @pytest.mark.parametrize("runbook", RUNBOOKS, ids=lambda p: p.name)

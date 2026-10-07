@@ -344,7 +344,8 @@ script of the served page is in it.
 
 Which channel a visit came from (the flyer included) and which items people open and text about.
 The page sends a small event to its own `/api/hit` (`functions/api/hit.js`), which writes it to a
-Workers Analytics Engine dataset; an n8n workflow emails a digest every morning. ADR-011 has the
+Workers Analytics Engine dataset; an n8n workflow emails a digest every morning (owned and imported as code by the kubelab repository,
+kubelab#2088). ADR-011 has the
 decision. What is and is not collected:
 
 - Three events: `visit` (only when the link has `utm_source`: `flyer`, `facebook`, `craigslist`,
@@ -386,9 +387,12 @@ decision. What is and is not collected:
    counts as one `facebook` visit; the address bar loses the parameter), open an item, then wait a
    minute for the dataset to appear.
 3. **The token.** Cloudflare dashboard > My Profile > API Tokens > Create Token > Create Custom
-   Token. Name `leaving-denver-analytics-read`. Permission: Account | Account Analytics | Read.
-   Account Resources: this account only. TTL: end it on 2026-11-15. Copy the token once, into the
-   n8n credential below; never paste it in a chat, a ticket or a file in this repository.
+   Token. It must be a **user token**, from My Profile, not an account token from the account's
+   own API Tokens page: kubelab's expiry check calls `/user/tokens/verify`, which an account token
+   does not answer. Name `leaving-denver-analytics-read`. Permission: Account | Account Analytics
+   | Read. Account Resources: this account only. TTL: end it on 2026-11-15. Copy the token once,
+   into kubelab's encrypted secrets (step 5); never paste it in a chat, a ticket or a file in this
+   repository.
 4. **Try both queries once** (this is the only run against the live APIs; the dataset's table is
    named in `wrangler.toml`). The token is read without echo and goes to `curl` and nowhere else:
 
@@ -408,18 +412,25 @@ decision. What is and is not collected:
    prints `"accounts":[{"totals":[...` with a count. `"accounts":null` or `errors` means the token or
    the site tag is wrong. Web Analytics' GraphQL dataset is not documented by Cloudflare; if it
    changed, the digest still goes out and says "unavailable" for that part. Tell the repository
-   (open an issue) rather than editing the workflow in n8n.
-5. **n8n on kubelab.** Credentials (n8n > Credentials), by these exact names: a **Header Auth**
-   credential `cloudflare-analytics-read` (name `Authorization`, value `Bearer ` followed by the
-   token) and an **SMTP** credential `sale-digest-smtp` for the mailbox that sends the digest.
-   Variables, set in the n8n deployment's environment in the kubelab repository (not by hand on the
-   server), beside `TELEGRAM_CHAT_ID`: `SALE_DIGEST_TO` (the address that reads it),
-   `SALE_DIGEST_FROM` (the sending address) and `CF_WEB_ANALYTICS_SITE_TAG` (from step 4). n8n 2
-   blocks `$env` in nodes unless `N8N_BLOCK_ENV_ACCESS_IN_NODE=false`.
-6. **Import and activate.** n8n > Workflows > Import from file >
-   `integrations/n8n/workflows/sale_metrics_daily_digest.json`. Open the three request nodes and the
-   email node and pick the credentials above if n8n shows them unset. Execute workflow once: the
-   email arrives with the test visit in it. Then switch Active on. It runs at 08:00 America/Denver.
+   (open an issue) rather than editing the workflow in n8n: it is imported from kubelab, which
+   overwrites a UI edit on the next import.
+5. **Store the three values in kubelab's SOPS.** From the kubelab checkout, one value at a time,
+   read without echo and piped to the command, never typed on its command line and never printed
+   (`toolkit secrets set` is in kubelab's `docs/runbooks/sops-and-secrets.md`):
+
+   ```
+   read -rs V; printf %s "$V" | toolkit secrets set apps.services.automation.n8n.sale_digest.analytics_token --env prod --stdin; unset V   # the token from step 3
+   read -rs V; printf %s "$V" | toolkit secrets set apps.services.automation.n8n.sale_digest.site_tag --env prod --stdin; unset V          # the site tag from step 4
+   read -rs V; printf %s "$V" | toolkit secrets set apps.services.automation.n8n.sale_digest.recipient --env prod --stdin; unset V         # the address that reads the digest
+   ```
+
+   Nothing else is needed in n8n: no credential to create by hand, no variable. The sender and the
+   SMTP credential (`kubelab-smtp`) come from kubelab's own mail relay settings.
+6. **Import.** From the kubelab checkout, `toolkit infra n8n import --env prod --dry-run` first
+   (a missing value fails here and names the path), then `make import-n8n ENV=prod`. The workflow
+   is live as soon as it is imported, with no switching on afterwards. It runs at 08:00
+   America/Denver; to see the first email now, open "Moving Sale - Daily Metrics Digest" in n8n and
+   Execute workflow once: it arrives with the test visit in it.
 
 ### Reading the digest
 
