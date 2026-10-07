@@ -164,7 +164,7 @@ When running `uv run leaving-denver serve`:
 ├── infra/
 │   └── terraform/cloudflare/      # Pages project and Access as Terraform (ADR-012); state is local
 ├── integrations/
-│   └── n8n/                       # Kubelab n8n workflow (Craigslist bump reminder)
+│   └── n8n/                       # Kubelab n8n workflow (Craigslist bump reminder); the digest lives in kubelab
 ├── docs/
 │   ├── adr/                       # Architecture decision records
 │   ├── lessons/                   # Lessons learned

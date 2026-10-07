@@ -23,6 +23,12 @@ Accepted (owner decision of 2026-10-03). It amends the manual steps of:
 
 ADR-008 is unchanged and is enforced: the Pages project is protected from destruction.
 
+Amended 2026-10-07 (kubelab#2088, kubelab#2090): the n8n metrics digest of ADR-011 is no longer a
+workflow in `integrations/n8n/` to import by hand. kubelab owns and imports it as code, and the
+read-only token stays manual in the sense of Decision 3 (the owner mints it, as a Cloudflare user
+token) but is stored in kubelab's SOPS instead of an n8n credential. `integrations/n8n/` keeps only
+the Craigslist reminder, so the "not moved under `infra/`" decision below is unchanged.
+
 ## Date
 
 2026-10-03

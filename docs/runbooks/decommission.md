@@ -175,12 +175,14 @@ that replaces it fail.
    paste `https://leaving-denver.pages.dev/` into the Facebook Sharing Debugger
    (`https://developers.facebook.com/tools/debug/`) and press Scrape Again.
 
-8. Switch the sale-metrics digest off. n8n on kubelab > the "Moving Sale - Daily Metrics Digest"
-   workflow (`integrations/n8n/workflows/sale_metrics_daily_digest.json`, ops.md "Sale metrics") >
-   Active off (or Delete). Left on, it emails every morning about a sale that is over. Its
-   credentials (`cloudflare-analytics-read`, `sale-digest-smtp`) and the variables
-   `SALE_DIGEST_TO`, `SALE_DIGEST_FROM`, `CF_WEB_ANALYTICS_SITE_TAG` can go from n8n and from the
-   kubelab repository with it.
+8. Remove the sale-metrics digest. It is owned and imported as code by kubelab, so the removal is
+   kubelab's: follow `infra/n8n/workflows/README.md` in `mlorentedev/kubelab`, "Removing the sale
+   (2026-11-09)" (delete the workflow's catalog entry and file, delete the three
+   `apps.services.automation.n8n.sale_digest.*` secrets and their registry lines, then delete the
+   "Moving Sale - Daily Metrics Digest" workflow and the `cloudflare-analytics-read` credential in
+   n8n, which the import never deletes). Left on, it emails every morning about a sale that is over.
+   `kubelab-smtp` stays: it is shared with other workflows and kubelab keeps it in its registry, in
+   n8n and in its import. Nothing in this repository changes.
 
 ## By Nov 15: remove the credentials and the number
 
@@ -229,9 +231,11 @@ new token (ADR-008).
    cd infra/terraform/cloudflare && rm -f terraform.tfstate* plan.tfplan ids.auto.tfvars
    ```
 
-   The metrics token (not in Terraform, so nothing here removes it) too: the same page > `leaving-denver-analytics-read` (Account Analytics
-   Read, created with a TTL that ends on 2026-11-15) > Delete. It is not in GitHub or in the
-   encrypted file, only in n8n's Header Auth credential, which step 8 above removes.
+   The metrics token (not in Terraform, so nothing here removes it) too: My Profile > API Tokens >
+   `leaving-denver-analytics-read` (a user token, Account Analytics Read, created with a TTL that
+   ends on 2026-11-15) > Delete. It is not in GitHub or in this repository's encrypted file, only in
+   kubelab's SOPS (`apps.services.automation.n8n.sale_digest.analytics_token`) and in n8n's Header
+   Auth credential, which step 8 above removes.
    `/api/hit` stays deployed with the project and answers as before; the end page does not call it.
    The Analytics Engine data (dataset `leaving_denver_sale_events`) expires by itself after three
    months, and there is nothing to delete.
