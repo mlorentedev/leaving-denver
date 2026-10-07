@@ -157,13 +157,6 @@ def nodes():
     return {n["name"]: n for n in flow["nodes"]}
 
 
-RUN_DIGEST = """
-const { code, answers } = JSON.parse(await new Response(process.stdin).text());
-const $ = name => ({ first: () => ({ json: answers[name] }) });
-const $now = { setZone: () => ({ toFormat: () => '2026-10-04' }) };
-const run = new Function('$', '$now', code);
-process.stdout.write(JSON.stringify(run($, $now)));
-"""
 WRITE_POINTS = """
 import { onRequestPost } from './functions/api/hit.js';
 const points = [];
@@ -173,7 +166,6 @@ for (const body of JSON.parse(await new Response(process.stdin).text())) {
 }
 process.stdout.write(JSON.stringify(points));
 """
-NO_WEB = {"data": None, "errors": [{"message": "denied"}]}
 
 
 def written(events):
@@ -194,19 +186,6 @@ def as_rows(nodes, points):
     return [{**dict(key), "n": str(n)} for key, n in counts.items()]  # UInt64 comes back a string
 
 
-def digest(nodes, recent, sale, web=NO_WEB):
-    answers = {
-        "Events, last 24 h": {"data": recent} if recent is not None else {"error": "x"},
-        "Events, whole sale": {"data": sale} if sale is not None else {"error": "x"},
-        "Web Analytics, last 24 h": web,
-    }
-    code = nodes["Write the digest"]["parameters"]["jsCode"]
-    result = node(RUN_DIGEST, json.dumps({"code": code, "answers": answers}))
-    assert result.returncode == 0, result.stderr
-    (item,) = json.loads(result.stdout)
-    return item["json"]
-
-
 EVENTS = (
     [{"event": "visit", "source": "flyer"}] * 3
     + [{"event": "visit", "source": "facebook"}] * 2
@@ -219,13 +198,17 @@ EVENTS = (
 )
 
 
-def test_the_digest_reports_what_the_endpoint_wrote(nodes):
-    rows = as_rows(nodes, written(EVENTS))
-    text = digest(nodes, rows, rows)["text"]
-    assert "Visits from a tracked link, by source: flyer 3, facebook 2, share 1" in text
-    assert "Text taps: 3 (by item: sofa-sleeper 2; by bundle: bundle-wfh 1)" in text
-    assert "by item: bar-stools 7, sofa-sleeper 6, lamp 2" in text
-    assert "Repricing candidates (at least 5 views, no text taps): bar-stools 7" in text
+def test_the_digest_sql_reads_back_what_the_endpoint_wrote(nodes):
+    """The data contract only: kubelab's own tests own how the email looks (kubelab#2088)."""
+    rows = {
+        (r.get("event"), r.get("source"), r.get("item"), r.get("bundle")): int(r["n"])
+        for r in as_rows(nodes, written(EVENTS))
+    }
+    assert rows[("visit", "flyer", "", "")] == 3
+    assert rows[("visit", "share", "", "")] == 1
+    assert rows[("view_item", "direct", "bar-stools", "")] == 7
+    assert rows[("text_tap", "flyer", "sofa-sleeper", "")] == 2
+    assert rows[("text_tap", "nextdoor", "", "bundle-wfh")] == 1
 
 
 def test_the_digest_reads_the_account_and_dataset_the_repository_names(nodes):
