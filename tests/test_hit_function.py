@@ -222,9 +222,10 @@ def test_every_channel_the_site_can_link_from_is_a_known_source():
     """A channel that is missing from the function reads as `other` in the digest: this fails
     the day a channel is added to the seller tool or to `make post` and not here."""
     from leaving_denver.channels import CHANNELS
+    from leaving_denver.social import SOURCES as SOCIAL_SOURCES
 
     sources = set(re.findall(r"source: '([a-z]+)'", SELLER_MJS.read_text(encoding="utf-8")))
-    sources |= set(CHANNELS) | {"flyer"}
+    sources |= set(CHANNELS) | {"flyer"} | set(SOCIAL_SOURCES)
     assert {"facebook", "craigslist", "offerup", "nextdoor", "flyer"} <= sources, "stale pattern"
     probe = run(*[post({"event": "visit", "source": s}) for s in sorted(sources)])
     for source, answer in zip(sorted(sources), probe, strict=True):

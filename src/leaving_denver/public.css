@@ -5,6 +5,7 @@
 @source "./templates/sale_over.html";
 @source "./templates/not_found.html";
 @source "./templates/flyer.html";
+@source "./templates/social.html";
 @source "./assets/seller.mjs";
 
 body {

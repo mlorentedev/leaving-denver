@@ -1,0 +1,26 @@
+# The social images' own copy (FEAT-017). Kept out of en.yaml and es.yaml, whose keys all travel
+# to the catalog page as inline JSON: the social page is not part of it. No date, no price and no
+# urgency (lesson-008), like the flyer.
+en:
+  title: Social images
+  heading: I'm moving abroad.
+  sub: Moving sale in Denver Tech Center
+  selling: "For sale:"
+  car: "And my car:"
+  car_alone: "My car:"
+  photos: Photos and prices
+  scan: Scan, or tap the link
+  post_label: Feed post (4:5)
+  story_label: Story (9:16)
+  save_hint: On a phone, press and hold an image, then choose Save image.
+  caption_label: Caption
+  links_label: Links
+  links_hint: One per network, so each one shows up on its own in the visit counts.
+  pickup: "Pickup in DTC. Photos and prices: {address}"
+  networks:
+    instagram: Instagram (bio or link sticker)
+    facebook: Facebook
+    whatsapp: WhatsApp
+es:
+  scan: Todo en español también
+  caption: "Me mudo fuera del país. Fotos y precios en español: {address}/es/"

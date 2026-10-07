@@ -22,6 +22,7 @@ PAGES = {
     "sale_over.html": PUBLIC_CSS,
     "not_found.html": PUBLIC_CSS,
     "flyer.html": PUBLIC_CSS,
+    "social.html": PUBLIC_CSS,
     # Script-only classes: the page's module is a Tailwind source too (public.css).
     "seller.mjs": PUBLIC_CSS,
 }
