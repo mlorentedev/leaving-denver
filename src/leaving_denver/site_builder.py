@@ -457,7 +457,7 @@ class SaleDates(NamedTuple):
 
 
 # The household price windows, in order; each is listed in `seller.price_schedule` by the day it opens.
-SCHEDULE_WINDOWS = ("first_drop", "second_drop", "clear_floors", "giveaway")
+SCHEDULE_WINDOWS = ("first_drop", "clear_floors", "giveaway")
 
 
 def seller_day(seller: dict[str, Any], key: str, value: Any) -> date:

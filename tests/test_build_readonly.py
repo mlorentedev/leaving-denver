@@ -12,8 +12,7 @@ INVENTORY = {
         "household_deadline": "2026-10-23",
         "vehicle_deadline": "2026-11-09",
         "price_schedule": {
-            "first_drop": "2026-10-06",
-            "second_drop": "2026-10-12",
+            "first_drop": "2026-10-13",
             "clear_floors": "2026-10-16",
             "giveaway": "2026-10-20",
         },

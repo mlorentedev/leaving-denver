@@ -192,7 +192,6 @@ def cmd_drops(args):
     print("SALE TIMELINE")
     for label, key in (
         ("First drop", "first_drop"),
-        ("Second drop", "second_drop"),
         ("Clear floors", "clear_floors"),
         ("Giveaway", "giveaway"),
     ):

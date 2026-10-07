@@ -173,7 +173,7 @@ def test_a_null_section_reads_as_empty(inventory, private, section):
 
 def test_the_next_drop_steps_halfway_to_the_floor_at_the_first_drop_window(inventory, private):
     schedule = sale_schedule(inventory["seller"])
-    monitor = rows_by_id(inventory, private)["dell-monitor-32"]
+    monitor = rows_by_id(inventory, private, today="2026-10-14")["dell-monitor-32"]
     assert monitor["nextDrop"] == {
         "on": schedule["first_drop"][0].isoformat(),
         "price": MONITOR_DROP,
@@ -181,10 +181,10 @@ def test_the_next_drop_steps_halfway_to_the_floor_at_the_first_drop_window(inven
     }
 
 
-def test_a_window_the_price_log_already_covers_is_not_the_next_drop(inventory, private):
-    # The sofa was repriced on 10-06, the day the first drop opened: the second drop is next.
+def test_a_reprice_before_a_window_opens_does_not_cover_it(inventory, private):
+    # The sofa was repriced on 10-06, a week before the first drop opens: that drop is next.
     sofa = rows_by_id(inventory, private)["sofa-sleeper"]
-    assert sofa["nextDrop"] == {"on": "2026-10-12", "price": 195, "overdue": False}
+    assert sofa["nextDrop"] == {"on": "2026-10-13", "price": 195, "overdue": False}
 
 
 def test_each_drop_recomputes_from_the_asking_price_in_force(inventory, private):
@@ -195,7 +195,8 @@ def test_each_drop_recomputes_from_the_asking_price_in_force(inventory, private)
 
 def test_the_last_step_is_the_floor_at_the_clear_floors_window(inventory, private):
     schedule = sale_schedule(inventory["seller"])
-    data = with_log(private, "sofa-sleeper", "2026-10-06", "2026-10-12")
+    # Repriced the day the first drop opened: that window is covered, the floors are next.
+    data = with_log(private, "sofa-sleeper", "2026-10-06", "2026-10-13")
     row = rows_by_id(inventory, data)["sofa-sleeper"]
     assert row["nextDrop"] == {
         "on": schedule["clear_floors"][0].isoformat(),
@@ -205,7 +206,7 @@ def test_the_last_step_is_the_floor_at_the_clear_floors_window(inventory, privat
 
 
 def test_nothing_is_left_to_drop_once_every_window_is_covered(inventory, private):
-    data = with_log(private, "sofa-sleeper", "2026-10-06", "2026-10-12", "2026-10-16")
+    data = with_log(private, "sofa-sleeper", "2026-10-13", "2026-10-16")
     assert rows_by_id(inventory, data)["sofa-sleeper"]["nextDrop"] is None
 
 

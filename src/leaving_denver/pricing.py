@@ -10,7 +10,7 @@ in assets/seller.mjs); a test compares the tiers.
 from typing import Any
 
 # The household windows a drop can happen in, in order (`seller.price_schedule` opens them).
-DROP_WINDOWS = ("first_drop", "second_drop", "clear_floors")
+DROP_WINDOWS = ("first_drop", "clear_floors")
 
 
 def price_tiers(item: dict[str, Any], floor: int | None) -> tuple[int, int, int]:

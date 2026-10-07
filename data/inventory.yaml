@@ -17,9 +17,9 @@ seller:
   vehicle_deadline: '2026-11-09'
   # The household price windows, by the day each opens. A window runs to the day before the next
   # opens, the giveaway to the day before `household_deadline`. The car has no schedule.
+  # The first drop moved a week and the second was dropped (owner, 2026-10-06; #211).
   price_schedule:
-    first_drop: '2026-10-06'
-    second_drop: '2026-10-12'
+    first_drop: '2026-10-13'
     clear_floors: '2026-10-16'
     giveaway: '2026-10-20'
   # Hero strip; the full facts follow in `pickup` (owner, 2026-09-28).
