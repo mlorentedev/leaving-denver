@@ -965,8 +965,38 @@
       document.getElementById('resultCount').textContent = UI[shown === 1 ? 'results_one' : 'results'].replace('{n}', shown);
     }
 
+    // The first tap on a card is the slow one (INP, issue #213): it pays for the number
+    // formatter's first use (`toLocaleString` loads the locale data, ~35 ms of a 4x-throttled
+    // phone's ~110 ms handler) and for the sheet's first style pass inside `showModal`. Both are
+    // paid here, once the page has loaded and the browser is idle, so the tap does not. Safari has
+    // no requestIdleCallback: a short timer after load stands in for it. Once the visitor has
+    // pressed anything the warm-up is skipped: that press already paid, and a timer firing next to
+    // it would only add to its delay.
+    let pressed = false;
+    for (const kind of ['pointerdown', 'keydown']) {
+      addEventListener(kind, () => { pressed = true; }, { capture: true, once: true, passive: true });
+    }
+    function whenIdle(work) {
+      if ('requestIdleCallback' in window) requestIdleCallback(work, { timeout: 2000 });
+      else setTimeout(work, 200);
+    }
+    function warmSheet() {
+      if (pressed) return;
+      (0).toLocaleString();
+      whenIdle(() => {
+        const sheet = document.getElementById('itemSheet');
+        if (pressed || sheet.open) return;
+        // Styles and lays out the sheet's subtree without opening it: nothing paints between the
+        // two writes, so no frame shows it, and no focus, inert page or history entry is touched.
+        sheet.style.display = 'block';
+        sheet.firstElementChild.offsetHeight;
+        sheet.style.display = '';
+      });
+    }
+
     // Init
     document.addEventListener('DOMContentLoaded', () => {
+      window.addEventListener('load', () => whenIdle(warmSheet), { once: true });
       // A reload keeps a sheet's history entry but no sheet is open: neutralise it, or the
       // next close would go back onto it and Back would need two presses.
       if (history.state && history.state.sheet) history.replaceState(null, '');
