@@ -80,21 +80,21 @@ def test_status_label_is_localized_and_the_key_kept():
 )
 def test_status_commands_set_the_status_and_rebuild(monkeypatch, command, status):
     inv = data(a="Available", b="Pending", c="Available", d="Available")
-    saved, built = [], []
+    edits, built = [], []
     monkeypatch.setattr(cli, "load_inventory_yaml", lambda: inv)
-    monkeypatch.setattr(cli, "save_inventory_yaml", saved.append)
+    monkeypatch.setattr(cli, "set_item_status", lambda *a: edits.append(a))
     monkeypatch.setattr(cli, "build_all", lambda: built.append(True))
     # `sold` records the day and reads the tracking: never against the owner's real file.
     monkeypatch.setattr(cli, "record_sale", lambda *args: None)
     monkeypatch.setattr(cli, "load_private", lambda: {})
     getattr(cli, f"cmd_{command}")(SimpleNamespace(id="b", price=None))
-    assert saved[0]["items"][1]["status"] == status
+    assert edits == [("b", status)]
     assert built
 
 
 def test_status_commands_reject_an_unknown_id(monkeypatch):
     monkeypatch.setattr(cli, "load_inventory_yaml", lambda: data(a="Available", b="", c="", d=""))
-    monkeypatch.setattr(cli, "save_inventory_yaml", lambda d: pytest.fail("saved"))
+    monkeypatch.setattr(cli, "set_item_status", lambda *a: pytest.fail("edited"))
     with pytest.raises(SystemExit):
         cli.cmd_pending(argparse.Namespace(id="nope", price=None))
 

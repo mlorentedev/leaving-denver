@@ -149,14 +149,14 @@ def commands(monkeypatch, fixture_private):
         ],
     }
     calls = []
-    saved = []
+    edits = []
     monkeypatch.setattr(cli, "load_inventory_yaml", lambda: inventory)
-    monkeypatch.setattr(cli, "save_inventory_yaml", saved.append)
+    monkeypatch.setattr(cli, "set_item_status", lambda *a: edits.append(a))
     monkeypatch.setattr(cli, "build_all", lambda: None)
     monkeypatch.setattr(cli, "load_private", lambda: fixture_private)
     for name in ("record_post", "record_price", "record_sale"):
         monkeypatch.setattr(cli, name, lambda *a, _n=name: calls.append((_n, *a)))
-    return SimpleNamespace(calls=calls, saved=saved, inventory=inventory)
+    return SimpleNamespace(calls=calls, edits=edits, inventory=inventory)
 
 
 def post_args(**kw):
@@ -252,7 +252,7 @@ def test_a_failed_write_is_an_error_not_a_traceback(commands, monkeypatch, capsy
 def test_sold_records_the_price_and_the_day(commands):
     cli.cmd_sold(SimpleNamespace(id="sofa-sleeper", price=180))
     assert commands.calls == [("record_sale", "sofa-sleeper", 180, date.today())]
-    assert commands.saved[-1]["items"][0]["status"] == "Sold"
+    assert commands.edits[-1] == ("sofa-sleeper", "Sold")
 
 
 def test_sold_lists_takedown_only_for_the_channels_the_item_was_posted_on(commands, capsys):
@@ -278,14 +278,14 @@ def test_sold_without_a_price_still_works_when_the_day_cannot_be_recorded(comman
 
     monkeypatch.setattr(cli, "record_sale", refuse)
     cli.cmd_sold(SimpleNamespace(id="lamp", price=None))
-    assert commands.saved[-1]["items"][1]["status"] == "Sold"
+    assert commands.edits[-1] == ("lamp", "Sold")
 
 
 def test_the_public_inventory_never_gains_a_price_a_date_or_a_channel(commands):
     cli.cmd_sold(SimpleNamespace(id="sofa-sleeper", price=180))
     cli.cmd_post(post_args())
     cli.cmd_reprice(SimpleNamespace(id="sofa-sleeper", price=190, on=None))
-    item = commands.saved[-1]["items"][0]
+    item = commands.inventory["items"][0]
     assert set(item) == {"id", "title", "status"}
 
 

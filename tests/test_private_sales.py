@@ -31,22 +31,22 @@ def fake_inventory():
 
 
 def test_sold_with_a_price_records_it_privately(monkeypatch):
-    inv, saved, recorded = fake_inventory(), [], []
+    inv, edits, recorded = fake_inventory(), [], []
     monkeypatch.setattr(cli, "load_inventory_yaml", lambda: inv)
-    monkeypatch.setattr(cli, "save_inventory_yaml", saved.append)
+    monkeypatch.setattr(cli, "set_item_status", lambda *a: edits.append(a))
     monkeypatch.setattr(cli, "build_all", lambda: None)
     monkeypatch.setattr(
         cli, "record_sale", lambda item_id, price, on: recorded.append((item_id, price, on))
     )
     cli.cmd_sold(SimpleNamespace(id="lamp", price=120))
     assert recorded == [("lamp", 120, date.today())]
-    assert saved[-1]["items"][0]["status"] == "Sold"
-    assert "realized_price" not in saved[-1]["items"][0]
+    assert edits == [("lamp", "Sold")]
+    assert "realized_price" not in inv["items"][0]
 
 
 def test_sold_fails_before_touching_anything_if_the_price_cannot_be_kept(monkeypatch):
     monkeypatch.setattr(cli, "load_inventory_yaml", fake_inventory)
-    monkeypatch.setattr(cli, "save_inventory_yaml", lambda d: pytest.fail("saved"))
+    monkeypatch.setattr(cli, "set_item_status", lambda *a: pytest.fail("edited"))
 
     def refuse(item_id, price, on):
         raise RuntimeError("sops unavailable")
