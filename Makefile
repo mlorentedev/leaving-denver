@@ -31,23 +31,18 @@ TF_TOKEN_KEY ?= cloudflare_terraform_token
 TF_CHECK = terraform -chdir=$(TF_DIR) fmt -check -recursive && \
 	terraform -chdir=$(TF_DIR) init -backend=false -input=false -no-color >/dev/null && \
 	terraform -chdir=$(TF_DIR) validate
-# Both secrets are read into shell variables first, so a failed `sops` stops the recipe
-# instead of leaving an empty value behind. $(1) is the Terraform subcommand and its flags.
-define tf_run
-	@set -e; \
-	token="$$(sops -d --extract '["$(TF_TOKEN_KEY)"]' $(SOPS_FILE))" || { echo "no $(TF_TOKEN_KEY) in $(SOPS_FILE): make secrets" >&2; exit 1; }; \
-	email="$$(sops -d --extract '["owner_email"]' $(SOPS_FILE))" || { echo "no owner_email in $(SOPS_FILE): make secrets" >&2; exit 1; }; \
-	test -n "$$token" && test -n "$$email" || { echo "empty Terraform token or owner_email" >&2; exit 1; }; \
-	CLOUDFLARE_API_TOKEN="$$token" TF_VAR_owner_email="$$email" TF_VAR_account_id=$(CF_ACCOUNT_ID) \
-		terraform -chdir=$(TF_DIR) $(1)
-endef
+# scripts/tf-run.sh reads both secrets into shell variables first, so a failed `sops` stops
+# the run instead of leaving an empty value behind, and hands them to Terraform in its
+# environment only. It is a script, not a `define` block, so BusyBox make parses this file
+# (lesson-035). Its argument is the Terraform subcommand and its flags.
+TF_RUN = TF_DIR=$(TF_DIR) TF_TOKEN_KEY=$(TF_TOKEN_KEY) SOPS_FILE=$(SOPS_FILE) CF_ACCOUNT_ID=$(CF_ACCOUNT_ID) sh scripts/tf-run.sh
 
 .DEFAULT_GOAL := help
 
 .PHONY: help install lint format build test check serve drops post reprice sold deploy cf-project ci-secrets protect-deploy protect-main audit-deploy secrets infra-init infra-ids infra-plan infra-apply infra-fmt infra-check clean
 
 help: ## Show this help
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' Makefile | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
 
 install: ## Install locked Python and Tailwind dependencies and the Git LFS hooks
 	$(UV) sync --extra dev
@@ -89,11 +84,11 @@ drops: ## Show the staged price-drop table (needs the sops key)
 
 post: ## Record a posting or renewal: make post ID=sofa-sleeper CHANNEL=facebook [ON=2026-10-01]
 	@test -n "$(ID)" && test -n "$(CHANNEL)" || { echo "usage: make post ID=<item-id> CHANNEL=<facebook|craigslist|offerup|nextdoor|activebuilding|carscom> [ON=<YYYY-MM-DD>]"; exit 1; }
-	$(UV) run leaving-denver post $(ID) $(CHANNEL) $(if $(ON),--on $(ON))
+	$(UV) run leaving-denver post $(ID) $(CHANNEL) $${ON:+--on "$$ON"}
 
 reprice: ## Record an asking-price change: make reprice ID=sofa-sleeper PRICE=190 [ON=2026-10-03]
 	@test -n "$(ID)" && test -n "$(PRICE)" || { echo "usage: make reprice ID=<item-id> PRICE=<usd> [ON=<YYYY-MM-DD>]"; exit 1; }
-	$(UV) run leaving-denver reprice $(ID) $(PRICE) $(if $(ON),--on $(ON))
+	$(UV) run leaving-denver reprice $(ID) $(PRICE) $${ON:+--on "$$ON"}
 
 sold: ## Mark an item sold: make sold ID=sofa-sleeper PRICE=200
 	@test -n "$(ID)" || { echo "usage: make sold ID=<item-id> [PRICE=<usd>]"; exit 1; }
@@ -157,7 +152,7 @@ secrets: ## Edit the encrypted floors, targets, notes, phone and deploy token (t
 	sops $(SOPS_FILE)
 
 infra-init: ## Initialise Terraform for the Cloudflare configuration (local state)
-	$(call tf_run,init -input=false)
+	@$(TF_RUN) init -input=false
 
 infra-ids: ## Find the ids of the existing Access objects for the import blocks (read-only; needs a token with Access read)
 	@set -e; \
@@ -168,7 +163,7 @@ infra-ids: ## Find the ids of the existing Access objects for the import blocks 
 	echo "wrote $(TF_DIR)/ids.auto.tfvars (ids only, gitignored)"
 
 infra-plan: ## Show what Terraform would change in Cloudflare; saves the plan for infra-apply (needs the sops key)
-	$(call tf_run,plan -input=false -out=plan.tfplan)
+	@$(TF_RUN) plan -input=false -out=plan.tfplan
 
 # The saved plan is read first: an import-only plan applies, a change needs CHANGES=1, a plan that
 # only deletes needs DESTROY=1 (decommission) and a replacement never goes through here
@@ -176,8 +171,8 @@ infra-plan: ## Show what Terraform would change in Cloudflare; saves the plan fo
 infra-apply: ## Apply the saved plan (imports only; CHANGES=1 for a change, DESTROY=1 to decommission): owner only, refused in CI, asks for nothing
 	@test -z "$$CI" || { echo "infra-apply is run by the owner, never by CI" >&2; exit 1; }
 	@test -f $(TF_DIR)/plan.tfplan || { echo "no saved plan: run make infra-plan and read it first" >&2; exit 1; }
-	$(call tf_run,show -json plan.tfplan) | python3 scripts/infra-plan-guard.py $(if $(CHANGES),--allow-changes) $(if $(DESTROY),--allow-destroy)
-	$(call tf_run,apply -input=false plan.tfplan)
+	@$(TF_RUN) show -json plan.tfplan | python3 scripts/infra-plan-guard.py $${CHANGES:+--allow-changes} $${DESTROY:+--allow-destroy}
+	@$(TF_RUN) apply -input=false plan.tfplan
 	@rm -f $(TF_DIR)/plan.tfplan
 
 infra-fmt: ## Terraform fmt check + validate (needs terraform, no credentials)
