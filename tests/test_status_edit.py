@@ -38,9 +38,11 @@ def changed(before, after):
     return [(a, b) for a, b in zip(before, after, strict=True) if a != b]
 
 
-def an_available_item():
+def an_item_not(status):
+    """(id, status) of a real item whose status is not `status`: the owner's data decides which,
+    so no test assumes an item is still Available (lesson-037)."""
     inventory = yaml.safe_load(INVENTORY_YAML.read_text(encoding="utf-8"))
-    return next(i["id"] for i in inventory["items"] if i["status"] == "Available")
+    return next((i["id"], i["status"]) for i in inventory["items"] if i["status"] != status)
 
 
 def test_the_real_inventory_has_comments_for_the_test_to_protect():
@@ -51,13 +53,16 @@ def test_the_real_inventory_has_comments_for_the_test_to_protect():
 def test_a_status_command_changes_exactly_one_line_of_the_real_inventory(
     real_copy, command, status
 ):
-    item_id = an_available_item()
+    item_id, was = an_item_not(status)
     before = lines_of(real_copy)
 
     getattr(cli, f"cmd_{command}")(SimpleNamespace(id=item_id, price=None))
 
     after = lines_of(real_copy)
-    assert changed(before, after) == [("  status: Available\n", f"  status: {status}\n")]
+    # Whatever the line's spacing or trailing comment, only the word changes.
+    [(old, new)] = changed(before, after)
+    assert old.lstrip().startswith(f"status: {was}")
+    assert new == old.replace(f"status: {was}", f"status: {status}", 1)
     inventory = yaml.safe_load("".join(after))
     assert next(i for i in inventory["items"] if i["id"] == item_id)["status"] == status
     assert [i["status"] for i in inventory["items"] if i["id"] != item_id] == [
@@ -67,7 +72,10 @@ def test_a_status_command_changes_exactly_one_line_of_the_real_inventory(
 
 def test_available_undoes_pending_to_the_byte(real_copy):
     original = real_copy.read_bytes()
-    item_id = an_available_item()
+    item_id, was = an_item_not("Pending")
+    if was != "Available":
+        site_builder.set_item_status(item_id, "Available")
+        original = real_copy.read_bytes()
     cli.cmd_pending(argparse.Namespace(id=item_id))
     assert real_copy.read_bytes() != original
     cli.cmd_available(argparse.Namespace(id=item_id))
@@ -76,7 +84,8 @@ def test_available_undoes_pending_to_the_byte(real_copy):
 
 def test_setting_the_status_it_already_has_leaves_the_file_byte_identical(real_copy):
     before = real_copy.read_bytes()
-    site_builder.set_item_status(an_available_item(), "Available")
+    item_id, was = an_item_not("")
+    site_builder.set_item_status(item_id, was)
     assert real_copy.read_bytes() == before
 
 
