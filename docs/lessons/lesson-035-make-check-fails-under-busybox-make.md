@@ -39,10 +39,11 @@ CI does not cover it: CI only ever runs GNU make.
   gets them in its environment only. The Makefile passes `TF_DIR`,
   `TF_TOKEN_KEY`, `SOPS_FILE` and `CF_ACCOUNT_ID` through a plain `TF_RUN`
   variable and calls `sh scripts/tf-run.sh <terraform args>`.
-- The other GNU-only constructs a POSIX make may reject were replaced the same
-  way, as a precaution (only `define` is known to have failed): `$(MAKEFILE_LIST)` became `Makefile`, and
-  `$(if $(ON),--on $(ON))` (also `CHANGES`, `DESTROY`) became the shell's
-  `${ON:+--on "$ON"}`. A make variable given on the command line or in the
+- Two more GNU-only constructs were replaced because a POSIX make expands them
+  to nothing, silently: `$(MAKEFILE_LIST)` (the `help` target would grep stdin
+  and hang) became `Makefile`, and `$(if $(ON),--on $(ON))` (also `CHANGES`,
+  `DESTROY`) became the shell's `${ON:+--on "$ON"}` (`make post ON=...` would
+  have dropped `--on`). A make variable given on the command line or in the
   environment reaches the recipe's environment, so the result is identical; it
   was compared before and after with `UV=echo make post ...`.
 - Left as is, not known to fail (unverified without a BusyBox make): `.DEFAULT_GOAL`
@@ -51,13 +52,24 @@ CI does not cover it: CI only ever runs GNU make.
   that relied on it, `terraform show | scripts/infra-plan-guard.py`, still fails
   closed because the guard rejects empty input), `?=`, `:=`, `=`.
 
-## Not verified
+## Verification
 
-BusyBox make itself was never run for this fix: the Linux `busybox` here has no
-`make` applet and Debian/upstream BusyBox does not ship one (the Windows build
-is a separate fork). The parse-time claim rests on the construct list above, not
-on a run. Whoever has the Windows machine: run `make -n check` and `make help`
-there and reopen #198 if either still fails.
+BusyBox make is `pdpmake` (rmyorston/pdpmake, the POSIX make that BusyBox for
+Windows ships as `make`). The BusyBox binary on the Linux dev machine was not
+used (the agent harness refused to run `busybox`); instead pdpmake `master` was
+built from source in a scratch directory and run against the files:
+
+- the Makefile before this fix: `make: (Makefile.old:36): expected separator`,
+  the symptom in #198, reproduced;
+- the Makefile after: `make -n help`, `make -n check` and `make -n infra-plan`
+  expand and exit 0; `make UV=echo post ID=x CHANNEL=f ON=2026-10-01` prints
+  `--on 2026-10-01`, and without `ON` prints no `--on`;
+- the old `$(MAKEFILE_LIST)` and `$(if)` forms under pdpmake expand to empty.
+
+Not verified: the scoop BusyBox v1.38.0 binary itself (a newer pdpmake than
+`master` could differ), and the test suite under pdpmake (the `make` the tests
+call is whatever is on PATH). Run `make -n check` and `make help` on the Windows
+machine and reopen #198 if either still fails.
 
 ## Rule
 
