@@ -91,31 +91,32 @@ def test_a_warmed_sheet_opens_with_the_same_content(tmp_path):
     assert result["title"] == result["expectedTitle"]
 
 
-# A press on a card before the page is idle: the warm-up stands down rather than run next to it.
-# A press anywhere else (a scroll starts with one on a phone) pays nothing and leaves it armed.
-PRESSED_EARLY = """
+# A sheet opened before the page is idle already paid: the warm-up stands down. A press that
+# opens nothing (a scroll starts with one on a phone, on a card or not) leaves it armed.
+BEFORE_IDLE = """
 document.addEventListener('DOMContentLoaded', () => {
-  const target = %s;
-  target.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+  %s
 });
 """
-ON_A_CARD = "document.querySelector('.item-card')"
-ELSEWHERE = "document.body"
+OPENS_A_SHEET = "openModal(INVENTORY.items[0].id); document.getElementById('itemSheet').close();"
+PRESSES = (
+    "for (const target of [document.querySelector('.item-card'), document.body]) "
+    "target.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));"
+)
 
 NOT_WARMED = """
 await until(() => window.__fmtAtLoad !== null, 8000);
 await wait(2500);
-return { formatted: window.__fmt, formattedAtLoad: window.__fmtAtLoad, layouts: window.__layout };
+return { layouts: window.__layout };
 """
 
 
-def test_a_card_press_before_idle_skips_the_warm_up(tmp_path):
-    result = run_page(tmp_path, "index.html", NOT_WARMED, setup=SPY + PRESSED_EARLY % ON_A_CARD)
+def test_a_sheet_opened_before_idle_skips_the_warm_up(tmp_path):
+    result = run_page(tmp_path, "index.html", NOT_WARMED, setup=SPY + BEFORE_IDLE % OPENS_A_SHEET)
     assert result["layouts"] == 0
-    assert result["formatted"] == result["formattedAtLoad"]
 
 
-def test_a_press_elsewhere_before_idle_leaves_the_warm_up_armed(tmp_path):
-    result = run_page(tmp_path, "index.html", WARMED, setup=SPY + PRESSED_EARLY % ELSEWHERE)
+def test_a_press_that_opens_nothing_leaves_the_warm_up_armed(tmp_path):
+    result = run_page(tmp_path, "index.html", WARMED, setup=SPY + BEFORE_IDLE % PRESSES)
     assert result["formatted"] > result["formattedAtLoad"]
     assert result["layouts"] > 0

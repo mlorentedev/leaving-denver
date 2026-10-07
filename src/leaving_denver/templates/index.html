@@ -497,6 +497,7 @@
     function openModal(itemId) {
       const item = INVENTORY.items.find(i => i.id === itemId);
       if (!item) return;
+      sheetWarm = true;
       track('view_item', { item: itemId });
 
       document.getElementById('modalTitle').textContent = item.title;
@@ -969,26 +970,20 @@
     // formatter's first use (`toLocaleString` loads the locale data, ~35 ms of a 4x-throttled
     // phone's ~110 ms handler) and for the sheet's first style pass inside `showModal`. Both are
     // paid here, once the page has loaded and the browser is idle, so the tap does not. Safari has
-    // no requestIdleCallback: a short timer after load stands in for it. Once the visitor has
-    // pressed something that opens the item sheet the warm-up is skipped: that press already paid,
-    // and a timer firing next to it would only add to its delay. A scroll or any other press does
-    // not pay, so it leaves the warm-up armed.
-    let pressed = false;
-    for (const kind of ['pointerdown', 'keydown']) {
-      addEventListener(kind, e => {
-        if (e.target instanceof Element && e.target.closest('.item-card, [data-open-item]')) pressed = true;
-      }, { capture: true, passive: true });
-    }
+    // no requestIdleCallback: a short timer after load stands in for it. Once the item sheet has
+    // opened, the warm-up is skipped: that opening already paid. It keys on the sheet, not on a
+    // gesture: a scroll starts with the same pointerdown as a tap, and pays nothing.
+    let sheetWarm = false;
     function whenIdle(work) {
       if ('requestIdleCallback' in window) requestIdleCallback(work, { timeout: 2000 });
       else setTimeout(work, 200);
     }
     function warmSheet() {
-      if (pressed) return;
+      if (sheetWarm) return;
       (0).toLocaleString();
       whenIdle(() => {
         const sheet = document.getElementById('itemSheet');
-        if (pressed || sheet.open) return;
+        if (sheetWarm || sheet.open) return;
         // Styles and lays out the sheet's subtree without opening it: nothing paints between the
         // two writes, so no frame shows it, and no focus, inert page or history entry is touched.
         sheet.style.display = 'block';
