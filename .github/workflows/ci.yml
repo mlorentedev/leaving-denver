@@ -53,9 +53,42 @@ jobs:
           terraform_wrapper: false
       - run: make check
 
+  # CI-005 (#185): the same suite with the sale over (OPS-011). That run skips the catalog tests
+  # listed by name in CATALOG_TESTS (tests/conftest.py), and nothing else ran it, so a new catalog
+  # test missing from the list stayed green until someone flipped the switch by hand (lesson-021).
+  # It runs beside `test`, so the wall-clock cost is the slower of the two, not their sum.
+  test-end-of-sale:
+    runs-on: ubuntu-latest
+    env:
+      SELLER_PHONE: "+15555550100"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Hash LFS object list
+        run: git lfs ls-files -l | cut -d' ' -f1 | sort | sha256sum | cut -d' ' -f1 > .lfs-assets-id
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .git/lfs
+          key: lfs-${{ hashFiles('.lfs-assets-id') }}
+      - run: git lfs pull
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          cache: npm
+      - run: make install
+      # The runner's checkout is the scratch copy: nothing here is committed or pushed. The edit
+      # is the decommission runbook's own, and the next step proves it took, so a change in the
+      # file's layout fails this job instead of silently testing the live catalog again.
+      - name: Turn the sale off in this checkout
+        run: |
+          sed -i '0,/^seller:/s//seller:\n  sale_over: true/' data/inventory.yaml
+          uv run python -c 'import sys, yaml; from leaving_denver.site_builder import sale_over; sys.exit(0 if sale_over(yaml.safe_load(open("data/inventory.yaml"))) else "the switch did not take: seller.sale_over is not true")'
+      - run: make test
+
   deploy:
     if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
-    needs: test
+    # A red end-of-sale run is a broken switch: the day it flips, the end deploy fails.
+    needs: [test, test-end-of-sale]
     runs-on: ubuntu-latest
     # One deploy per Pages branch at a time; later runs wait.
     concurrency:

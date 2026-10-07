@@ -20,7 +20,7 @@ BRANCH = "${{ github.event_name == 'push' && 'main' || inputs.branch }}"
 
 def test_main_push_deploys_production_only_after_tests():
     assert WORKFLOW["on"]["push"]["branches"] == ["main"]
-    assert DEPLOY["needs"] == "test"
+    assert DEPLOY["needs"] == ["test", "test-end-of-sale"]
     assert DEPLOY["if"] == (
         "(github.event_name == 'push' && github.ref == 'refs/heads/main')"
         " || github.event_name == 'workflow_dispatch'"
@@ -30,6 +30,18 @@ def test_main_push_deploys_production_only_after_tests():
         "|| inputs.branch == 'main' && 'production' || 'preview' }}"
     )
     assert DEPLOY["concurrency"]["group"] == f"pages-{BRANCH}"
+
+
+def test_the_suite_also_runs_with_the_sale_over():
+    """CI-005 (#185): a catalog test missing from CATALOG_TESTS turns the PR red, not the end day."""
+    steps = WORKFLOW["jobs"]["test-end-of-sale"]["steps"]
+    runs = [s.get("run", "") for s in steps]
+    switch = next(r for r in runs if "sale_over: true" in r)
+    assert "data/inventory.yaml" in switch
+    assert "sale_over(" in switch, (
+        "the job must prove the switch took, or it tests the catalog again"
+    )
+    assert runs.index(switch) < runs.index("make test")
 
 
 def test_manual_preview_and_guarded_main_redeploy():

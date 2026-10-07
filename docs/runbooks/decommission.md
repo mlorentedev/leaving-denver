@@ -119,7 +119,8 @@ that replaces it fail.
    ```
 
    `make check` skips the catalog's tests by name while the switch is on (`tests/conftest.py`).
-   A skipped list that is out of date shows up here, not in production.
+   CI's `test-end-of-sale` job already runs this mode on every pull request (CI-005), so the
+   list should be current. This run confirms it on the real flip, not in production.
 
 2. Merge it through a pull request, as for any change to `main`:
 
