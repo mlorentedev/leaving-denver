@@ -220,7 +220,7 @@ export async function openEnvelope(envelope, passphrase) {
 // payload holds the allow-list only, and "overdue" depends on today. `price_tiers` and
 // `next_drop` in pricing.py are the same arithmetic (a test compares them); days are ISO
 // strings (YYYY-MM-DD), which sort as dates.
-const DROP_WINDOWS = ['first_drop', 'second_drop', 'clear_floors'];
+const DROP_WINDOWS = ['first_drop', 'clear_floors'];
 
 // Python rounds a half to the even number; so does this, or the page would differ from
 // `make drops` by one step.
@@ -503,8 +503,8 @@ if (typeof document !== 'undefined') {
     sum.className = 'border-t border-neutral-300 font-semibold';
     sum.append(planCell('Total'), ...total.map(value => planCell(usd(value))));
     byId('plan-total').append(sum);
-    const { first_drop: first, second_drop: second, clear_floors: floors } = config.drops;
-    byId('plan-windows').textContent = `The first drop opens ${dayText(first)}, the second ${dayText(second)} and the floors ${dayText(floors)}.`;
+    const { first_drop: first, clear_floors: floors } = config.drops;
+    byId('plan-windows').textContent = `The drop opens ${dayText(first)} and the floors ${dayText(floors)}.`;
   }
 
   function sealedAt(text) {

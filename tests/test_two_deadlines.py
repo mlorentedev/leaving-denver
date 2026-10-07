@@ -127,8 +127,7 @@ def test_the_real_data_holds_the_owners_two_deadlines_and_no_departure_date():
 
 def test_the_price_schedule_is_the_owners_explicit_dates():
     assert site_builder.sale_schedule(SOURCE["seller"]) == {
-        "first_drop": (date(2026, 10, 6), date(2026, 10, 11)),
-        "second_drop": (date(2026, 10, 12), date(2026, 10, 15)),
+        "first_drop": (date(2026, 10, 13), date(2026, 10, 15)),
         "clear_floors": (date(2026, 10, 16), date(2026, 10, 19)),
         "giveaway": (date(2026, 10, 20), date(2026, 10, 22)),
     }
@@ -138,18 +137,17 @@ def test_the_schedule_is_written_down_not_computed_from_a_deadline():
     seller = copy.deepcopy(SOURCE["seller"])
     seller["household_deadline"] = "2026-10-30"
     seller["vehicle_deadline"] = "2026-12-01"
-    assert site_builder.sale_schedule(seller)["first_drop"][0] == date(2026, 10, 6)
+    assert site_builder.sale_schedule(seller)["first_drop"][0] == date(2026, 10, 13)
     seller["price_schedule"]["first_drop"] = "2026-10-08"
     assert site_builder.sale_schedule(seller)["first_drop"] == (
         date(2026, 10, 8),
-        date(2026, 10, 11),
+        date(2026, 10, 15),
     )
 
 
 def test_the_seller_tool_gets_the_days_the_windows_open():
     assert site_builder.seller_drops(SOURCE["seller"]) == {
-        "first_drop": "2026-10-06",
-        "second_drop": "2026-10-12",
+        "first_drop": "2026-10-13",
         "clear_floors": "2026-10-16",
     }
 
@@ -159,8 +157,8 @@ def test_drops_prints_the_explicit_windows(monkeypatch, capsys):
     monkeypatch.setattr(private_data, "floors", lambda: {"unused": 1})
     cli.cmd_drops(None)
     output = capsys.readouterr().out
-    assert "First drop: Oct 6-11" in output
-    assert "Second drop: Oct 12-15" in output
+    assert "First drop: Oct 13-15" in output
+    assert "Second drop" not in output
     assert "Clear floors: Oct 16-19" in output
     assert "Giveaway: Oct 20-22" in output
 
@@ -175,19 +173,22 @@ BAD_SELLERS = {
     "no household deadline": broken(lambda s: s.pop("household_deadline")),
     "no vehicle deadline": broken(lambda s: s.pop("vehicle_deadline")),
     "no schedule": broken(lambda s: s.pop("price_schedule")),
-    "a window missing": broken(lambda s: s["price_schedule"].pop("second_drop")),
+    "a window missing": broken(lambda s: s["price_schedule"].pop("clear_floors")),
+    "the dropped second window": broken(
+        lambda s: s["price_schedule"].update(second_drop="2026-10-14")
+    ),
     "an unknown window": broken(lambda s: s["price_schedule"].update(fire_sale="2026-10-21")),
     "an unquoted date": broken(lambda s: s.update(household_deadline=date(2026, 10, 23))),
     "an unquoted window": broken(
-        lambda s: s["price_schedule"].update(first_drop=date(2026, 10, 6))
+        lambda s: s["price_schedule"].update(first_drop=date(2026, 10, 13))
     ),
     "not an ISO date": broken(lambda s: s.update(vehicle_deadline="11/09/2026")),
     "the compact form": broken(lambda s: s.update(vehicle_deadline="20261109")),
     "a date that does not exist": broken(lambda s: s.update(vehicle_deadline="2026-11-31")),
     "the car before the household": broken(lambda s: s.update(vehicle_deadline="2026-10-23")),
-    "windows out of order": broken(lambda s: s["price_schedule"].update(second_drop="2026-10-05")),
+    "windows out of order": broken(lambda s: s["price_schedule"].update(clear_floors="2026-10-05")),
     "two windows opening one day": broken(
-        lambda s: s["price_schedule"].update(second_drop="2026-10-06")
+        lambda s: s["price_schedule"].update(clear_floors="2026-10-13")
     ),
     "giveaway on the deadline": broken(lambda s: s["price_schedule"].update(giveaway="2026-10-23")),
     "a schedule that is a list": broken(lambda s: s.update(price_schedule=["2026-10-06"])),
@@ -317,8 +318,7 @@ def seller_config(page):
 def test_the_seller_tool_page_carries_the_explicit_drop_days(public_dir):
     config = seller_config(build(public_dir, catalog_inventory())["seller"])
     assert config["drops"] == {
-        "first_drop": "2026-10-06",
-        "second_drop": "2026-10-12",
+        "first_drop": "2026-10-13",
         "clear_floors": "2026-10-16",
     }
     # The listings it writes never say when I move (FEAT-014).

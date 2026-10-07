@@ -33,7 +33,7 @@ content/raw_heic/
 
 # Tooling
 .venv/
-node_modules/
+node_modules
 *.egg-info/
 .ruff_cache/
 .lfs-assets-id

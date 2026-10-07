@@ -58,8 +58,8 @@ unverified vehicle service, condition or retail value.
 | When | Seller action |
 | :--- | :--- |
 | September 29–October 4 | Photograph and list the car and highest-value items first; list smaller items after the main listings. Post an umbrella message only where group rules allow it and put a QR flyer on the building board if permitted (print `https://leaving-denver.pages.dev/flyer/` from a browser). |
-| October 5–11 | Reply promptly, follow up on qualified inquiries and renew listings only when the platform offers it. The first household price drop opens October 6; review items with no messages before changing their public asking prices. |
-| October 12–15 | The second drop opens October 12. If the sectional is unsold, contact The Good Couch with real photos by October 12 as a backup, and book donation/pickup alternatives by October 15 ([backup-exits.md](backup-exits.md)); confirm acceptance first, especially for bedding, electronics and sleeper sofas. |
+| October 5–11 | Reply promptly, follow up on qualified inquiries and renew listings only when the platform offers it. Asking prices hold this week (owner, 2026-10-06; #211). |
+| October 12–15 | The price drop opens October 13 (the only one before the floors); review items with no messages before changing their public asking prices. If the sectional is unsold, contact The Good Couch with real photos by October 12 as a backup, and book donation/pickup alternatives by October 15 ([backup-exits.md](backup-exits.md)); confirm acceptance first, especially for bedding, electronics and sleeper sofas. |
 | October 16–19 | Reserve floors open October 16 for household items. Promote remaining bundles without claiming items already sold. |
 | October 20–22 | Household giveaway window: give away or donate what is left; last drop-offs and recycling by October 21 ([backup-exits.md](backup-exits.md)). Take down sold listings. |
 | October 23 | Household deadline: take the unsold household items off the catalog ([household close-out](decommission.md)). From here the page is about the car. |
@@ -69,7 +69,6 @@ unverified vehicle service, condition or retail value.
 Run `leaving-denver drops` immediately before repricing. It reads the household windows from `seller.price_schedule` (the car has no schedule) and displays all price tiers:
 
 * **First drop:** reduce items with no qualified inquiries.
-* **Second drop:** make the next controlled reduction.
 * **Clear reserve floors:** use the encrypted per-item minimums.
 * **Giveaway window:** dispose of remaining low-value household items before October 23.
 
@@ -111,9 +110,10 @@ use the link for that network: Instagram's bio or link sticker, Facebook, WhatsA
 counts as its own channel in the dashboard. The images are rebuilt on every deploy, so sold items
 drop out of the collage; save them again after a sale before the next post.
 
-The next drop is the first window the price log does not cover yet (first drop, second drop,
-clear floors). The first two step halfway to the floor from the asking price in force, to the
-nearest $5 ($100 for the car); the last is the floor. Afterwards, compare each item's price log
+The next drop is the first window the price log does not cover yet (first drop, then clear
+floors). The first steps halfway to the floor from the asking price in force, to the nearest $5
+($100 for the car); the second is the floor. The second drop window was removed when the first
+moved to October 13 (#211). Afterwards, compare each item's price log
 with its sale in the private views to see whether a drop moved it.
 
 Targets are recorded for each household item except the topper (2026-10-01, #32). They are the expected-close prices from the 2026-09-25 pricing research. Research says the topper goes with the sofa, not alone, so it has none. Change any of them with `make secrets` (it opens the editor):
