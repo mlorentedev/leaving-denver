@@ -7,6 +7,7 @@ other byte alone, so the tests here run them against a copy of the real inventor
 """
 
 import argparse
+import sys
 from types import SimpleNamespace
 
 import pytest
@@ -251,3 +252,53 @@ def test_a_refused_private_write_leaves_the_inventory_untouched(real_copy, monke
     with pytest.raises(SystemExit):
         cli.cmd_sold(argparse.Namespace(id=item_id, price=100))
     assert real_copy.read_bytes() == before
+
+
+# A malformed `- id:` line is a refusal naming the line, never a raw YAMLError (#226).
+BROKEN_ID = SMALL.replace("- id: rug\n", "- id: 'rug\n")
+
+
+def test_a_malformed_id_line_is_a_refusal_that_names_the_line():
+    with pytest.raises(ValueError, match=r"line 10 .*- id: 'rug"):
+        site_builder.edit_item_status(BROKEN_ID, "vase", "Sold")
+
+
+def test_sold_refuses_a_malformed_id_line_without_a_traceback(tmp_path, monkeypatch, capsys):
+    path = tmp_path / "inventory.yaml"
+    path.write_text(BROKEN_ID, encoding="utf-8")
+    monkeypatch.setattr(site_builder, "INVENTORY_YAML", path)
+    monkeypatch.setattr(cli, "load_inventory_yaml", lambda: {"items": [{"id": "vase"}]})
+    monkeypatch.setattr(cli, "build_all", lambda: pytest.fail("rebuilt"))
+    recorded = []
+    monkeypatch.setattr(cli, "record_sale", lambda *args: recorded.append(args))
+    with pytest.raises(SystemExit) as stop:
+        cli.cmd_sold(argparse.Namespace(id="vase", price=150))
+    assert stop.value.code == 1
+    out = capsys.readouterr().out
+    assert "Error:" in out and "line 10" in out and "Nothing changed." in out
+    assert recorded == []
+    assert path.read_text(encoding="utf-8") == BROKEN_ID
+
+
+def test_the_command_line_refuses_a_file_yaml_cannot_read(tmp_path, monkeypatch, capsys):
+    # The real path: `known_item` reads the whole file before any line is looked at.
+    path = tmp_path / "inventory.yaml"
+    path.write_text(BROKEN_ID, encoding="utf-8")
+    monkeypatch.setattr(site_builder, "INVENTORY_YAML", path)
+    monkeypatch.setattr(cli, "record_sale", lambda *args: pytest.fail("recorded"))
+    monkeypatch.setattr(sys, "argv", ["leaving-denver", "sold", "vase", "150"])
+    with pytest.raises(SystemExit) as stop:
+        cli.main()
+    assert stop.value.code == 1
+    assert "Error: inventory.yaml line" in capsys.readouterr().out
+    assert path.read_text(encoding="utf-8") == BROKEN_ID
+
+
+def test_an_id_line_that_parses_only_with_the_whole_file_is_refused_too():
+    # An alias: the file is valid YAML, the `- id:` line read on its own is not.
+    aliased = SMALL.replace("seller:\n", "seller:\n  name: &rug rug\n").replace(
+        "- id: rug\n", "- id: *rug\n"
+    )
+    assert yaml.safe_load(aliased)["items"][1]["id"] == "rug"
+    with pytest.raises(site_builder.InventoryYamlError, match=r"line 11 .*- id: \*rug"):
+        site_builder.edit_item_status(aliased, "vase", "Sold")

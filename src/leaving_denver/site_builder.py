@@ -114,11 +114,30 @@ def build_stylesheets() -> None:
             staged.unlink(missing_ok=True)
 
 
+class InventoryYamlError(ValueError):
+    """inventory.yaml (or one line of it) is not valid YAML: a refusal, never a traceback (#226)."""
+
+
+def yaml_refusal(
+    err: yaml.YAMLError, line: int | None = None, text: str = ""
+) -> InventoryYamlError:
+    """The parser's complaint as one line naming where it is; `line` (1-based) wins over the mark."""
+    mark = getattr(err, "problem_mark", None)
+    where = line if line is not None else (mark.line + 1 if mark else None)
+    problem = getattr(err, "problem", None) or err.__class__.__name__
+    at = f" line {where}" if where else ""
+    shown = f": {text}" if text else ""
+    return InventoryYamlError(f"inventory.yaml{at} is not valid YAML ({problem}){shown}.")
+
+
 def load_inventory_yaml() -> dict[str, Any]:
     if not INVENTORY_YAML.exists():
         raise FileNotFoundError(f"SSOT inventory not found at {INVENTORY_YAML}")
     with open(INVENTORY_YAML, encoding="utf-8") as f:
-        return yaml.safe_load(f)
+        try:
+            return yaml.safe_load(f)
+        except yaml.YAMLError as err:
+            raise yaml_refusal(err) from err
 
 
 STATUS_LINE = re.compile(r"^  status:(?P<gap>[ \t]+)(?P<value>[^\s#]+)(?P<tail>[ \t]+#.*)?$")
@@ -141,7 +160,12 @@ def item_block(lines: list[str], item_id: str) -> tuple[int, int]:
             break
     for at, start in enumerate(starts):
         stop = starts[at + 1] if at + 1 < len(starts) else end
-        if yaml.safe_load(lines[start][2:]) != {"id": item_id}:
+        # Read on its own, the `- id:` line can fail where the whole file parses (an alias).
+        try:
+            head = yaml.safe_load(lines[start][2:])
+        except yaml.YAMLError as err:
+            raise yaml_refusal(err, start + 1, lines[start].rstrip()) from err
+        if head != {"id": item_id}:
             continue
         while stop > start + 1 and (not lines[stop - 1].strip() or lines[stop - 1][0] == "#"):
             stop -= 1

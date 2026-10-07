@@ -9,6 +9,7 @@ cannot edit safely. The last test is the guard: no source file serializes the in
 
 import ast
 import re
+import sys
 from pathlib import Path
 
 import pytest
@@ -309,3 +310,19 @@ def test_the_guard_sees_a_yaml_dump_and_not_a_json_one(tmp_path, source, expecte
     sample = tmp_path / "bad.py"
     sample.write_text(source)
     assert serializes_yaml(sample) == expected
+
+
+def test_sync_refuses_a_malformed_id_line_without_a_traceback(tmp_path, monkeypatch, capsys):
+    # #226: the line that names the item is read on its own, before any edit.
+    broken = SMALL.replace("- id: lamp\n", "- id: [lamp\n")
+    path = tmp_path / "inventory.yaml"
+    path.write_text(broken, encoding="utf-8")
+    monkeypatch.setattr(site_builder, "INVENTORY_YAML", path)
+    fake_sync(monkeypatch, {"lamp": ["catalog/lamp/lamp-1.jpg", "catalog/lamp/lamp-2.jpg"]})
+    monkeypatch.setattr(sys, "argv", ["leaving-denver", "sync"])
+    with pytest.raises(SystemExit) as stop:
+        cli.main()
+    assert stop.value.code == 1
+    out = capsys.readouterr().out
+    assert "Error: inventory.yaml line 7 is not valid YAML" in out
+    assert path.read_text(encoding="utf-8") == broken
