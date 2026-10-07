@@ -30,6 +30,7 @@ from leaving_denver.site_builder import (
     sale_over,
     sale_schedule,
     save_inventory_yaml,
+    set_item_status,
 )
 
 
@@ -53,14 +54,21 @@ def cmd_sync(args):
 
 
 def set_status(item_id, status):
-    """Set one item's status in the SSOT, save it and rebuild; returns the item."""
+    """Set one item's status in the SSOT, rebuild; returns the item.
+
+    Only that item's `status:` line is edited, so the owner's comments and layout survive
+    (a re-serialization with `save_inventory_yaml` drops every comment: #205)."""
     data = load_inventory_yaml()
     target_item = next((item for item in data.get("items", []) if item["id"] == item_id), None)
     if not target_item:
         print(f"Error: Item with ID '{item_id}' not found.")
         sys.exit(1)
+    try:
+        set_item_status(item_id, status)
+    except ValueError as err:
+        print(f"Error: {err} Nothing changed.")
+        sys.exit(1)
     target_item["status"] = status
-    save_inventory_yaml(data)
     build_all()
     return target_item
 

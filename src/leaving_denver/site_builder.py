@@ -126,6 +126,84 @@ def save_inventory_yaml(data: dict[str, Any]) -> None:
         yaml.dump(data, f, sort_keys=False, allow_unicode=True, indent=2)
 
 
+STATUS_LINE = re.compile(r"^  status:(?P<gap>[ \t]+)(?P<value>[^\s#]+)(?P<tail>[ \t]+#.*)?$")
+
+
+def item_block(lines: list[str], item_id: str) -> tuple[int, int]:
+    """The line range [start, end) of one item under `items:`, trailing blanks and comments out.
+
+    An item starts at a column-0 `- ` line and ends where the next `- ` or key begins."""
+    try:
+        first = next(n for n, line in enumerate(lines) if line.rstrip() == "items:") + 1
+    except StopIteration:
+        raise ValueError("inventory.yaml has no top-level `items:` list.") from None
+    starts, end = [], len(lines)
+    for n in range(first, len(lines)):
+        if lines[n].startswith("- "):
+            starts.append(n)
+        elif lines[n][:1].isalpha():
+            end = n
+            break
+    for at, start in enumerate(starts):
+        stop = starts[at + 1] if at + 1 < len(starts) else end
+        if yaml.safe_load(lines[start][2:]) != {"id": item_id}:
+            continue
+        while stop > start + 1 and (not lines[stop - 1].strip() or lines[stop - 1][0] == "#"):
+            stop -= 1
+        return start, stop
+    raise ValueError(
+        f"item '{item_id}' is not a `- id: ...` entry under `items:` in inventory.yaml."
+    )
+
+
+def edit_item_status(text: str, item_id: str, status: str) -> str:
+    """`text` with the one `status:` line of this item set to `status`, nothing else touched.
+
+    Raises ValueError when the item block does not hold exactly one `status:` line it can
+    rewrite; a block with none gets one, before `primary_image:` as the other items carry it.
+    The result is parsed back: only that item's status may differ from the input."""
+    lines = text.splitlines(keepends=True)
+    start, stop = item_block(lines, item_id)
+    found = [n for n in range(start, stop) if lines[n].startswith("  status:")]
+    if len(found) > 1:
+        raise ValueError(
+            f"item '{item_id}' has {len(found)} `status:` lines in inventory.yaml; "
+            "keep one and run the command again."
+        )
+    if found:
+        line = lines[found[0]]
+        body = line.rstrip("\r\n")
+        match = STATUS_LINE.match(body)
+        if not match:
+            raise ValueError(
+                f"item '{item_id}': cannot rewrite the line {body.strip()!r} in place; "
+                "make it `status: <word>` and run the command again."
+            )
+        lines[found[0]] = f"  status:{match['gap']}{status}{match['tail'] or ''}{line[len(body) :]}"
+    else:
+        at = next((n for n in range(start, stop) if lines[n].startswith("  primary_image:")), stop)
+        newline = "\r\n" if lines[start].endswith("\r\n") else "\n"
+        if at > 0 and not lines[at - 1].endswith("\n"):
+            lines[at - 1] += newline
+        lines.insert(at, f"  status: {status}{newline}")
+    edited = "".join(lines)
+    expected = yaml.safe_load(text)
+    next(i for i in expected["items"] if i["id"] == item_id)["status"] = status
+    if yaml.safe_load(edited) != expected:
+        raise ValueError(f"item '{item_id}': the edit would change more than its status.")
+    return edited
+
+
+def set_item_status(item_id: str, status: str) -> None:
+    """Set one item's status in inventory.yaml by editing its line, keeping every other byte."""
+    if not INVENTORY_YAML.exists():
+        raise FileNotFoundError(f"SSOT inventory not found at {INVENTORY_YAML}")
+    text = INVENTORY_YAML.read_bytes().decode("utf-8")
+    edited = edit_item_status(text, item_id, status)
+    if edited != text:
+        INVENTORY_YAML.write_bytes(edited.encode("utf-8"))
+
+
 def load_locale(locale: str) -> dict[str, Any]:
     path = LOCALES_DIR / f"{locale}.yaml"
     if not path.exists():
