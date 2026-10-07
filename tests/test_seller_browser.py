@@ -7,6 +7,8 @@ the user pastes, and each copy button puts exactly what is on screen on the clip
 import pytest
 from browser_harness import needs_chrome, run_page
 
+from leaving_denver import site_builder
+
 pytestmark = needs_chrome
 
 STUBS = """
@@ -117,7 +119,15 @@ for (const option of $('item').options) {{
 return seen;
 """,
     )
-    assert len(result) >= 12
+    # Every item still on sale is offered, so the count follows the real sales.
+    listable = [
+        i
+        for i in site_builder.load_inventory_yaml()["items"]
+        if i.get("published", True)
+        and i.get("status", "Available") == "Available"
+        and not i.get("free_with_purchase")
+    ]
+    assert len(result) == len(listable) >= 1
     assert all(title and length > 100 for title, length in result)
 
 

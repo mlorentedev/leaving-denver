@@ -244,7 +244,8 @@ def test_no_payload_holds_the_phone_or_an_sms_uri(tmp_path):
         tmp_path,
         IN_A_BUNDLE
         + """
-openModal(INVENTORY.items[0].id);
+// An item in a bundle still on sale, so its sheet offers the upsell whatever has sold.
+openModal(bundledItem);
 document.getElementById('modalSmsLink').click();
 document.getElementById('upsellLink').click();
 document.querySelector('[data-sms-role="sticky-text"]').click();

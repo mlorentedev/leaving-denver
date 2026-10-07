@@ -30,6 +30,13 @@ targets:
     auxiliary-c-table: ENC[AES256_GCM,data:8Ys=,iv:BkrFik4UlbnuuOIEkAeJXkxqxEY5ESenmo5CouNEymo=,tag:zZB3CfucOHvgAqiBFNnSRw==,type:int]
 cloudflare_terraform_token: ENC[AES256_GCM,data:BRkprCsHasj3lyB/+u/9EPia8UPWT5N2hE8Z7gCVWSsxfQt8wry/ey01EPkn0HjVtZkN6is=,iv:XmJgWzsx99u7+8XR4aZ1n8m0G2gZ/r8CgeX3Lii9pk0=,tag:bxXCXkGbW9YFWoeA3lUG1g==,type:str]
 owner_email: ENC[AES256_GCM,data:jOdszTaqCiDnQOvimuqHGv5XJB/Q,iv:kb76q//bFS+eLXRERBUz1057qE6XCTKT2m9GClNaxUo=,tag:dZHRZmK+Y+Md8JXk+70Kgg==,type:str]
+sales:
+    bar-stools-pair:
+        price: ENC[AES256_GCM,data:cJo=,iv:+k8JaEvQ1qrZeZ7Xa7lEcSJhNVwZsonkbM5YkHRpnc0=,tag:q/F2oborF0lHxfARVJE86A==,type:float]
+        at: ENC[AES256_GCM,data:rJPVjAEh1S1ymQ==,iv:lR84GORMCD8gaD0Z2dSUPSqlc8nVxlbTQ6a6PoU/eE0=,tag:5VmxqS4a+gkkOL9TQ87+0Q==,type:str]
+    auxiliary-c-table:
+        price: ENC[AES256_GCM,data:Sc4=,iv:ykPjPFtVkP63ndugHGG+kRHYwIy3J+N9WcuMRmCtElY=,tag:dA1PvzfxTpV2xH+BeguI/A==,type:float]
+        at: ENC[AES256_GCM,data:gZr3tCw5+y+b4w==,iv:nJnXyXo1L33Olb9ttK0HXVn2VlcIYH81fEKcT3wg2z0=,tag:ScbMu65m65YI7Xwsz+LDHg==,type:str]
 sops:
     age:
         - enc: |
@@ -41,7 +48,7 @@ sops:
             N5S0b6gn+J7t3Lg9zTalfJK5VHCwzBcjg5kbjsk7dea2bNSxWE/NQA==
             -----END AGE ENCRYPTED FILE-----
           recipient: age166v8efpskctmxxes5lcqpxkj0ny3q74l3v0pswpdpa63wlkqmc8q35fkdw
-    lastmodified: "2026-10-04T03:36:23Z"
-    mac: ENC[AES256_GCM,data:PiA8AhDOQs8rA1HadEQb/obDZBEd1QtWBRZiB/xv0sfT2Z6VK4iXm5OSB5eZVAxurgJI1eZPjMnGyQv3X2zVotk1T0XbYYPOP2ClgsB9QLG/nJgppvpUcVMbS0Fuyq8Z8W032rlUaV47R+Mve3XauSvsLePvM3DZ54UYBGAfSDI=,iv:B/JfpkVv52xOzokzK5m3MVTaAYd4bOnuM5EE8JeJsu0=,tag:syR/WYT8d5gVIKJF33C9ag==,type:str]
+    lastmodified: "2026-10-07T01:27:50Z"
+    mac: ENC[AES256_GCM,data:JZASAmHApkdi+mHPW/jvdm/Ln+e1fv7+X/pL3Pj5fcFbU3i4N4mcTjYl03kjbshrj/+chVExMz1R6JxrF1YBk1T6cRxRnRdFobmL2n2X5noQiS58Pw40J64fiF+8kKdblh6e6urchLrfcOEjnX5HLvZM6uD4PZQBpu40mObSSS8=,iv:cME/IjjCtAXJPRAxGEzt0vO8Nw7CHZQSHNh62jI8Msk=,tag:Jmi/LNGgf0oFGprF14VB3Q==,type:str]
     unencrypted_suffix: _unencrypted
     version: 3.13.1

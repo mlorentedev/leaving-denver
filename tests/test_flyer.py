@@ -46,6 +46,15 @@ def catalog_inventory():
     return data
 
 
+def nothing_sold():
+    """The catalog as if nothing had sold yet: a test of the mechanism must not depend on
+    which real items have sold by the day it runs."""
+    data = catalog_inventory()
+    for item in data["items"]:
+        item["status"] = "Available"
+    return data
+
+
 @pytest.fixture
 def public_dir(tmp_path, monkeypatch):
     dist = tmp_path / "public"
@@ -235,13 +244,18 @@ CATEGORY_LABELS = {
 
 def test_the_real_flyer_lists_every_category_of_the_catalog(flyer):
     text = text_of(flyer)
-    for label in CATEGORY_LABELS.values():
-        assert label in text, label
+    on_sale = {
+        i["category"]
+        for i in SOURCE["items"]
+        if i.get("published", True) and i.get("status", "Available") != "Sold"
+    }
+    for category, label in CATEGORY_LABELS.items():
+        assert (label in text) == (category in on_sale), label
     assert "Vehicle" not in text, "the car has its own line, not a category"
 
 
 def test_the_categories_come_from_the_data_not_from_the_template(public_dir):
-    data = catalog_inventory()
+    data = nothing_sold()
     data["items"] = [i for i in data["items"] if i["category"] in {"Bedroom", "Dining & Kitchen"}]
     data["bundles"] = []
     text = text_of(build_flyer(public_dir, data))
@@ -250,7 +264,7 @@ def test_the_categories_come_from_the_data_not_from_the_template(public_dir):
 
 
 def test_a_category_with_nothing_left_is_not_advertised(public_dir):
-    data = catalog_inventory()
+    data = nothing_sold()
     for item in data["items"]:
         if item["category"] == "Bedroom":
             item["status"] = "Sold"
