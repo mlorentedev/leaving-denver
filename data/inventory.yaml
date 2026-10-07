@@ -59,15 +59,15 @@ items:
   size_in: [92, 60, 37]
   color: Gray Fabric
   status: Available
-  primary_image: catalog/sofa-sleeper/afw_kent_sofa_dimensions.jpg
+  primary_image: catalog/sofa-sleeper/sofa-3.jpg
   images:
-  - catalog/sofa-sleeper/afw_kent_sofa_dimensions.jpg
+  - catalog/sofa-sleeper/sofa-3.jpg
+  - catalog/sofa-sleeper/sofa-1.jpg
+  - catalog/sofa-sleeper/sofa-2.jpg
   - catalog/sofa-sleeper/afw_kent_sofa_front.jpg
   - catalog/sofa-sleeper/afw_kent_sofa_sleeper_open.jpg
   - catalog/sofa-sleeper/afw_kent_sofa_storage_open.jpg
-  - catalog/sofa-sleeper/sofa-1.jpg
-  - catalog/sofa-sleeper/sofa-2.jpg
-  - catalog/sofa-sleeper/sofa-3.jpg
+  - catalog/sofa-sleeper/afw_kent_sofa_dimensions.jpg
   specs:
   - Reversible chaise (configure left or right)
   - Smooth pull-out bed mechanism converts from couch to double sleeper
@@ -124,10 +124,10 @@ items:
   dimensions: 31.5" Diagonal Viewable, 1800R Curve
   color: Platinum Silver / Black
   status: Available
-  primary_image: catalog/dell-monitor-32/dell_s3222hn_front.jpg
+  primary_image: catalog/dell-monitor-32/monitor.jpg
   images:
-  - catalog/dell-monitor-32/dell_s3222hn_front.jpg
   - catalog/dell-monitor-32/monitor.jpg
+  - catalog/dell-monitor-32/dell_s3222hn_front.jpg
   specs:
   - 31.5-inch 1800R curved VA panel with 178/178 wide viewing angles
   - Full HD 1920 x 1080 resolution at 75Hz refresh rate
@@ -182,10 +182,10 @@ items:
   size_in: [38.2, 3.2, 22.4]
   color: Black
   status: Available
-  primary_image: catalog/onn-43-4k-tv/tv-1.jpg
+  primary_image: catalog/onn-43-4k-tv/tv-2.jpg
   images:
-  - catalog/onn-43-4k-tv/tv-1.jpg
   - catalog/onn-43-4k-tv/tv-2.jpg
+  - catalog/onn-43-4k-tv/tv-1.jpg
   specs:
   - Crisp 4K UHD 2160p resolution with HDR10 support
   - Built-in Roku smart streaming platform (Netflix, Disney+, Prime, Max, YouTube)
@@ -240,10 +240,10 @@ items:
   size_in: [58.6, 50.4, 29.8]
   color: Canyon Walnut Woodgrain + Black Metal
   status: Available
-  primary_image: catalog/convertible-desk/desk-1.jpg
+  primary_image: catalog/convertible-desk/desk-2.jpg
   images:
-  - catalog/convertible-desk/desk-1.jpg
   - catalog/convertible-desk/desk-2.jpg
+  - catalog/convertible-desk/desk-1.jpg
   specs:
   - '2-in-1 modular design: assemble as corner L-shape or long straight executive
     desk'
@@ -494,11 +494,11 @@ items:
   size_in: [24.5, 25.5, 41.25]
   color: Black Mesh & Fabric
   status: Available
-  primary_image: catalog/office-chair-ergonomic/chair-1.jpg
+  primary_image: catalog/office-chair-ergonomic/chair-2.jpg
   images:
-  - catalog/office-chair-ergonomic/chair-1.jpg
   - catalog/office-chair-ergonomic/chair-2.jpg
   - catalog/office-chair-ergonomic/chair-3.jpg
+  - catalog/office-chair-ergonomic/chair-1.jpg
   specs:
   - Breathable tension mesh back keeps you cool during long work sessions
   - Padded flip-up armrests allow chair to slide completely under desks to save space
@@ -700,10 +700,10 @@ items:
   size_in: [15.5, 15.5, 25.9]
   color: Canyon Walnut Woodgrain + Black Metal
   status: Sold
-  primary_image: catalog/auxiliary-c-table/aux-table-1.jpg
+  primary_image: catalog/auxiliary-c-table/aux-table-2.jpg
   images:
-  - catalog/auxiliary-c-table/aux-table-1.jpg
   - catalog/auxiliary-c-table/aux-table-2.jpg
+  - catalog/auxiliary-c-table/aux-table-1.jpg
   - catalog/auxiliary-c-table/aux-table-3.jpg
   specs:
   - C-frame cantilever design slides under couches, armchairs, and beds
