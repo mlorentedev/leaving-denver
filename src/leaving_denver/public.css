@@ -34,9 +34,9 @@ dialog.sheet {
   overflow: visible;
 }
 
+/* No backdrop blur: it added ~25 ms to a sheet's first open on a throttled phone (#213). */
 dialog.sheet::backdrop {
-  background: rgb(0 0 0 / 0.5);
-  backdrop-filter: blur(4px);
+  background: rgb(0 0 0 / 0.55);
 }
 
 /* The page behind an open sheet stays put. */

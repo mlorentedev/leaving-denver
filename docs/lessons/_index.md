@@ -51,3 +51,4 @@ tags: [lessons, index, docs, leaving-denver]
 | [lesson-036](lesson-036-command-substitution-discards-function-globals.md) | Command Substitution Discards a Function's Globals Under `set -u` | 2026-10-05 | [bash, ci, github-actions, testing, shell] |
 | [lesson-037](lesson-037-the-first-real-sale-breaks-tests-that-read-live-data.md) | The First Real Sale Breaks Tests That Read Live Data | 2026-10-06 | [testing, data, ci, catalog] |
 | [lesson-038](lesson-038-waiting-for-a-change-reads-the-state-in-between.md) | Waiting for "Changed" Reads the State In Between | 2026-10-06 | [testing, browser, flaky, ci, race] |
+| [lesson-039](lesson-039-the-first-tap-pays-for-the-cold-start.md) | The First Tap Pays for the Cold Start | 2026-10-06 | [performance, inp, frontend, measurement] |
