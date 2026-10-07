@@ -24,6 +24,7 @@ from leaving_denver.private_data import (
     record_sale,
 )
 from leaving_denver.site_builder import (
+    InventoryYamlError,
     apply_photos,
     build_all,
     check_item_status,
@@ -342,7 +343,12 @@ def main():
         parser.print_help()
         sys.exit(0)
 
-    args.func(args)
+    # A file YAML cannot read stops any command with the line to fix, not a traceback (#226).
+    try:
+        args.func(args)
+    except InventoryYamlError as err:
+        print(f"Error: {err}")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
