@@ -303,9 +303,11 @@ Owner setup (dashboards; this repository cannot enable either). Both are in plac
     or a Pages 5xx does not carry it.
   - The monitor is declared as code in kubelab's seed, `infra/config/uptime-kuma/monitors.json`,
     under the key `services-leaving-denver` (since 2026-10-06). Change it with a kubelab pull
-    request followed by `make monitoring-apply`. Never edit it in the Kuma UI:
-    `make monitoring-apply` deletes any live monitor that the seed lacks, which is how the
-    first, hand-built monitor was lost on 2026-10-06.
+    request followed by `make monitoring-apply`. Never edit it in the Kuma UI: the seed is the
+    record, and an apply reconciles Kuma to it. Before kubelab#2105, an apply deleted any live
+    monitor the seed did not declare, which is how the first, hand-built monitor was lost on
+    2026-10-06. Since #2105 it lists such monitors and exits 1, and deletes them only with
+    `PRUNE=1`. `CHECK=1` shows the plan without writing anything.
   - The monitor lives on the homelab, so a homelab outage silences it. That is accepted:
     the deploy smoke already guards the likelier failure, a bad deploy.
   - On an alert, run `scripts/smoke.sh https://leaving-denver.pages.dev`, check Cloudflare
