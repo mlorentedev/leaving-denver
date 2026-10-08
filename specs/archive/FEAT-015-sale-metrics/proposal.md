@@ -1,7 +1,7 @@
 ---
 id: "FEAT-015-sale-metrics"
 type: spec
-status: verifying # draft | implementing | verifying | archived
+status: archived # draft | implementing | verifying | archived
 review: waived
 review_waived_reason: "Owner waived the launcher review on 2026-10-08: the repo has no harness/reviewer-pool.json, so dotf spec review cannot run. The owner chose an independent reviewer subagent instead; its verdict is in verification.md (Independent review, 2026-10-08)."
 created: "2026-10-03"
@@ -65,3 +65,5 @@ The owner has already posted paper flyers and wants to know what they bring and 
 - ADR-002 (the phone is never sent), ADR-005 (Web Analytics, amended by ADR-011), ADR-007 (`/seller/*` policy), ADR-008 (the Pages project outlives the sale)
 - Lessons 008 (honest urgency), 024 (CSP and inline script)
 - Cloudflare docs: Analytics Engine (get started, limits, pricing, SQL API), Pages Functions bindings, Web Analytics FAQ
+
+<!-- archived 2026-10-07 — PR: https://github.com/mlorentedev/leaving-denver/pull/239 -->
