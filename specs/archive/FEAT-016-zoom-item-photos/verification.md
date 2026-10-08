@@ -109,7 +109,7 @@ The owner chose an independent reviewer subagent for these archives (the repo ha
 
 ## Archive checklist
 
-- [ ] `proposal.md` frontmatter set to `status: archived`
-- [ ] Folder moved: `specs/FEAT-016-zoom-item-photos/` -> `specs/archive/FEAT-016-zoom-item-photos/`
-- [ ] Bitácora board ticket for this spec moved to Done / closed with PR link (ADR-018)
-- [ ] Promotions above executed (if any)
+- [x] `proposal.md` frontmatter set to `status: archived`
+- [x] Folder moved: `specs/FEAT-016-zoom-item-photos/` -> `specs/archive/FEAT-016-zoom-item-photos/`
+- [x] Bitácora board ticket for this spec moved to Done / closed with PR link (ADR-018)
+- [x] Promotions above executed (if any)
