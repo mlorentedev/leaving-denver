@@ -28,5 +28,7 @@ created: "2026-10-06"
 
 The owner chose an independent reviewer subagent for these archives (the repo has no reviewer pool, so `dotf spec review` cannot run). The reviewer was not the implementer. It worked read-only on main at 077360f, checking each criterion against the code and the tests. The `features.json` commands were run again on 9659d65 before archiving, and all of them pass.
 
-- Verdict: AC3 and AC4 hold, with no defects found in the code or on production.
-- AC1 and AC2 (browser) were not run by the reviewer, because its sandbox refused `leaving-denver build`. They were run before archiving, on 9659d65: `test_share_button_browser.py -k 'not hero'` 6 passed, `-k hero` 5 passed.
+- Verdict: ready (PASS). AC1–AC4 hold, and no defects were found in the code or on production (`/` and `/es/` serve `catalogShare` with `utm_source=share`).
+- The reviewer's first build attempt was refused by its sandbox. On a retry the build ran, and the reviewer ran the three `features.json` commands at 077360f: `-k 'not hero'` 6 passed, `-k hero` 5 passed, `known_source` 10 passed. They were run again before archiving, on 9659d65, with the same counts.
+- Not run by the reviewer: the AC3 mutation (removing `share` from `hit.js`) and the full suite for AC4.
+- Remaining gap, outside CI: no real `share` visit in the digest yet. That is the owner's after-deploy check.
