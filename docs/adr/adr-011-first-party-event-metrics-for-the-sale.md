@@ -109,5 +109,5 @@ Verified against Cloudflare's documentation (2026-10-03):
 ## References
 
 - ADR-002, ADR-005, ADR-007, ADR-008; lessons 008 (honest urgency: these counts are not shown to buyers) and 024
-- Spec: `specs/FEAT-015-sale-metrics/`; issue `mlorentedev/leaving-denver#177`
+- Spec: `specs/archive/FEAT-015-sale-metrics/`; issue `mlorentedev/leaving-denver#177`
 - Runbooks: `docs/runbooks/ops.md` ("Sale metrics"), `docs/runbooks/kubelab-integration.md`

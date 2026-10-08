@@ -1,7 +1,9 @@
 ---
 id: "FEAT-018-bundles-follow-sales"
 type: spec
-status: verifying # draft | implementing | verifying | archived
+status: archived # draft | implementing | verifying | archived
+review: waived
+review_waived_reason: "Owner waived the launcher review on 2026-10-08: the repo has no harness/reviewer-pool.json, so dotf spec review cannot run. The owner chose an independent reviewer subagent instead; its verdict is in verification.md (Independent review, 2026-10-08)."
 created: "2026-10-06"
 issue: "mlorentedev/leaving-denver#207"   # repo#NNN — GitHub issue / Project item that tracks this spec
 tags: [spec, proposal]
@@ -43,3 +45,5 @@ Any sale takes **Take everything** off sale: it is a fixed list of 12 items at a
 - [x] AC3: with fewer than two items left, neither the card nor the sheet is rendered, and the page builds.
 - [x] AC4: the real page shows Take everything on sale at $500 with 10 items, "Save $125".
 - [x] AC5: `bundle-sofa-tv-table` (TV, sleeper sofa, coffee table, $300, with Spanish copy) is on the page, and `bundle-living-room` is gone.
+
+<!-- archived 2026-10-07 — PR: https://github.com/mlorentedev/leaving-denver/pull/239 -->

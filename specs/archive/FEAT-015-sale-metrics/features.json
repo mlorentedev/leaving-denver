@@ -3,77 +3,77 @@
     "id": "FEAT-015-sale-metrics-f1",
     "behavior": "AC1: hit.js validates strictly, writes one five-blob data point, answers 400 or 204, handles POST only",
     "verification": "uv run pytest -q tests/test_hit_function.py",
-    "state": "pending",
-    "evidence": ""
+    "state": "passing",
+    "evidence": "2026-10-08 on 9659d65: 55 passed in 8.83s"
   },
   {
     "id": "FEAT-015-sale-metrics-f2",
     "behavior": "AC2: the function reads no header and not request.cf and stores no extra field",
     "verification": "uv run pytest -q tests/test_hit_function.py -k 'nothing_of_the_request or extra_fields'",
-    "state": "pending",
-    "evidence": ""
+    "state": "passing",
+    "evidence": "2026-10-08 on 9659d65: 2 passed, 53 deselected in 0.68s"
   },
   {
     "id": "FEAT-015-sale-metrics-f3",
     "behavior": "AC3: a utm landing sends one visit, strips the utm parameters; no utm sends nothing; a reload is not a second visit",
     "verification": "uv run pytest -q tests/test_metrics_beacon_browser.py -k 'flyer_scan_sends or only_the_utm or no_utm or reload_after or spanish_page'",
-    "state": "pending",
-    "evidence": ""
+    "state": "passing",
+    "evidence": "2026-10-08 on 9659d65: 5 passed, 25 deselected in 2.36s"
   },
   {
     "id": "FEAT-015-sale-metrics-f4",
     "behavior": "AC4: every text link reports one text_tap with its item or bundle and the landing source, keeps its sms: href and is not cancelled",
     "verification": "uv run pytest -q tests/test_metrics_beacon_browser.py -k 'each_way_to_text or tap_on_a_desktop'",
-    "state": "pending",
-    "evidence": ""
+    "state": "passing",
+    "evidence": "2026-10-08 on 9659d65: 11 passed, 19 deselected in 4.03s"
   },
   {
     "id": "FEAT-015-sale-metrics-f5",
     "behavior": "AC5: opening an item, including a linked one, reports a view_item",
     "verification": "uv run pytest -q tests/test_metrics_beacon_browser.py -k 'view or linked_item'",
-    "state": "pending",
-    "evidence": ""
+    "state": "passing",
+    "evidence": "2026-10-08 on 9659d65: 3 passed, 27 deselected in 1.17s"
   },
   {
     "id": "FEAT-015-sale-metrics-f6",
     "behavior": "AC6: no payload holds the phone; the real sendBeacon is same-origin under connect-src 'self'; no new inline handler or host",
     "verification": "uv run pytest -q tests/test_metrics_beacon_browser.py tests/test_metrics_beacon.py -k 'phone or connect_src or another_origin or inline or one_beacon'",
-    "state": "pending",
-    "evidence": ""
+    "state": "passing",
+    "evidence": "2026-10-08 on 9659d65: 6 passed, 30 deselected in 2.91s"
   },
   {
     "id": "FEAT-015-sale-metrics-f7",
     "behavior": "AC7: a share link keeps its utm_source to the catalog in both languages",
     "verification": "uv run pytest -q tests/test_metrics_beacon_browser.py tests/test_link_previews.py -k 'share_link or location'",
-    "state": "pending",
-    "evidence": ""
+    "state": "passing",
+    "evidence": "2026-10-08 on 9659d65: 3 passed, 56 deselected in 2.59s"
   },
   {
     "id": "FEAT-015-sale-metrics-f8",
     "behavior": "AC8: wrangler.toml declares SALE_METRICS and the middleware passes /api/hit through",
     "verification": "uv run pytest -q tests/test_hit_function.py -k 'binding or middleware'",
-    "state": "pending",
-    "evidence": ""
+    "state": "passing",
+    "evidence": "2026-10-08 on 9659d65: 3 passed, 52 deselected in 0.37s"
   },
   {
     "id": "FEAT-015-sale-metrics-f9",
     "behavior": "AC9: the n8n digest workflow is valid, scheduled, emailed, secret-free and its Code node reports what hit.js writes",
     "verification": "uv run pytest -q tests/test_sale_metrics_workflow.py",
-    "state": "pending",
-    "evidence": ""
+    "state": "passing",
+    "evidence": "2026-10-08 on 9659d65: 7 passed, 2 skipped in 0.23s"
   },
   {
     "id": "FEAT-015-sale-metrics-f10",
     "behavior": "AC10: ADR-011, the runbook sections and the teardown exist and name every variable and credential",
     "verification": "uv run pytest -q tests/test_sale_metrics_workflow.py -k 'runbook or decommission'",
-    "state": "pending",
-    "evidence": ""
+    "state": "passing",
+    "evidence": "2026-10-08 on 9659d65: 4 passed, 5 deselected in 0.07s"
   },
   {
     "id": "FEAT-015-sale-metrics-f11",
     "behavior": "AC11: the new catalog browser tests are in CATALOG_TESTS and make check passes with sale_over on",
     "verification": "uv run pytest -q tests/test_end_of_sale.py",
-    "state": "pending",
-    "evidence": ""
+    "state": "passing",
+    "evidence": "2026-10-08 on 9659d65: 25 passed in 0.99s"
   }
 ]

@@ -27,4 +27,16 @@ created: "2026-10-06"
 
 ## Promotion candidates
 
-- none: the rule "derive offers from the data, never type a list that sales invalidate" is already in lesson-037's spirit; no new cross-project insight.
+- [x] Lesson for the repo's `docs/lessons/`? no: the rule "derive offers from the data, never type a list that sales invalidate" is already covered by lesson-037
+- [x] ADR-worthy decision for the repo's `docs/adr/adr-XXX.md`? no: a derived price inside the existing inventory schema
+- [x] New pattern candidate for `00_meta/patterns/`? no: no new cross-project insight
+
+## Independent review (2026-10-08)
+
+The owner chose an independent reviewer subagent for these archives (the repo has no reviewer pool, so `dotf spec review` cannot run). The reviewer was not the implementer. It worked read-only on main at 077360f, checking each criterion against the code and the tests. The `features.json` commands were run again on 9659d65 before archiving, and all of them pass.
+
+- Verdict: ready.
+- AC1–AC5 hold.
+- `features.json` was the unfilled scaffold. This archive replaces it with one command per criterion, and all five pass.
+- Gaps, ticketed in #238: nothing pins that `bundle-living-room` is gone, and `isinstance(True, int)` lets a boolean `discount_pct` through.
+- Stale citation above: AC4's "$500, 10 items" was the page on 2026-10-06. `test_the_real_page_offers_it_at_the_derived_price` follows the data, so the figure changes as items sell.

@@ -97,9 +97,19 @@ refuses a line left unanswered, a `no` without a reason, and a `yes` whose file 
 - [ ] ADR-worthy decision for the repo's `docs/adr/adr-XXX.md`? no: the zoom is UI inside the existing sheet. It adds no origin, no dependency and no contract; ADR-010 (the hash-pinned CSP) and ADR-002 (nothing new is sent) already cover what it touches, and both tests still pass unchanged
 - [ ] New pattern candidate for `00_meta/patterns/`? no: nothing here recurs across projects. `pattern-architecture` covers the layering this keeps, and the gesture lesson is repo-and-platform specific
 
+## Independent review (2026-10-08)
+
+The owner chose an independent reviewer subagent for these archives (the repo has no reviewer pool, so `dotf spec review` cannot run). The reviewer was not the implementer. It worked read-only on main at 077360f, checking each criterion against the code and the tests. The `features.json` commands were run again on 9659d65 before archiving, and all of them pass.
+
+- Verdict: ready, pass with gaps.
+- Every criterion holds.
+- The wheel-at-fit and pinch-anchoring tests assert weakly. Ticketed in #238.
+- `features.json` used `uv run pytest`, and it still runs.
+- Stale citations above: the test totals predate later PRs.
+
 ## Archive checklist
 
-- [ ] `proposal.md` frontmatter set to `status: archived`
-- [ ] Folder moved: `specs/FEAT-016-zoom-item-photos/` -> `specs/archive/FEAT-016-zoom-item-photos/`
-- [ ] Bitácora board ticket for this spec moved to Done / closed with PR link (ADR-018)
-- [ ] Promotions above executed (if any)
+- [x] `proposal.md` frontmatter set to `status: archived`
+- [x] Folder moved: `specs/FEAT-016-zoom-item-photos/` -> `specs/archive/FEAT-016-zoom-item-photos/`
+- [x] Bitácora board ticket for this spec moved to Done / closed with PR link (ADR-018)
+- [x] Promotions above executed (if any)

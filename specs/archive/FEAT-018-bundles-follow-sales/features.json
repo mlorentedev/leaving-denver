@@ -1,0 +1,37 @@
+[
+  {
+    "id": "FEAT-018-bundles-follow-sales-f1",
+    "behavior": "AC1: Take everything holds what is for sale at the discount rounded down to five; a Sold or Pending item leaves it",
+    "verification": "uv run python -m pytest -q tests/test_everything_bundle.py -k 'holds_what_is_for_sale or rounds_down or leaves_it_and_lowers or car_and_unpublished or free_item_counts'",
+    "state": "passing",
+    "evidence": "2026-10-08 on 9659d65: 6 passed, 6 deselected in 0.07s"
+  },
+  {
+    "id": "FEAT-018-bundles-follow-sales-f2",
+    "behavior": "AC2: a typed list or price, or a missing discount, fails the build",
+    "verification": "uv run python -m pytest -q tests/test_everything_bundle.py tests/test_inventory_ssot.py -k 'typed_list_or_price or missing_discount or bundles_integrity'",
+    "state": "passing",
+    "evidence": "2026-10-08 on 9659d65: 4 passed, 59 deselected in 0.14s"
+  },
+  {
+    "id": "FEAT-018-bundles-follow-sales-f3",
+    "behavior": "AC3: with fewer than two items left there is no card and no sheet, and the page builds",
+    "verification": "uv run python -m pytest -q tests/test_everything_bundle.py -k 'fewer_than_two_items or renders_without_it'",
+    "state": "passing",
+    "evidence": "2026-10-08 on 9659d65: 2 passed, 10 deselected in 0.49s"
+  },
+  {
+    "id": "FEAT-018-bundles-follow-sales-f4",
+    "behavior": "AC4: the real page offers Take everything at the derived price",
+    "verification": "uv run python -m pytest -q tests/test_everything_bundle.py tests/test_build_contract.py -k 'real_page_offers_it or page_figures_match'",
+    "state": "passing",
+    "evidence": "2026-10-08 on 9659d65: 2 passed, 42 deselected in 0.57s"
+  },
+  {
+    "id": "FEAT-018-bundles-follow-sales-f5",
+    "behavior": "AC5: bundle sheets list what is in them over the real data",
+    "verification": "uv run python -m pytest -q tests/test_build_contract.py -k 'bundle_sheet_lists_what_is_in_it'",
+    "state": "passing",
+    "evidence": "2026-10-08 on 9659d65: 1 passed, 31 deselected in 0.47s"
+  }
+]

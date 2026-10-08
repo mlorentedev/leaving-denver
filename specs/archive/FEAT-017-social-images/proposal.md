@@ -1,7 +1,9 @@
 ---
 id: "FEAT-017-social-images"
 type: spec
-status: verifying # draft | implementing | verifying | archived
+status: archived # draft | implementing | verifying | archived
+review: waived
+review_waived_reason: "Owner waived the launcher review on 2026-10-08: the repo has no harness/reviewer-pool.json, so dotf spec review cannot run. The owner chose an independent reviewer subagent instead; its verdict is in verification.md (Independent review, 2026-10-08)."
 created: "2026-10-06"
 issue: "mlorentedev/leaving-denver#209"   # repo#NNN — GitHub issue / Project item that tracks this spec
 tags: [spec, proposal]
@@ -52,3 +54,5 @@ The text is set in the site's own font (Plus Jakarta Sans, the woff2 already in 
 - [x] AC5: with `seller.sale_over: true`, no `social/` is built, a stale one is swept, and `_redirects` sends `/social` and `/social/*` to `/` with a 302.
 - [x] AC6: `hit.js` reads `instagram` and `whatsapp` as themselves, and the drift test covers every source the social page links with.
 - [x] AC7: the catalog does not link to `/social/`, and every class the page uses is in the compiled stylesheet.
+
+<!-- archived 2026-10-07 — PR: https://github.com/mlorentedev/leaving-denver/pull/239 -->
