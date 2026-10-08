@@ -46,7 +46,8 @@ uv run leaving-denver sold sofa-sleeper 200
 uv run leaving-denver pending sofa-sleeper
 uv run leaving-denver available sofa-sleeper
 
-# Record a posting or renewal, and an asking-price change (written to the encrypted private file)
+# Record a posting or renewal (encrypted private file), and an asking-price change
+# (sets the price in data/inventory.yaml and logs it in the encrypted private file)
 make post ID=sofa-sleeper CHANNEL=facebook   # channels: facebook, craigslist, offerup, nextdoor, activebuilding, carscom (the car only)
 make reprice ID=sofa-sleeper PRICE=190
 

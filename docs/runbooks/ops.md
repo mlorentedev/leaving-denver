@@ -444,7 +444,8 @@ decision. What is and is not collected:
 The digest has the last 24 hours (not a calendar day), the whole sale, Web Analytics' page views,
 visits and top referrers, and the repricing candidates: items with at least five views and no text
 tap in the whole sale. They are candidates, not verdicts: a price is one reason among photos and
-timing. Reprice with `make reprice ID=<item> PRICE=<usd>` (the private tracking records it). The
+timing. Reprice with `make reprice ID=<item> PRICE=<usd>`: it sets the item's price in
+`data/inventory.yaml` and records it in the private price log (#236). The
 flyer's effect is the `flyer` row of "Visits from a tracked link" and the texts that follow from
 it ("Text taps, by source").
 
