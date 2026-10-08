@@ -53,3 +53,4 @@ tags: [lessons, index, docs, leaving-denver]
 | [lesson-038](lesson-038-waiting-for-a-change-reads-the-state-in-between.md) | Waiting for "Changed" Reads the State In Between | 2026-10-06 | [testing, browser, flaky, ci, race] |
 | [lesson-039](lesson-039-the-first-tap-pays-for-the-cold-start.md) | The First Tap Pays for the Cold Start | 2026-10-06 | [performance, inp, frontend, measurement] |
 | [lesson-040](lesson-040-one-200-is-not-a-ready-deployment.md) | One 200 Is Not a Ready Deployment | 2026-10-07 | [ci, cloudflare, deploy, smoke, flaky] |
+| [lesson-041](lesson-041-a-command-that-starts-writing-inherits-tests-that-never-stubbed-it.md) | A Command That Starts Writing Inherits Tests That Never Stubbed It | 2026-10-08 | [testing, cli, inventory, fixtures, sops] |

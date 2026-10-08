@@ -27,11 +27,13 @@ from leaving_denver.site_builder import (
     InventoryYamlError,
     apply_photos,
     build_all,
+    check_item_price,
     check_item_status,
     load_inventory_yaml,
     sale_over,
     sale_schedule,
     set_inventory_photos,
+    set_item_price,
     set_item_status,
 )
 
@@ -63,10 +65,10 @@ def cmd_sync(args):
     print("Sync complete. Run 'leaving-denver build' to recompile sites.")
 
 
-def refusing_edit(edit, item_id, status):
-    """Run an inventory status edit; a refusal is an error message and exit 1, never a traceback."""
+def refusing_edit(edit, item_id, value):
+    """Run an inventory edit; a refusal is an error message and exit 1, never a traceback."""
     try:
-        edit(item_id, status)
+        edit(item_id, value)
     except ValueError as err:
         print(f"Error: {err} Nothing changed.")
         sys.exit(1)
@@ -162,9 +164,20 @@ def cmd_reprice(args):
         print("Error: the price must be a positive number of dollars.")
         sys.exit(1)
     on = day_arg(args.on)
+    if on > date.today():
+        print(
+            f"Error: {on} is after today. The inventory holds today's price, so record a change "
+            "on its day. Nothing changed."
+        )
+        sys.exit(1)
+    # Ask the edit first, record second, write the inventory last: a refused edit must not leave
+    # a price in the log that the site does not show (#220, #236).
+    refusing_edit(check_item_price, args.id, args.price)
     record_privately(record_price, args.id, args.price, on)
+    refusing_edit(set_item_price, args.id, args.price)
+    build_all()
     print(
-        f"Recorded: {args.id} asking ${args.price} from {on}. Edit its price in the inventory too."
+        f"Recorded: {args.id} asking ${args.price} from {on}, in the inventory and the price log."
     )
     offer_seller_update()
 

@@ -31,6 +31,8 @@ def commands(monkeypatch):
     monkeypatch.setattr(cli, "load_inventory_yaml", lambda: inventory)
     monkeypatch.setattr(cli, "set_item_status", lambda *args: None)
     monkeypatch.setattr(cli, "check_item_status", lambda *args: None)
+    monkeypatch.setattr(cli, "set_item_price", lambda *args: None)
+    monkeypatch.setattr(cli, "check_item_price", lambda *args: None)
     monkeypatch.setattr(cli, "build_all", lambda: None)
     monkeypatch.setattr(cli, "load_private", fixture_private)
     for name in ("record_post", "record_price", "record_sale"):
@@ -156,6 +158,9 @@ def test_yes_end_to_end_sets_both_environments_then_dispatches_the_deploy(tmp_pa
     }
     monkeypatch.setattr(cli, "load_inventory_yaml", lambda: inventory)
     monkeypatch.setattr(cli, "record_price", lambda *a: None)
+    monkeypatch.setattr(cli, "set_item_price", lambda *a: None)
+    monkeypatch.setattr(cli, "check_item_price", lambda *a: None)
+    monkeypatch.setattr(cli, "build_all", lambda: None)
     monkeypatch.setattr(seal, "decrypt_private", fixture_private)
     monkeypatch.chdir(tmp_path)
     gh_calls = install_fakes(tmp_path, monkeypatch)
@@ -181,6 +186,8 @@ def test_an_empty_passphrase_on_a_resealing_aborts_with_the_hint_and_rotates_not
     monkeypatch.setattr(cli, "load_inventory_yaml", lambda: INVENTORY_OF_ONE)
     monkeypatch.setattr(cli, "set_item_status", lambda *args: None)
     monkeypatch.setattr(cli, "check_item_status", lambda *args: None)
+    monkeypatch.setattr(cli, "set_item_price", lambda *args: None)
+    monkeypatch.setattr(cli, "check_item_price", lambda *args: None)
     monkeypatch.setattr(cli, "build_all", lambda: None)
     monkeypatch.setattr(cli, "load_private", fixture_private)
     for name in ("record_post", "record_price", "record_sale"):

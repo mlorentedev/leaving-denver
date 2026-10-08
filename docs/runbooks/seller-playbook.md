@@ -101,7 +101,7 @@ Record what happens as it happens; each command writes to `data/private.sops.yam
 | When | Command |
 | :--- | :--- |
 | You post an item, or renew it | `make post ID=sofa-sleeper CHANNEL=facebook` (channels: facebook, craigslist, offerup, nextdoor, activebuilding, and carscom for the car only; add `ON=2026-10-01` for a post made earlier) |
-| You change an asking price | edit `recommended_list_price` in `data/inventory.yaml`, then `make reprice ID=sofa-sleeper PRICE=195` (the private views flag a log that differs from the asking price) |
+| You change an asking price | `make reprice ID=sofa-sleeper PRICE=195` sets `recommended_list_price` in `data/inventory.yaml` (that one line, comments kept) and records it in the private price log; then publish as in [site operations](ops.md). A date after today is refused (#236) |
 | An item sells | `make sold ID=sofa-sleeper PRICE=180` records price and date and lists the channels to take it down from |
 
 **Social posts.** Open `https://leaving-denver.pages.dev/social/` on the phone. Press and hold

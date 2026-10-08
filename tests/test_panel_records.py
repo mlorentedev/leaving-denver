@@ -153,6 +153,8 @@ def commands(monkeypatch, fixture_private):
     monkeypatch.setattr(cli, "load_inventory_yaml", lambda: inventory)
     monkeypatch.setattr(cli, "set_item_status", lambda *a: edits.append(a))
     monkeypatch.setattr(cli, "check_item_status", lambda *a: None)
+    monkeypatch.setattr(cli, "set_item_price", lambda *a: edits.append(("price", *a)))
+    monkeypatch.setattr(cli, "check_item_price", lambda *a: None)
     monkeypatch.setattr(cli, "build_all", lambda: None)
     monkeypatch.setattr(cli, "load_private", lambda: fixture_private)
     for name in ("record_post", "record_price", "record_sale"):
@@ -228,6 +230,7 @@ def test_the_make_post_usage_names_every_channel():
 def test_reprice_records_the_new_price(commands):
     cli.cmd_reprice(SimpleNamespace(id="sofa-sleeper", price=190, on=None))
     assert commands.calls == [("record_price", "sofa-sleeper", 190, date.today())]
+    assert commands.edits == [("price", "sofa-sleeper", 190)]
 
 
 @pytest.mark.parametrize("bad", [{"id": "typo"}, {"price": 0}, {"price": -5}])
@@ -314,21 +317,22 @@ def test_the_real_sops_accepts_the_values_and_keeps_the_history(tmp_path, monkey
     monkeypatch.setenv("SOPS_AGE_KEY_FILE", str(key))
     monkeypatch.setattr(private_data, "PRIVATE_SOPS_YAML", encrypted)
 
-    private_data.record_post("lamp", "facebook", date(2026, 10, 1))
-    private_data.record_post("lamp", "facebook", date(2026, 10, 8))
-    private_data.record_price("lamp", 35, date(2026, 10, 3))
-    private_data.record_sale("lamp", 30, date(2026, 10, 9))
+    private_data.record_post("lamp", "facebook", date(2001, 10, 1))
+    private_data.record_post("lamp", "facebook", date(2001, 10, 8))
+    private_data.record_price("lamp", 35, date(2001, 10, 3))
+    private_data.record_sale("lamp", 30, date(2001, 10, 9))
 
     data = private_data.decrypt_private()
     assert data["floors"] == {"lamp": 40}
-    assert data["tracking"]["lamp"]["channels"]["facebook"] == ["2026-10-01", "2026-10-08"]
-    assert data["tracking"]["lamp"]["price_log"] == [{"at": "2026-10-03", "price": 35}]
-    assert data["sales"]["lamp"] == {"price": 30, "at": "2026-10-09"}
+    assert data["tracking"]["lamp"]["channels"]["facebook"] == ["2001-10-01", "2001-10-08"]
+    assert data["tracking"]["lamp"]["price_log"] == [{"at": "2001-10-03", "price": 35}]
+    assert data["sales"]["lamp"] == {"price": 30, "at": "2001-10-09"}
     # Selling again with no price moves the day and keeps the price.
-    private_data.record_sale("lamp", None, date(2026, 10, 10))
-    assert private_data.decrypt_private()["sales"]["lamp"] == {"price": 30, "at": "2026-10-10"}
-    # Nothing readable on disk: the values are encrypted.
-    assert "2026-10-08" not in encrypted.read_text()
+    private_data.record_sale("lamp", None, date(2001, 10, 10))
+    assert private_data.decrypt_private()["sales"]["lamp"] == {"price": 30, "at": "2001-10-10"}
+    # Nothing readable on disk: the values are encrypted. The dates are from 2001 so none can be
+    # today's, which sops writes in clear as `lastmodified` (this failed on 2026-10-08 UTC).
+    assert "2001-10-08" not in encrypted.read_text()
 
 
 def test_a_test_that_forgets_to_stub_the_recorder_cannot_write_the_real_file():

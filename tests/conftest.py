@@ -26,6 +26,21 @@ def never_write_the_owners_private_file(monkeypatch):
 
 
 @pytest.fixture(autouse=True)
+def never_change_the_owners_inventory():
+    """No test may change data/inventory.yaml.
+
+    `make reprice` edits the inventory since #236, and a test that drove it with the edit
+    unstubbed rewrote the real sofa price. A test that edits points `site_builder.INVENTORY_YAML`
+    at a copy (tests/test_status_edit.py) or stubs the edit; one that does not fails here, and
+    the file is put back."""
+    before = config.INVENTORY_YAML.read_bytes()
+    yield
+    if config.INVENTORY_YAML.read_bytes() != before:
+        config.INVENTORY_YAML.write_bytes(before)
+        pytest.fail("a test changed the real data/inventory.yaml (restored)")
+
+
+@pytest.fixture(autouse=True)
 def no_test_asks_a_terminal_or_reaches_the_real_gh(monkeypatch):
     """`pytest -s` in a terminal must not hang on a prompt, and no test may set a secret or
     dispatch a deploy on the real repository, or write to the owner's Bitwarden.

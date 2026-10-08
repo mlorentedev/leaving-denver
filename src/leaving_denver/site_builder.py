@@ -213,12 +213,53 @@ def edit_item_status(text: str, item_id: str, status: str) -> str:
     return edited
 
 
-def planned_status_edit(item_id: str, status: str) -> tuple[str, str]:
-    """(current text, edited text) of inventory.yaml for this status; ValueError if refused."""
+PRICE_LINE = re.compile(
+    r"^  recommended_list_price:(?P<gap>[ \t]+)(?P<value>[0-9]+)(?P<tail>[ \t]+#.*)?$"
+)
+
+
+def edit_item_price(text: str, item_id: str, price: int) -> str:
+    """`text` with this item's one `recommended_list_price:` line set to `price`, nothing else.
+
+    Raises ValueError when the item has no such line, has two, or carries one that is not a
+    whole number of dollars. The result is parsed back: only that item's price may differ."""
+    lines = text.splitlines(keepends=True)
+    at = only_line(lines, item_id, "recommended_list_price")
+    if at is None:
+        raise ValueError(
+            f"item '{item_id}' has no `recommended_list_price:` line in inventory.yaml; "
+            "add one and run the command again."
+        )
+    body = lines[at].rstrip("\r\n")
+    match = PRICE_LINE.match(body)
+    if not match:
+        raise ValueError(
+            f"item '{item_id}': cannot rewrite the line {body.strip()!r} in place; "
+            "make it `recommended_list_price: <whole dollars>` and run the command again."
+        )
+    lines[at] = (
+        f"  recommended_list_price:{match['gap']}{price}{match['tail'] or ''}"
+        f"{lines[at][len(body) :]}"
+    )
+    edited = "".join(lines)
+    expected = load_text(text, item_id)
+    next(i for i in expected["items"] if i["id"] == item_id)["recommended_list_price"] = price
+    if yaml.safe_load(edited) != expected:
+        raise ValueError(f"item '{item_id}': the edit would change more than its price.")
+    return edited
+
+
+def planned_edit(edit, item_id: str, value) -> tuple[str, str]:
+    """(current text, edited text) of inventory.yaml for one item edit; ValueError if refused."""
     if not INVENTORY_YAML.exists():
         raise FileNotFoundError(f"SSOT inventory not found at {INVENTORY_YAML}")
     text = INVENTORY_YAML.read_bytes().decode("utf-8")
-    return text, edit_item_status(text, item_id, status)
+    return text, edit(text, item_id, value)
+
+
+def planned_status_edit(item_id: str, status: str) -> tuple[str, str]:
+    """(current text, edited text) of inventory.yaml for this status; ValueError if refused."""
+    return planned_edit(edit_item_status, item_id, status)
 
 
 def check_item_status(item_id: str, status: str) -> None:
@@ -232,6 +273,18 @@ def check_item_status(item_id: str, status: str) -> None:
 def set_item_status(item_id: str, status: str) -> None:
     """Set one item's status in inventory.yaml by editing its line, keeping every other byte."""
     text, edited = planned_status_edit(item_id, status)
+    if edited != text:
+        INVENTORY_YAML.write_bytes(edited.encode("utf-8"))
+
+
+def check_item_price(item_id: str, price: int) -> None:
+    """Dry run of `set_item_price`: raises the ValueError it would, writes nothing (#220)."""
+    planned_edit(edit_item_price, item_id, price)
+
+
+def set_item_price(item_id: str, price: int) -> None:
+    """Set one item's asking price in inventory.yaml by editing its line, keeping every other byte."""
+    text, edited = planned_edit(edit_item_price, item_id, price)
     if edited != text:
         INVENTORY_YAML.write_bytes(edited.encode("utf-8"))
 
