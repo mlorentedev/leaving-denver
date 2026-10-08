@@ -2,6 +2,8 @@
 id: "FEAT-019-share-button"
 type: spec
 status: verifying # draft | implementing | verifying | archived
+review: waived
+review_waived_reason: "Owner waived the launcher review on 2026-10-08: the repo has no harness/reviewer-pool.json, so dotf spec review cannot run. The owner chose an independent reviewer subagent instead; its verdict is in verification.md (Independent review, 2026-10-08)."
 created: "2026-10-06"
 issue: "mlorentedev/leaving-denver#214"   # repo#NNN — GitHub issue / Project item that tracks this spec
 tags: [spec, proposal]

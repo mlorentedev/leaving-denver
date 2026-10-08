@@ -28,3 +28,19 @@ created: "2026-10-03"
 ## Not run here
 
 - The Analytics Engine write, the SQL API, the Web Analytics GraphQL query and the SMTP send, against the live services. Bindings cannot be used locally and no deploy or Cloudflare resource is in scope; the owner's first-run steps are in `docs/runbooks/ops.md` "Sale metrics".
+
+## Promotion candidates
+
+- [x] Lesson for the repo's `docs/lessons/`? yes: docs/lessons/lesson-029-a-redirect-that-rebuilds-the-url-drops-the-query.md
+- [x] ADR-worthy decision for the repo's `docs/adr/adr-XXX.md`? yes: docs/adr/adr-011-first-party-event-metrics-for-the-sale.md
+- [x] New pattern candidate for `00_meta/patterns/`? no: first-party counting without personal data is specific to this sale's endpoint and ADR-002
+
+## Independent review (2026-10-08)
+
+The owner chose an independent reviewer subagent for these archives (the repo has no reviewer pool, so `dotf spec review` cannot run). The reviewer was not the implementer. It worked read-only on main at 077360f, checking each criterion against the code and the tests. The `features.json` commands were run again on 9659d65 before archiving, and all of them pass.
+
+- Verdict: ready.
+- AC1–AC8, AC10 and AC11 hold.
+- AC9 is superseded. The digest workflow moved to kubelab (ADR-011 amendment, #228; kubelab#2090, #2095, #2106). This repo now keeps only the pointer, the runbooks and the `hit.js` ↔ SQL contract (`tests/test_sale_metrics_workflow.py`, 7 passed, 2 skipped without `KUBELAB_SALE_DIGEST_JSON`).
+- Stale citations above: the AC9 and AC10 lines describe the in-repo workflow file, which no longer exists, and the test totals predate later PRs.
+- Minor: `hit.js` reads the body before the `MAX_BODY` check. Cloudflare caps the body upstream, so this is theoretical. Ticketed in #238.

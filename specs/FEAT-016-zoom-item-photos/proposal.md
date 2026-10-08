@@ -2,6 +2,8 @@
 id: "FEAT-016-zoom-item-photos"
 type: spec
 status: verifying # draft | implementing | verifying | archived
+review: waived
+review_waived_reason: "Owner waived the launcher review on 2026-10-08: the repo has no harness/reviewer-pool.json, so dotf spec review cannot run. The owner chose an independent reviewer subagent instead; its verdict is in verification.md (Independent review, 2026-10-08)."
 created: "2026-10-04"
 issue: "mlorentedev/leaving-denver#190"   # repo#NNN — GitHub issue / Project item that tracks this spec
 tags: [spec, proposal]

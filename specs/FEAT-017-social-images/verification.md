@@ -29,4 +29,15 @@ created: "2026-10-06"
 
 ## Promotion candidates
 
-- none
+- [x] Lesson for the repo's `docs/lessons/`? no: nothing surprising came up; the format choices are recorded above
+- [x] ADR-worthy decision for the repo's `docs/adr/adr-XXX.md`? no: an unlinked, scriptless page under the existing CSP adds no origin and no contract
+- [x] New pattern candidate for `00_meta/patterns/`? no: social image sizes are specific to this sale
+
+## Independent review (2026-10-08)
+
+The owner chose an independent reviewer subagent for these archives (the repo has no reviewer pool, so `dotf spec review` cannot run). The reviewer was not the implementer. It worked read-only on main at 077360f, checking each criterion against the code and the tests. The `features.json` commands were run again on 9659d65 before archiving, and all of them pass.
+
+- Verdict: ready.
+- AC1–AC7 hold.
+- `features.json` was the unfilled scaffold (`echo 'not implemented'`). This archive replaces it with one command per criterion, and all seven pass. AC7 builds first, because the class-coverage test reads `build/`.
+- The QR is checked module by module against `segno`, not decoded by a camera. The owner's phone scan is #210.
