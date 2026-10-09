@@ -443,7 +443,7 @@ items:
   dimensions: 45.5" W x 15.8" D x 18.9" H
   size_in: [45.5, 15.8, 18.9]
   color: Canyon Walnut Woodgrain
-  status: Available
+  status: Sold
   primary_image: catalog/tv-stand-canyon-walnut/tv-stand.jpg
   images:
   - catalog/tv-stand-canyon-walnut/tv-stand.jpg
@@ -546,7 +546,7 @@ items:
   dimensions: 19.8" L x 17.6" W x 23.9" H
   size_in: [19.8, 17.6, 23.9]
   color: Espresso Finish
-  status: Available
+  status: Sold
   primary_image: catalog/nightstand-espresso/nightstand.jpg
   images:
   - catalog/nightstand-espresso/nightstand.jpg
@@ -591,7 +591,7 @@ items:
   condition: Used - Like New
   dimensions: 'Twin: 39" W x 75" L x 16.5" H'
   color: Two-tone Blue / Gray Flocked Top
-  status: Available
+  status: Sold
   primary_image: catalog/air-mattress-twin-pump/air-mattress.jpg
   images:
   - catalog/air-mattress-twin-pump/air-mattress.jpg
