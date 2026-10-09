@@ -37,6 +37,15 @@ sales:
     auxiliary-c-table:
         price: ENC[AES256_GCM,data:Sc4=,iv:ykPjPFtVkP63ndugHGG+kRHYwIy3J+N9WcuMRmCtElY=,tag:dA1PvzfxTpV2xH+BeguI/A==,type:float]
         at: ENC[AES256_GCM,data:gZr3tCw5+y+b4w==,iv:nJnXyXo1L33Olb9ttK0HXVn2VlcIYH81fEKcT3wg2z0=,tag:ScbMu65m65YI7Xwsz+LDHg==,type:str]
+    nightstand-espresso:
+        price: ENC[AES256_GCM,data:Gig=,iv:d0iZ/iwFBfwSFgcoMN7Zdl92zi2sjigNwVKHriR4O34=,tag:SEjY0mc0wowlgLkkSizydQ==,type:float]
+        at: ENC[AES256_GCM,data:Ums3GPDi+DQe+g==,iv:khHIkLnAC6WbDQXYxhrTaDU3iA2X8PNqghm4ZFBV5XQ=,tag:907TS3TCvG7ydRZn6roAhQ==,type:str]
+    air-mattress-twin-pump:
+        price: ENC[AES256_GCM,data:2wE=,iv:j7TR3HMd66ywTFIdHdlPKUBlr7VgRxl98AMy+7ispDM=,tag:d3ymqdGjjJUY8o5E9cKrlg==,type:float]
+        at: ENC[AES256_GCM,data:s3cpsrWUxvJSPw==,iv:pIHmHLGd2vji87hHBw3jsFZnD12G6fU5ec8yw3tZ6sA=,tag:6yj4RyS4RwxU5btrInNUTQ==,type:str]
+    tv-stand-canyon-walnut:
+        price: ENC[AES256_GCM,data:O8I=,iv:xVe0jH1BEFzhnonAwtdbBFYzrXCh1v5s6FDo3zKH4ak=,tag:+iQp7v52lYnq9lMGE/PcuA==,type:float]
+        at: ENC[AES256_GCM,data:WAerWm+bUdOfFA==,iv:ZGI8aUmBNSK5NeH0cbhk3r1fr5EUE2G7RYdUWQgnm68=,tag:OjItnQgH/5W88jlSpWQbFg==,type:str]
 sops:
     age:
         - enc: |
@@ -48,7 +57,7 @@ sops:
             N5S0b6gn+J7t3Lg9zTalfJK5VHCwzBcjg5kbjsk7dea2bNSxWE/NQA==
             -----END AGE ENCRYPTED FILE-----
           recipient: age166v8efpskctmxxes5lcqpxkj0ny3q74l3v0pswpdpa63wlkqmc8q35fkdw
-    lastmodified: "2026-10-07T01:27:50Z"
-    mac: ENC[AES256_GCM,data:JZASAmHApkdi+mHPW/jvdm/Ln+e1fv7+X/pL3Pj5fcFbU3i4N4mcTjYl03kjbshrj/+chVExMz1R6JxrF1YBk1T6cRxRnRdFobmL2n2X5noQiS58Pw40J64fiF+8kKdblh6e6urchLrfcOEjnX5HLvZM6uD4PZQBpu40mObSSS8=,iv:cME/IjjCtAXJPRAxGEzt0vO8Nw7CHZQSHNh62jI8Msk=,tag:Jmi/LNGgf0oFGprF14VB3Q==,type:str]
+    lastmodified: "2026-10-09T03:58:39Z"
+    mac: ENC[AES256_GCM,data:vEqDxH97f0GX5cz0ghESd5+iMO8ftYDqHbCmzrMEU3VlQ+7Zud72TSXkQq6UOf/bDRwtmWDnKMqgCi1KL1gO3zq7Rux0G1LZVa08rbg754EjbC6ExpO8xGxgbot5L7P6HcxYQagJ8+TdDe8Epa7903R/FK8X7rqKk5V0Bp1RBy0=,iv:G2FqMpHJOf4xnA2U9/j30CnW4vX/aJx3RCcj9MPqIpA=,tag:82O4Z7Dr/prmAp9gf8OB6Q==,type:str]
     unencrypted_suffix: _unencrypted
     version: 3.13.1
