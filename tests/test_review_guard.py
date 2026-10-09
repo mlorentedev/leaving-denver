@@ -71,7 +71,7 @@ case "$*" in
           echo 1 >> "$SEEN_FILE"
           echo "gh: api.github.com: read timed out" >&2; exit 1
         fi
-        ;&
+        printf '%s' "$REGISTRY" | base64 ;;
       ok) printf '%s' "$REGISTRY" | base64 ;;
       noentry) printf '%s' "$NOENTRY_REGISTRY" | base64 ;;
     esac
@@ -147,6 +147,12 @@ def contents_calls(tmp_path: Path) -> int:
     if not calls.exists():
         return 0
     return sum(1 for line in calls.read_text(encoding="utf-8").splitlines() if "contents/" in line)
+
+
+def test_the_stub_parses_under_the_bash_macos_ships():
+    # macOS's /bin/bash is 3.2: a case fallthrough (;& or ;;&) is a syntax error there,
+    # which CI's bash 5 never shows. Issue #241.
+    assert ";&" not in STUB_GH
 
 
 def test_a_published_review_passes(tmp_path):
