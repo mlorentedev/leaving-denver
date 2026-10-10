@@ -99,8 +99,14 @@ def public_pages(public_dir, pages):
     return built
 
 
+# "Pickup from Oct 23" says when an item can leave, not when the sale ends (owner, 2026-10-10:
+# the chair and desk free up on the deadline's day), so that phrase alone may carry the date.
+PICKUP_FROM = re.compile(r"(?:[Pp]ickup from|from|desde el|a partir del) (?:Oct 23|23 de octubre)")
+
+
 def dates_on(page):
-    return [shape for shape in DATE_SHAPES if shape in unescape(page)]
+    text = PICKUP_FROM.sub("", unescape(page))
+    return [shape for shape in DATE_SHAPES if shape in text]
 
 
 def description(page):

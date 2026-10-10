@@ -46,6 +46,9 @@ sales:
     tv-stand-canyon-walnut:
         price: ENC[AES256_GCM,data:O8I=,iv:xVe0jH1BEFzhnonAwtdbBFYzrXCh1v5s6FDo3zKH4ak=,tag:+iQp7v52lYnq9lMGE/PcuA==,type:float]
         at: ENC[AES256_GCM,data:WAerWm+bUdOfFA==,iv:ZGI8aUmBNSK5NeH0cbhk3r1fr5EUE2G7RYdUWQgnm68=,tag:OjItnQgH/5W88jlSpWQbFg==,type:str]
+    coffee-table-lift-top:
+        price: ENC[AES256_GCM,data:FaY=,iv:2MAGH0Loq/HlWmslwvLygqEljcmSNPo15d/t6qNF3A0=,tag:rrqEIfOSnxCAL6WD7jYoYg==,type:float]
+        at: ENC[AES256_GCM,data:Jr3IaLPc/AAqKg==,iv:tqoQ+Ycm1II3213wKaj2qDUKCUx0ZS7BQexj83wUlrs=,tag:OFJ3qJVLnRc+T7hfaxfM8Q==,type:str]
 sops:
     age:
         - enc: |
@@ -57,7 +60,7 @@ sops:
             N5S0b6gn+J7t3Lg9zTalfJK5VHCwzBcjg5kbjsk7dea2bNSxWE/NQA==
             -----END AGE ENCRYPTED FILE-----
           recipient: age166v8efpskctmxxes5lcqpxkj0ny3q74l3v0pswpdpa63wlkqmc8q35fkdw
-    lastmodified: "2026-10-09T03:58:39Z"
-    mac: ENC[AES256_GCM,data:vEqDxH97f0GX5cz0ghESd5+iMO8ftYDqHbCmzrMEU3VlQ+7Zud72TSXkQq6UOf/bDRwtmWDnKMqgCi1KL1gO3zq7Rux0G1LZVa08rbg754EjbC6ExpO8xGxgbot5L7P6HcxYQagJ8+TdDe8Epa7903R/FK8X7rqKk5V0Bp1RBy0=,iv:G2FqMpHJOf4xnA2U9/j30CnW4vX/aJx3RCcj9MPqIpA=,tag:82O4Z7Dr/prmAp9gf8OB6Q==,type:str]
+    lastmodified: "2026-10-10T19:51:46Z"
+    mac: ENC[AES256_GCM,data:tOuNq77+ZKTw8lIJ+6o0QxQSGGXwcSXOoTBrmFVdElSTuTprnIVEynIeBZCgadDee103oosQ2mCNAW2WDPoq8Dh4poHZVydotPlNh1aFbQdUF/VaAnhkl+sR5jO2KGDziLh2gEe1L/1KGcPGCqg9HFX9ZYZN++zpJtEsIqJ8rhg=,iv:WC4uVbE04N3W/L3QtG2+DkUFMkl+D1LkZOuOFRpMdpI=,tag:f7qdZtgGZrwxzmq+pXawAw==,type:str]
     unencrypted_suffix: _unencrypted
     version: 3.13.1

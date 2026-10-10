@@ -108,63 +108,6 @@ items:
   - apartment couch
   - denver furniture
   - convertible sofa
-- id: dell-monitor-32
-  # Own photos first, stock last; the first is the cover (FEAT-012).
-  photos:
-  - monitor.jpg
-  - dell_s3222hn_front.jpg
-  category: Home Office & Tech
-  title: Dell 32" Curved 75Hz FHD Monitor (S3222HN) - Zero Dead Pixels
-  short_title: Dell 32" Curved Monitor
-  brand: Dell
-  model: S3222HN
-  original_price: 180
-  recommended_list_price: 95
-  condition: Used - Like New
-  dimensions: 31.5" Diagonal Viewable, 1800R Curve
-  color: Platinum Silver / Black
-  status: Available
-  primary_image: catalog/dell-monitor-32/monitor.jpg
-  images:
-  - catalog/dell-monitor-32/monitor.jpg
-  - catalog/dell-monitor-32/dell_s3222hn_front.jpg
-  specs:
-  - 31.5-inch 1800R curved VA panel with 178/178 wide viewing angles
-  - Full HD 1920 x 1080 resolution at 75Hz refresh rate
-  - AMD FreeSync technology for tear-free gaming & video
-  - Dual HDMI 1.4 ports + Audio line-out port
-  - Tested 100% functional with zero dead pixels, pristine condition
-  included:
-  - Dell S3222HN monitor
-  - Original factory stand
-  - Original power cable
-  pickup_note: No original box. Bring a clean towel or blanket to protect screen during
-    transport.
-  es:
-    color: Plata platino y negro
-    title: Monitor curvo Dell de 32 pulgadas, 75 Hz FHD (S3222HN), sin píxeles muertos
-    short_title: Monitor curvo Dell de 32 pulgadas
-    dimensions: Pantalla diagonal de 31.5 pulgadas, curva 1800R
-    specs:
-    - Panel VA curvo 1800R de 31.5 pulgadas con ángulos de visión 178/178
-    - Resolución Full HD 1920 x 1080 a 75 Hz
-    - Tecnología AMD FreeSync para video y juegos sin cortes
-    - Dos puertos HDMI 1.4 y salida de audio
-    - Probado al 100 %, sin píxeles muertos y en estado impecable
-    included:
-    - Monitor Dell S3222HN
-    - Base original
-    - Cable de alimentación original
-    pickup_note: No incluye caja. Traiga una toalla o cobija limpia para proteger la pantalla.
-  tags:
-  - dell monitor
-  - curved monitor
-  - 32 inch monitor
-  - gaming monitor
-  - wfh screen
-  - home office
-  - hdmi monitor
-  - freesync
 - id: onn-43-4k-tv
   # Own photos first, stock last; the first is the cover (FEAT-012).
   photos:
@@ -224,116 +167,6 @@ items:
   - bedroom tv
   - budget tv
   - streaming tv
-- id: convertible-desk
-  # Own photos first, stock last; the first is the cover (FEAT-012).
-  photos:
-  - desk-2.jpg
-  - desk-1.jpg
-  category: Home Office & Tech
-  title: Mainstays Two-Way Convertible L-Shaped / Long Computer Desk
-  short_title: Convertible L-Shaped Desk
-  brand: Mainstays
-  original_price: 159
-  recommended_list_price: 60
-  condition: Used - Good
-  dimensions: 'L-Shape: 58.6" W x 50.4" D x 29.8" H (or straight 80"+ wide)'
-  size_in: [58.6, 50.4, 29.8]
-  color: Canyon Walnut Woodgrain + Black Metal
-  status: Available
-  primary_image: catalog/convertible-desk/desk-2.jpg
-  images:
-  - catalog/convertible-desk/desk-2.jpg
-  - catalog/convertible-desk/desk-1.jpg
-  specs:
-  - '2-in-1 modular design: assemble as corner L-shape or long straight executive
-    desk'
-  - Built-in lower storage shelf for PC tower, printer, or storage bins
-  - Sturdy powder-coated black steel frame with adjustable leveling feet
-  - Scratch-resistant Canyon Walnut melamine desktop
-  - Currently assembled; easily separable into 2 sections for transport
-  included:
-  - Convertible desk structure
-  - Lower storage shelf
-  pickup_from: Pickup from Oct 17
-  pickup_note: Available for pickup from Oct 17. Already assembled. Fits in midsize SUV with seats
-    folded or truck bed. Tools available on site if you wish to disassemble.
-  es:
-    color: Veta de nogal Canyon y metal negro
-    title: Escritorio Mainstays convertible en L o recto
-    short_title: Escritorio convertible en L
-    dimensions: En L, 58.6" ancho x 50.4" fondo x 29.8" alto; recto, más de 80" de ancho
-    specs:
-    - Diseño modular 2 en 1 para esquina en L o escritorio recto largo
-    - Estante inferior para torre, impresora o cajas
-    - Estructura firme de acero negro con patas niveladoras
-    - Superficie de melamina Canyon Walnut resistente a rayones
-    - Está armado y se separa fácilmente en 2 secciones
-    included:
-    - Estructura del escritorio convertible
-    - Estante inferior
-    pickup_from: Recogida desde el 17 de octubre
-    pickup_note: Disponible para recoger a partir del 17 de octubre. Está armado. Cabe en un SUV
-      mediano con los asientos abatidos o en una pickup; hay herramientas para desmontarlo.
-  tags:
-  - computer desk
-  - l-shaped desk
-  - corner desk
-  - wfh desk
-  - office desk
-  - convertible desk
-  - industrial desk
-  - walnut desk
-- id: coffee-table-lift-top
-  # Own photos first, stock last; the first is the cover (FEAT-012).
-  photos:
-  - coffee-table-1.jpg
-  - coffee-table-2.jpg
-  category: Living Room
-  title: Mainstays Lift-Top Coffee Table w/ Hidden Storage & Bottom Shelf
-  short_title: Lift-Top Coffee Table
-  brand: Mainstays
-  original_price: 117
-  recommended_list_price: 55
-  condition: Used - Like New
-  dimensions: 40.9" W x 18.0" D x 18.5" H (Lifts to 24" H)
-  size_in: [40.9, 18.0, 18.5]
-  color: Blackwood / Espresso Finish
-  status: Available
-  primary_image: catalog/coffee-table-lift-top/coffee-table-1.jpg
-  images:
-  - catalog/coffee-table-lift-top/coffee-table-1.jpg
-  - catalog/coffee-table-lift-top/coffee-table-2.jpg
-  specs:
-  - Mechanical spring-assisted lift top raises smoothly to dining/work height
-  - Large interior hidden storage compartment keeps remotes, laptops, and games out
-    of sight
-  - Open lower shelf for books, blankets, and storage baskets
-  - Durable, easy-wipe melamine surface in deep blackwood finish
-  - Solid, wobble-free construction in pristine condition
-  included:
-  - Fully assembled lift-top coffee table
-  pickup_note: Sturdy and relatively heavy. One flight of stairs down; I help you carry it.
-  es:
-    color: Madera negra, acabado espresso
-    title: Mesa de centro Mainstays con tapa elevable, almacenamiento y estante
-    short_title: Mesa de centro con tapa elevable
-    dimensions: 40.9" ancho x 18" fondo x 18.5" alto; elevada, 24" alto
-    specs:
-    - Tapa con resorte que se eleva suavemente a altura de comedor o trabajo
-    - Amplio compartimento oculto para controles, laptops y juegos
-    - Estante inferior abierto para libros, cobijas o canastas
-    - Superficie de melamina resistente y fácil de limpiar
-    - Construcción sólida, estable y en estado impecable
-    included:
-    - Mesa de centro con tapa elevable completamente armada
-    pickup_note: Es firme y algo pesada. Hay que bajarla un tramo de escaleras; yo ayudo a cargarla.
-  tags:
-  - lift top table
-  - coffee table
-  - storage coffee table
-  - living room table
-  - work from couch table
-  - blackwood table
 - id: ikea-mattress-topper
   # Own photos first, stock last; the first is the cover (FEAT-012).
   photos:
@@ -386,6 +219,176 @@ items:
   - bedding
   - full size topper
   - guest bed
+- id: dell-monitor-32
+  # Own photos first, stock last; the first is the cover (FEAT-012).
+  photos:
+  - monitor.jpg
+  - dell_s3222hn_front.jpg
+  category: Home Office & Tech
+  title: Dell 32" Curved 75Hz FHD Monitor (S3222HN) - Zero Dead Pixels
+  short_title: Dell 32" Curved Monitor
+  brand: Dell
+  model: S3222HN
+  original_price: 180
+  recommended_list_price: 95
+  condition: Used - Like New
+  dimensions: 31.5" Diagonal Viewable, 1800R Curve
+  color: Platinum Silver / Black
+  status: Available
+  primary_image: catalog/dell-monitor-32/monitor.jpg
+  images:
+  - catalog/dell-monitor-32/monitor.jpg
+  - catalog/dell-monitor-32/dell_s3222hn_front.jpg
+  specs:
+  - 31.5-inch 1800R curved VA panel with 178/178 wide viewing angles
+  - Full HD 1920 x 1080 resolution at 75Hz refresh rate
+  - AMD FreeSync technology for tear-free gaming & video
+  - Dual HDMI 1.4 ports + Audio line-out port
+  - Tested 100% functional with zero dead pixels, pristine condition
+  included:
+  - Dell S3222HN monitor
+  - Original factory stand
+  - Original power cable
+  pickup_from: Pickup from Nov 15
+  pickup_note: Available for pickup from Nov 15. No original box. Bring a clean towel or blanket
+    to protect screen during transport.
+  es:
+    color: Plata platino y negro
+    title: Monitor curvo Dell de 32 pulgadas, 75 Hz FHD (S3222HN), sin píxeles muertos
+    short_title: Monitor curvo Dell de 32 pulgadas
+    dimensions: Pantalla diagonal de 31.5 pulgadas, curva 1800R
+    specs:
+    - Panel VA curvo 1800R de 31.5 pulgadas con ángulos de visión 178/178
+    - Resolución Full HD 1920 x 1080 a 75 Hz
+    - Tecnología AMD FreeSync para video y juegos sin cortes
+    - Dos puertos HDMI 1.4 y salida de audio
+    - Probado al 100 %, sin píxeles muertos y en estado impecable
+    included:
+    - Monitor Dell S3222HN
+    - Base original
+    - Cable de alimentación original
+    pickup_from: Recogida desde el 15 de noviembre
+    pickup_note: Disponible para recoger a partir del 15 de noviembre. No incluye caja. Traiga una
+      toalla o cobija limpia para proteger la pantalla.
+  tags:
+  - dell monitor
+  - curved monitor
+  - 32 inch monitor
+  - gaming monitor
+  - wfh screen
+  - home office
+  - hdmi monitor
+  - freesync
+- id: convertible-desk
+  # Own photos first, stock last; the first is the cover (FEAT-012).
+  photos:
+  - desk-2.jpg
+  - desk-1.jpg
+  category: Home Office & Tech
+  title: Mainstays Two-Way Convertible L-Shaped / Long Computer Desk
+  short_title: Convertible L-Shaped Desk
+  brand: Mainstays
+  original_price: 159
+  recommended_list_price: 60
+  condition: Used - Good
+  dimensions: 'L-Shape: 58.6" W x 50.4" D x 29.8" H (or straight 80"+ wide)'
+  size_in: [58.6, 50.4, 29.8]
+  color: Canyon Walnut Woodgrain + Black Metal
+  status: Available
+  primary_image: catalog/convertible-desk/desk-2.jpg
+  images:
+  - catalog/convertible-desk/desk-2.jpg
+  - catalog/convertible-desk/desk-1.jpg
+  specs:
+  - '2-in-1 modular design: assemble as corner L-shape or long straight executive
+    desk'
+  - Built-in lower storage shelf for PC tower, printer, or storage bins
+  - Sturdy powder-coated black steel frame with adjustable leveling feet
+  - Scratch-resistant Canyon Walnut melamine desktop
+  - Currently assembled; easily separable into 2 sections for transport
+  included:
+  - Convertible desk structure
+  - Lower storage shelf
+  pickup_from: Pickup from Oct 23
+  pickup_note: Available for pickup from Oct 23. Already assembled. Fits in midsize SUV with seats
+    folded or truck bed. Tools available on site if you wish to disassemble.
+  es:
+    color: Veta de nogal Canyon y metal negro
+    title: Escritorio Mainstays convertible en L o recto
+    short_title: Escritorio convertible en L
+    dimensions: En L, 58.6" ancho x 50.4" fondo x 29.8" alto; recto, más de 80" de ancho
+    specs:
+    - Diseño modular 2 en 1 para esquina en L o escritorio recto largo
+    - Estante inferior para torre, impresora o cajas
+    - Estructura firme de acero negro con patas niveladoras
+    - Superficie de melamina Canyon Walnut resistente a rayones
+    - Está armado y se separa fácilmente en 2 secciones
+    included:
+    - Estructura del escritorio convertible
+    - Estante inferior
+    pickup_from: Recogida desde el 23 de octubre
+    pickup_note: Disponible para recoger a partir del 23 de octubre. Está armado. Cabe en un SUV
+      mediano con los asientos abatidos o en una pickup; hay herramientas para desmontarlo.
+  tags:
+  - computer desk
+  - l-shaped desk
+  - corner desk
+  - wfh desk
+  - office desk
+  - convertible desk
+  - industrial desk
+  - walnut desk
+- id: coffee-table-lift-top
+  # Own photos first, stock last; the first is the cover (FEAT-012).
+  photos:
+  - coffee-table-1.jpg
+  - coffee-table-2.jpg
+  category: Living Room
+  title: Mainstays Lift-Top Coffee Table w/ Hidden Storage & Bottom Shelf
+  short_title: Lift-Top Coffee Table
+  brand: Mainstays
+  original_price: 117
+  recommended_list_price: 55
+  condition: Used - Like New
+  dimensions: 40.9" W x 18.0" D x 18.5" H (Lifts to 24" H)
+  size_in: [40.9, 18.0, 18.5]
+  color: Blackwood / Espresso Finish
+  status: Sold
+  primary_image: catalog/coffee-table-lift-top/coffee-table-1.jpg
+  images:
+  - catalog/coffee-table-lift-top/coffee-table-1.jpg
+  - catalog/coffee-table-lift-top/coffee-table-2.jpg
+  specs:
+  - Mechanical spring-assisted lift top raises smoothly to dining/work height
+  - Large interior hidden storage compartment keeps remotes, laptops, and games out
+    of sight
+  - Open lower shelf for books, blankets, and storage baskets
+  - Durable, easy-wipe melamine surface in deep blackwood finish
+  - Solid, wobble-free construction in pristine condition
+  included:
+  - Fully assembled lift-top coffee table
+  pickup_note: Sturdy and relatively heavy. One flight of stairs down; I help you carry it.
+  es:
+    color: Madera negra, acabado espresso
+    title: Mesa de centro Mainstays con tapa elevable, almacenamiento y estante
+    short_title: Mesa de centro con tapa elevable
+    dimensions: 40.9" ancho x 18" fondo x 18.5" alto; elevada, 24" alto
+    specs:
+    - Tapa con resorte que se eleva suavemente a altura de comedor o trabajo
+    - Amplio compartimento oculto para controles, laptops y juegos
+    - Estante inferior abierto para libros, cobijas o canastas
+    - Superficie de melamina resistente y fácil de limpiar
+    - Construcción sólida, estable y en estado impecable
+    included:
+    - Mesa de centro con tapa elevable completamente armada
+    pickup_note: Es firme y algo pesada. Hay que bajarla un tramo de escaleras; yo ayudo a cargarla.
+  tags:
+  - lift top table
+  - coffee table
+  - storage coffee table
+  - living room table
+  - work from couch table
+  - blackwood table
 - id: bar-stools-pair
   category: Dining & Kitchen
   title: VASAGLE Industrial Bar Stools (Set of 2) - 28.7" Counter/Bar Height
@@ -508,8 +511,8 @@ items:
   - 275 lb weight capacity
   included:
   - Fully assembled ergonomic desk chair
-  pickup_from: Pickup from Oct 17
-  pickup_note: Available for pickup from Oct 17. Fits easily in any car back seat or trunk.
+  pickup_from: Pickup from Oct 23
+  pickup_note: Available for pickup from Oct 23. Fits easily in any car back seat or trunk.
   es:
     color: Malla y tela negras
     title: Silla ergonómica Mainstays de malla con brazos abatibles
@@ -524,8 +527,8 @@ items:
     - Capacidad de 275 lb
     included:
     - Silla de escritorio ergonómica completamente armada
-    pickup_from: Recogida desde el 17 de octubre
-    pickup_note: Disponible para recoger a partir del 17 de octubre. Cabe fácilmente en el asiento
+    pickup_from: Recogida desde el 23 de octubre
+    pickup_note: Disponible para recoger a partir del 23 de octubre. Cabe fácilmente en el asiento
       trasero o la cajuela de cualquier auto.
   tags:
   - office chair
@@ -961,18 +964,17 @@ bundles:
   es:
     name: Estación completa para oficina en casa
     short_name: Oficina en casa
-# Replaces "Living room media" once the C-shaped table sold (owner, 2026-10-06; FEAT-018).
-- id: bundle-sofa-tv-table
-  name: Sleeper Sofa + 43" 4K TV + Lift-Top Coffee Table
-  short_name: Sofa + TV + coffee table
+# Lost the lift-top coffee table when it sold (owner, 2026-10-10); $250, a $55 saving.
+- id: bundle-sofa-tv
+  name: Sleeper Sofa + 43" 4K TV
+  short_name: Sofa + TV
   items:
   - sofa-sleeper
   - onn-43-4k-tv
-  - coffee-table-lift-top
-  bundle_price: 300
+  bundle_price: 250
   es:
-    name: Sofá cama, TV 4K de 43" y mesa de centro elevable
-    short_name: Sofá + TV + mesa de centro
+    name: Sofá cama y TV 4K de 43"
+    short_name: Sofá + TV
 - id: bundle-take-all
   name: Whole Apartment Relocation Liquidation
   short_name: Take everything
