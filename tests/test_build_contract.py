@@ -293,7 +293,8 @@ def offered(data, bundle):
             and i.get("published", True)
             and i.get("status", "Available") == "Available"
         ),
-        key=lambda i: i["recommended_list_price"],
+        # The grid's order: pinned items first, then cheapest first.
+        key=lambda i: (i.get("grid_pin") or float("inf"), i["recommended_list_price"]),
     )
     total = sum(0 if i.get("free_with_purchase") else i["recommended_list_price"] for i in items)
     price = total * (100 - bundle["discount_pct"]) // 100 // 5 * 5

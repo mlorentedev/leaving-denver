@@ -442,6 +442,13 @@ def test_a_free_item_sorts_by_its_list_price_and_does_not_lead_the_grid():
 def test_the_real_grid_runs_from_cheap_to_dear_with_sold_last(locale):
     html, items = built(PAGES[locale])
     order = re.findall(r'data-item="([^"]+)"', html)
-    keys = [(ITEMS[i].get("status") == "Sold", list_price(ITEMS[i])) for i in order]
+    keys = [
+        (
+            ITEMS[i].get("status") == "Sold",
+            ITEMS[i].get("grid_pin") or float("inf"),
+            list_price(ITEMS[i]),
+        )
+        for i in order
+    ]
     assert keys == sorted(keys)
     assert len(order) == len(items) - 1  # the car has its own section
