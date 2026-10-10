@@ -23,6 +23,8 @@ Amended by ADR-011: Web Analytics does not log query strings, so it cannot tell 
 
 Amended by ADR-012: Terraform leaves the setting alone (it ignores the project's `build_config`, which holds the beacon pair), so the owner step in the Decision is unchanged.
 
+Amended 2026-10-10 (#245): the owner dropped Web Analytics. The site recorded no pageloads for its tag (verified against the GraphQL dataset with the digest's own token), and the first-party metrics of ADR-011 give the owner what he reads. The setting is switched off by hand in the Pages dashboard; the digest no longer queries it. The CSP keeps allowing the beacon, which is harmless while it is off.
+
 ## Date
 
 2026-09-30
