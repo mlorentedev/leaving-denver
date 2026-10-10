@@ -20,7 +20,7 @@ What to do with whatever has not sold, before the household deadline of 2026-10-
 | Dell 32" monitor | Best Buy, $29.99 | Blue Star Recyclers, by weight | Oct 21 |
 | onn 43" TV | Best Buy, $29.99 | Blue Star Recyclers, or At Your Door ($20) | Oct 21 |
 | L-desk | ARC pickup if solid; Habitat ($40) | Buy Nothing | Oct 15 |
-| Lift-top coffee table | ARC pickup or drop-off | Habitat | Oct 15 |
+| Lift-top coffee table | Sold 2026-10-10: no exit needed | n/a | n/a |
 | IKEA memory-foam topper | Buy Nothing (if clean) | Trash: Habitat, ARC and Goodwill refuse bedding | Oct 21 |
 | Bar stools (pair) | Goodwill or ARC drop-off | Buy Nothing | Oct 21 |
 | TV stand (particleboard) | Buy Nothing, Goodwill drop-off | Trash | Oct 21 |
