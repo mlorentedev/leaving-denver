@@ -666,7 +666,9 @@ def everything_offer(bundle: dict[str, Any], public_items: list[dict[str, Any]])
     typed = [key for key in ("items", "bundle_price") if key in bundle]
     if typed:
         raise RuntimeError(f"Bundle {bundle['id']}: an everything bundle is derived; drop {typed}")
-    if not isinstance(bundle.get("discount_pct"), int):
+    discount = bundle.get("discount_pct")
+    # bool is an int subclass: `discount_pct: true` would otherwise pass as a 1 % discount.
+    if not isinstance(discount, int) or isinstance(discount, bool):
         raise RuntimeError(f"Bundle {bundle['id']}: an everything bundle needs discount_pct")
     return [
         item["id"]

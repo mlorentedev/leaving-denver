@@ -175,6 +175,8 @@ def test_bundles_integrity(inventory):
         i["id"]: 0 if i.get("free_with_purchase") else i["recommended_list_price"]
         for i in inventory["items"]
     }
+    # FEAT-018 AC5: "Living room media" went when the C-shaped table sold; it must not return.
+    assert "bundle-living-room" not in {b["id"] for b in inventory.get("bundles", [])}
     for b in inventory.get("bundles", []):
         assert b.get("name"), "Bundle missing name"
         # Totals and savings are computed at build time; typed copies drift (#6).

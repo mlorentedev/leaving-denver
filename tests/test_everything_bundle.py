@@ -88,6 +88,14 @@ def test_a_missing_discount_is_refused():
         everything_of(data)
 
 
+@pytest.mark.parametrize("discount", [True, False, "20", 20.5, None])
+def test_a_discount_that_is_not_a_whole_number_is_refused(discount):
+    data = inventory(item("a", 100), item("b", 100))
+    data["bundles"][0]["discount_pct"] = discount
+    with pytest.raises(RuntimeError, match="all.*discount_pct"):
+        everything_of(data)
+
+
 def test_the_page_renders_without_it(tmp_path, monkeypatch):
     dist = tmp_path / "public"
     monkeypatch.setattr(site_builder, "DIST_DIR", dist)
