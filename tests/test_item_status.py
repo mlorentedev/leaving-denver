@@ -47,6 +47,19 @@ def test_sold_items_sort_last_and_the_rest_keep_their_order():
     assert [i["id"] for i in public["items"]] == ["b", "c", "d", "a"]
 
 
+def test_pinned_items_lead_the_grid_in_pin_order_and_a_sold_one_still_goes_last():
+    inv = data(a="Available", b="Available", c="Available", d="Available")
+    for item, price in zip(inv["items"], (10, 20, 30, 40), strict=True):
+        item["recommended_list_price"] = price
+    inv["items"][3]["grid_pin"] = 1
+    inv["items"][2]["grid_pin"] = 2
+    public = site_builder.sanitize_public_inventory(inv)
+    assert [i["id"] for i in public["items"]] == ["d", "c", "a", "b"]
+    inv["items"][3]["status"] = "Sold"
+    public = site_builder.sanitize_public_inventory(inv)
+    assert [i["id"] for i in public["items"]] == ["c", "a", "b", "d"]
+
+
 @pytest.mark.parametrize("taken", ["Pending", "Sold"])
 def test_bundle_with_a_taken_item_is_unavailable(taken):
     public = site_builder.sanitize_public_inventory(

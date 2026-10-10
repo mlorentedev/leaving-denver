@@ -695,11 +695,16 @@ def sanitize_public_inventory(full_data: dict[str, Any]) -> dict[str, Any]:
         # A string would be compared character by character and never match a hidden id.
         if not bundle.get("everything") and not isinstance(bundle.get("items"), list):
             raise RuntimeError(f"Bundle {bundle.get('id')}: items must be a list of item ids")
-    # Cheapest first, Sold last; sorted() is stable, so equal prices keep the data's order. A free
-    # item sorts by its list price (it is free only with a purchase) so it does not lead the grid.
+    # Sold last; the items the owner pinned (`grid_pin`, 1 first) lead the rest, which go cheapest
+    # first. sorted() is stable, so equal prices keep the data's order. A free item sorts by its
+    # list price (it is free only with a purchase) so it does not lead the grid.
     shown = sorted(
         (item for item in full_data.get("items", []) if item["id"] not in hidden),
-        key=lambda item: (item.get("status", "Available") == "Sold", list_price(item)),
+        key=lambda item: (
+            item.get("status", "Available") == "Sold",
+            item.get("grid_pin") or float("inf"),
+            list_price(item),
+        ),
     )
     public_items = [public_item(item) for item in shown]
     prices = {item["id"]: item["price"] for item in public_items}

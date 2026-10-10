@@ -39,6 +39,8 @@ seller:
     - Puede ver y probar cualquier artículo antes de pagar.
 items:
 - id: sofa-sleeper
+  # Leads the grid, in this order (owner, 2026-10-10); the rest go cheapest first.
+  grid_pin: 1
   # Own photos first, stock last; the first is the cover (FEAT-012).
   photos:
   - sofa-3.jpg
@@ -109,6 +111,8 @@ items:
   - denver furniture
   - convertible sofa
 - id: onn-43-4k-tv
+  # Leads the grid, in this order (owner, 2026-10-10); the rest go cheapest first.
+  grid_pin: 2
   # Own photos first, stock last; the first is the cover (FEAT-012).
   photos:
   - tv-2.jpg
@@ -168,6 +172,8 @@ items:
   - budget tv
   - streaming tv
 - id: ikea-mattress-topper
+  # Leads the grid, in this order (owner, 2026-10-10); the rest go cheapest first.
+  grid_pin: 3
   # Own photos first, stock last; the first is the cover (FEAT-012).
   photos:
   - topper-1.jpg
