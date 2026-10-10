@@ -91,7 +91,7 @@ The Pages project and the Access objects of "Owner-only mobile listing copy" are
 |---|---|
 | Pages project `leaving-denver` (exists, production branch `main`, cannot be destroyed) | Deployment settings and bindings (`wrangler.toml` owns them) |
 | Access one-time PIN provider, the `/seller` application, the owner-only Allow policy | `ACCESS_TEAM_DOMAIN` and `ACCESS_AUD` (secret Pages variables) |
-| | Web Analytics (the Pages setting, ADR-005) |
+| | Web Analytics (the Pages setting, ADR-005; dropped, see Monitoring) |
 | | The read-only API token of the n8n metrics digest |
 
 **One-time setup.**
@@ -312,9 +312,13 @@ Owner setup (dashboards; this repository cannot enable either). Both are in plac
     the deploy smoke already guards the likelier failure, a bad deploy.
   - On an alert, run `scripts/smoke.sh https://leaving-denver.pages.dev`, check Cloudflare
     Pages status, and roll back if a deploy caused it.
-- **Web Analytics.** Enabled in Workers & Pages > `leaving-denver` > Metrics > Web Analytics
-  (ADR-005: the repo ships no beacon, and no CSP blocks it). Terraform leaves this setting
-  alone (ADR-012), so it is still a dashboard step.
+- **Web Analytics (dropped 2026-10-10, #245).** It recorded no pageloads for the site tag (the
+  tag in the served beacon matched kubelab's, the token was valid, the query ran, and the account
+  held no events for it over seven days), and the first-party metrics below give what the owner
+  reads: visits by source and item taps. The digest no longer queries it. **[OWNER]** switch the
+  setting off in Workers & Pages > `leaving-denver` > Metrics > Web Analytics once kubelab's
+  digest change is imported. The CSP keeps allowing the beacon, which is harmless while it is off.
+  The notes below describe how it worked (ADR-005; Terraform leaves it alone, ADR-012).
   - Pages injects the beacon only from the next deployment on. On 2026-10-01 a production
     redeploy (`gh workflow run ci.yml --ref main -f branch=main`) was needed before it
     appeared.
@@ -362,7 +366,7 @@ decision. What is and is not collected:
   "Text me"). Each carries the source, the language and the item or bundle id.
 - Never: a cookie, an IP address, a user agent, a country, a visitor id or the phone number. Counts
   are events, not people: one buyer opening three items is three views.
-- A visit with no `utm_source` is not sent (Web Analytics counts it). The utm parameters leave the
+- A visit with no `utm_source` is not sent, so direct visits are not counted at all now that Web Analytics is dropped. The utm parameters leave the
   address bar after the visit is counted, so a link a buyer shares from there does not carry them.
 - The numbers are yours. They are shown nowhere on the page and do not belong in a listing
   ("12 people looked at this" is the invented scarcity lesson-008 rules out).
@@ -400,7 +404,7 @@ decision. What is and is not collected:
    | Read. Account Resources: this account only. TTL: end it on 2026-11-15. Copy the token once,
    into kubelab's encrypted secrets (step 5); never paste it in a chat, a ticket or a file in this
    repository.
-4. **Try both queries once** (this is the only run against the live APIs; the dataset's table is
+4. **Try the query once** (this is the only run against the live APIs; the dataset's table is
    named in `wrangler.toml`). The token is read without echo and goes to `curl` and nowhere else:
 
    ```
@@ -408,26 +412,18 @@ decision. What is and is not collected:
    curl -s "https://api.cloudflare.com/client/v4/accounts/76967f5ede1ce50efce34d90b7e94958/analytics_engine/sql" \
      -H "Authorization: Bearer $CF_TOKEN" \
      --data "SELECT blob1 AS event, blob2 AS source, SUM(_sample_interval) AS n FROM leaving_denver_sale_events GROUP BY event, source FORMAT JSON"
-   curl -s https://leaving-denver.pages.dev/ | grep -o '"token": *"[^"]*"'     # the Web Analytics site tag
-   curl -s https://api.cloudflare.com/client/v4/graphql -H "Authorization: Bearer $CF_TOKEN" \
-     -H 'Content-Type: application/json' \
-     --data '{"query":"query($a:String!,$s:String!,$t:Time!,$u:Time!){viewer{accounts(filter:{accountTag:$a}){totals:rumPageloadEventsAdaptiveGroups(limit:1,filter:{siteTag:$s,datetime_geq:$t,datetime_leq:$u}){count sum{visits}}}}}","variables":{"a":"76967f5ede1ce50efce34d90b7e94958","s":"<site tag from above>","t":"2026-10-03T00:00:00Z","u":"2026-10-05T00:00:00Z"}}'
    unset CF_TOKEN
    ```
 
-   The first answer lists your test visit under `data`. The second prints the site tag; the third
-   prints `"accounts":[{"totals":[...` with a count. `"accounts":null` or `errors` means the token or
-   the site tag is wrong. Web Analytics' GraphQL dataset is not documented by Cloudflare; if it
-   changed, the digest still goes out and says "unavailable" for that part. Tell the repository
-   (open an issue) rather than editing the workflow in n8n: it is imported from kubelab, which
-   overwrites a UI edit on the next import.
-5. **Store the three values in kubelab's SOPS.** From the kubelab checkout, one value at a time,
+   The answer lists your test visit under `data`. If the digest's query ever fails, it still goes out
+   and says so for that part. Tell the repository (open an issue) rather than editing the workflow in
+   n8n: it is imported from kubelab, which overwrites a UI edit on the next import.
+5. **Store the two values in kubelab's SOPS.** From the kubelab checkout, one value at a time,
    read without echo and piped to the command, never typed on its command line and never printed
    (`toolkit secrets set` is in kubelab's `docs/runbooks/sops-and-secrets.md`):
 
    ```
    read -rs V; printf %s "$V" | toolkit secrets set apps.services.automation.n8n.sale_digest.analytics_token --env prod --stdin; unset V   # the token from step 3
-   read -rs V; printf %s "$V" | toolkit secrets set apps.services.automation.n8n.sale_digest.site_tag --env prod --stdin; unset V          # the site tag from step 4
    read -rs V; printf %s "$V" | toolkit secrets set apps.services.automation.n8n.sale_digest.recipient --env prod --stdin; unset V         # the address that reads the digest
    ```
 
@@ -441,8 +437,7 @@ decision. What is and is not collected:
 
 ### Reading the digest
 
-The digest has the last 24 hours (not a calendar day), the whole sale, Web Analytics' page views,
-visits and top referrers, and the repricing candidates: items with at least five views and no text
+The digest has the last 24 hours (not a calendar day), the whole sale, and the repricing candidates: items with at least five views and no text
 tap in the whole sale. They are candidates, not verdicts: a price is one reason among photos and
 timing. Reprice with `make reprice ID=<item> PRICE=<usd>`: it sets the item's price in
 `data/inventory.yaml` and records it in the private price log (#236). The

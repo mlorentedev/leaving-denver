@@ -36,8 +36,8 @@ When the sale ends, deactivate the workflow on kubelab: [decommission.md](decomm
 ## 3. Sale Metrics Daily Digest
 
 Emails the owner, every day at 08:00 America/Denver, which channels brought visits (the printed
-flyer included), which items were opened and texted about, Cloudflare Web Analytics' page views
-and top referrers, and the items worth repricing. The data is first-party (ADR-011): the page
+flyer included), which items were opened and texted about, and the items worth repricing
+(Cloudflare Web Analytics was dropped from it on 2026-10-10, #245). The data is first-party (ADR-011): the page
 sends events to `/api/hit`, a Pages Function writes them to Workers Analytics Engine, and the
 workflow reads them back with the SQL API.
 
@@ -55,7 +55,6 @@ workflow reads no n8n variable.
      Analytics | Read.
    - `apps.services.automation.n8n.sale_digest.recipient`: the address that reads the digest.
      It is deliberately not in this public repository.
-   - `apps.services.automation.n8n.sale_digest.site_tag`: the Web Analytics site tag.
 2. Email goes through `kubelab-smtp`, the shared SMTP credential kubelab renders from its own relay
    settings. Nothing to create in n8n: the import makes it, and the sender is the relay's account.
 3. From the kubelab checkout: `toolkit infra n8n import --env prod --dry-run`, then
