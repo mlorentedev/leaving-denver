@@ -964,14 +964,14 @@ bundles:
   es:
     name: Estación completa para oficina en casa
     short_name: Oficina en casa
-# Lost the lift-top coffee table when it sold (owner, 2026-10-10); same $60 saving as before.
+# Lost the lift-top coffee table when it sold (owner, 2026-10-10); $250, a $55 saving.
 - id: bundle-sofa-tv
   name: Sleeper Sofa + 43" 4K TV
   short_name: Sofa + TV
   items:
   - sofa-sleeper
   - onn-43-4k-tv
-  bundle_price: 245
+  bundle_price: 250
   es:
     name: Sofá cama y TV 4K de 43"
     short_name: Sofá + TV

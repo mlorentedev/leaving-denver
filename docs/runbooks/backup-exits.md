@@ -12,19 +12,21 @@ What to do with whatever has not sold, before the household deadline of 2026-10-
 | **Oct 21** | Last drop-off and recycling runs: Goodwill, ARC, Best Buy, Blue Star. |
 | **Oct 23** | Anything left goes in the trash, except electronics: Colorado bans TVs and monitors from landfill, so an unsold TV or monitor goes to Blue Star or At Your Door, or is left with a neighbour to recycle. Then take the unsold items off the catalog: the [household close-out](decommission.md). |
 
+**Items with a pickup-from date** (owner, 2026-10-10): the L-desk and the office chair are free to leave from Oct 23 and the Dell monitor from Nov 15. They stay in the apartment until then, so the Oct 21 and Oct 23 cutoffs above do not apply to them: their backup exit runs on their own date. Everything else keeps the table's dates.
+
 ## Per item
 
 | Item | Best exit | Backup | Book by |
 |---|---|---|---|
 | Sleeper sectional | The Good Couch (free pickup if in good condition) | ARC curbside pickup, Buy Nothing | Oct 15 |
-| Dell 32" monitor | Best Buy, $29.99 | Blue Star Recyclers, by weight | Oct 21 |
+| Dell 32" monitor | Best Buy, $29.99 | Blue Star Recyclers, by weight | Nov 15 (stays until its pickup date) |
 | onn 43" TV | Best Buy, $29.99 | Blue Star Recyclers, or At Your Door ($20) | Oct 21 |
-| L-desk | ARC pickup if solid; Habitat ($40) | Buy Nothing | Oct 15 |
+| L-desk | ARC pickup if solid; Habitat ($40) | Buy Nothing | Oct 23 (pickup-from date; Habitat books 2–3 days out, so book by Oct 20) |
 | Lift-top coffee table | Sold 2026-10-10: no exit needed | n/a | n/a |
 | IKEA memory-foam topper | Buy Nothing (if clean) | Trash: Habitat, ARC and Goodwill refuse bedding | Oct 21 |
 | Bar stools (pair) | Goodwill or ARC drop-off | Buy Nothing | Oct 21 |
 | TV stand (particleboard) | Buy Nothing, Goodwill drop-off | Trash | Oct 21 |
-| Mesh office chair | Goodwill or ARC drop-off | Buy Nothing | Oct 21 |
+| Mesh office chair | Goodwill or ARC drop-off | Buy Nothing | Oct 23 (pickup-from date) |
 | Nightstand | ARC pickup or Goodwill drop-off | Habitat | Oct 15 |
 | Intex airbed | Buy Nothing | Trash: Habitat refuses airbeds | Oct 21 |
 | Dinnerware, 20 pieces | Goodwill or ARC drop-off | Buy Nothing | Oct 21 |
