@@ -116,8 +116,8 @@ def test_the_spanish_channels_write_the_listing_from_the_spanish_overlay(built, 
         assert es["pickup"] in copy["description"], item["id"]
         assert "Asking price" not in copy["description"]
         assert copy["description"].count("Me mudo y vendo") == 1
-        # An item's own "a partir del 15 de noviembre" pickup date is not the car deadline.
-        assert "noviembre" not in re.sub(r"a partir del \d+ de noviembre", "", copy["description"])
+        # The item's own pickup note may carry its pickup date; no other November may appear.
+        assert "noviembre" not in copy["description"].replace(es["pickup"], "", 1)
 
 
 def test_the_spanish_overlay_is_complete_for_every_listable_item(built):
