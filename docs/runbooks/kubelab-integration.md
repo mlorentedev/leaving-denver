@@ -44,10 +44,10 @@ workflow reads them back with the SQL API.
 The workflow is not in this repository. kubelab owns it (kubelab#2088, kubelab#2090):
 `infra/n8n/workflows/sale-metrics-daily-digest.json` in `mlorentedev/kubelab`, imported as code,
 prod only. Its README, "Removing the sale (2026-11-09)", is the teardown. It holds nothing
-private: the three values below are filled in at import from kubelab's encrypted secrets, and the
+private: the two values below are filled in at import from kubelab's encrypted secrets, and the
 workflow reads no n8n variable.
 
-1. Set the three values in kubelab's SOPS, from the kubelab checkout, one at a time and never
+1. Set the two values in kubelab's SOPS, from the kubelab checkout, one at a time and never
    echoed (the exact commands are in [ops.md](ops.md), "Sale metrics", step 5):
    - `apps.services.automation.n8n.sale_digest.analytics_token`: a Cloudflare **user token**
      (My Profile > API Tokens), not an account token. kubelab's expiry check asks
@@ -64,7 +64,7 @@ workflow reads no n8n variable.
    email is the next 08:00 America/Denver, or run Execute workflow once in the n8n UI to see it
    now.
 
-The step-by-step (creating the token, trying both queries, what the digest means) is in
+The step-by-step (creating the token, trying the query, what the digest means) is in
 [ops.md](ops.md), "Sale metrics". When the sale ends, remove it the way kubelab's
 `infra/n8n/workflows/README.md`, "Removing the sale (2026-11-09)", says; this repository's side is
 [decommission.md](decommission.md), "By Nov 9". `kubelab-smtp` stays: it is shared.

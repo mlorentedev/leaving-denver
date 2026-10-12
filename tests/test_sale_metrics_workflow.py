@@ -221,4 +221,4 @@ def test_the_digest_reads_the_account_and_dataset_the_repository_names(nodes):
         assert account in parameters["url"]
         assert re.search(rf"\bFROM {dataset}\b", parameters["body"])
         assert "SUM(_sample_interval)" in parameters["body"], "counts must weigh sampled rows"
-    assert account in nodes["Web Analytics query"]["parameters"]["jsCode"]
+    assert "Web Analytics query" not in nodes

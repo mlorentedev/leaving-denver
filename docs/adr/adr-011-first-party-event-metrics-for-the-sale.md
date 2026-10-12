@@ -28,6 +28,8 @@ they are kubelab SOPS secrets under `apps.services.automation.n8n.sale_digest.*`
 import, and the token is a Cloudflare user token. The data point, the dataset and the decision
 itself are unchanged.
 
+Amended 2026-10-10 (#245, kubelab#2200): Cloudflare Web Analytics is dropped (see ADR-005 amendment). The daily n8n digest no longer queries its GraphQL API and kubelab dropped the `site_tag` secret. First-party event metrics now provide all metrics read by the owner.
+
 ## Date
 
 2026-10-03

@@ -178,7 +178,7 @@ that replaces it fail.
 
 8. Remove the sale-metrics digest. It is owned and imported as code by kubelab, so the removal is
    kubelab's: follow `infra/n8n/workflows/README.md` in `mlorentedev/kubelab`, "Removing the sale
-   (2026-11-09)" (delete the workflow's catalog entry and file, delete the three
+   (2026-11-09)" (delete the workflow's catalog entry and file, delete the two
    `apps.services.automation.n8n.sale_digest.*` secrets and their registry lines, then delete the
    "Moving Sale - Daily Metrics Digest" workflow and the `cloudflare-analytics-read` credential in
    n8n, which the import never deletes). Left on, it emails every morning about a sale that is over.
