@@ -486,3 +486,20 @@ def test_variants_outside_the_current_widths_are_removed(tmp_path, cache):
     assert process_image(src, target, cache)
     assert not any(path.exists() for path in stale)
     assert widths(target) == (1300, [480, 800, 1200])
+
+
+def test_tracked_source_photos_have_no_gps_or_bad_orientation():
+    """Tracked photos in content/photos must never leak GPS or carry bogus orientation tags."""
+    photos_dir = BASE_DIR / "content" / "photos"
+    for img_path in photos_dir.rglob("*"):
+        if img_path.suffix.lower() in (".jpg", ".jpeg", ".png"):
+            with Image.open(img_path) as img:
+                exif = img.getexif()
+                if exif:
+                    assert not exif.get_ifd(0x8825), f"{img_path.name} leaks GPS metadata"
+                    orientation = exif.get(0x0112)
+                    assert orientation in (None, 1), (
+                        f"{img_path.name} has non-standard orientation {orientation}; "
+                        "bake rotation into pixels and reset orientation tag to 1"
+                    )
+
