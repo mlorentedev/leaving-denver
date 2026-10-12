@@ -162,6 +162,7 @@ def test_evidence_links_to_photos_the_car_has_and_the_build_ships(locale):
     assert {href.rsplit("/", 1)[-1] for href in evidence} == {
         "doc_1_recall_invoice.jpg",
         "doc_2_emissions_report.jpg",
+        "doc_3_window_sticker.jpg",
     }
     for href in evidence:
         assert href.startswith(prefix + "catalog/" + CAR_ID + "/"), href

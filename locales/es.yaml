@@ -89,7 +89,7 @@ conditions:
   Used - Good: Usado - Buen estado
   Used - Fair: Usado - Aceptable
 size_badges:
-  truck: Necesita camioneta o SUV
+  truck: Necesita camioneta
   lift: Levantar entre 2 personas
 statuses:
   Available: Disponible

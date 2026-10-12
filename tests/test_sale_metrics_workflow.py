@@ -34,7 +34,6 @@ KUBELAB_WORKFLOW = "infra/n8n/workflows/sale-metrics-daily-digest.json"
 SOPS_PATHS = (
     "apps.services.automation.n8n.sale_digest.analytics_token",
     "apps.services.automation.n8n.sale_digest.recipient",
-    "apps.services.automation.n8n.sale_digest.site_tag",
 )
 # What the workflow used to need and no longer does: n8n variables, hand-made credentials, and the
 # n8n 2 switch that let a node read `$env`. A runbook that still names one sends the owner to set
@@ -95,7 +94,7 @@ def test_the_integration_runbook_says_how_the_digest_gets_imported_and_what_it_n
     assert "Switch Active" not in digest and "arrives switched off" not in digest
 
 
-def test_the_ops_runbook_stores_the_three_values_in_kubelab_sops_without_echoing_them():
+def test_the_ops_runbook_stores_the_two_values_in_kubelab_sops_without_echoing_them():
     sale = section(OPS, "Sale metrics")
     setup = sale.split("### Owner setup")[1].split("### Reading the digest")[0]
     for path in SOPS_PATHS:
@@ -222,4 +221,4 @@ def test_the_digest_reads_the_account_and_dataset_the_repository_names(nodes):
         assert account in parameters["url"]
         assert re.search(rf"\bFROM {dataset}\b", parameters["body"])
         assert "SUM(_sample_interval)" in parameters["body"], "counts must weigh sampled rows"
-    assert account in nodes["Web Analytics query"]["parameters"]["jsCode"]
+    assert "Web Analytics query" not in nodes

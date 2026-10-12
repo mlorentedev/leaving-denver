@@ -29,7 +29,7 @@ SCALE = {
     "Used - Good": "Usado - Buen estado",
     "Used - Fair": "Usado - Aceptable",
 }
-TRUCK = {"en": "Needs truck/SUV", "es": "Necesita camioneta o SUV"}
+TRUCK = {"en": "Needs truck", "es": "Necesita camioneta"}
 LIFT = {"en": "2-person lift", "es": "Levantar entre 2 personas"}
 
 
