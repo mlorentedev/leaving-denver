@@ -177,6 +177,8 @@ def test_bundles_integrity(inventory):
     }
     # FEAT-018 AC5: "Living room media" went when the C-shaped table sold; it must not return.
     assert "bundle-living-room" not in {b["id"] for b in inventory.get("bundles", [])}
+    # "Living room sofa + TV" went when the TV sold; it must not return.
+    assert "bundle-sofa-tv" not in {b["id"] for b in inventory.get("bundles", [])}
     for b in inventory.get("bundles", []):
         assert b.get("name"), "Bundle missing name"
         # Totals and savings are computed at build time; typed copies drift (#6).

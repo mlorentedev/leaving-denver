@@ -317,7 +317,8 @@ Owner setup (dashboards; this repository cannot enable either). Both are in plac
   held no events for it over seven days), and the first-party metrics below give what the owner
   reads: visits by source and item taps. The digest no longer queries it. **[OWNER]** switch the
   setting off in Workers & Pages > `leaving-denver` > Metrics > Web Analytics once kubelab's
-  digest change is imported. The CSP keeps allowing the beacon, which is harmless while it is off.
+  digest change is imported. Pre-merge order: import kubelab's digest change, switch off the Pages
+  Web Analytics setting, then merge this PR. The CSP keeps allowing the beacon, which is harmless while it is off.
   The notes below describe how it worked (ADR-005; Terraform leaves it alone, ADR-012).
   - Pages injects the beacon only from the next deployment on. On 2026-10-01 a production
     redeploy (`gh workflow run ci.yml --ref main -f branch=main`) was needed before it
