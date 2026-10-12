@@ -116,7 +116,7 @@ jobs:
       # are testable with a stub gh (BUG #163, scripts/verify-review-published.sh and
       # tests/test_review_guard.py). The job otherwise has no checkout by design.
       - name: Check out the guard script
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8  # v5.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false
           sparse-checkout: scripts/verify-review-published.sh
