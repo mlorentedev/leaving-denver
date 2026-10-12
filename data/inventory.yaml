@@ -47,7 +47,7 @@ items:
   - sofa-sleeper-open.jpg
   - sofa-with-topper.jpg
   - sofa-storage-open.jpg
-  - sofa-disassembled-dimensions.jpg
+  - sofa-modular-dimensions.jpg
   - sofa-1.jpg
   - sofa-2.jpg
   - afw_kent_sofa_front.jpg
@@ -71,7 +71,7 @@ items:
   - catalog/sofa-sleeper/sofa-sleeper-open.jpg
   - catalog/sofa-sleeper/sofa-with-topper.jpg
   - catalog/sofa-sleeper/sofa-storage-open.jpg
-  - catalog/sofa-sleeper/sofa-disassembled-dimensions.jpg
+  - catalog/sofa-sleeper/sofa-modular-dimensions.jpg
   - catalog/sofa-sleeper/sofa-1.jpg
   - catalog/sofa-sleeper/sofa-2.jpg
   - catalog/sofa-sleeper/afw_kent_sofa_front.jpg
@@ -84,7 +84,7 @@ items:
   - Spacious hidden storage chaise with lift mechanism
   - Durable charcoal/slate gray polyester upholstery
   - Disassembles into 2 main modules plus detachable armrest for pickup truck or cargo van transport
-  - 'Modular sections for transport: 2-seater (50" W x 35" D x 33.5" H / 126 x 88 x 85 cm), chaise with attached arm (34" W x 59" D x 33.5" H / 86 x 150 x 85 cm), detachable left armrest (8.3" W x 32.7" D x 25.6" H / 21 x 83 x 65 cm)'
+  - 'Modular sections for transport: 2-seater (50" W x 35" D x 34" H / 126 x 88 x 85 cm), chaise with attached arm (34" W x 59" D x 34" H / 86 x 150 x 85 cm), detachable left armrest (8" W x 33" D x 26" H / 21 x 83 x 65 cm)'
   included:
   - 'AFW Kent sectional sofa (2 main modules: chaise + loveseat, plus detachable armrest)'
   - Built-in pull-out sleeper mechanism
@@ -106,7 +106,7 @@ items:
     - Chaise con amplio almacenamiento oculto y mecanismo elevable
     - Tapicería resistente de poliéster gris carbón
     - Se desmonta en 2 módulos principales más reposabrazos en menos de 10 minutos
-    - 'Despiece modular para transporte: módulo 2 plazas (50" ancho x 35" fondo x 33.5" alto / 126 x 88 x 85 cm), chaiselongue con brazo integrado (34" ancho x 59" fondo x 33.5" alto / 86 x 150 x 85 cm), reposabrazos lateral desmontable (8.3" ancho x 32.7" fondo x 25.6" alto / 21 x 83 x 65 cm)'
+    - 'Despiece modular para transporte: módulo 2 plazas (50" ancho x 35" fondo x 34" alto / 126 x 88 x 85 cm), chaiselongue con brazo integrado (34" ancho x 59" fondo x 34" alto / 86 x 150 x 85 cm), reposabrazos lateral desmontable (8" ancho x 33" fondo x 26" alto / 21 x 83 x 65 cm)'
     included:
     - 'Sofá seccional AFW Kent en 2 módulos principales más reposabrazos desmontable'
     - Mecanismo de cama extraíble integrado
@@ -861,45 +861,26 @@ items:
   - catalog/2019-ford-escape-sel-awd/doc_2_emissions_report.jpg
   - catalog/2019-ford-escape-sel-awd/doc_3_window_sticker.jpg
   specs:
-  - 1.5L EcoBoost 4-Cylinder (179 HP) with 6-speed automatic transmission (22 city
-    / 28 hwy MPG)
-  - Ford Intelligent AWD system with high-performance all-weather tires (Colorado
-    winter-ready)
+  - 'Drivetrain: Ford Intelligent AWD system with high-performance all-weather tires (Colorado winter-ready)'
   - Clean Colorado Title in hand with zero liens
-  - "Passed the Colorado emissions test on 12 May 2026: overall PASS, no trouble codes
-    (report in the photos). That certificate is already used for my registration renewal:
-    before handover I'll take a new emissions test and give you that new certificate"
-  - Zero open recalls (recall 22S43 closed at a Ford dealership on 25 Sep 2026; invoice
-    in the photos)
-  - 'Ford dealer inspection on 25 Sep 2026: battery good, brakes OK, tires good (on
-    the recall invoice in the photos)'
-  - 'Dealer service when I bought it in April 2024: new spark plugs, oil change and four
-    new tires (on the 2024 Carfax)'
-  - Ford SYNC 3 with 8-inch touchscreen, Apple CarPlay, Android Auto, Bluetooth, Wi-Fi
-    hotspot
-  - 'Cold Weather Package: Heated front leather seats, heated side mirrors, factory
-    roof rails'
-  - Remote keyless entry, push-button start, hands-free foot-activated power liftgate,
-    dual-zone automatic climate control, Auto Start-Stop, and MyKey (a second key with
-    limits for a new driver)
+  - 1.5L EcoBoost 4-Cylinder (179 HP) with 6-speed automatic transmission (22 city / 28 hwy MPG)
+  - 'Factory Options: Ford Safe and Smart Package (Adaptive Cruise Control, Lane-Keeping System, Blind Spot BLIS with cross-traffic alert) and premium White Platinum Metallic Tri-Coat paint, verified on the Ford window sticker'
   # Warnings only: the car never brakes by itself (owner, 2026-09-30).
-  - 'Safety: Brake Assist, AdvanceTrac with Roll Stability Control, rear-view camera,
-    rear parking sensors, forward collision warning (light and chime), and blind-spot
-    and rear cross-traffic alerts'
-  - Garage-kept (a photo shows it in my garage) and driven mostly on the highway, commuting
-    to work since 2024. Shifts smoothly, no fluid leaks (the wet spots on the pavement
-    in the photos are water; I had just washed it)
-  - 'Real-world fuel economy: 27.7 MPG over my last 1,355 miles, on the trip computer in
-    the photos'
-  - "The dashboard read 102,768 miles on 3 Oct 2026 (photo). I list 103,500 to cover the
-    miles I drive until handover, so you never find more than advertised"
-  - 'Clean Carfax when I bought it in April 2024: no accidents or damage reported. No
-    accidents since, smoke-free, pet-free, zero dash warning lights or mechanical codes'
-  - 'Factory Options: Ford Safe and Smart Package (factory option) and premium White Platinum Metallic Tri-Coat paint, verified on the original window sticker'
+  - 'Safety: NHTSA 5-Star Overall Safety Rating, Brake Assist, AdvanceTrac with Roll Stability Control, rear-view camera, rear parking sensors, forward collision warning (light and chime), and blind-spot and rear cross-traffic alerts'
+  - 'Comfort & Seating: Heated front leather seats with 10-way power driver seat, heated side mirrors, factory roof rails'
+  - Ford SYNC 3 with 8-inch touchscreen, Apple CarPlay, Android Auto, Bluetooth, Wi-Fi hotspot
+  - 'Convenience: SecuriCode keyless entry door keypad, push-button start, hands-free foot-activated power liftgate, dual-zone automatic climate control, Auto Start-Stop, and MyKey (a second key with limits for a new driver)'
+  - 'Dealer Inspection on 25 Sep 2026: battery good, brakes OK, tires good (on the recall invoice in the photos)'
+  - Zero open recalls (recall 22S43 closed at a Ford dealership on 25 Sep 2026; invoice in the photos)
+  - "Passed the Colorado emissions test on 12 May 2026: overall PASS, no trouble codes (report in the photos). That certificate is already used for my registration renewal: before handover I'll take a new emissions test and give you that new certificate"
+  - 'Prior Service: Dealer service when I bought it in April 2024 included new spark plugs, oil change, and four new tires (on the 2024 Carfax)'
+  - 'Vehicle History: Clean Carfax when I bought it in April 2024 (no accidents or damage reported). No accidents since, smoke-free, pet-free, zero dash warning lights or mechanical codes'
+  - Garage-kept (a photo shows it in my garage) and driven mostly on the highway, commuting to work since 2024. Shifts smoothly, no fluid leaks (the wet spots on the pavement in the photos are water; I had just washed it)
+  - 'Fuel Economy: Real-world 27.7 MPG over my last 1,355 miles, on the trip computer in the photos'
+  - "Mileage: Dashboard read 102,768 miles on 3 Oct 2026 (photo). I list 103,500 to cover the miles I drive until handover, so you never find more than advertised"
   included:
   - 2019 Ford Escape SEL AWD
   - Original Key Fobs
-  - Original Ford Window Sticker (Monroney label copy)
   - New Colorado emissions certificate, from a test taken before handover
   - Standard Bill of Sale & Signed Clean Title
   pickup_note: |
@@ -941,7 +922,7 @@ items:
     - id: window-sticker
       photo: doc_3_window_sticker.jpg
       label: 'Original window sticker (Monroney), MSRP $32,630'
-      note: 'Factory options and packages verified: Ford Safe & Smart Package, White Platinum Tri-Coat. Order codes redacted.'
+      note: 'Factory options and packages verified from the Ford app: Ford Safe & Smart Package, White Platinum Tri-Coat. Order codes redacted.'
   es:
     title: Ford Escape SEL AWD 2019, título limpio de Colorado e inspección de concesionario
     short_title: Ford Escape SEL AWD 2019
@@ -950,37 +931,25 @@ items:
     title_status: Título limpio de Colorado
     color: Blanco Platinum Metálico Tricapa / Interior Charcoal Black ActiveX
     specs:
-    - Motor EcoBoost de 1.5 L y 4 cilindros, 179 HP, transmisión automática de 6 velocidades
-    - Tracción integral inteligente Ford y llantas para todo clima
+    - 'Tracción: Tracción integral inteligente Ford y llantas para todo clima (preparado para el invierno de Colorado)'
     - Título limpio de Colorado en mano y sin gravámenes
-    - 'Pasó la prueba de emisiones de Colorado el 12 de mayo de 2026: resultado PASS, sin códigos de falla (reporte en las fotos). Ese certificado ya se usó para renovar mi registro: antes de la entrega haré una nueva prueba de emisiones y te daré ese certificado nuevo'
-    - Sin recalls abiertos; el recall 22S43 se cerró en concesionario Ford el 25 de septiembre de 2026
-    - Inspección Ford del 25 de septiembre de 2026 con batería, frenos y llantas en buen estado
-    - 'Servicio en concesionario cuando lo compré en abril de 2024: bujías nuevas, cambio de
-      aceite y cuatro llantas nuevas (en el Carfax de 2024)'
+    - Motor EcoBoost de 1.5 L y 4 cilindros, 179 HP, transmisión automática de 6 velocidades
+    - 'Opciones de fábrica: paquete Ford Safe and Smart (control de crucero adaptativo, mantenimiento de carril, monitoreo de punto ciego BLIS con alerta de tráfico cruzado) y pintura premium Blanco Platinum Metálico Tricapa, verificados en la etiqueta de ventana de Ford'
+    - 'Seguridad: calificación oficial NHTSA de 5 estrellas, asistencia de frenado, AdvanceTrac con control de estabilidad antivuelco, cámara de reversa, sensores de estacionamiento traseros, aviso de colisión frontal (luz y pitido) y alertas de ángulo muerto y tráfico cruzado trasero'
+    - 'Confort y asientos: paquete para clima frío con asientos delanteros calefactados y ajuste eléctrico de 10 posiciones para el conductor, espejos térmicos y barras de techo de fábrica'
     - Ford SYNC 3, pantalla de 8 pulgadas, Apple CarPlay, Android Auto, Bluetooth y Wi-Fi
-    - Paquete para clima frío con asientos delanteros y espejos calefactados
-    - Entrada sin llave con control remoto, encendido por botón, portón eléctrico manos
-      libres, climatización automática de dos zonas, Auto Start-Stop y MyKey (una segunda
-      llave con límites para un conductor nuevo)
-    - 'Seguridad: asistencia de frenado, AdvanceTrac con control de estabilidad antivuelco,
-      cámara de reversa, sensores de estacionamiento traseros, aviso de colisión frontal
-      (luz y pitido), y alertas de ángulo muerto y de tráfico cruzado trasero'
-    - Guardado en garaje (hay una foto en mi garaje) y usado sobre todo en autopista para
-      ir al trabajo desde 2024. Cambios suaves y sin fugas (las manchas mojadas del
-      asfalto en las fotos son agua; lo acababa de lavar)
-    - 'Consumo real: 27.7 MPG en mis últimas 1,355 millas, según la computadora de viaje
-      en las fotos'
-    - El tablero marcaba 102,768 millas el 3 de octubre de 2026 (foto). Anuncio 103,500
-      para cubrir las millas que haga hasta la entrega, así nunca encontrarás más de las
-      anunciadas
-    - 'Carfax limpio cuando lo compré en abril de 2024: sin accidentes ni daños reportados.
-      Sin accidentes desde entonces, sin humo ni mascotas y sin alertas en el tablero'
-    - 'Opciones de fábrica: paquete Ford Safe and Smart (opción de fábrica) y pintura premium Blanco Platinum Metálico Tricapa, verificados en la etiqueta original de ventana'
+    - 'Conveniencia: teclado numérico SecuriCode en puerta, encendido por botón, portón eléctrico manos libres, climatización automática de dos zonas, Auto Start-Stop y MyKey (una segunda llave con límites para un conductor nuevo)'
+    - Inspección Ford del 25 de septiembre de 2026 con batería, frenos y llantas en buen estado
+    - Sin recalls abiertos; el recall 22S43 se cerró en concesionario Ford el 25 de septiembre de 2026
+    - 'Pasó la prueba de emisiones de Colorado el 12 de mayo de 2026: resultado PASS, sin códigos de falla (reporte en las fotos). Ese certificado ya se usó para renovar mi registro: antes de la entrega haré una nueva prueba de emisiones y te daré ese certificado nuevo'
+    - 'Servicio en concesionario cuando lo compré en abril de 2024: bujías nuevas, cambio de aceite y cuatro llantas nuevas (en el Carfax de 2024)'
+    - 'Historial y estado: Carfax limpio cuando lo compré en abril de 2024: sin accidentes ni daños reportados. Sin accidentes desde entonces, sin humo ni mascotas y sin alertas en el tablero'
+    - Guardado en garaje (hay una foto en mi garaje) y usado sobre todo en autopista para ir al trabajo desde 2024. Cambios suaves y sin fugas (las manchas mojadas del asfalto en las fotos son agua; lo acababa de lavar)
+    - 'Consumo real: 27.7 MPG en mis últimas 1,355 millas, según la computadora de viaje en las fotos'
+    - El tablero marcaba 102,768 millas el 3 de octubre de 2026 (foto). Anuncio 103,500 para cubrir las millas que haga hasta la entrega, así nunca encontrarás más de las anunciadas
     included:
     - Ford Escape SEL AWD 2019
     - Controles originales
-    - Copia de la etiqueta original de ventana Ford (Monroney)
     - Certificado de emisiones de Colorado nuevo, de una prueba hecha antes de la entrega
     - Contrato de compraventa y título limpio firmado
     pickup_note: |
@@ -1005,7 +974,7 @@ items:
         note: Pasó, pero ese certificado ya se usó en la renovación de mi registro. Antes de la entrega haré una nueva prueba de emisiones y te daré ese certificado nuevo.
       window-sticker:
         label: 'Etiqueta original de ventana (Monroney), MSRP $32,630'
-        note: 'Opciones y paquetes de fábrica verificados: paquete Ford Safe & Smart, Blanco Platinum Tricapa. Códigos de pedido tapados.'
+        note: 'Opciones y paquetes de fábrica verificados desde la app de Ford: paquete Ford Safe & Smart, Blanco Platinum Tricapa. Códigos de pedido tapados.'
   tags:
   - ford escape
   - escape sel
