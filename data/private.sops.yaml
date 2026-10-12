@@ -49,6 +49,9 @@ sales:
     coffee-table-lift-top:
         price: ENC[AES256_GCM,data:FaY=,iv:2MAGH0Loq/HlWmslwvLygqEljcmSNPo15d/t6qNF3A0=,tag:rrqEIfOSnxCAL6WD7jYoYg==,type:float]
         at: ENC[AES256_GCM,data:Jr3IaLPc/AAqKg==,iv:tqoQ+Ycm1II3213wKaj2qDUKCUx0ZS7BQexj83wUlrs=,tag:OFJ3qJVLnRc+T7hfaxfM8Q==,type:str]
+    onn-43-4k-tv:
+        price: ENC[AES256_GCM,data:sMw=,iv:iTa8jIoPadkGNMxPRnCblIsr7lhEKDGEb+/b6JdAHnQ=,tag:4uZOO2WAJuC3F++bvFr5pw==,type:float]
+        at: ENC[AES256_GCM,data:36eZ9ZqeQJqTgg==,iv:Z5+96qkcUh1zN8HryU8yIA9GRXEstK1Pq/T+LpSN6Mk=,tag:+0vjFJmBA2aBl3Pph89oIw==,type:str]
 sops:
     age:
         - enc: |
@@ -60,7 +63,7 @@ sops:
             N5S0b6gn+J7t3Lg9zTalfJK5VHCwzBcjg5kbjsk7dea2bNSxWE/NQA==
             -----END AGE ENCRYPTED FILE-----
           recipient: age166v8efpskctmxxes5lcqpxkj0ny3q74l3v0pswpdpa63wlkqmc8q35fkdw
-    lastmodified: "2026-10-10T19:51:46Z"
-    mac: ENC[AES256_GCM,data:tOuNq77+ZKTw8lIJ+6o0QxQSGGXwcSXOoTBrmFVdElSTuTprnIVEynIeBZCgadDee103oosQ2mCNAW2WDPoq8Dh4poHZVydotPlNh1aFbQdUF/VaAnhkl+sR5jO2KGDziLh2gEe1L/1KGcPGCqg9HFX9ZYZN++zpJtEsIqJ8rhg=,iv:WC4uVbE04N3W/L3QtG2+DkUFMkl+D1LkZOuOFRpMdpI=,tag:f7qdZtgGZrwxzmq+pXawAw==,type:str]
+    lastmodified: "2026-10-12T00:40:03Z"
+    mac: ENC[AES256_GCM,data:zY5IOtbs9eJLVWM1Ij3gLBqKEJgQS5BVBM1es5gt8xQKllj45lZqqYCIJ36E43qE4h83+S51AVMJlPEF/bRhbCFMDIoX8Kx9TM6mCzPcHN4MAbcqzYRSazxgwPU5j1YIx1v5F92dVgOcMEkSGtMSvM7mQUdPyMjM7RpT9KORPGo=,iv:aX+xgo5ZCao5D3qm1EGw13vXfqjtWazqyqxD5o/iObA=,tag:4EjfV8ATe5twwbwMyZ49uw==,type:str]
     unencrypted_suffix: _unencrypted
     version: 3.13.1
