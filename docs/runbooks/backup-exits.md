@@ -20,7 +20,7 @@ What to do with whatever has not sold, before the household deadline of 2026-10-
 |---|---|---|---|
 | Sleeper sectional | The Good Couch (free pickup if in good condition) | ARC curbside pickup, Buy Nothing | Oct 15 |
 | Dell 32" monitor | Best Buy, $29.99 | Blue Star Recyclers, by weight | Nov 15 (stays until its pickup date) |
-| onn 43" TV | Best Buy, $29.99 | Blue Star Recyclers, or At Your Door ($20) | Oct 21 |
+| onn 43" TV | Sold 2026-10-11: no exit needed | n/a | n/a |
 | L-desk | ARC pickup if solid; Habitat ($40) | Buy Nothing | Oct 23 (pickup-from date; Habitat books 2–3 days out, so book by Oct 20) |
 | Lift-top coffee table | Sold 2026-10-10: no exit needed | n/a | n/a |
 | IKEA memory-foam topper | Buy Nothing (if clean) | Trash: Habitat, ARC and Goodwill refuse bedding | Oct 21 |

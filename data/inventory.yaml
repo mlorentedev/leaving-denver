@@ -46,6 +46,10 @@ items:
   - sofa-3.jpg
   - sofa-1.jpg
   - sofa-2.jpg
+  - sofa-sleeper-open.jpg
+  - sofa-with-topper.jpg
+  - sofa-storage-open.jpg
+  - sofa-disassembled-dimensions.jpg
   - afw_kent_sofa_front.jpg
   - afw_kent_sofa_sleeper_open.jpg
   - afw_kent_sofa_storage_open.jpg
@@ -57,7 +61,7 @@ items:
   original_price: 578
   recommended_list_price: 220
   condition: Used - Good
-  dimensions: 92" W x 60" D x 37" H
+  dimensions: 92" W x 60" D x 37" H (234 x 152 x 94 cm)
   size_in: [92, 60, 37]
   color: Gray Fabric
   status: Available
@@ -66,6 +70,10 @@ items:
   - catalog/sofa-sleeper/sofa-3.jpg
   - catalog/sofa-sleeper/sofa-1.jpg
   - catalog/sofa-sleeper/sofa-2.jpg
+  - catalog/sofa-sleeper/sofa-sleeper-open.jpg
+  - catalog/sofa-sleeper/sofa-with-topper.jpg
+  - catalog/sofa-sleeper/sofa-storage-open.jpg
+  - catalog/sofa-sleeper/sofa-disassembled-dimensions.jpg
   - catalog/sofa-sleeper/afw_kent_sofa_front.jpg
   - catalog/sofa-sleeper/afw_kent_sofa_sleeper_open.jpg
   - catalog/sofa-sleeper/afw_kent_sofa_storage_open.jpg
@@ -76,29 +84,29 @@ items:
   - Spacious hidden storage chaise with lift mechanism
   - Durable charcoal/slate gray polyester upholstery
   - Disassembles into 2 main pieces in under 10 minutes for pickup truck or cargo van transport
+  - 'Modular sections for transport: 2-seater (50" W x 35" D x 33.5" H / 126 x 88 x 85 cm), chaise with arm (34" W x 59" D x 33.5" H / 86 x 150 x 85 cm), side armrest (8.3" W x 32.7" D x 25.6" H / 21 x 83 x 65 cm)'
   included:
   - 'AFW Kent sectional sofa (2 modular pieces: chaise + loveseat)'
   - Built-in pull-out sleeper mechanism
   - All fitted back cushions
-  pickup_note: Currently assembled for in-person testing. Easily separates into 2
-    main modules in under 10 minutes for transport. Requires 2 people to carry. Needs
-    a pickup truck or cargo van — does NOT fit in an SUV.
+  pickup_note: Currently assembled for in-person testing. Easily separates into 2 main modules in under 10 minutes for transport. Requires a minimum of 2 people to carry and load into a truck. Needs a pickup truck or cargo van — does NOT fit in an SUV.
   es:
     color: Tela gris
     title: Sofá seccional reversible AFW Kent con cama extraíble y chaise con almacenamiento
     short_title: Sofá seccional cama Kent
-    dimensions: 92" ancho x 60" fondo x 37" alto
+    dimensions: 92" ancho x 60" fondo x 37" alto (234 x 152 x 94 cm)
     specs:
     - Chaise reversible, configurable a la izquierda o derecha
     - Mecanismo suave que convierte el sofá en cama doble
     - Chaise con amplio almacenamiento oculto y mecanismo elevable
     - Tapicería resistente de poliéster gris carbón
     - Se desmonta en 2 piezas principales en menos de 10 minutos
+    - 'Despiece modular para transporte: 2 plazas (50" ancho x 35" fondo x 33.5" alto / 126 x 88 x 85 cm), chaiselongue con brazo (34" ancho x 59" fondo x 33.5" alto / 86 x 150 x 85 cm), reposabrazos lateral (8.3" ancho x 32.7" fondo x 25.6" alto / 21 x 83 x 65 cm)'
     included:
     - Sofá seccional AFW Kent en 2 módulos
     - Mecanismo de cama extraíble integrado
     - Todos los cojines de respaldo
-    pickup_note: Está armado para probarlo. Se separa en 2 módulos en menos de 10 minutos; se necesitan 2 personas y una pickup o camioneta de carga — NO cabe en un SUV.
+    pickup_note: Está armado para probarlo. Se separa en 2 módulos en menos de 10 minutos; se necesitan mínimo 2 personas para cargarlo y subirlo a la pickup o camión/camioneta de carga — NO cabe en un SUV.
   tags:
   - american furniture warehouse
   - afw sofa
@@ -111,8 +119,6 @@ items:
   - denver furniture
   - convertible sofa
 - id: onn-43-4k-tv
-  # Leads the grid, in this order (owner, 2026-10-10); the rest go cheapest first.
-  grid_pin: 2
   # Own photos first, stock last; the first is the cover (FEAT-012).
   photos:
   - tv-2.jpg
@@ -128,7 +134,7 @@ items:
   dimensions: 38.2" W x 22.4" H x 3.2" D (without stand)
   size_in: [38.2, 3.2, 22.4]
   color: Black
-  status: Available
+  status: Sold
   primary_image: catalog/onn-43-4k-tv/tv-2.jpg
   images:
   - catalog/onn-43-4k-tv/tv-2.jpg
@@ -173,7 +179,7 @@ items:
   - streaming tv
 - id: ikea-mattress-topper
   # Leads the grid, in this order (owner, 2026-10-10); the rest go cheapest first.
-  grid_pin: 3
+  grid_pin: 2
   # Own photos first, stock last; the first is the cover (FEAT-012).
   photos:
   - topper-1.jpg
@@ -970,17 +976,6 @@ bundles:
   es:
     name: Estación completa para oficina en casa
     short_name: Oficina en casa
-# Lost the lift-top coffee table when it sold (owner, 2026-10-10); $250, a $55 saving.
-- id: bundle-sofa-tv
-  name: Sleeper Sofa + 43" 4K TV
-  short_name: Sofa + TV
-  items:
-  - sofa-sleeper
-  - onn-43-4k-tv
-  bundle_price: 250
-  es:
-    name: Sofá cama y TV 4K de 43"
-    short_name: Sofá + TV
 - id: bundle-take-all
   name: Whole Apartment Relocation Liquidation
   short_name: Take everything
