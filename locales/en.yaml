@@ -91,7 +91,7 @@ conditions:
   Used - Good: Used - Good
   Used - Fair: Used - Fair
 size_badges:
-  truck: Needs truck/SUV
+  truck: Needs truck
   lift: 2-person lift
 statuses:
   Available: Available

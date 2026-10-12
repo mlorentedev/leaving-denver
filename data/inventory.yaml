@@ -346,7 +346,7 @@ items:
   pickup_note: |
     Available for pickup from Oct 23. Already assembled.
 
-    Fits in midsize SUV with seats folded or truck bed.
+    Needs a pickup truck or cargo van — does NOT fit in an SUV while assembled.
 
     Tools available on site if you wish to disassemble.
   es:
@@ -367,7 +367,7 @@ items:
     pickup_note: |
       Disponible para recoger a partir del 23 de octubre. Ya armado.
 
-      Cabe en un SUV mediano con los asientos abatidos o en una pickup.
+      Requiere una pickup o camioneta de carga — NO cabe en un SUV estando armado.
 
       Hay herramientas disponibles para desmontarlo si lo desea.
   tags:
@@ -820,6 +820,7 @@ items:
   - 2019_ford_escape_garage_kept.jpg
   - doc_1_recall_invoice.jpg
   - doc_2_emissions_report.jpg
+  - doc_3_window_sticker.jpg
   category: Vehicle
   title: 2019 Ford Escape SEL AWD – Clean Colorado Title, Dealer Inspected
   short_title: 2019 Ford Escape SEL AWD
@@ -829,11 +830,11 @@ items:
   vin: 1FMCU9HD9KUB80146
   odometer: 103500
   title_status: Clean Colorado title
-  original_price: 29800
+  original_price: 32630
   recommended_list_price: 11950
   condition: Excellent Exterior / Very Good Interior
   dimensions: Compact SUV · 103.5k Miles · Clean Title
-  color: White / Black Leather-Trimmed Interior
+  color: White Platinum Metallic Tri-Coat / Charcoal Black ActiveX Interior
   status: Available
   primary_image: catalog/2019-ford-escape-sel-awd/2019_ford_escape_front_three_quarter.jpg
   images:
@@ -858,6 +859,7 @@ items:
   - catalog/2019-ford-escape-sel-awd/2019_ford_escape_garage_kept.jpg
   - catalog/2019-ford-escape-sel-awd/doc_1_recall_invoice.jpg
   - catalog/2019-ford-escape-sel-awd/doc_2_emissions_report.jpg
+  - catalog/2019-ford-escape-sel-awd/doc_3_window_sticker.jpg
   specs:
   - 1.5L EcoBoost 4-Cylinder (179 HP) with 6-speed automatic transmission (22 city
     / 28 hwy MPG)
@@ -893,9 +895,11 @@ items:
     miles I drive until handover, so you never find more than advertised"
   - 'Clean Carfax when I bought it in April 2024: no accidents or damage reported. No
     accidents since, smoke-free, pet-free, zero dash warning lights or mechanical codes'
+  - 'Factory Options: Ford Safe and Smart Package (factory option) and premium White Platinum Metallic Tri-Coat paint, verified on the original window sticker'
   included:
   - 2019 Ford Escape SEL AWD
   - Original Key Fobs
+  - Original Ford Window Sticker (Monroney label copy)
   - New Colorado emissions certificate, from a test taken before handover
   - Standard Bill of Sale & Signed Clean Title
   pickup_note: |
@@ -934,13 +938,17 @@ items:
       photo: doc_2_emissions_report.jpg
       label: 'Emissions report, 12 May 2026: overall PASS'
       note: "Passed, but that certificate is already used for my registration renewal. Before handover I'll take a new emissions test and give you that new certificate."
+    - id: window-sticker
+      photo: doc_3_window_sticker.jpg
+      label: 'Original window sticker (Monroney), MSRP $32,630'
+      note: 'Factory options and packages verified: Ford Safe & Smart Package, White Platinum Tri-Coat. Order codes redacted.'
   es:
     title: Ford Escape SEL AWD 2019, título limpio de Colorado e inspección de concesionario
     short_title: Ford Escape SEL AWD 2019
     condition: Exterior excelente e interior en muy buen estado
     dimensions: SUV compacto · 103.5k millas · título limpio
     title_status: Título limpio de Colorado
-    color: Blanco con interior negro tapizado en cuero
+    color: Blanco Platinum Metálico Tricapa / Interior Charcoal Black ActiveX
     specs:
     - Motor EcoBoost de 1.5 L y 4 cilindros, 179 HP, transmisión automática de 6 velocidades
     - Tracción integral inteligente Ford y llantas para todo clima
@@ -968,9 +976,11 @@ items:
       anunciadas
     - 'Carfax limpio cuando lo compré en abril de 2024: sin accidentes ni daños reportados.
       Sin accidentes desde entonces, sin humo ni mascotas y sin alertas en el tablero'
+    - 'Opciones de fábrica: paquete Ford Safe and Smart (opción de fábrica) y pintura premium Blanco Platinum Metálico Tricapa, verificados en la etiqueta original de ventana'
     included:
     - Ford Escape SEL AWD 2019
     - Controles originales
+    - Copia de la etiqueta original de ventana Ford (Monroney)
     - Certificado de emisiones de Colorado nuevo, de una prueba hecha antes de la entrega
     - Contrato de compraventa y título limpio firmado
     pickup_note: |
@@ -993,6 +1003,9 @@ items:
       emissions-report:
         label: 'Reporte de emisiones, 12 de mayo de 2026: resultado PASS'
         note: Pasó, pero ese certificado ya se usó en la renovación de mi registro. Antes de la entrega haré una nueva prueba de emisiones y te daré ese certificado nuevo.
+      window-sticker:
+        label: 'Etiqueta original de ventana (Monroney), MSRP $32,630'
+        note: 'Opciones y paquetes de fábrica verificados: paquete Ford Safe & Smart, Blanco Platinum Tricapa. Códigos de pedido tapados.'
   tags:
   - ford escape
   - escape sel

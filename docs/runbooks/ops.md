@@ -247,7 +247,7 @@ Do not redeploy afterwards: the deploy job needs the secrets until the end page 
   under `es: flaws:`; with none known leave it out. Add `size_in: [w, d, h]` only as
   the owner's own numbers from `dimensions` (as the buyer carries it: omit it for
   things that roll or fold), and `weight_lb` plus `weight_source` only for a weighed
-  item. Over 48 in or 50 lb shows "Needs truck/SUV"; over 75 lb also "2-person lift".
+  item. Over 48 in or 50 lb shows "Needs truck"; over 75 lb also "2-person lift".
 - **Phone:** the listing number is the owner's work phone, so there is nothing to release
   at the end (#29 was closed as not planned). To change the number, run
   `make secrets` and edit `seller.phone` in `data/private.sops.yaml`, then
