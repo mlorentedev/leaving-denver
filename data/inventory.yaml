@@ -877,15 +877,10 @@ items:
     new tires (on the 2024 Carfax)'
   - Ford SYNC 3 with 8-inch touchscreen, Apple CarPlay, Android Auto, Bluetooth, Wi-Fi
     hotspot
-  - 'Cold Weather Package: Heated front leather seats, heated side mirrors, factory
-    roof rails'
-  - Remote keyless entry, push-button start, hands-free foot-activated power liftgate,
-    dual-zone automatic climate control, Auto Start-Stop, and MyKey (a second key with
-    limits for a new driver)
+  - 'Cold Weather Package: Heated front leather seats with 10-way power driver seat, heated side mirrors, factory roof rails'
+  - SecuriCode keyless entry door keypad, push-button start, hands-free foot-activated power liftgate, dual-zone automatic climate control, Auto Start-Stop, and MyKey (a second key with limits for a new driver)
   # Warnings only: the car never brakes by itself (owner, 2026-09-30).
-  - 'Safety: Brake Assist, AdvanceTrac with Roll Stability Control, rear-view camera,
-    rear parking sensors, forward collision warning (light and chime), and blind-spot
-    and rear cross-traffic alerts'
+  - 'Safety: NHTSA 5-Star Overall Safety Rating, Brake Assist, AdvanceTrac with Roll Stability Control, rear-view camera, rear parking sensors, forward collision warning (light and chime), and blind-spot and rear cross-traffic alerts'
   - Garage-kept (a photo shows it in my garage) and driven mostly on the highway, commuting
     to work since 2024. Shifts smoothly, no fluid leaks (the wet spots on the pavement
     in the photos are water; I had just washed it)
@@ -895,11 +890,10 @@ items:
     miles I drive until handover, so you never find more than advertised"
   - 'Clean Carfax when I bought it in April 2024: no accidents or damage reported. No
     accidents since, smoke-free, pet-free, zero dash warning lights or mechanical codes'
-  - 'Factory Options: Ford Safe and Smart Package (factory option) and premium White Platinum Metallic Tri-Coat paint, verified on the original window sticker'
+  - 'Factory Options: Ford Safe and Smart Package (Adaptive Cruise Control, Lane-Keeping System, Blind Spot BLIS with cross-traffic alert) and premium White Platinum Metallic Tri-Coat paint, verified on the Ford window sticker'
   included:
   - 2019 Ford Escape SEL AWD
   - Original Key Fobs
-  - Original Ford Window Sticker (Monroney label copy)
   - New Colorado emissions certificate, from a test taken before handover
   - Standard Bill of Sale & Signed Clean Title
   pickup_note: |
@@ -941,7 +935,7 @@ items:
     - id: window-sticker
       photo: doc_3_window_sticker.jpg
       label: 'Original window sticker (Monroney), MSRP $32,630'
-      note: 'Factory options and packages verified: Ford Safe & Smart Package, White Platinum Tri-Coat. Order codes redacted.'
+      note: 'Factory options and packages verified from the Ford app: Ford Safe & Smart Package, White Platinum Tri-Coat. Order codes redacted.'
   es:
     title: Ford Escape SEL AWD 2019, título limpio de Colorado e inspección de concesionario
     short_title: Ford Escape SEL AWD 2019
@@ -959,13 +953,9 @@ items:
     - 'Servicio en concesionario cuando lo compré en abril de 2024: bujías nuevas, cambio de
       aceite y cuatro llantas nuevas (en el Carfax de 2024)'
     - Ford SYNC 3, pantalla de 8 pulgadas, Apple CarPlay, Android Auto, Bluetooth y Wi-Fi
-    - Paquete para clima frío con asientos delanteros y espejos calefactados
-    - Entrada sin llave con control remoto, encendido por botón, portón eléctrico manos
-      libres, climatización automática de dos zonas, Auto Start-Stop y MyKey (una segunda
-      llave con límites para un conductor nuevo)
-    - 'Seguridad: asistencia de frenado, AdvanceTrac con control de estabilidad antivuelco,
-      cámara de reversa, sensores de estacionamiento traseros, aviso de colisión frontal
-      (luz y pitido), y alertas de ángulo muerto y de tráfico cruzado trasero'
+    - Paquete para clima frío con asientos delanteros calefactados y ajuste eléctrico de 10 posiciones para el conductor, espejos térmicos y barras de techo
+    - Teclado numérico SecuriCode en puerta, encendido por botón, portón eléctrico manos libres, climatización automática de dos zonas, Auto Start-Stop y MyKey (una segunda llave con límites para un conductor nuevo)
+    - 'Seguridad: calificación oficial NHTSA de 5 estrellas, asistencia de frenado, AdvanceTrac con control de estabilidad antivuelco, cámara de reversa, sensores de estacionamiento traseros, aviso de colisión frontal (luz y pitido) y alertas de ángulo muerto y tráfico cruzado trasero'
     - Guardado en garaje (hay una foto en mi garaje) y usado sobre todo en autopista para
       ir al trabajo desde 2024. Cambios suaves y sin fugas (las manchas mojadas del
       asfalto en las fotos son agua; lo acababa de lavar)
@@ -976,11 +966,10 @@ items:
       anunciadas
     - 'Carfax limpio cuando lo compré en abril de 2024: sin accidentes ni daños reportados.
       Sin accidentes desde entonces, sin humo ni mascotas y sin alertas en el tablero'
-    - 'Opciones de fábrica: paquete Ford Safe and Smart (opción de fábrica) y pintura premium Blanco Platinum Metálico Tricapa, verificados en la etiqueta original de ventana'
+    - 'Opciones de fábrica: paquete Ford Safe and Smart (control de crucero adaptativo, mantenimiento de carril, monitoreo de punto ciego BLIS con alerta de tráfico cruzado) y pintura premium Blanco Platinum Metálico Tricapa, verificados en la etiqueta de ventana de Ford'
     included:
     - Ford Escape SEL AWD 2019
     - Controles originales
-    - Copia de la etiqueta original de ventana Ford (Monroney)
     - Certificado de emisiones de Colorado nuevo, de una prueba hecha antes de la entrega
     - Contrato de compraventa y título limpio firmado
     pickup_note: |
@@ -1005,7 +994,7 @@ items:
         note: Pasó, pero ese certificado ya se usó en la renovación de mi registro. Antes de la entrega haré una nueva prueba de emisiones y te daré ese certificado nuevo.
       window-sticker:
         label: 'Etiqueta original de ventana (Monroney), MSRP $32,630'
-        note: 'Opciones y paquetes de fábrica verificados: paquete Ford Safe & Smart, Blanco Platinum Tricapa. Códigos de pedido tapados.'
+        note: 'Opciones y paquetes de fábrica verificados desde la app de Ford: paquete Ford Safe & Smart, Blanco Platinum Tricapa. Códigos de pedido tapados.'
   tags:
   - ford escape
   - escape sel
