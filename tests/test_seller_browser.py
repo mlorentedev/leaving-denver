@@ -25,7 +25,8 @@ const choose = async (id, value) => {
   $(id).dispatchEvent(new Event('change'));
   await wait(20);
 };
-const ITEM = [...$('item').options].find(o => o.textContent.includes('Sleeper')).value;
+// Any household item the tool lists: it lists none that is sold, so the sofa left it when it sold.
+const ITEM = [...$('item').options].find(o => !o.textContent.includes('Escape')).value;
 const CAR = [...$('item').options].find(o => o.textContent.includes('Escape')).value;
 """
 
@@ -40,15 +41,15 @@ def test_choosing_a_spanish_channel_rewrites_the_listing_in_spanish(tmp_path):
         """
 await choose('item', ITEM);
 await choose('platform', 'fb-es');
-return { description: $('description').value, link: $('link').value,
+return { description: $('description').value, link: $('link').value, item: ITEMS[Number(ITEM)],
   options: [...$('platform').options].map(o => o.value) };
 """,
     )
     assert result["options"] == ["fb", "fb-es", "cl", "cl-es", "offerup", "nextdoor"]
     assert "Me mudo y vendo" in result["description"]
     assert "noviembre" not in result["description"]
-    assert "Precio: $220." in result["description"]
-    assert "/es/i/sofa-sleeper/" in result["link"]
+    assert f"Precio: ${result['item']['price']}." in result["description"]
+    assert f"/es/i/{result['item']['id']}/" in result["link"]
 
 
 def test_the_counters_the_creator_link_and_the_tags_follow_the_choice(tmp_path):

@@ -20,7 +20,8 @@ const read = id => {
     markup: document.getElementById('modalFlaws').querySelectorAll('b, img, script').length,
   };
 };
-const sofa = INVENTORY.items.find(i => i.id === 'sofa-sleeper');
+// A household item still for sale: a sold card carries no badges (the sofa was the sample until it sold).
+const sofa = INVENTORY.items.find(i => i.status !== 'Sold' && i.category !== 'Vehicle' && !i.free && i.discount_pct > 0);
 const clean = read(sofa.id);
 const real = { discount: sofa.discount_pct, sizes: sofa.size_badges };
 sofa.flaws = ['Scuff <b>on</b> the arm', 'Zipper sticks'];
