@@ -122,7 +122,7 @@ def test_the_right_passphrase_opens_the_views_the_node_seal_wrote(tmp_path, seal
         f"""
 await unlock({json.dumps(PASSPHRASE)});
 const select = $('item');
-select.value = [...select.options].find(o => o.textContent.includes('Sleeper')).value;
+select.value = [...select.options].find(o => o.textContent.includes('Escape')).value;
 select.dispatchEvent(new Event('change'));
 return {{ ...state(), text: $('private-views').innerText, asOf: $('as-of')?.textContent,
   due: $('due').innerText, total: $('plan-total').innerText }};

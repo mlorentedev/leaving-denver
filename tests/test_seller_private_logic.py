@@ -39,7 +39,11 @@ process.stdout.write(JSON.stringify(buildRows(roster, payload, config, today)));
 
 @pytest.fixture
 def inventory():
-    return load_inventory_yaml()
+    """The real data as the 10-07 fixtures know it: the sofa, their sample item, still for sale
+    (it has sold since, and a sold item is no row to price or renew)."""
+    data = load_inventory_yaml()
+    next(i for i in data["items"] if i["id"] == "sofa-sleeper")["status"] = "Available"
+    return data
 
 
 @pytest.fixture

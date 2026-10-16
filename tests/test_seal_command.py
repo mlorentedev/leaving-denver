@@ -17,6 +17,7 @@ from sealed_helpers import (
     PASSPHRASE,
     ROOT,
     SENTINEL_FLOOR,
+    SENTINEL_ITEM,
     SENTINEL_NOTE,
     fixture_private,
     install_fakes,
@@ -226,7 +227,7 @@ def test_the_envelope_it_sets_opens_to_the_allow_list_with_the_passphrase(machin
     seal.run_seal()
     payload = json.loads(open_in_node(sets(calls())[0]["stdin"], PASSPHRASE))
     assert set(payload) == {"floors", "targets", "sales", "tracking", "notes", "sealed_at"}
-    assert payload["notes"]["sofa-sleeper"] == SENTINEL_NOTE
+    assert payload["notes"][SENTINEL_ITEM] == SENTINEL_NOTE
 
 
 def test_a_repository_level_copy_is_removed_after_the_upload(tmp_path, monkeypatch, fixture_data):

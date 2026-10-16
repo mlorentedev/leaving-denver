@@ -38,7 +38,9 @@ SENTINELS = (
     SENTINEL_POSTED,
     SENTINEL_NOTE,
 )
-SENTINEL_ITEM = "sofa-sleeper"
+# The car is the item the sale ends with: /seller/ lists no sold item, so a household item
+# here (the sofa, until it sold) would leave the listing tool with nothing to select.
+SENTINEL_ITEM = "2019-ford-escape-sel-awd"
 
 
 def fixture_private():
@@ -48,7 +50,7 @@ def fixture_private():
     private["targets"][SENTINEL_ITEM] = SENTINEL_TARGET
     private["sales"][SENTINEL_ITEM] = {"price": SENTINEL_SALE, "at": "2026-10-13"}
     tracking = private["tracking"][SENTINEL_ITEM]
-    tracking["price_log"].append({"at": "2026-10-04", "price": SENTINEL_PRICE_LOG})
+    tracking.setdefault("price_log", []).append({"at": "2026-10-04", "price": SENTINEL_PRICE_LOG})
     tracking["channels"]["facebook"].append(SENTINEL_POSTED)
     private["notes"] = {SENTINEL_ITEM: SENTINEL_NOTE}
     return private

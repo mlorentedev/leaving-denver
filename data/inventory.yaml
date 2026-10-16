@@ -39,8 +39,6 @@ seller:
     - Puede ver y probar cualquier artículo antes de pagar.
 items:
 - id: sofa-sleeper
-  # Leads the grid, in this order (owner, 2026-10-10); the rest go cheapest first.
-  grid_pin: 1
   # Own photos first, stock last; the first is the cover (FEAT-012).
   photos:
   - sofa-3.jpg
@@ -64,7 +62,7 @@ items:
   dimensions: 92" W x 60" D x 37" H (234 x 152 x 94 cm)
   size_in: [92, 60, 37]
   color: Gray Fabric
-  status: Available
+  status: Sold
   primary_image: catalog/sofa-sleeper/sofa-3.jpg
   images:
   - catalog/sofa-sleeper/sofa-3.jpg
@@ -201,7 +199,7 @@ items:
   brand: IKEA
   model: TANANGER Full
   original_price: 129
-  recommended_list_price: 35
+  recommended_list_price: 20
   condition: Used - Good
   dimensions: 'Full Size: 53 1/8" x 74 3/8" (2 3/8" thick)'
   color: White / Light Gray
@@ -796,6 +794,63 @@ items:
   - end table
   - snack table
   - sofa arm table
+- id: lamps-pair
+  # Own photos first, stock last; the first is the cover (FEAT-012).
+  photos:
+  - lamps-1.jpg
+  - lamps-lit.jpg
+  - table-lamp.jpg
+  - table-lamp-usb.jpg
+  category: Living Room
+  title: Mainstays Gray Combo Floor Lamp with Reading Light + Mainstays USB Table Lamp (Set of 2)
+  short_title: Mainstays Floor Lamp + USB Table Lamp
+  brand: Mainstays
+  original_price: 35
+  recommended_list_price: 15
+  condition: Used - Good
+  dimensions: 'Floor lamp: 72" H, 9" round base. Table lamp: 19" H, 8" x 8" base'
+  color: Gray / Brushed Nickel with White Shades
+  status: Available
+  specs:
+  - Floor lamp with a bright upward main light (3-way switch) and an adjustable gooseneck reading light with its own switch
+  - Table lamp with a brushed nickel base, a white fabric shade, a switch on the base and a built-in USB charging port
+  - Both tested and working
+  - Free spare bulbs included
+  included:
+  - Floor lamp with reading light
+  - Table lamp with USB port
+  - Spare bulbs, free
+  pickup_note: The floor lamp is tall but slim and light; it lies across the back seat of most cars. The table lamp is small.
+  es:
+    color: Gris y níquel cepillado con pantallas blancas
+    title: Lámpara de pie Mainstays gris con luz de lectura + lámpara de mesa Mainstays con USB (juego de 2)
+    short_title: Mainstays lámpara de pie + lámpara de mesa USB
+    dimensions: 'Lámpara de pie: 72" de alto, base redonda de 9". Lámpara de mesa: 19" de alto, base de 8" x 8"'
+    specs:
+    - Lámpara de pie con luz principal hacia arriba (interruptor de 3 intensidades) y luz de lectura flexible ajustable con su propio interruptor
+    - Lámpara de mesa con base de níquel cepillado, pantalla de tela blanca, interruptor en la base y puerto USB de carga integrado
+    - Las dos probadas y funcionando
+    - Focos de repuesto gratis incluidos
+    included:
+    - Lámpara de pie con luz de lectura
+    - Lámpara de mesa con puerto USB
+    - Focos de repuesto, gratis
+    pickup_note: La lámpara de pie es alta pero delgada y ligera; cabe acostada sobre el asiento trasero de la mayoría de los autos. La de mesa es pequeña.
+  tags:
+  - floor lamp
+  - reading lamp
+  - torchiere lamp
+  - table lamp
+  - usb lamp
+  - mainstays lamp
+  - bedside lamp
+  - set of 2 lamps
+  primary_image: catalog/lamps-pair/lamps-1.jpg
+  images:
+  - catalog/lamps-pair/lamps-1.jpg
+  - catalog/lamps-pair/lamps-lit.jpg
+  - catalog/lamps-pair/table-lamp.jpg
+  - catalog/lamps-pair/table-lamp-usb.jpg
 - id: 2019-ford-escape-sel-awd
   # My own photos, taken 3 Oct 2026; the first is the cover (FEAT-012), the documents close it.
   photos:
