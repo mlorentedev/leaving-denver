@@ -43,7 +43,7 @@ sales:
         price: ENC[AES256_GCM,data:Gig=,iv:d0iZ/iwFBfwSFgcoMN7Zdl92zi2sjigNwVKHriR4O34=,tag:SEjY0mc0wowlgLkkSizydQ==,type:float]
         at: ENC[AES256_GCM,data:Ums3GPDi+DQe+g==,iv:khHIkLnAC6WbDQXYxhrTaDU3iA2X8PNqghm4ZFBV5XQ=,tag:907TS3TCvG7ydRZn6roAhQ==,type:str]
     air-mattress-twin-pump:
-        price: ENC[AES256_GCM,data:2wE=,iv:j7TR3HMd66ywTFIdHdlPKUBlr7VgRxl98AMy+7ispDM=,tag:d3ymqdGjjJUY8o5E9cKrlg==,type:float]
+        price: ENC[AES256_GCM,data:Eg==,iv:sfvws/njT6ys+LdiafljA9B3mLAzcuesbPJGlfVWg8M=,tag:loS6VgnT7tBFp/AFuTu6gw==,type:float]
         at: ENC[AES256_GCM,data:s3cpsrWUxvJSPw==,iv:pIHmHLGd2vji87hHBw3jsFZnD12G6fU5ec8yw3tZ6sA=,tag:6yj4RyS4RwxU5btrInNUTQ==,type:str]
     tv-stand-canyon-walnut:
         price: ENC[AES256_GCM,data:O8I=,iv:xVe0jH1BEFzhnonAwtdbBFYzrXCh1v5s6FDo3zKH4ak=,tag:+iQp7v52lYnq9lMGE/PcuA==,type:float]
@@ -73,7 +73,7 @@ sops:
             N5S0b6gn+J7t3Lg9zTalfJK5VHCwzBcjg5kbjsk7dea2bNSxWE/NQA==
             -----END AGE ENCRYPTED FILE-----
           recipient: age166v8efpskctmxxes5lcqpxkj0ny3q74l3v0pswpdpa63wlkqmc8q35fkdw
-    lastmodified: "2026-10-16T20:34:19Z"
-    mac: ENC[AES256_GCM,data:uUlR/aigsUyb0VMcWOBMmuVXmehqoZD1cGkLkxXmE0TcLe2YmXT9sV96lN5WEG4NtuZ9J6RVl5Clb6aEgSVywI4hpGMuQBirLnlVHkAcJsxsbS1NxY48l3t4QK+QUYuhwzi3t5i5VJSdvSXMyhPfAPhnbVA1AJnYxSyLLUMt7yE=,iv:O1vhAB/RCkvB7cpOgabynOlWo8AbeC1ZffV0zxMBE70=,tag:LzQJm62M12vHLxfr5UFx/w==,type:str]
+    lastmodified: "2026-10-16T21:07:44Z"
+    mac: ENC[AES256_GCM,data:r81ywqunnMAVzKJArsefN+iFJwCAyVkfxUkv91QKY0nJ22RE5luVpXeAluU1bjcRsnSA8BlDkSpDEx9MSSd1c6dFeimGqY+mUeBjft4P/L9eyIlBxQvIhyyI/h0hNrNmJTW8Lb3lvD1DcxsLes+CFJiCvCUrqXgADqyjeeY1/oE=,iv:0vdoTbr0fngrwALJ2mWUHRaTS3SorTzgpRXCrVq/gA0=,tag:aVKrD5pJVXoa1ZKc3EtTWw==,type:str]
     unencrypted_suffix: _unencrypted
     version: 3.13.1
