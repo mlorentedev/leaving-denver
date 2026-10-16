@@ -92,7 +92,9 @@ def car_of(built):
 def household_of(built):
     """A household item still for sale: /seller/ lists none that is sold, so the item that once
     stood here (the sofa) left it when it sold."""
-    return next(i for i in built["items"] if i["category"] != "Vehicle")
+    return next(
+        i for i in built["items"] if i["category"] != "Vehicle" and i.get("status") != "Sold"
+    )
 
 
 def descriptions(copies):
