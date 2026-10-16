@@ -388,5 +388,5 @@ def test_after_the_closeout_the_page_offers_only_the_car_and_the_old_share_page_
     pages = build(public_dir, data)
     assert "furniture" not in role(pages["en"], "hero-copy")
     assert not dates_on(pages["en"])
-    assert not (public_dir / "i" / "sofa-sleeper").exists()
+    assert not (public_dir / "i" / "ikea-mattress-topper").exists()
     assert (public_dir / "i" / CAR / "index.html").exists()

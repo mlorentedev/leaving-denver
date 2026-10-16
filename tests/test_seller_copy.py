@@ -90,7 +90,9 @@ def car_of(built):
 
 
 def household_of(built):
-    return next(i for i in built["items"] if i["id"] == "sofa-sleeper")
+    """A household item still for sale: /seller/ lists none that is sold, so the item that once
+    stood here (the sofa) left it when it sold."""
+    return next(i for i in built["items"] if i["category"] != "Vehicle")
 
 
 def descriptions(copies):
@@ -257,8 +259,8 @@ def test_every_listing_says_no_holds_and_no_deposits(copies):
         assert marker in description, f"{item_id}/{channel}"
 
 
-def test_craigslist_replies_through_its_relay_and_chat_channels_through_chat(copies):
-    sofa = copies["sofa-sleeper"]
+def test_craigslist_replies_through_its_relay_and_chat_channels_through_chat(built, copies):
+    sofa = copies[household_of(built)["id"]]
     assert "Craigslist" in sofa["cl"]["description"]
     assert "Craigslist" in sofa["cl-es"]["description"]
     for channel in ("fb", "offerup", "nextdoor", "fb-es"):
@@ -268,7 +270,7 @@ def test_craigslist_replies_through_its_relay_and_chat_channels_through_chat(cop
 # --- AC6: limits ---------------------------------------------------------------------------------
 
 
-def test_every_listing_fits_its_platform_without_cutting_anything(copies):
+def test_every_listing_fits_its_platform_without_cutting_anything(built, copies):
     limits = {"fb": 100, "fb-es": 100, "cl": 70, "cl-es": 70, "offerup": 60, "nextdoor": 100}
     for item_id, by_channel in copies.items():
         for channel, copy in by_channel.items():
@@ -278,7 +280,7 @@ def test_every_listing_fits_its_platform_without_cutting_anything(copies):
             assert len(copy["title"]) <= limits[channel], where
             assert copy["fits"]["description"], where
     for channel in ("fb", "fb-es"):
-        assert copies["sofa-sleeper"][channel]["limits"]["description"] == 5000
+        assert copies[household_of(built)["id"]][channel]["limits"]["description"] == 5000
 
 
 def test_an_overlong_listing_is_flagged_not_silently_cut():

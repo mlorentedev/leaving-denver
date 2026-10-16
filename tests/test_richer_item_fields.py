@@ -398,7 +398,8 @@ def test_the_real_big_items_say_so(locale):
         source = ITEMS[item_id]
         big = max(source.get("size_in", [0])) > 48 or source.get("weight_lb", 0) > 50
         assert (TRUCK[locale] in item["size_badges"]) == big, item_id
-        if source["category"] != "Vehicle":  # the car has its own section, not a grid card
+        # The car has its own section, not a grid card; a sold card carries no size badge.
+        if source["category"] != "Vehicle" and source.get("status") != "Sold":
             assert (TRUCK[locale] in card(html, item_id)) == big, item_id
     assert TRUCK[locale] in items["sofa-sleeper"]["size_badges"]
     assert items["tv-stand-canyon-walnut"]["size_badges"] == []
