@@ -820,7 +820,7 @@ items:
   - Floor lamp with reading light
   - Table lamp with USB port
   - Spare bulbs, free
-  pickup_note: The floor lamp is tall but light and slim; it fits in the back seat of any car. The table lamp is small.
+  pickup_note: The floor lamp is tall but slim and light; it lies across the back seat of most cars. The table lamp is small.
   es:
     color: Gris y níquel cepillado con pantallas blancas
     title: Lámpara de pie Mainstays gris con luz de lectura + lámpara de mesa Mainstays con USB (juego de 2)
@@ -835,7 +835,7 @@ items:
     - Lámpara de pie con luz de lectura
     - Lámpara de mesa con puerto USB
     - Focos de repuesto, gratis
-    pickup_note: La lámpara de pie es alta pero ligera y delgada; cabe en el asiento trasero de cualquier auto. La de mesa es pequeña.
+    pickup_note: La lámpara de pie es alta pero delgada y ligera; cabe acostada sobre el asiento trasero de la mayoría de los autos. La de mesa es pequeña.
   tags:
   - floor lamp
   - reading lamp
