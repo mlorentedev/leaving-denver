@@ -20,6 +20,7 @@ from pathlib import Path
 import pytest
 from sealed_helpers import (
     PASSPHRASE,
+    SENTINEL_ITEM,
     SENTINEL_SEALED_AT,
     SENTINELS,
     build_site,
@@ -73,7 +74,7 @@ def test_the_envelope_opens_to_the_allow_list_and_nothing_else(sealed_build):
     payload = json.loads(open_in_node(sealed_build["envelope"], PASSPHRASE))
     assert set(payload) == ALLOW_LIST
     assert payload["sealed_at"] == "2031-05-06T07:08:09Z"
-    assert payload["notes"]["sofa-sleeper"] == "sentinel-note-kestrel-4471"
+    assert payload["notes"][SENTINEL_ITEM] == "sentinel-note-kestrel-4471"
     flat = json.dumps(payload)
     for secret in NEVER_SEALED:
         assert secret not in flat
