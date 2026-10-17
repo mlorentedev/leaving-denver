@@ -99,7 +99,16 @@ def test_an_unknown_item_changes_nothing(real_copy, capsys):
 
 def test_a_bundle_with_the_same_id_is_never_the_item(real_copy):
     """`bundles:` entries also start with `- id:`; only `items:` is searched."""
-    bundle_id = yaml.safe_load(real_copy.read_text(encoding="utf-8"))["bundles"][0]["id"]
+    bundle_id = "bundle-test"
+    text = real_copy.read_text(encoding="utf-8")
+    assert "\nbundles: []\n" in text, "the real data now lists bundles: this test types its own"
+    real_copy.write_text(
+        text.replace(
+            "\nbundles: []\n",
+            f"\nbundles:\n- id: {bundle_id}\n  name: Test\n  items: [a, b]\n  bundle_price: 5\n",
+        ),
+        encoding="utf-8",
+    )
     before = real_copy.read_bytes()
     with pytest.raises(ValueError, match=bundle_id):
         site_builder.set_item_status(bundle_id, "Sold")

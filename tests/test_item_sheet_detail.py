@@ -64,6 +64,12 @@ def test_the_sheet_and_the_bundle_sheet_repeat_the_pickup_from_date():
     html = (PUBLIC / "index.html").read_text(encoding="utf-8")
     assert 'id="modalPickupFrom"' in html, "the sheet has no pickup-from slot"
     assert "item.pickup_from" in html, "the script never fills the slot"
+
+
+def test_the_bundle_sheets_repeat_the_pickup_from_date():
+    html = (PUBLIC / "index.html").read_text(encoding="utf-8")
+    if 'id="sheet-title-bundle-wfh"' not in html:
+        pytest.skip("the owner took the bundles off the page (2026-10-16)")
     wfh = html.split('id="sheet-title-bundle-wfh"')[1].split("</section>")[0]
     assert "Pickup from Oct 23" in wfh, "bundle-wfh row for the desk lacks the date"
     assert "Pickup from Nov 15" in wfh, "bundle-wfh row for the monitor lacks the date"

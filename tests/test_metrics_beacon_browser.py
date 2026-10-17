@@ -15,7 +15,8 @@ import time
 from collections import Counter
 
 import pytest
-from browser_harness import PUBLIC, needs_chrome, open_page, page_items, pointer, run_page
+import yaml
+from browser_harness import PUBLIC, ROOT, needs_chrome, open_page, page_items, pointer, run_page
 from pages_stub import AppliesHeadersFile, MissingPath
 from test_public_csp import SETUP as CSP_SETUP
 from test_public_csp import no_trouble, served_headers
@@ -42,7 +43,7 @@ window.addEventListener('click', e => {
 # The item in an available bundle, and that bundle, from the page's own data.
 IN_A_BUNDLE = """
 const bundled = INVENTORY.bundles.find(b => b.available && !b.everything);
-const bundledItem = bundled.items.find(id => INVENTORY.items.find(i => i.id === id).status !== 'Sold');
+const bundledItem = bundled?.items.find(id => INVENTORY.items.find(i => i.id === id).status !== 'Sold');
 """
 
 
@@ -170,7 +171,24 @@ TAPS = {
 }
 
 
-@pytest.mark.parametrize("name", TAPS)
+INVENTORY_DATA = yaml.safe_load((ROOT / "data" / "inventory.yaml").read_text(encoding="utf-8"))
+NEEDS_A_BUNDLE = ("the item sheet's bundle offer", "the bundle button")
+HAS_BUNDLES = bool(INVENTORY_DATA["bundles"])
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        pytest.param(
+            name,
+            marks=pytest.mark.skipif(
+                name in NEEDS_A_BUNDLE and not HAS_BUNDLES,
+                reason="the page lists no bundle (2026-10-16)",
+            ),
+        )
+        for name in TAPS
+    ],
+)
 @pytest.mark.parametrize("source", ["flyer", None])
 def test_each_way_to_text_reports_one_tap_and_keeps_its_link(tmp_path, name, source):
     setup, kind = TAPS[name]
@@ -245,12 +263,16 @@ def test_no_payload_holds_the_phone_or_an_sms_uri(tmp_path):
         IN_A_BUNDLE
         + """
 // An item in a bundle still on sale, so its sheet offers the upsell whatever has sold.
-openModal(bundledItem);
-document.getElementById('modalSmsLink').click();
-document.getElementById('upsellLink').click();
+if (bundled) {
+  openModal(bundledItem);
+  document.getElementById('modalSmsLink').click();
+  document.getElementById('upsellLink').click();
+}
 document.querySelector('[data-sms-role="sticky-text"]').click();
-openSheet(document.getElementById('sheet-' + bundled.id));
-document.querySelector(`[data-bundle-sheet="${bundled.id}"] a[data-sms-intent]`).click();
+if (bundled) {
+  openSheet(document.getElementById('sheet-' + bundled.id));
+  document.querySelector(`[data-bundle-sheet="${bundled.id}"] a[data-sms-intent]`).click();
+}
 const digits = getSellerPhone().replace(/\\D/g, '');
 const texts = BEACONS.map(b => JSON.stringify(b));
 return {
@@ -265,7 +287,7 @@ return {
         query=FLYER,
     )
     assert result["numberLength"] >= 7, "a real number to look for"
-    assert result["sent"] >= 6
+    assert result["sent"] >= (6 if HAS_BUNDLES else 1)
     assert result["carryingTheNumber"] == 0
     assert result["carryingAPiece"] == 0
     assert result["carryingAUri"] == 0

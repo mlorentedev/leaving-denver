@@ -101,7 +101,23 @@ def test_a_drag_from_the_panel_onto_the_backdrop_keeps_the_sheet(tmp_path, item)
     assert result == {"open": ["itemSheet"], "state": {"sheet": "itemSheet"}}
 
 
-@pytest.mark.parametrize("opener", ["contact", "bundle"])
+HAS_BUNDLES = bool(
+    yaml.safe_load((ROOT / "data" / "inventory.yaml").read_text(encoding="utf-8"))["bundles"]
+)
+
+
+@pytest.mark.parametrize(
+    "opener",
+    [
+        "contact",
+        pytest.param(
+            "bundle",
+            marks=pytest.mark.skipif(
+                not HAS_BUNDLES, reason="the page lists no bundle (2026-10-16)"
+            ),
+        ),
+    ],
+)
 def test_the_close_button_of_other_sheets_closes_them(tmp_path, opener):
     open_it = {
         "contact": "document.querySelector('[data-sms-role=\"sticky-text\"]').click();",
