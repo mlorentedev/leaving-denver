@@ -7,7 +7,7 @@ This project implements an automated, privacy-first inventory management and sal
 ## 1. Architectural Philosophy
 
 1. **Single Source of Truth (SSOT):**  
-   The file `data/inventory.yaml` is the authoritative definition of all 14 items, bundled packages, public copy, retail pricing, and recommended list prices. Internal firm floor prices, targets, sales, tracking and notes are sourced only from encrypted `data/private.sops.yaml`; the build never reads that file (ADR-007).
+   The file `data/inventory.yaml` is the authoritative definition of every item, the optional bundled packages (none are listed now), public copy, retail pricing, and recommended list prices. Internal firm floor prices, targets, sales, tracking and notes are sourced only from encrypted `data/private.sops.yaml`; the build never reads that file (ADR-007).
 2. **Folder-Convention Media Ingestion:**  
    Dropping an image (JPEG, PNG, WebP, or iPhone HEIC) into `content/photos/<item_id>/` auto-triggers discovery, format conversion and EXIF scrubbing at build time. The build only reads the SSOT; `leaving-denver sync` is what writes the discovered photo paths into `data/inventory.yaml`, editing only the `primary_image:` and `images:` lines of the items whose photos changed (comments and layout stay).
 3. **Strict Security Isolation:**  

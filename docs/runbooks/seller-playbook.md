@@ -60,7 +60,7 @@ unverified vehicle service, condition or retail value.
 | September 29–October 4 | Photograph and list the car and highest-value items first; list smaller items after the main listings. Post an umbrella message only where group rules allow it and put a QR flyer on the building board if permitted (print `https://leaving-denver.pages.dev/flyer/` from a browser). |
 | October 5–11 | Reply promptly, follow up on qualified inquiries and renew listings only when the platform offers it. Asking prices hold this week (owner, 2026-10-06; #211). |
 | October 12–15 | The price drop opens October 13 (the only one before the floors); review items with no messages before changing their public asking prices. If the sectional is unsold, contact The Good Couch with real photos by October 12 as a backup, and book donation/pickup alternatives by October 15 ([backup-exits.md](backup-exits.md)); confirm acceptance first, especially for bedding, electronics and sleeper sofas. |
-| October 16–19 | Reserve floors open October 16 for household items. Promote remaining bundles without claiming items already sold. |
+| October 16–19 | Reserve floors open October 16 for household items. Bundles are off the catalog (owner, 2026-10-16); re-post what is left without claiming items already sold. |
 | October 20–22 | Household giveaway window: give away or donate what is left; last drop-offs and recycling by October 21 ([backup-exits.md](backup-exits.md)). Take down sold listings. |
 | October 23 | Household deadline: take the unsold household items off the catalog ([household close-out](decommission.md)). From here the page is about the car. |
 | October 24–November 9 | Sell the car and arrange its handover in this window, never later than November 9 (see [vehicle-sale.md](vehicle-sale.md)); refresh the car's instant offers after October 30 and do not promise a later bank transaction. |
@@ -116,7 +116,7 @@ floors). The first steps halfway to the floor from the asking price in force, to
 moved to October 13 (#211). Afterwards, compare each item's price log
 with its sale in the private views to see whether a drop moved it.
 
-Targets are recorded for each household item except the topper (2026-10-01, #32). They are the expected-close prices from the 2026-09-25 pricing research. Research says the topper goes with the sofa, not alone, so it has none. Change any of them with `make secrets` (it opens the editor):
+Targets are recorded for each household item except the topper (2026-10-01, #32). They are the expected-close prices from the 2026-09-25 pricing research. Research said the topper goes with the sofa, not alone, so it has none; the sofa sold on 2026-10-16 and the topper now lists alone at $20. Change any of them with `make secrets` (it opens the editor):
 
 ```yaml
 targets:

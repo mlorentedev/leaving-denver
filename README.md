@@ -6,7 +6,7 @@ A privacy-focused inventory management, automated photo ingestion, and multi-por
 
 ## Key Features
 
-- **Single Source of Truth (`data/inventory.yaml`):** Human-readable YAML configuration managing all 14 items, value bundles, pricing tiers, and descriptions.
+- **Single Source of Truth (`data/inventory.yaml`):** Human-readable YAML configuration managing every item, the optional value bundles (none are listed now), pricing tiers, and descriptions.
 - **Folder-Convention Media Pipeline:** Drop any photo (including iPhone HEIC) into `content/photos/<item_id>/` and run `leaving-denver build` to auto-discover, strip GPS EXIF metadata and compile. Each photo becomes one JPEG capped at 1600 px on its longer side (quality 85) plus WebP copies at 480, 800, 1200 and 1600 px wide that the page's `srcset` picks from (never upscaled); a photo whose source and settings have not changed is skipped.
 - **Data & Privacy Isolation:** Public build in `build/public/` is completely stripped of internal reserve floor prices, negotiation notes, and seller admin tools.
 - **Bot & Scraper Defense:** Telephone numbers are obfuscated and assembled dynamically via client JS. Static HTML attributes contain no harvestable numbers. `robots.txt` disallows every crawler except link-preview fetchers (Facebook, X, Telegram, WhatsApp; ADR-004) and the assistants a person asked to read a page (ChatGPT-User, Claude-User, Perplexity-User, MistralAI-User; ADR-009); every response also carries `X-Robots-Tag: noindex`.
