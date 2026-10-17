@@ -6,7 +6,7 @@ A privacy-focused inventory management, automated photo ingestion, and multi-por
 
 ## Key Features
 
-- **Single Source of Truth (`data/inventory.yaml`):** Human-readable YAML configuration managing all 14 items, value bundles, pricing tiers, and descriptions.
+- **Single Source of Truth (`data/inventory.yaml`):** Human-readable YAML configuration managing every item, the optional value bundles (none are listed now), pricing tiers, and descriptions.
 - **Folder-Convention Media Pipeline:** Drop any photo (including iPhone HEIC) into `content/photos/<item_id>/` and run `leaving-denver build` to auto-discover, strip GPS EXIF metadata and compile. Each photo becomes one JPEG capped at 1600 px on its longer side (quality 85) plus WebP copies at 480, 800, 1200 and 1600 px wide that the page's `srcset` picks from (never upscaled); a photo whose source and settings have not changed is skipped.
 - **Data & Privacy Isolation:** Public build in `build/public/` is completely stripped of internal reserve floor prices, negotiation notes, and seller admin tools.
 - **Bot & Scraper Defense:** Telephone numbers are obfuscated and assembled dynamically via client JS. Static HTML attributes contain no harvestable numbers. `robots.txt` disallows every crawler except link-preview fetchers (Facebook, X, Telegram, WhatsApp; ADR-004) and the assistants a person asked to read a page (ChatGPT-User, Claude-User, Perplexity-User, MistralAI-User; ADR-009); every response also carries `X-Robots-Tag: noindex`.
@@ -40,16 +40,16 @@ uv run leaving-denver sync
 uv run leaving-denver drops
 
 # Mark an item as sold and trigger automatic site rebuild
-uv run leaving-denver sold sofa-sleeper 200
+uv run leaving-denver sold lamps-pair 200
 
 # Reserve an item for an agreed pickup, or put it back on sale
-uv run leaving-denver pending sofa-sleeper
-uv run leaving-denver available sofa-sleeper
+uv run leaving-denver pending lamps-pair
+uv run leaving-denver available lamps-pair
 
 # Record a posting or renewal (encrypted private file), and an asking-price change
 # (sets the price in data/inventory.yaml and logs it in the encrypted private file)
-make post ID=sofa-sleeper CHANNEL=facebook   # channels: facebook, craigslist, offerup, nextdoor, activebuilding, carscom (the car only)
-make reprice ID=sofa-sleeper PRICE=190
+make post ID=lamps-pair CHANNEL=facebook   # channels: facebook, craigslist, offerup, nextdoor, activebuilding, carscom (the car only)
+make reprice ID=lamps-pair PRICE=190
 
 # Seal the private data for /seller/ and set SELLER_SEALED (needs a terminal)
 uv run leaving-denver seal

@@ -131,8 +131,29 @@ def page(tmp_path, monkeypatch):
     # Real sales would change what this fixture sets up, so it starts from nothing sold.
     for item in inv["items"]:
         item["status"] = "Available"
-    curated = [b for b in inv["bundles"] if not b.get("everything")]
-    bundle = curated[0]
+    # The real data lists no bundle since 2026-10-16: this page gets two over household items,
+    # and "take everything".
+    household = [i for i in inv["items"] if i["category"] != "Vehicle" and i.get("published", True)]
+
+    def pair(name, items):
+        return {
+            "id": f"bundle-{name}",
+            "name": name,
+            "short_name": name,
+            "items": [i["id"] for i in items],
+            "bundle_price": sum(i["recommended_list_price"] for i in items) - 1,
+        }
+
+    bundle = pair("first", household[:2])
+    curated = [bundle, pair("second", household[2:4])]
+    everything = {
+        "id": "bundle-all",
+        "name": "All",
+        "short_name": "All",
+        "everything": True,
+        "discount_pct": 20,
+    }
+    inv["bundles"] = [*curated, everything]
     in_a_bundle = {i for b in curated for i in b["items"]}
     sold, pending = (
         bundle["items"][0],

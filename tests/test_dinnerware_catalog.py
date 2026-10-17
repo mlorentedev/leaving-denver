@@ -1,7 +1,7 @@
 from leaving_denver.site_builder import load_inventory_yaml, sanitize_public_inventory
 
 
-def test_dinnerware_is_private_without_hiding_take_everything():
+def test_dinnerware_is_private_and_in_no_bundle():
     inventory = load_inventory_yaml()
     dinnerware = next(
         item for item in inventory["items"] if item["id"] == "dinnerware-glassware-set"
@@ -14,4 +14,3 @@ def test_dinnerware_is_private_without_hiding_take_everything():
     public = sanitize_public_inventory(inventory)
     assert "dinnerware-glassware-set" not in {item["id"] for item in public["items"]}
     assert "bundle-kitchen-island" not in {bundle["id"] for bundle in public["bundles"]}
-    assert any(bundle["everything"] for bundle in public["bundles"])

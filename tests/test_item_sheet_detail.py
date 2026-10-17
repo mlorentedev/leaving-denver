@@ -57,13 +57,18 @@ def test_the_pickup_from_date_ships_for_every_carrier_in_both_locales(locale):
         assert items[item_id]["pickup_from"], item_id
 
 
-def test_the_sheet_and_the_bundle_sheet_repeat_the_pickup_from_date():
-    """The date lives on every surface that names the item: the card pill, the sheet (under
-    the status) and each bundle row that includes a carrier — a bundle cannot read
-    "available" while two of its items sit unavailable for two weeks."""
+def test_the_sheet_repeats_the_pickup_from_date():
+    """The sheet shows the pickup-from date under the status; the bundle rows are covered by
+    the next test."""
     html = (PUBLIC / "index.html").read_text(encoding="utf-8")
     assert 'id="modalPickupFrom"' in html, "the sheet has no pickup-from slot"
     assert "item.pickup_from" in html, "the script never fills the slot"
+
+
+def test_the_bundle_sheets_repeat_the_pickup_from_date():
+    html = (PUBLIC / "index.html").read_text(encoding="utf-8")
+    if 'id="sheet-title-bundle-wfh"' not in html:
+        pytest.skip("the owner took the bundles off the page (2026-10-16)")
     wfh = html.split('id="sheet-title-bundle-wfh"')[1].split("</section>")[0]
     assert "Pickup from Oct 23" in wfh, "bundle-wfh row for the desk lacks the date"
     assert "Pickup from Nov 15" in wfh, "bundle-wfh row for the monitor lacks the date"

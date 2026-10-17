@@ -18,23 +18,26 @@ What to do with whatever has not sold, before the household deadline of 2026-10-
 
 | Item | Best exit | Backup | Book by |
 |---|---|---|---|
-| Sleeper sectional | The Good Couch (free pickup if in good condition) | ARC curbside pickup, Buy Nothing | Oct 15 |
+| Sleeper sectional | Sold 2026-10-16: no exit needed | n/a | n/a |
 | Dell 32" monitor | Best Buy, $29.99 | Blue Star Recyclers, by weight | Nov 15 (stays until its pickup date) |
 | onn 43" TV | Sold 2026-10-11: no exit needed | n/a | n/a |
 | L-desk | ARC pickup if solid; Habitat ($40) | Buy Nothing | Oct 23 (pickup-from date; Habitat books 2–3 days out, so book by Oct 20) |
 | Lift-top coffee table | Sold 2026-10-10: no exit needed | n/a | n/a |
 | IKEA memory-foam topper | Buy Nothing (if clean) | Trash: Habitat, ARC and Goodwill refuse bedding | Oct 21 |
-| Bar stools (pair) | Goodwill or ARC drop-off | Buy Nothing | Oct 21 |
-| TV stand (particleboard) | Buy Nothing, Goodwill drop-off | Trash | Oct 21 |
+| Bar stools (pair) | Sold: no exit needed | n/a | n/a |
+| TV stand (particleboard) | Sold: no exit needed | n/a | n/a |
 | Mesh office chair | Goodwill or ARC drop-off | Buy Nothing | Oct 23 (pickup-from date) |
-| Nightstand | ARC pickup or Goodwill drop-off | Habitat | Oct 15 |
-| Intex airbed | Buy Nothing | Trash: Habitat refuses airbeds | Oct 21 |
+| Nightstand | Sold: no exit needed | n/a | n/a |
+| Intex airbed | Went free 2026-10-16: no exit needed | n/a | n/a |
 | Dinnerware, 20 pieces | Goodwill or ARC drop-off | Buy Nothing | Oct 21 |
-| C-side table | Goodwill or ARC drop-off | Buy Nothing | Oct 21 |
+| C-side table | Sold: no exit needed | n/a | n/a |
+| Lamps (floor + USB table) | Goodwill or ARC drop-off | Buy Nothing | Oct 21 |
 
 ## The organisations
 
 ### The Good Couch (sofas, sectionals, sleepers)
+
+*Not needed now: the sectional sold on 2026-10-16. Kept for reference.*
 
 - Takes upholstered seating, sleeper sofas included. Pickup is free in good condition: removable stains, some pet hair and one or two minor tears are fine. Otherwise it costs about $50–150. They carry it down stairs, and there is no fee to cancel. [donate-your-couch](https://www.thegoodusedcouch.com/donate-your-couch/)
 - Serves "most of the Front Range including Denver". 80111 is not named explicitly: **UNVERIFIED**, so ask when booking. [FAQ](https://www.thegoodusedcouch.com/couch-donation-frequently-asked-questions/)

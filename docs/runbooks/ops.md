@@ -186,7 +186,7 @@ phone, open the item in the Bitwarden app and add the URI
 that deploy; Enter alone does not make a new passphrase (it aborts and says to run
 `make ci-secrets`). No, the default, does nothing more. To skip the typing, run the command
 under dotf, which puts the passphrase in the environment of that one command:
-`dotf secrets run --only SELLER_PASSPHRASE -- make sold ID=sofa-sleeper PRICE=180`. The target
+`dotf secrets run --only SELLER_PASSPHRASE -- make sold ID=lamps-pair PRICE=180`. The target
 reads the environment under that name only, checks it like a typed passphrase, never prints it and
 removes it from the environment of the programs it starts. It cannot tell dotf from a variable you
 set by hand, so it still requires a terminal.

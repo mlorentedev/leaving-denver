@@ -156,8 +156,8 @@ CATALOG_TESTS = {
         "test_the_footer_holds_only_the_credit_and_the_build",
         "test_the_included_list_has_a_heading",
         "test_the_pickup_from_date_ships_for_every_carrier_in_both_locales",
-        "test_the_sheet_and_the_bundle_sheet_repeat_the_pickup_from_date",
         "test_the_sheet_renders_every_spec_the_details_and_the_included_list",
+        "test_the_sheet_repeats_the_pickup_from_date",
         "test_the_spanish_sheet_has_spanish_details",
     ),
     "test_metrics_beacon_browser.py": (

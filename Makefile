@@ -82,15 +82,15 @@ serve: build ## Serve the catalog and /seller/ on 127.0.0.1:$(PORT) (loopback on
 drops: ## Show the staged price-drop table (needs the sops key)
 	$(UV) run leaving-denver drops
 
-post: ## Record a posting or renewal: make post ID=sofa-sleeper CHANNEL=facebook [ON=2026-10-01]
+post: ## Record a posting or renewal: make post ID=lamps-pair CHANNEL=facebook [ON=2026-10-01]
 	@test -n "$(ID)" && test -n "$(CHANNEL)" || { echo "usage: make post ID=<item-id> CHANNEL=<facebook|craigslist|offerup|nextdoor|activebuilding|carscom> [ON=<YYYY-MM-DD>]"; exit 1; }
 	$(UV) run leaving-denver post $(ID) $(CHANNEL) $${ON:+--on "$$ON"}
 
-reprice: ## Record an asking-price change: make reprice ID=sofa-sleeper PRICE=190 [ON=2026-10-03]
+reprice: ## Record an asking-price change: make reprice ID=lamps-pair PRICE=190 [ON=2026-10-03]
 	@test -n "$(ID)" && test -n "$(PRICE)" || { echo "usage: make reprice ID=<item-id> PRICE=<usd> [ON=<YYYY-MM-DD>]"; exit 1; }
 	$(UV) run leaving-denver reprice $(ID) $(PRICE) $${ON:+--on "$$ON"}
 
-sold: ## Mark an item sold: make sold ID=sofa-sleeper PRICE=200
+sold: ## Mark an item sold: make sold ID=lamps-pair PRICE=200
 	@test -n "$(ID)" || { echo "usage: make sold ID=<item-id> [PRICE=<usd>]"; exit 1; }
 	$(UV) run leaving-denver sold $(ID) $(PRICE)
 

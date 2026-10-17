@@ -25,7 +25,6 @@ def test_every_sheet_is_a_labelled_dialog(page):
     assert item, "item sheet is not a <dialog>"
     assert 'aria-labelledby="modalTitle"' in item.group(0)
     bundles = re.findall(r'<dialog id="sheet-([^"]+)"[^>]*aria-labelledby="sheet-title-\1"', html)
-    assert bundles, "bundle sheets are not labelled <dialog>s"
     for bundle_id in bundles:
         assert f'id="sheet-title-{bundle_id}"' in html
     assert not re.search(r'<div id="(itemSheet|sheet-[^"]+)"', html), "a sheet is still a <div>"

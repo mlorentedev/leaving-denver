@@ -101,7 +101,23 @@ def test_a_drag_from_the_panel_onto_the_backdrop_keeps_the_sheet(tmp_path, item)
     assert result == {"open": ["itemSheet"], "state": {"sheet": "itemSheet"}}
 
 
-@pytest.mark.parametrize("opener", ["contact", "bundle"])
+HAS_BUNDLES = bool(
+    yaml.safe_load((ROOT / "data" / "inventory.yaml").read_text(encoding="utf-8"))["bundles"]
+)
+
+
+@pytest.mark.parametrize(
+    "opener",
+    [
+        "contact",
+        pytest.param(
+            "bundle",
+            marks=pytest.mark.skipif(
+                not HAS_BUNDLES, reason="the page lists no bundle (2026-10-16)"
+            ),
+        ),
+    ],
+)
 def test_the_close_button_of_other_sheets_closes_them(tmp_path, opener):
     open_it = {
         "contact": "document.querySelector('[data-sms-role=\"sticky-text\"]').click();",
@@ -244,15 +260,17 @@ def test_a_refused_clipboard_selects_the_number(tmp_path):
     assert result["label"] == EN["copy_fallback"]
 
 
-def test_an_item_text_link_carries_its_message_into_the_contact_sheet(tmp_path):
-    steps = """
-    const link = document.querySelector('[data-sms-intent]');
+def test_an_item_text_link_carries_its_message_into_the_contact_sheet(tmp_path, item):
+    steps = f"""
+    openModal({item!r});
+    await until(() => history.state);
+    const link = document.getElementById('modalSmsLink');
     link.click();
-    return { open: sheets(), message: document.getElementById('contactMessage').textContent,
-      intent: link.getAttribute('data-sms-intent') };
+    return {{ open: sheets(), message: document.getElementById('contactMessage').textContent,
+      intent: decodeURIComponent(link.href.split(SMS_BODY)[1]) }};
     """
     result = run_page(tmp_path, "index.html", steps, setup=pointer(fine=True))
-    assert result["open"] == ["contactSheet"]
+    assert result["open"] == ["itemSheet", "contactSheet"]
     assert result["message"] == result["intent"]
 
 
@@ -268,15 +286,17 @@ def test_the_contact_sheets_own_link_hands_off_to_messages(tmp_path):
     assert result["open"] == ["contactSheet"]
 
 
-def test_a_text_link_on_a_touch_screen_keeps_the_native_hand_off(tmp_path):
-    steps = """
+def test_a_text_link_on_a_touch_screen_keeps_the_native_hand_off(tmp_path, item):
+    steps = f"""
     document.querySelector('[data-sms-role="sticky-text"]').click();
-    document.querySelector('[data-sms-intent]').click();
+    openModal({item!r});
+    await until(() => history.state);
+    document.getElementById('modalSmsLink').click();
     await wait(100);
-    return { open: sheets(), clicks: CLICKS, state: history.state };
+    return {{ open: sheets(), clicks: CLICKS }};
     """
     result = run_page(tmp_path, "index.html", steps, setup=pointer(fine=False) + CLICKS)
-    assert result == {"open": [], "clicks": [False, False], "state": None}
+    assert result == {"open": ["itemSheet"], "clicks": [False, False]}
 
 
 def test_a_linked_item_opens_and_drops_the_hash(tmp_path, item):

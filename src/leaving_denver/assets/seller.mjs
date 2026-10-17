@@ -37,7 +37,6 @@ const TEXT = {
     condition: 'Condition', dimensions: 'Dimensions', included: 'Included', details: 'Details',
     flaws: 'Known flaws', pickup: 'Pickup', payment: 'Payment',
     noHolds: 'No holds and no deposits: it goes to the first person who confirms a pickup time.',
-    bundle: 'Taking several items? Ask me about a bundle price.',
     nextdoorTitle: 'DTC moving sale',
   },
   es: {
@@ -45,7 +44,6 @@ const TEXT = {
     condition: 'Estado', dimensions: 'Dimensiones', included: 'Incluye', details: 'Detalles',
     flaws: 'Defectos conocidos', pickup: 'Recogida', payment: 'Pago',
     noHolds: 'No aparto artículos ni pido depósitos: se lo lleva la primera persona que confirme una hora de recogida.',
-    bundle: '¿Varios artículos? Pregúnteme por un precio en paquete.',
     nextdoorTitle: 'Venta por mudanza en DTC',
   },
 };
@@ -106,7 +104,6 @@ function termLines(item, text) {
     item.pickup && `${text.pickup}: ${item.pickup}`,
     item.payment && `${text.payment}: ${item.payment}.`,
     text.noHolds,
-    !isCar(item) && text.bundle,
   ];
 }
 

@@ -115,6 +115,8 @@ def test_the_page_renders_without_it(tmp_path, monkeypatch):
 def test_the_real_page_offers_it_at_the_derived_price():
     data = site_builder.load_inventory_yaml()
     bundle = everything_of(data)
+    if bundle is None:
+        pytest.skip("the owner took the bundles off the page (2026-10-16)")
     on_offer = [
         i
         for i in data["items"]
