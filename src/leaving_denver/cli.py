@@ -301,32 +301,32 @@ def main():
     sync_p.set_defaults(func=cmd_sync)
 
     sold_p = subparsers.add_parser("sold", help="Mark item as sold and trigger rebuild")
-    sold_p.add_argument("id", help="Item ID (e.g. sofa-sleeper)")
+    sold_p.add_argument("id", help="Item ID (e.g. lamps-pair)")
     sold_p.add_argument("price", nargs="?", type=int, help="Realized sale price in USD")
     sold_p.set_defaults(func=cmd_sold)
 
     post_p = subparsers.add_parser(
         "post", help="Record a posting or renewal of an item on a channel"
     )
-    post_p.add_argument("id", help="Item ID (e.g. sofa-sleeper)")
+    post_p.add_argument("id", help="Item ID (e.g. lamps-pair)")
     post_p.add_argument("channel", choices=sorted(CHANNELS), help="Where it was posted")
     post_p.add_argument("--on", help="Date, YYYY-MM-DD (default: today)")
     post_p.set_defaults(func=cmd_post)
 
     reprice_p = subparsers.add_parser("reprice", help="Record a change of an item's asking price")
-    reprice_p.add_argument("id", help="Item ID (e.g. sofa-sleeper)")
+    reprice_p.add_argument("id", help="Item ID (e.g. lamps-pair)")
     reprice_p.add_argument("price", type=int, help="New asking price in USD")
     reprice_p.add_argument("--on", help="Date, YYYY-MM-DD (default: today)")
     reprice_p.set_defaults(func=cmd_reprice)
 
     pending_p = subparsers.add_parser("pending", help="Reserve an item for a pickup and rebuild")
-    pending_p.add_argument("id", help="Item ID (e.g. sofa-sleeper)")
+    pending_p.add_argument("id", help="Item ID (e.g. lamps-pair)")
     pending_p.set_defaults(func=cmd_pending)
 
     available_p = subparsers.add_parser(
         "available", help="Put an item back on sale (a pickup fell through) and rebuild"
     )
-    available_p.add_argument("id", help="Item ID (e.g. sofa-sleeper)")
+    available_p.add_argument("id", help="Item ID (e.g. lamps-pair)")
     available_p.set_defaults(func=cmd_available)
 
     drops_p = subparsers.add_parser(

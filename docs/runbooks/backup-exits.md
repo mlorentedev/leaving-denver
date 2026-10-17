@@ -37,6 +37,8 @@ What to do with whatever has not sold, before the household deadline of 2026-10-
 
 ### The Good Couch (sofas, sectionals, sleepers)
 
+*Not needed now: the sectional sold on 2026-10-16. Kept for reference.*
+
 - Takes upholstered seating, sleeper sofas included. Pickup is free in good condition: removable stains, some pet hair and one or two minor tears are fine. Otherwise it costs about $50–150. They carry it down stairs, and there is no fee to cancel. [donate-your-couch](https://www.thegoodusedcouch.com/donate-your-couch/)
 - Serves "most of the Front Range including Denver". 80111 is not named explicitly: **UNVERIFIED**, so ask when booking. [FAQ](https://www.thegoodusedcouch.com/couch-donation-frequently-asked-questions/)
 - **[OWNER]** Book with the site form, or text the photos to (720) 234-2068. The FAQ also lists (720) 869-7510. There is no tax receipt.

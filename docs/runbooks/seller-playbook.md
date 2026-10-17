@@ -93,16 +93,16 @@ The phone shows the data as of the last `make ci-secrets` and deploy. A recordin
 commands below reaches it only after the update they offer (answer yes) or a later
 `make ci-secrets` and deploy. See the sealed private data section in [site operations](ops.md).
 To skip typing the passphrase when the update asks for it, run the command under dotf:
-`dotf secrets run --only SELLER_PASSPHRASE -- make sold ID=sofa-sleeper PRICE=180`.
+`dotf secrets run --only SELLER_PASSPHRASE -- make sold ID=lamps-pair PRICE=180`.
 
 Record what happens as it happens; each command writes to `data/private.sops.yaml` through
 `sops set` (nothing is decrypted to disk). Commit the encrypted file afterwards.
 
 | When | Command |
 | :--- | :--- |
-| You post an item, or renew it | `make post ID=sofa-sleeper CHANNEL=facebook` (channels: facebook, craigslist, offerup, nextdoor, activebuilding, and carscom for the car only; add `ON=2026-10-01` for a post made earlier) |
-| You change an asking price | `make reprice ID=sofa-sleeper PRICE=195` sets `recommended_list_price` in `data/inventory.yaml` (that one line, comments kept) and records it in the private price log; then publish as in [site operations](ops.md). A date after today is refused (#236) |
-| An item sells | `make sold ID=sofa-sleeper PRICE=180` records price and date and lists the channels to take it down from |
+| You post an item, or renew it | `make post ID=lamps-pair CHANNEL=facebook` (channels: facebook, craigslist, offerup, nextdoor, activebuilding, and carscom for the car only; add `ON=2026-10-01` for a post made earlier) |
+| You change an asking price | `make reprice ID=lamps-pair PRICE=195` sets `recommended_list_price` in `data/inventory.yaml` (that one line, comments kept) and records it in the private price log; then publish as in [site operations](ops.md). A date after today is refused (#236) |
+| An item sells | `make sold ID=lamps-pair PRICE=180` records price and date and lists the channels to take it down from |
 
 **Social posts.** Open `https://leaving-denver.pages.dev/social/` on the phone. Press and hold
 each image to save it (`post.jpg` for the feed, `story.png` for a story), copy the caption, and
@@ -116,11 +116,11 @@ floors). The first steps halfway to the floor from the asking price in force, to
 moved to October 13 (#211). Afterwards, compare each item's price log
 with its sale in the private views to see whether a drop moved it.
 
-Targets are recorded for each household item except the topper (2026-10-01, #32). They are the expected-close prices from the 2026-09-25 pricing research. Research said the topper goes with the sofa, not alone, so it has none; the sofa sold on 2026-10-16 and the topper now lists alone at $20. Change any of them with `make secrets` (it opens the editor):
+Targets are recorded for each household item (2026-10-01, #32; the topper's was added on 2026-10-16, once it listed alone). They are the expected-close prices from the 2026-09-25 pricing research. Change any of them with `make secrets` (it opens the editor):
 
 ```yaml
 targets:
-  sofa-sleeper: 190   # researched expected close, USD, per item id
+  lamps-pair: 190   # researched expected close, USD, per item id
 ```
 
 ---

@@ -40,16 +40,16 @@ uv run leaving-denver sync
 uv run leaving-denver drops
 
 # Mark an item as sold and trigger automatic site rebuild
-uv run leaving-denver sold sofa-sleeper 200
+uv run leaving-denver sold lamps-pair 200
 
 # Reserve an item for an agreed pickup, or put it back on sale
-uv run leaving-denver pending sofa-sleeper
-uv run leaving-denver available sofa-sleeper
+uv run leaving-denver pending lamps-pair
+uv run leaving-denver available lamps-pair
 
 # Record a posting or renewal (encrypted private file), and an asking-price change
 # (sets the price in data/inventory.yaml and logs it in the encrypted private file)
-make post ID=sofa-sleeper CHANNEL=facebook   # channels: facebook, craigslist, offerup, nextdoor, activebuilding, carscom (the car only)
-make reprice ID=sofa-sleeper PRICE=190
+make post ID=lamps-pair CHANNEL=facebook   # channels: facebook, craigslist, offerup, nextdoor, activebuilding, carscom (the car only)
+make reprice ID=lamps-pair PRICE=190
 
 # Seal the private data for /seller/ and set SELLER_SEALED (needs a terminal)
 uv run leaving-denver seal

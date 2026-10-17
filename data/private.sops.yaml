@@ -7,7 +7,7 @@ floors:
     onn-43-4k-tv: ENC[AES256_GCM,data:LFU=,iv:9SInxaLvSNduO2rmUmKg5st32jGcjDW1QrIynehZkoI=,tag:QQyvMWGsvrv0gJpnNkFmtw==,type:int]
     convertible-desk: ENC[AES256_GCM,data:nTc=,iv:HmgEc8UTTmZ/1QgUlWfic2yIwrcBCKprKIrWEr0fB9Y=,tag:jRjzzJ11BI4XtmzF6uY+Ow==,type:int]
     coffee-table-lift-top: ENC[AES256_GCM,data:UFY=,iv:k1dMgsyoqwUqdiv0k7pN4zNT3gFTBJbOJClcnXcULTo=,tag:0n3ScdwcT/C/KzFRNO/hrw==,type:int]
-    ikea-mattress-topper: ENC[AES256_GCM,data:xBU=,iv:r0wJPiv26I52xI04XsaP7CgVC/jlFwSqM9ESkaRWp4I=,tag:DDeMGPTyA6Rn5+YNi2ZsHA==,type:int]
+    ikea-mattress-topper: ENC[AES256_GCM,data:wLY=,iv:Jsp9dGktche7Cf2fGMSPMMmsvu/EdciQJtLCfUUgyns=,tag:4/b5EvyZnX4syZxZnvYLqQ==,type:float]
     bar-stools-pair: ENC[AES256_GCM,data:BNM=,iv:tFwrv1SFDpsucWRyHBLHRwBFziMQHVLK4klC/A8Xk5k=,tag:6YdxUttHcAR+jt5120pKvw==,type:int]
     tv-stand-canyon-walnut: ENC[AES256_GCM,data:Gb8=,iv:hnDo03850XoPIHBkH0X+JpfyE8Y/xj/FbUefKLKbgSI=,tag:RDKiWzeEQL6FxYXfCzsZxA==,type:int]
     office-chair-ergonomic: ENC[AES256_GCM,data:XHs=,iv:Tn4ZPwHZ3Ik5Cel/BpkOjmA9Sx+OtL+Oy8zEmsYfmeM=,tag:5bhVEfk0Fp8Sb+IkoL126A==,type:int]
@@ -30,6 +30,7 @@ targets:
     dinnerware-glassware-set: ENC[AES256_GCM,data:uJk=,iv:WfFhQjoecqn4lSg6lAfhDDuPY0385l3Vwlg9Lq6qgcQ=,tag:ouQXYXlT7dFQfynZ1ROmcQ==,type:int]
     auxiliary-c-table: ENC[AES256_GCM,data:8Ys=,iv:BkrFik4UlbnuuOIEkAeJXkxqxEY5ESenmo5CouNEymo=,tag:zZB3CfucOHvgAqiBFNnSRw==,type:int]
     lamps-pair: ENC[AES256_GCM,data:eGA=,iv:+a550W3KaZNjASOpen9th9c88uomT26rwr/zOimAJDQ=,tag:iXyCiXmfAKcn2RAYYcUfyg==,type:float]
+    ikea-mattress-topper: ENC[AES256_GCM,data:Ed4=,iv:akbnbR/g7fyOomRBFEQmNF+12iyHn9bMtNBy/YMUne4=,tag:hFC7JE8Gbxwo14hmWK5wYA==,type:float]
 cloudflare_terraform_token: ENC[AES256_GCM,data:BRkprCsHasj3lyB/+u/9EPia8UPWT5N2hE8Z7gCVWSsxfQt8wry/ey01EPkn0HjVtZkN6is=,iv:XmJgWzsx99u7+8XR4aZ1n8m0G2gZ/r8CgeX3Lii9pk0=,tag:bxXCXkGbW9YFWoeA3lUG1g==,type:str]
 owner_email: ENC[AES256_GCM,data:jOdszTaqCiDnQOvimuqHGv5XJB/Q,iv:kb76q//bFS+eLXRERBUz1057qE6XCTKT2m9GClNaxUo=,tag:dZHRZmK+Y+Md8JXk+70Kgg==,type:str]
 sales:
@@ -73,7 +74,7 @@ sops:
             N5S0b6gn+J7t3Lg9zTalfJK5VHCwzBcjg5kbjsk7dea2bNSxWE/NQA==
             -----END AGE ENCRYPTED FILE-----
           recipient: age166v8efpskctmxxes5lcqpxkj0ny3q74l3v0pswpdpa63wlkqmc8q35fkdw
-    lastmodified: "2026-10-16T21:07:44Z"
-    mac: ENC[AES256_GCM,data:r81ywqunnMAVzKJArsefN+iFJwCAyVkfxUkv91QKY0nJ22RE5luVpXeAluU1bjcRsnSA8BlDkSpDEx9MSSd1c6dFeimGqY+mUeBjft4P/L9eyIlBxQvIhyyI/h0hNrNmJTW8Lb3lvD1DcxsLes+CFJiCvCUrqXgADqyjeeY1/oE=,iv:0vdoTbr0fngrwALJ2mWUHRaTS3SorTzgpRXCrVq/gA0=,tag:aVKrD5pJVXoa1ZKc3EtTWw==,type:str]
+    lastmodified: "2026-10-17T01:24:43Z"
+    mac: ENC[AES256_GCM,data:vtAiX3ow/TBA87kNW++XbWOhFxU7iLGiPMCv4RcvBcKwRA/s9OcPG+iq+3l8tloZYNH9lb+fUHFl4sccr6NdDJuJvtc561ZVrEM6MW4/P2Nh04NAvUldWy5QMXSdbRAlXJb6P/35SW9KCZ9E8lKd9Y8E0dQGN+rnMKQ0cRdV1SU=,iv:MJFySsZ4nRxGiD7khaP+11WAjVYN/GybdSgt8qOwdtc=,tag:vC+bb3xgqTDcHE9HFx7C9A==,type:str]
     unencrypted_suffix: _unencrypted
     version: 3.13.1
