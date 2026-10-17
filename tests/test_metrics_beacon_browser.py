@@ -262,12 +262,11 @@ def test_no_payload_holds_the_phone_or_an_sms_uri(tmp_path):
         tmp_path,
         IN_A_BUNDLE
         + """
-// An item in a bundle still on sale, so its sheet offers the upsell whatever has sold.
-if (bundled) {
-  openModal(bundledItem);
-  document.getElementById('modalSmsLink').click();
-  document.getElementById('upsellLink').click();
-}
+// An item in a bundle still on sale, so its sheet offers the upsell whatever has sold; with no
+// bundle, any item still for sale keeps the item-event check alive.
+openModal(bundled ? bundledItem : INVENTORY.items.find(i => i.status !== 'Sold').id);
+document.getElementById('modalSmsLink').click();
+if (bundled) document.getElementById('upsellLink').click();
 document.querySelector('[data-sms-role="sticky-text"]').click();
 if (bundled) {
   openSheet(document.getElementById('sheet-' + bundled.id));

@@ -120,7 +120,7 @@ Targets are recorded for each household item (2026-10-01, #32; the topper's was 
 
 ```yaml
 targets:
-  lamps-pair: 190   # researched expected close, USD, per item id
+  example-item-id: 190   # researched expected close, USD, per item id
 ```
 
 ---

@@ -373,7 +373,7 @@ def drive_catalog(browser):
     assert [entry.split()[0] for entry in log] == ["share", "copy"]
     assert log[0].split()[1] == log[1].split()[1].strip()
     # The contact sheet, which a mouse gets in place of the sms: hand-off.
-    browser.run("document.querySelector('[data-sms-intent]').click(); await wait(30);")
+    browser.run("document.getElementById('modalSmsLink').click(); await wait(30);")
     assert browser.run("return sheets();") == ["itemSheet", "contactSheet"]
     browser.run("document.getElementById('contactCopy').click(); await wait(30);")
     assert browser.run("return window.LOG.length;") == 3
