@@ -185,3 +185,15 @@ def test_the_terraform_objects_go_before_the_token_that_removes_them_and_the_sta
     assert "leaving-denver-analytics-read" in by_nov_15 and "not in Terraform" in by_nov_15
     assert "terraform.tfstate*" in by_nov_15 and "owner_email" in by_nov_15
     assert by_nov_15.index("Terraform token") < by_nov_15.index("terraform.tfstate*")
+
+
+def test_every_documented_sale_names_its_item_and_price_as_make_variables():
+    """`make sold` reads ID= and PRICE=: a positional id is a make target, so the command would
+    sell nothing and say it did (CodeRabbit on #259)."""
+    for path in sorted((ROOT / "docs").rglob("*.md")):
+        for line in path.read_text(encoding="utf-8").splitlines():
+            command = line.split("#", 1)[0]
+            for found in re.finditer(r"make sold(?P<args>[^`\n]*)", command):
+                args = found.group("args").strip()
+                if args:
+                    assert "ID=" in args, (path.name, line)

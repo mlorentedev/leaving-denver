@@ -89,10 +89,10 @@ the car's and the chair's. The flyer rebuilt by this deploy still lists the chai
 ## Oct 24: the chair's last day
 
 The chair's own date (owner, 2026-10-19), the day the page becomes about the car alone. Either it
-sells — `make sold office-chair-ergonomic <price>` keeps the price and the day in the encrypted
-file, and the takedown list it prints names the channels — or it does not, and it comes off the
-catalog like the rest did: run the same snippet with `KEEP = set()` from a clone, which now hides
-the one unsold item left.
+sells — `make sold ID=office-chair-ergonomic PRICE=<price>` keeps the price and the day in the
+encrypted file, and the takedown list it prints names the channels — or it does not, and it comes
+off the catalog like the rest did: run the same snippet with `KEEP = set()` from a clone, which
+now hides the one unsold item left.
 
 ```
 git switch -c chore/chair-close-out main
