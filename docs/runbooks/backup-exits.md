@@ -12,7 +12,7 @@ What to do with whatever has not sold, before the household deadline of 2026-10-
 | **Oct 21** | Last drop-off and recycling runs: Goodwill, ARC, Best Buy, Blue Star. |
 | **Oct 23** | Anything left goes in the trash, except electronics: Colorado bans TVs and monitors from landfill, so an unsold TV or monitor goes to Blue Star or At Your Door, or is left with a neighbour to recycle. Then take the unsold items off the catalog: the [household close-out](decommission.md). |
 
-**Items with a pickup-from date** (owner, 2026-10-10): the L-desk and the office chair are free to leave from Oct 23 and the Dell monitor from Nov 15. They stay in the apartment until then, so the Oct 21 and Oct 23 cutoffs above do not apply to them: their backup exit runs on their own date. Everything else keeps the table's dates.
+**Items with a pickup-from date** (owner, 2026-10-10; the office chair moved to Oct 24 on 2026-10-19): the office chair is free to leave from Oct 24 and the Dell monitor from Nov 15. They stay in the apartment until then, so the Oct 21 and Oct 23 cutoffs above do not apply to them: their backup exit runs on their own date. The chair is still for sale past the deadline, so the Oct 23 close-out keeps it on the catalog ([decommission](decommission.md)). Everything else keeps the table's dates.
 
 ## Per item
 
@@ -21,12 +21,12 @@ What to do with whatever has not sold, before the household deadline of 2026-10-
 | Sleeper sectional | Sold 2026-10-16: no exit needed | n/a | n/a |
 | Dell 32" monitor | Best Buy, $29.99 | Blue Star Recyclers, by weight | Nov 15 (stays until its pickup date) |
 | onn 43" TV | Sold 2026-10-11: no exit needed | n/a | n/a |
-| L-desk | ARC pickup if solid; Habitat ($40) | Buy Nothing | Oct 23 (pickup-from date; Habitat books 2–3 days out, so book by Oct 20) |
+| L-desk | Given away 2026-10-19: no exit needed | n/a | n/a |
 | Lift-top coffee table | Sold 2026-10-10: no exit needed | n/a | n/a |
-| IKEA memory-foam topper | Buy Nothing (if clean) | Trash: Habitat, ARC and Goodwill refuse bedding | Oct 21 |
+| IKEA memory-foam topper | Sold 2026-10-19: no exit needed | n/a | n/a |
 | Bar stools (pair) | Sold: no exit needed | n/a | n/a |
 | TV stand (particleboard) | Sold: no exit needed | n/a | n/a |
-| Mesh office chair | Goodwill or ARC drop-off | Buy Nothing | Oct 23 (pickup-from date) |
+| Mesh office chair | Goodwill or ARC drop-off | Buy Nothing | Oct 24 (pickup-from date) |
 | Nightstand | Sold: no exit needed | n/a | n/a |
 | Intex airbed | Went free 2026-10-16: no exit needed | n/a | n/a |
 | Dinnerware, 20 pieces | Goodwill or ARC drop-off | Buy Nothing | Oct 21 |

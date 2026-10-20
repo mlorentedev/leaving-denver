@@ -2,9 +2,10 @@
 
 The sale has two deadlines (OPS-013): household items go by 2026-10-23 and the car by
 2026-11-09, and the seller flies on 2026-11-18. The site must not outlive the sale with a phone
-number behind it: that number would keep drawing spam and scam messages nobody can answer. Three
-steps, in this order: take the unsold household items off the catalog on Oct 23, turn the sale
-off once the car is handed over (no later than Nov 9), then remove the credentials. Specs:
+number behind it: that number would keep drawing spam and scam messages nobody can answer. Four
+steps, in this order: take the unsold household items off the catalog on Oct 23 — the office
+chair stays for sale until Oct 24 — turn the sale off once the car is handed over (no later than
+Nov 9), then remove the credentials. Specs:
 `specs/archive/OPS-013-two-deadlines/`, `specs/archive/OPS-011-end-of-sale/`. The Pages project stays (ADR-008).
 
 Run every command from a clone of the repository, in a shell where `gh` is logged in as the
@@ -19,14 +20,24 @@ Sold: Sold is a sale that happened, and the sofa that nobody bought is not one. 
 
 By then the sale must be settled: an item with a pickup still to come is `Pending`; finish
 that pickup first, or leave the item out of this step by hand. Then, from a clone of the
-repository, hide every household item that is not Sold. The snippet edits the text of the file
-and adds one line per item, so its comments stay:
+repository, hide every household item that is not Sold, bar the pinned one. The snippet edits
+the text of the file and adds one line per item, so its comments stay:
+
+**The office chair is the exception (owner, 2026-10-19).** It is still for sale past the
+deadline and it may be handed over on Oct 24, so it stays on the catalog for one more day: the
+snippet keeps it, pinned by id in `KEEP`. Everything else unsold goes, and the page still says
+it sells furniture while the chair is up — it sells only the car from the chair's own last day
+(the next section).
 
 ```python
 import pathlib
 import re
 
 import yaml
+
+# The office chair stays for sale past the deadline (owner, 2026-10-19): it may leave on Oct 24.
+# Empty this set when the chair goes, or on the 24th if it does not sell.
+KEEP = {"office-chair-ergonomic"}
 
 path = pathlib.Path("data/inventory.yaml")
 text = path.read_text(encoding="utf-8")
@@ -36,6 +47,7 @@ unsold = [
     if item["category"] != "Vehicle"
     and item.get("status", "Available") != "Sold"
     and item.get("published", True)
+    and item["id"] not in KEEP
 ]
 for item_id in unsold:
     text = re.sub(
@@ -60,19 +72,48 @@ git push -u origin chore/household-close-out
 gh pr create --fill
 ```
 
-After the owner merges, the push to `main` deploys. The page now sells only the car: its title
-is the vehicle one, it still says "Ready for pickup" (it never shows a date, FEAT-014), and the
-flyer names only the car. Check it:
+After the owner merges, the push to `main` deploys. The page still sells furniture, because the
+chair is still for sale: its title names both, and the chair keeps its share page while the
+hidden items answer the 404. Check it:
+
+```
+curl -s https://leaving-denver.pages.dev/ | grep -o '<title>[^<]*'                 # <title>Denver Tech Center Relocation Sale — Furniture, Tech & Vehicle
+curl -s https://leaving-denver.pages.dev/ | grep -o 'data-role="sale-status">[^<]*' # data-role="sale-status">Ready for pickup
+curl -sI https://leaving-denver.pages.dev/i/lamps-pair/ | head -1                   # 404, a hidden item
+curl -sI https://leaving-denver.pages.dev/i/office-chair-ergonomic/ | head -1       # 200, the pinned chair
+```
+
+Then take the household listings down, on the channels listed in step 5 of "By Nov 9", and keep
+the car's and the chair's. The flyer rebuilt by this deploy still lists the chair; reprint it.
+
+## Oct 24: the chair's last day
+
+The chair's own date (owner, 2026-10-19), the day the page becomes about the car alone. Either it
+sells — `make sold office-chair-ergonomic <price>` keeps the price and the day in the encrypted
+file, and the takedown list it prints names the channels — or it does not, and it comes off the
+catalog like the rest did: run the same snippet with `KEEP = set()` from a clone, which now hides
+the one unsold item left.
+
+```
+git switch -c chore/chair-close-out main
+git diff data/inventory.yaml   # one added `published: false` line
+make check
+git commit -am "chore: take the last household item off the catalog"
+git push -u origin chore/chair-close-out
+gh pr create --fill
+```
+
+After it deploys, the page sells only the car: its title is the vehicle one, it still says
+"Ready for pickup" (it never shows a date, FEAT-014), and the flyer names only the car. Check it:
 
 ```
 curl -s https://leaving-denver.pages.dev/ | grep -o '<title>[^<]*'                 # <title>Denver Tech Center Relocation Sale — AWD SUV
 curl -s https://leaving-denver.pages.dev/ | grep -o 'data-role="sale-status">[^<]*' # data-role="sale-status">Ready for pickup
-curl -sI https://leaving-denver.pages.dev/i/sofa-sleeper/ | head -1   # 404
+curl -sI https://leaving-denver.pages.dev/i/office-chair-ergonomic/ | head -1      # 404
 ```
 
-Then take the household listings down, on the channels listed in step 5 of "By Nov 9", and keep
-the car's. The flyer rebuilt by this deploy names only the car; reprint it if the paper one
-still says furniture.
+Reprint the flyer: the paper one still lists the chair. A chair that sold instead keeps its
+share page, like every other Sold item.
 
 ## Before Nov 9: rehearse the end deploy on a preview
 

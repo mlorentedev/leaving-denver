@@ -183,7 +183,8 @@ The build phase is over; what is left is running the sale and closing it:
   recording a posting (`make sold`, `uv run leaving-denver pending`, `make reprice`, `make post`),
   deploys, rollbacks and key recovery.
 - [decommission](docs/runbooks/decommission.md): the end of the sale, dated: the household
-  close-out on Oct 23, turning the sale off by Nov 9 and removing the credentials and the number.
+  close-out on Oct 23 (the office chair stays for sale until Oct 24), turning the sale off by Nov 9
+  and removing the credentials and the number.
 - [vehicle sale](docs/runbooks/vehicle-sale.md): screening, test drive, payment (a cashier's
   check at the buyer's bank, no deposit) and the Colorado paperwork for the car.
 

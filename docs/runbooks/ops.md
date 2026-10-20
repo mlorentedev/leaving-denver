@@ -450,4 +450,4 @@ When the sale ends the workflow, the token and the data go: [decommission.md](de
 
 ## End of the sale
 
-The sale has two deadlines: household items by Oct 23 (the unsold ones come off the catalog that day) and the car by Nov 9. Once the car is handed over, and no later than Nov 9, the site becomes one "the sale is over" page; the steps, and what to remove by Nov 15, are in the [decommission runbook](decommission.md).
+The sale has two deadlines: household items by Oct 23 (the unsold ones come off the catalog that day, except the office chair, which stays for sale until Oct 24) and the car by Nov 9. Once the car is handed over, and no later than Nov 9, the site becomes one "the sale is over" page; the steps, and what to remove by Nov 15, are in the [decommission runbook](decommission.md).

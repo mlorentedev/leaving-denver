@@ -58,11 +58,21 @@ sales:
     sofa-sleeper:
         price: ENC[AES256_GCM,data:fbc1,iv:E/dOyKG3uRuVJTV3N3/q4L5vWtrQruxikOGq3HUUE3Q=,tag:LdQoAvx5fBhCgyKnO50GpA==,type:float]
         at: ENC[AES256_GCM,data:ZQeenTNLGGih8Q==,iv:kg30x+g84+piFVzv4d/vEvm1UjqsaAyZeSb0eL4R7Y8=,tag:iCjGS6hxHxplgYK5j+4+MA==,type:str]
+    ikea-mattress-topper:
+        price: ENC[AES256_GCM,data:K0c=,iv:oXX1rXZYKMGDx2Pnve5Vu0QkmOGWvT9qmjFB7oSibxU=,tag:qz+b3TOE6FAuNSIXb4rjhw==,type:float]
+        at: ENC[AES256_GCM,data:xWrPDW/7oPOefg==,iv:w97Pzxrn/v2w02XJpzV6NUEWUD80kqEPIwqMkTq3U9k=,tag:/f8rp/VghXZb04yQNx0/yg==,type:str]
+    convertible-desk:
+        price: ENC[AES256_GCM,data:SQ==,iv:47q8/bLboqIiPTPgJgwsmoz3HHXOcBzqFZE1IZ0PiF0=,tag:4xfrryBWhkKRzGBvGek1WA==,type:float]
+        at: ENC[AES256_GCM,data:TKxHJfCffRPFog==,iv:70d2fQ4w84S+0Nd6pI/cHq7bnRQENYvGXr1EKx2K1WE=,tag:IjCwculvRl+WOefwg7tN7g==,type:str]
 tracking:
     ikea-mattress-topper:
         price_log:
             - at: ENC[AES256_GCM,data:z7tgA/ixbCAJKg==,iv:jCiQmi9w7RnY6YDpsmh1eWuWCyO7VVHkUu7y0xMHKFY=,tag:nZPvpd8FxmiBuB9dJW2K3Q==,type:str]
               price: ENC[AES256_GCM,data:Trg=,iv:ozs38hLA1NpzRkYkIQjZGnATLw6o6mFUFZTzfYaWG3k=,tag:w+N/ekLREuCbB259CgtxcQ==,type:float]
+    lamps-pair:
+        channels:
+            facebook:
+                - ENC[AES256_GCM,data:2+HQqWb7du9Mmg==,iv:/A0XryTXyBhPrnMmXIWB8Ekpdbx4AIzVNV8N5m0MXcY=,tag:OeaWcD2Y5TmTD3/OiUmPKQ==,type:str]
 sops:
     age:
         - enc: |
@@ -74,7 +84,7 @@ sops:
             N5S0b6gn+J7t3Lg9zTalfJK5VHCwzBcjg5kbjsk7dea2bNSxWE/NQA==
             -----END AGE ENCRYPTED FILE-----
           recipient: age166v8efpskctmxxes5lcqpxkj0ny3q74l3v0pswpdpa63wlkqmc8q35fkdw
-    lastmodified: "2026-10-17T01:24:43Z"
-    mac: ENC[AES256_GCM,data:vtAiX3ow/TBA87kNW++XbWOhFxU7iLGiPMCv4RcvBcKwRA/s9OcPG+iq+3l8tloZYNH9lb+fUHFl4sccr6NdDJuJvtc561ZVrEM6MW4/P2Nh04NAvUldWy5QMXSdbRAlXJb6P/35SW9KCZ9E8lKd9Y8E0dQGN+rnMKQ0cRdV1SU=,iv:MJFySsZ4nRxGiD7khaP+11WAjVYN/GybdSgt8qOwdtc=,tag:vC+bb3xgqTDcHE9HFx7C9A==,type:str]
+    lastmodified: "2026-10-20T00:22:32Z"
+    mac: ENC[AES256_GCM,data:xYiVJPrX3C1TyHgeM5sm4rt6YGVMylan8yfsJ1r1W/pEvS3+ZPW7POSOSG6SU/wmv672MdqTeBwaXnXm5Sg6mNUrtaszDP9B7TKZhu0GvociuK45GmhKjPjtF5ub2PMlzLyCGHccYZXx4NB4+A7UETuxO5S2abdnAJHV/x2lyIo=,iv:9Bi9avathPQkhi1yyF7DmvAfXomyg8jz7YFZr7ywFuo=,tag:FK5/zOEGC0NW+1Vdur7FVQ==,type:str]
     unencrypted_suffix: _unencrypted
     version: 3.13.1
