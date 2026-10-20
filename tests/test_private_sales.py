@@ -97,3 +97,30 @@ def test_record_sale_raises_when_sops_fails(monkeypatch, tmp_path):
     )
     with pytest.raises(RuntimeError, match="no key"):
         private_data.record_sale("lamp", 120, date(2026, 10, 7))
+
+
+def sold_output(monkeypatch, capsys, price):
+    """Run `sold` against one $60 item and return what it printed."""
+    inv = {
+        "items": [
+            {"id": "desk", "title": "Desk", "status": "Available", "recommended_list_price": 60}
+        ],
+        "bundles": [],
+    }
+    monkeypatch.setattr(cli, "load_inventory_yaml", lambda: inv)
+    monkeypatch.setattr(cli, "check_item_status", lambda *a: None)
+    monkeypatch.setattr(
+        cli, "set_item_status", lambda item_id, status: {**inv["items"][0], "status": status}
+    )
+    monkeypatch.setattr(cli, "record_sale", lambda *a: None)
+    cli.cmd_sold(SimpleNamespace(id="desk", price=price))
+    return capsys.readouterr().out
+
+
+def test_a_giveaway_prints_the_zero_it_recorded(monkeypatch, capsys):
+    """$0 is a realized price, not a missing one: the asking price must not stand in."""
+    assert "(Price: $0)" in sold_output(monkeypatch, capsys, 0)
+
+
+def test_a_sale_with_no_price_prints_the_asking_price(monkeypatch, capsys):
+    assert "(Price: $60)" in sold_output(monkeypatch, capsys, None)
