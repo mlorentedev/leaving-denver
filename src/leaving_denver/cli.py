@@ -197,9 +197,9 @@ def cmd_sold(args):
         except (RuntimeError, ValueError, AttributeError) as err:
             print(f"Warning: the sale date was not recorded privately ({err}).")
     target_item = set_status(args.id, "Sold")
-    print(
-        f"Item '{target_item['title']}' marked as SOLD (Price: ${args.price or target_item.get('recommended_list_price')})."
-    )
+    # A giveaway is a real realized price of $0: `or` would print the asking price instead.
+    realized = args.price if args.price is not None else target_item.get("recommended_list_price")
+    print(f"Item '{target_item['title']}' marked as SOLD (Price: ${realized}).")
     print("\n" + "=" * 60)
     print("TAKE THE LISTING DOWN:")
     for step in takedown_steps(args.id, load_private(), item.get("category") == "Vehicle"):

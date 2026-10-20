@@ -100,7 +100,8 @@ def public_pages(public_dir, pages):
 
 
 # "Pickup from Oct 23" says when an item can leave, not when the sale ends (owner, 2026-10-10:
-# the chair and desk free up on the deadline's day), so that phrase alone may carry the date.
+# the desk freed up on the deadline's day), so that phrase alone may carry the date. The office
+# chair's pickup date moved to Oct 24 (owner, 2026-10-19), which is no deadline shape at all.
 PICKUP_FROM = re.compile(r"(?:[Pp]ickup from|from|desde el|a partir del) (?:Oct 23|23 de octubre)")
 
 
@@ -334,24 +335,48 @@ def test_the_seller_tool_page_carries_the_explicit_drop_days(public_dir):
 # The close-out: the runbook's snippet hides what is unsold, and the page follows.
 
 
-def runbook_snippet():
+# The office chair is the last household item for sale and may leave on Oct 24, so the close-out
+# pins it (owner, 2026-10-19). The snippet's KEEP and this set must agree, or the runbook hides
+# the very item the owner is still selling.
+PINNED = {"office-chair-ergonomic"}
+
+
+def runbook_snippet(keep: set[str] | None = None):
+    """The close-out snippet, optionally with its pinned ids replaced."""
     text = (ROOT / "docs/runbooks/decommission.md").read_text(encoding="utf-8")
     section = text.split("\n## Oct 23: household close-out", 1)[1].split("\n## ", 1)[0]
-    return re.search(r"```python\n(.*?)```", section, flags=re.DOTALL).group(1)
+    code = re.search(r"```python\n(.*?)```", section, flags=re.DOTALL).group(1)
+    if keep is None:
+        return code
+    return re.sub(r"^KEEP = \{.*?\}$", f"KEEP = set({sorted(keep)!r})", code, count=1, flags=re.M)
 
 
-def test_the_closeout_snippet_hides_unsold_household_items_and_nothing_else(tmp_path):
-    (tmp_path / "data").mkdir()
-    source = DATA_DIR / "inventory.yaml"
-    (tmp_path / "data" / "inventory.yaml").write_text(source.read_text(encoding="utf-8"))
+def close_out(tmp_path, keep: set[str] | None = None, public_dir=None):
+    """Run the runbook's close-out on a scratch copy; return the data it wrote, and the pages."""
+    (tmp_path / "data").mkdir(exist_ok=True)
+    (tmp_path / "data" / "inventory.yaml").write_text(
+        (DATA_DIR / "inventory.yaml").read_text(encoding="utf-8")
+    )
     result = subprocess.run(
-        [sys.executable, "-c", runbook_snippet()],
+        [sys.executable, "-c", runbook_snippet(keep)],
         cwd=tmp_path,
         capture_output=True,
         text=True,
         check=True,
     )
-    after = yaml.safe_load((tmp_path / "data" / "inventory.yaml").read_text(encoding="utf-8"))
+    data = yaml.safe_load((tmp_path / "data" / "inventory.yaml").read_text(encoding="utf-8"))
+    data["seller"].pop("sale_over", None)
+    return data, result.stdout, (build(public_dir, data) if public_dir else None)
+
+
+def test_the_snippet_pins_exactly_what_this_test_pins():
+    found = re.search(r"^KEEP = \{(.*?)\}$", runbook_snippet(), re.M)
+    assert found, "the close-out snippet no longer pins anything"
+    assert set(re.findall(r'"([^"]+)"', found.group(1))) == PINNED
+
+
+def test_the_closeout_snippet_hides_unsold_household_items_and_nothing_else(tmp_path):
+    after, stdout, _ = close_out(tmp_path)
     by_id = {i["id"]: i for i in after["items"]}
     before = {i["id"]: i for i in SOURCE["items"]}
     assert by_id[CAR].get("published", True) is True
@@ -363,30 +388,57 @@ def test_the_closeout_snippet_hides_unsold_household_items_and_nothing_else(tmp_
         and i.get("published", True)
     ]
     assert unsold, "the real data has household items for sale"
-    assert all(by_id[i["id"]]["published"] is False for i in unsold)
-    assert f"hidden: {len(unsold)}" in result.stdout
+    pinned = [i for i in unsold if i["id"] in PINNED]
+    assert pinned, "nothing left to pin: empty KEEP in the runbook snippet"
+    hidden = [i for i in unsold if i["id"] not in PINNED]
+    assert all(by_id[i["id"]].get("published", True) is True for i in pinned)
+    assert all(by_id[i["id"]]["published"] is False for i in hidden)
+    assert f"hidden: {len(hidden)}" in stdout
     # Same data otherwise: only `published` was added.
     for item_id, item in before.items():
         assert {k: v for k, v in by_id[item_id].items() if k != "published"} == {
             k: v for k, v in item.items() if k != "published"
         }
-    assert after["seller"] == SOURCE["seller"]
+    # The switch is the one thing this helper drops (a scratch build means the catalog), so it is
+    # compared out: this test runs in the end-of-sale mode too, where the owner's file carries it.
+    seller = {k: v for k, v in SOURCE["seller"].items() if k != "sale_over"}
+    assert after["seller"] == seller
 
 
-def test_after_the_closeout_the_page_offers_only_the_car_and_the_old_share_page_is_gone(
-    tmp_path, public_dir
-):
-    (tmp_path / "data").mkdir()
-    (tmp_path / "data" / "inventory.yaml").write_text(
-        (DATA_DIR / "inventory.yaml").read_text(encoding="utf-8")
-    )
-    subprocess.run(
-        [sys.executable, "-c", runbook_snippet()], cwd=tmp_path, check=True, capture_output=True
-    )
-    data = yaml.safe_load((tmp_path / "data" / "inventory.yaml").read_text(encoding="utf-8"))
-    data["seller"].pop("sale_over", None)
-    pages = build(public_dir, data)
+def test_after_the_closeout_the_page_still_sells_the_pinned_item(tmp_path, public_dir):
+    after, _, pages = close_out(tmp_path, public_dir=public_dir)
+    assert pages is not None
+    # The chair is still for sale, so the page still claims furniture and its sheet stays up.
+    assert "furniture" in role(pages["en"], "hero-copy")
+    assert not dates_on(pages["en"])
+    assert (public_dir / "i" / "office-chair-ergonomic" / "index.html").exists()
+    # Every item the close-out hid has no share page left, the car's stays.
+    hidden = [i for i in unsold_household() if i not in PINNED]
+    assert hidden, "the real data has household items for sale"
+    assert not [item_id for item_id in hidden if (public_dir / "i" / item_id).exists()]
+    assert (public_dir / "i" / CAR / "index.html").exists()
+
+
+def unsold_household():
+    """The household items a close-out run today would have to decide about."""
+    return [
+        i["id"]
+        for i in SOURCE["items"]
+        if i["category"] != "Vehicle"
+        and i.get("status", "Available") != "Sold"
+        and i.get("published", True)
+    ]
+
+
+def test_the_chairs_last_day_leaves_the_page_the_cars(tmp_path, public_dir):
+    """Oct 24: the chair sold or hidden, and the page is the car's alone."""
+    after, stdout, pages = close_out(tmp_path, keep=set(), public_dir=public_dir)
+    assert pages is not None
+    chair = next(i for i in after["items"] if i["id"] == "office-chair-ergonomic")
+    assert chair["published"] is False
+    assert unsold_household(), "the real data has household items for sale"
+    assert f"hidden: {len(unsold_household())}" in stdout
     assert "furniture" not in role(pages["en"], "hero-copy")
     assert not dates_on(pages["en"])
-    assert not (public_dir / "i" / "ikea-mattress-topper").exists()
+    assert not [item_id for item_id in unsold_household() if (public_dir / "i" / item_id).exists()]
     assert (public_dir / "i" / CAR / "index.html").exists()

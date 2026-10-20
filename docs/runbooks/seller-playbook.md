@@ -62,7 +62,8 @@ unverified vehicle service, condition or retail value.
 | October 12–15 | The price drop opens October 13 (the only one before the floors); review items with no messages before changing their public asking prices. If the sectional is unsold, contact The Good Couch with real photos by October 12 as a backup, and book donation/pickup alternatives by October 15 ([backup-exits.md](backup-exits.md)); confirm acceptance first, especially for bedding, electronics and sleeper sofas. |
 | October 16–19 | Reserve floors open October 16 for household items. Bundles are off the catalog (owner, 2026-10-16); re-post what is left without claiming items already sold. |
 | October 20–22 | Household giveaway window: give away or donate what is left; last drop-offs and recycling by October 21 ([backup-exits.md](backup-exits.md)). Take down sold listings. |
-| October 23 | Household deadline: take the unsold household items off the catalog ([household close-out](decommission.md)). From here the page is about the car. |
+| October 23 | Household deadline: take the unsold household items off the catalog ([household close-out](decommission.md)), except the office chair, which stays for sale one more day. |
+| October 24 | The office chair's last day: sell it (`make sold`) or take it off the catalog, and from then the page is about the car ([the chair's last day](decommission.md)). |
 | October 24–November 9 | Sell the car and arrange its handover in this window, never later than November 9 (see [vehicle-sale.md](vehicle-sale.md)); refresh the car's instant offers after October 30 and do not promise a later bank transaction. |
 | By November 9 | Car handed over: turn the sale off, take down the car's listings and follow the [decommission runbook](decommission.md) to remove public contact details. Verify the catalog no longer exposes a contact number. |
 

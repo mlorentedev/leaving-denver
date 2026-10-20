@@ -43,8 +43,9 @@ CARRIERS = ("convertible-desk", "office-chair-ergonomic", "dell-monitor-32")
 
 @pytest.mark.parametrize("locale", PAGES)
 def test_the_pickup_from_date_ships_for_every_carrier_in_both_locales(locale):
-    """`pickup_from` (BUG: the desk and chair are not physically available until Oct 23, the monitor until Nov 15) ships
-    on every carrier, in the locale's copy, and on no one else."""
+    """`pickup_from` (BUG: an item is not physically available until its date — the chair is free to
+    leave from Oct 24, the monitor from Nov 15) ships on every carrier, in the locale's copy, and on
+    no one else."""
     _, items = inventory(PAGES[locale])
     for item_id, item in items.items():
         source = SOURCE[item_id]

@@ -1,6 +1,7 @@
 """The decommission runbook and ADR-008 (OPS-011): the end of the sale is a dated checklist
-the owner follows on Oct 23, by Nov 9 and by Nov 15, so each step has to be a command or a named
-dashboard path, and no credential the repository uses can be left off the list."""
+the owner follows on Oct 23, on Oct 24 for the last item, by Nov 9 and by Nov 15, so each step
+has to be a command or a named dashboard path, and no credential the repository uses can be
+left off the list."""
 
 import re
 from pathlib import Path
@@ -22,6 +23,7 @@ def section(heading):
 
 def test_there_is_a_section_for_each_date():
     assert section("Oct 23")
+    assert section("Oct 24")
     assert section("By Nov 9")
     assert section("By Nov 15")
 
@@ -90,15 +92,21 @@ def test_no_google_voice_number_is_left_to_release():
         assert "get a Google Voice" not in text, name
 
 
-def test_the_oct_23_check_matches_the_page_the_build_makes():
-    """The close-out check greps the live page for what the locale file renders (FEAT-014: no
-    date is ever shown), so a reworded page fails here, not on the day."""
-    oct_23 = " ".join(section("Oct 23").split())
+def test_each_closeout_check_matches_the_page_the_build_makes():
+    """The close-out checks grep the live page for what the locale file renders (FEAT-014: no
+    date is ever shown), so a reworded page fails here, not on the day. Two checks, because the
+    chair stays for sale a day past the deadline: Oct 23 still sells furniture, Oct 24 sells only
+    the car."""
     en = yaml.safe_load((ROOT / "locales/en.yaml").read_text(encoding="utf-8"))
-    assert en["page_title_vehicle"] in oct_23
+    oct_23 = " ".join(section("Oct 23").split())
+    assert en["page_title_both"] in oct_23
     assert en["sale_status"] in oct_23
-    assert "Car available until" not in oct_23
-    assert "counts down" not in oct_23
+    oct_24 = " ".join(section("Oct 24").split())
+    assert en["page_title_vehicle"] in oct_24
+    assert en["sale_status"] in oct_24
+    for text in (oct_23, oct_24):
+        assert "Car available until" not in text
+        assert "counts down" not in text
 
 
 def test_by_nov_9_takes_down_the_cars_listing_and_the_reminder_workflow():
@@ -144,10 +152,22 @@ def test_no_runbook_command_prints_a_secret():
 
 def test_the_household_closeout_comes_first_and_does_not_end_the_sale():
     oct_23 = section("Oct 23")
-    assert RUNBOOK.index("\n## Oct 23") < RUNBOOK.index("\n## Before Nov 9")
+    assert RUNBOOK.index("\n## Oct 23") < RUNBOOK.index("\n## Oct 24")
+    assert RUNBOOK.index("\n## Oct 24") < RUNBOOK.index("\n## Before Nov 9")
     assert "published: false" in oct_23
     assert "sale_over" not in oct_23
     assert "without being marked Sold" in " ".join(oct_23.split())
+
+
+def test_the_closeout_pins_the_last_item_for_sale_and_says_when_to_let_it_go():
+    """The chair is the last household item for sale (owner, 2026-10-19): the runbook keeps it,
+    names the day it goes, and says that from then the page is the car's alone."""
+    oct_23 = " ".join(section("Oct 23").split())
+    assert 'KEEP = {"office-chair-ergonomic"}' in oct_23
+    assert "2026-10-19" in oct_23
+    oct_24 = " ".join(section("Oct 24").split())
+    assert "KEEP = set()" in oct_24
+    assert "office-chair-ergonomic" in oct_24
 
 
 def test_the_sale_is_turned_off_with_the_car_not_on_a_fixed_day():
@@ -165,3 +185,15 @@ def test_the_terraform_objects_go_before_the_token_that_removes_them_and_the_sta
     assert "leaving-denver-analytics-read" in by_nov_15 and "not in Terraform" in by_nov_15
     assert "terraform.tfstate*" in by_nov_15 and "owner_email" in by_nov_15
     assert by_nov_15.index("Terraform token") < by_nov_15.index("terraform.tfstate*")
+
+
+def test_every_documented_sale_names_its_item_and_price_as_make_variables():
+    """`make sold` reads ID= and PRICE=: a positional id is a make target, so the command would
+    sell nothing and say it did (CodeRabbit on #259)."""
+    for path in sorted((ROOT / "docs").rglob("*.md")):
+        for line in path.read_text(encoding="utf-8").splitlines():
+            command = line.split("#", 1)[0]
+            for found in re.finditer(r"make sold(?P<args>[^`\n]*)", command):
+                args = found.group("args").strip()
+                if args:
+                    assert "ID=" in args, (path.name, line)
