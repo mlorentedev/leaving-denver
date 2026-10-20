@@ -399,7 +399,10 @@ def test_the_closeout_snippet_hides_unsold_household_items_and_nothing_else(tmp_
         assert {k: v for k, v in by_id[item_id].items() if k != "published"} == {
             k: v for k, v in item.items() if k != "published"
         }
-    assert after["seller"] == SOURCE["seller"]
+    # The switch is the one thing this helper drops (a scratch build means the catalog), so it is
+    # compared out: this test runs in the end-of-sale mode too, where the owner's file carries it.
+    seller = {k: v for k, v in SOURCE["seller"].items() if k != "sale_over"}
+    assert after["seller"] == seller
 
 
 def test_after_the_closeout_the_page_still_sells_the_pinned_item(tmp_path, public_dir):

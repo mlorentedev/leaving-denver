@@ -113,6 +113,9 @@ def sold_output(monkeypatch, capsys, price):
         cli, "set_item_status", lambda item_id, status: {**inv["items"][0], "status": status}
     )
     monkeypatch.setattr(cli, "record_sale", lambda *a: None)
+    # Without this the command rebuilds the real build/public mid-suite (lesson 041): the end-of-sale
+    # job then finds a /seller/ page the catalog build would have left behind.
+    monkeypatch.setattr(cli, "build_all", lambda: None)
     cli.cmd_sold(SimpleNamespace(id="desk", price=price))
     return capsys.readouterr().out
 
