@@ -109,11 +109,12 @@ After it deploys, the page sells only the car: its title is the vehicle one, it 
 ```
 curl -s https://leaving-denver.pages.dev/ | grep -o '<title>[^<]*'                 # <title>Denver Tech Center Relocation Sale — AWD SUV
 curl -s https://leaving-denver.pages.dev/ | grep -o 'data-role="sale-status">[^<]*' # data-role="sale-status">Ready for pickup
-curl -sI https://leaving-denver.pages.dev/i/office-chair-ergonomic/ | head -1      # 404
+curl -sI https://leaving-denver.pages.dev/i/office-chair-ergonomic/ | head -1      # 404 if it came off the catalog, 200 if it sold
 ```
 
 Reprint the flyer: the paper one still lists the chair. A chair that sold instead keeps its
-share page, like every other Sold item.
+share page, like every other Sold item: 200 is the pass there, and 404 the pass when it came off
+the catalog unsold.
 
 ## Before Nov 9: rehearse the end deploy on a preview
 

@@ -100,7 +100,7 @@ def test_record_sale_raises_when_sops_fails(monkeypatch, tmp_path):
 
 
 def sold_output(monkeypatch, capsys, price):
-    """Run `sold` against one $60 item and return what it printed."""
+    """Run `sold` against one $60 item: what it printed, and what it recorded."""
     inv = {
         "items": [
             {"id": "desk", "title": "Desk", "status": "Available", "recommended_list_price": 60}
@@ -112,18 +112,24 @@ def sold_output(monkeypatch, capsys, price):
     monkeypatch.setattr(
         cli, "set_item_status", lambda item_id, status: {**inv["items"][0], "status": status}
     )
-    monkeypatch.setattr(cli, "record_sale", lambda *a: None)
+    recorded = []
+    monkeypatch.setattr(cli, "record_sale", lambda *a: recorded.append(a))
     # Without this the command rebuilds the real build/public mid-suite (lesson 041): the end-of-sale
     # job then finds a /seller/ page the catalog build would have left behind.
     monkeypatch.setattr(cli, "build_all", lambda: None)
     cli.cmd_sold(SimpleNamespace(id="desk", price=price))
-    return capsys.readouterr().out
+    return capsys.readouterr().out, recorded
 
 
-def test_a_giveaway_prints_the_zero_it_recorded(monkeypatch, capsys):
-    """$0 is a realized price, not a missing one: the asking price must not stand in."""
-    assert "(Price: $0)" in sold_output(monkeypatch, capsys, 0)
+def test_a_giveaway_prints_and_records_the_zero(monkeypatch, capsys):
+    """$0 is a realized price, not a missing one: the asking price must not stand in, and the
+    recorder must get a real 0 rather than None."""
+    output, recorded = sold_output(monkeypatch, capsys, 0)
+    assert "(Price: $0)" in output
+    assert recorded == [("desk", 0, date.today())]
 
 
 def test_a_sale_with_no_price_prints_the_asking_price(monkeypatch, capsys):
-    assert "(Price: $60)" in sold_output(monkeypatch, capsys, None)
+    output, recorded = sold_output(monkeypatch, capsys, None)
+    assert "(Price: $60)" in output
+    assert recorded == [("desk", None, date.today())]
