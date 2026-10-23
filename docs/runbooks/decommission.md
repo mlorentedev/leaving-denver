@@ -233,7 +233,7 @@ Only after step 3 of "By Nov 9" passed. From here the CI deploy cannot run again
 `SELLER_PHONE` and the token. The deployed end page keeps serving. A later change to it needs a
 new token (ADR-008).
 
-1. Delete the GitHub secrets, in both environments. A name that was never set is only reported:
+1. Delete the GitHub secrets in the production environment. A name that was never set is only reported:
 
    ```
    for environment in production; do

@@ -867,7 +867,10 @@ items:
   recommended_list_price: 100
   condition: Used - Like New
   dimensions: Queen, 82" L x 62" W x 40" H (Headboard)
-  size_in: [82, 62, 40]
+  size_in:
+  - 82
+  - 62
+  - 40
   color: Charcoal / Dark Gray Fabric
   status: Available
   primary_image: catalog/queen-bed-frame-mattress/bed-assembled-front.jpg
@@ -879,22 +882,31 @@ items:
   - catalog/queen-bed-frame-mattress/frame-slats-side.jpg
   - catalog/queen-bed-frame-mattress/disassembled-suv-ready.jpg
   specs:
-  - Complete Queen bedroom setup with upholstered platform bed frame and 10" hybrid mattress
-  - "Flexible purchase: Complete Set ($120) | Bed Frame alone ($75) | Allswell Mattress alone ($55)"
-  - Bed Frame: Modern horizontal 3-panel channel-tufted headboard in durable dark gray / charcoal upholstery
-  - Heavy-duty solid wooden slat support system with center metal rail and center support legs (no box spring required)
-  - "Mattress: The Allswell 10-inch Queen Hybrid combining gel memory foam with individually wrapped pocketed coils"
-  - Spotless condition: completely clean, no stains, used in a smoke-free and pet-free home
-  - Disassembled and SUV-ready: side rails split in halves, wooden slats roll up, fits flat in any standard SUV or crossover
-  - All hardware, bolts, and Allen wrench tool included; reassembles in just 10-15 minutes
+  - Complete Queen bedroom setup with upholstered platform bed frame and 10" hybrid
+    mattress
+  - 'Flexible purchase options: available as a complete set, or the bed frame and
+    Allswell mattress separately'
+  - 'Bed Frame: Modern horizontal 3-panel channel-tufted headboard in durable dark
+    gray / charcoal upholstery'
+  - Heavy-duty solid wooden slat support system with center metal rail and center
+    support legs (no box spring required)
+  - 'Mattress: The Allswell 10-inch Queen Hybrid combining gel memory foam with individually
+    wrapped pocketed coils'
+  - 'Spotless condition: completely clean, no stains, used in a smoke-free and pet-free
+    home'
+  - 'Disassembled and SUV-ready: side rails split in halves, wooden slats roll up,
+    fits flat in any standard SUV or crossover'
+  - All hardware, bolts, and Allen wrench tool included; reassembles in just 10-15
+    minutes
   included:
-  - Queen upholstered platform bed frame (headboard, footboard, side rails, center beam, legs)
+  - Queen upholstered platform bed frame (headboard, footboard, side rails, center
+    beam, legs)
   - Roll-up solid wooden slat system
   - The Allswell 10" Queen Hybrid mattress (clean & spotless)
   - All original assembly hardware and Allen wrench tool
   pickup_note: |
-    • BED FRAME: Disassembled and organized with all hardware and tools included. Easily fits flat inside any standard SUV, crossover, hatchback, or minivan with folding rear seats.
-    • MATTRESS: The Allswell Hybrid contains steel pocketed coils and CANNOT be rolled up or folded (rigid flat dimensions: 60" W x 80" L). Transporting the mattress requires a pickup truck, cargo van, trailer, or roof rack with ratchet straps.
+    - BED FRAME: Already completely disassembled and organized with all hardware and tools included. Easily fits flat inside any standard SUV, crossover, hatchback, or minivan with folding rear seats.
+    - MATTRESS: The Allswell Hybrid contains steel pocketed coils and CANNOT be rolled up or folded (rigid flat dimensions: 60" W x 80" L). Transporting the mattress requires a pickup truck, cargo van, trailer, or roof rack with ratchet straps.
 
     Pickup in Denver Tech Center (DTC). I am happy to help you carry and load it!
   es:
@@ -903,24 +915,33 @@ items:
     short_title: Cama Queen + Colchón Allswell
     dimensions: Queen, 82" L x 62" W x 40" H (Cabecero)
     specs:
-    - Juego completo Queen con base de plataforma tapizada y colchón híbrido de 10 pulgadas
-    - "Venta flexible: Juego completo ($120) | Solo estructura de cama ($75) | Solo colchón Allswell ($55)"
-    - Estructura: Cabecero moderno con diseño horizontal de 3 paneles tapizado en tela gris oscuro
-    - Sistema de soporte con listones de madera maciza, viga metálica central y patas de apoyo (no requiere somier ni box spring)
-    - "Colchón: The Allswell híbrido Queen de 10 pulgadas con espuma viscoelástica de gel refrigerante y resortes embolsados individuales"
-    - Estado impecable: totalmente limpio, sin manchas, usado en un hogar libre de humo y sin mascotas
-    - Desmontada y lista para SUV: los largueros se dividen en mitades y las tablillas se enrollan, cabe plano en cualquier SUV o crossover normal
-    - Incluye todos los tornillos y la llave Allen; se vuelve a armar fácilmente en 10-15 minutos
+    - Juego completo Queen con base de plataforma tapizada y colchón híbrido de 10
+      pulgadas
+    - 'Opciones flexibles de compra: disponible como juego completo, o la estructura
+      de cama y el colchón Allswell por separado'
+    - 'Estructura: Cabecero moderno con diseño horizontal de 3 paneles tapizado en
+      tela gris oscuro'
+    - Sistema de soporte con listones de madera maciza, viga metálica central y patas
+      de apoyo (no requiere somier ni box spring)
+    - 'Colchón: The Allswell híbrido Queen de 10 pulgadas con espuma viscoelástica
+      de gel refrigerante y resortes embolsados individuales'
+    - 'Estado impecable: totalmente limpio, sin manchas, usado en un hogar libre de
+      humo y sin mascotas'
+    - 'Desmontada y lista para SUV: los largueros se dividen en mitades y las tablillas
+      se enrollan, cabe plano en cualquier SUV o crossover normal'
+    - Incluye todos los tornillos y la llave Allen; se vuelve a armar fácilmente en
+      10-15 minutos
     included:
-    - Estructura de cama Queen tapizada (cabecero, piecero, largueros laterales, viga central, patas)
+    - Estructura de cama Queen tapizada (cabecero, piecero, largueros laterales, viga
+      central, patas)
     - Sistema de listones de madera maciza enrollables
     - Colchón híbrido Queen The Allswell de 10" (impecable)
     - Toda la tornillería y herramienta (llave Allen)
     pickup_note: |
-      • ESTRUCTURA DE CAMA: Ya está totalmente desmontada con toda su tornillería y herramienta. Cabe plana en cualquier SUV, crossover, hatchback o minivan con asientos abatidos.
-      • COLCHÓN: El colchón Allswell Hybrid contiene muelles de acero ensacados y NO se puede enrollar ni doblar (medida plana: 60" x 80" / 152 x 203 cm). Para transportar el colchón se requiere pickup truck, furgoneta grande, o baca/techo del coche con cinchas.
+      - ESTRUCTURA DE CAMA: Ya está totalmente desmontada y agrupada con toda su tornillería y herramienta incluida. Cabe perfectamente plana en cualquier SUV, crossover, hatchback o minivan con los asientos traseros abatidos.
+      - COLCHÓN: El colchón Allswell Hybrid contiene muelles de acero ensacados y NO se puede enrollar ni doblar (medidas fijas plano: 60" x 80" / 152 x 203 cm). Para transportar el colchón se requiere pickup truck / camioneta, furgoneta grande, remolque o baca/techo del coche con cinchas de amarre.
 
-      Recogida en Denver Tech Center (DTC). Con gusto ayudo a cargarlo.
+      Recogida en Denver Tech Center (DTC). Con gusto ayudo a cargarlo en su vehículo.
   tags:
   - queen bed
   - queen bed frame

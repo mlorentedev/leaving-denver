@@ -161,7 +161,7 @@ keys, asks "Passphrase (Enter to generate one):", seals
 with Node WebCrypto, and writes `SELLER_SEALED` to both environments with `gh secret set`. To
 re-seal without the rest, run `uv run leaving-denver seal`. The envelope has to be under 40,000
 bytes (the worst case measures about 33,000). Nothing is written to disk.
-After sealing, redeploy: `gh workflow run ci.yml --ref main -f branch=main`.
+After sealing, redeploy: `gh workflow run ci.yml --ref main`.
 
 **The passphrase and Bitwarden.** Press Enter at the prompt to have five words generated. With
 `dotf` on `PATH` they are saved to the Bitwarden login item `leaving-denver-seller` (field
@@ -252,7 +252,7 @@ Do not redeploy afterwards: the deploy job needs the secrets until the end page 
   `make ci-secrets` from a machine with the age key and an admin `gh`: it copies the
   phone into the `SELLER_PHONE` secret of both environments. Commit only the encrypted
   file and merge. If `make ci-secrets` ran after the merge, redeploy with
-  `gh workflow run ci.yml --ref main -f branch=main`: a deploy uses the secret as it
+  `gh workflow run ci.yml --ref main`: a deploy uses the secret as it
   was when it started. Then test the SMS CTA on the live site and update marketplace
   listings. Push CI uses a placeholder phone, so its green check does not validate the
   production contact.
@@ -319,7 +319,7 @@ Owner setup (dashboards; this repository cannot enable either). Both are in plac
   Web Analytics setting, then merge this PR. The CSP keeps allowing the beacon, which is harmless while it is off.
   The notes below describe how it worked (ADR-005; Terraform leaves it alone, ADR-012).
   - Pages injects the beacon only from the next deployment on. On 2026-10-01 a production
-    redeploy (`gh workflow run ci.yml --ref main -f branch=main`) was needed before it
+    redeploy (`gh workflow run ci.yml --ref main`) was needed before it
     appeared.
   - Verify with `curl -s https://leaving-denver.pages.dev/ | grep -c cloudflareinsights`
     and a test visit that shows in the dashboard.

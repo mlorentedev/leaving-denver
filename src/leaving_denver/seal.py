@@ -50,7 +50,7 @@ PASSPHRASE_WORDS = 5
 # The bitwarden id is the dotfiles secret's name; PASSPHRASE_ENV (private_data) is the variable
 # `dotf secrets run --only SELLER_PASSPHRASE -- make ...` injects into one child alone.
 BITWARDEN_ID = "SELLER_PASSPHRASE"
-DEPLOY_DISPATCH = ["workflow", "run", "ci.yml", "--ref", "main", "-f", "branch=main"]
+DEPLOY_DISPATCH = ["workflow", "run", "ci.yml", "--ref", "main"]
 
 
 class SealError(RuntimeError):
