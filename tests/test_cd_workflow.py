@@ -15,21 +15,14 @@ WORKFLOW = yaml.load(
     Loader=yaml.BaseLoader,
 )
 DEPLOY = WORKFLOW["jobs"]["deploy"]
-BRANCH = "${{ github.event_name == 'push' && 'main' || inputs.branch }}"
 
 
 def test_main_push_deploys_production_only_after_tests():
     assert WORKFLOW["on"]["push"]["branches"] == ["main"]
     assert DEPLOY["needs"] == ["test", "test-end-of-sale"]
-    assert DEPLOY["if"] == (
-        "(github.event_name == 'push' && github.ref == 'refs/heads/main')"
-        " || github.event_name == 'workflow_dispatch'"
-    )
-    assert DEPLOY["environment"]["name"] == (
-        "${{ github.event_name == 'push' && 'production' "
-        "|| inputs.branch == 'main' && 'production' || 'preview' }}"
-    )
-    assert DEPLOY["concurrency"]["group"] == f"pages-{BRANCH}"
+    assert DEPLOY["if"] == "github.ref == 'refs/heads/main'"
+    assert DEPLOY["environment"]["name"] == "production"
+    assert DEPLOY["concurrency"]["group"] == "pages-production"
 
 
 def test_the_suite_also_runs_with_the_sale_over():
@@ -45,15 +38,11 @@ def test_the_suite_also_runs_with_the_sale_over():
 
 
 def test_manual_preview_and_guarded_main_redeploy():
-    assert WORKFLOW["on"]["workflow_dispatch"]["inputs"]["branch"]["default"] == "preview"
-    validation = next(
-        step for step in DEPLOY["steps"] if step.get("name") == "Validate branch input"
-    )
-    assert validation["env"]["BRANCH"] == BRANCH
+    validation = next(step for step in DEPLOY["steps"] if step.get("name") == "Require main branch")
     assert "refs/heads/main" in validation["run"]
-    assert "branch=main must be dispatched from main" in validation["run"]
+    assert "production must be deployed from main" in validation["run"]
     deployment = next(step for step in DEPLOY["steps"] if step.get("id") == "deploy")
-    assert deployment["with"]["command"].endswith(f"--branch={BRANCH}")
+    assert deployment["with"]["command"].endswith("--branch=main")
 
 
 def test_deploy_requires_real_phone_and_checks_public_site():
@@ -73,8 +62,8 @@ def test_deploy_requires_real_phone_and_checks_public_site():
 def test_docs_distinguish_auto_production_from_manual_preview():
     readme = (ROOT / "README.md").read_text(encoding="utf-8").lower()
     operations = (ROOT / "docs/runbooks/ops.md").read_text(encoding="utf-8").lower()
-    assert "automatically" in readme and "preview" in readme
-    assert "automatically" in operations and "preview" in operations
+    assert "automatically" in readme and "production" in readme
+    assert "automatically" in operations and "production" in operations
 
 
 def test_deploy_token_is_environment_scoped_and_branches_are_restricted():
@@ -121,7 +110,7 @@ def test_deploy_protection_removes_stale_policies_and_is_idempotent(tmp_path):
             if not args or args[0] != "api":
                 raise SystemExit("unexpected gh command: " + repr(args))
             endpoint = next((arg for arg in args if "/environments/" in arg), "")
-            environment = next((e for e in ("production", "preview") if f"/{e}" in endpoint), None)
+            environment = next((e for e in ("production",) if f"/{e}" in endpoint), None)
             if environment is None:
                 raise SystemExit("missing environment")
             operation = args[args.index("-X") + 1] if "-X" in args else "GET"
@@ -167,17 +156,13 @@ def test_deploy_protection_removes_stale_policies_and_is_idempotent(tmp_path):
         assert result.returncode == 0, result.stderr
         state = json.loads(state_file.read_text(encoding="utf-8"))
         assert [p["name"] for p in state["production"]] == ["main"]
-        assert [p["type"] for p in state["preview"]] == ["branch"]
 
     assert state["writes"] == [
         ["PUT", "production"],
         ["DELETE", "production", 1],
         ["DELETE", "production", 2],
         ["POST", "production"],
-        ["PUT", "preview"],
-        ["DELETE", "preview", 4],
         ["PUT", "production"],
-        ["PUT", "preview"],
     ]
 
 
@@ -205,9 +190,7 @@ def step_index(predicate):
 
 
 def test_production_smokes_a_candidate_before_it_deploys():
-    assert DEPLOY["env"]["PRODUCTION"] == (
-        "${{ github.event_name == 'push' || inputs.branch == 'main' }}"
-    )
+    assert DEPLOY["env"]["PRODUCTION"] == "true"
     candidate = step_index(lambda s: s.get("id") == "candidate")
     candidate_smoke = step_index(lambda s: "steps.candidate.outputs" in str(s.get("env", "")))
     production = step_index(lambda s: s.get("id") == "deploy")
@@ -215,10 +198,6 @@ def test_production_smokes_a_candidate_before_it_deploys():
     steps = DEPLOY["steps"]
     assert steps[candidate]["with"]["command"].endswith("--branch=candidate")
     assert "scripts/smoke.sh" in steps[candidate_smoke]["run"]
-    # A dispatched preview deploys once: both candidate steps are production only.
-    assert steps[candidate]["if"] == PRODUCTION_ONLY
-    assert steps[candidate_smoke]["if"] == PRODUCTION_ONLY
-    assert "if" not in steps[production]
     assert steps[candidate_smoke]["run"] == 'scripts/smoke.sh "$DEPLOYMENT_URL"'
 
 
@@ -238,11 +217,7 @@ def test_the_canonical_site_is_smoked_after_the_production_deploy():
     final = DEPLOY["steps"][-1]
     assert DEPLOY["steps"].index(final) > production
     assert "scripts/smoke.sh" in final["run"]
-    target = final["env"]["DEPLOYMENT_URL"]
-    assert target == (
-        f"${{{{ env.PRODUCTION == 'true' && '{CANONICAL}' "
-        "|| steps.deploy.outputs.deployment-url }}"
-    )
+    assert CANONICAL in final["run"]
 
 
 def run_contact_gate(phone):

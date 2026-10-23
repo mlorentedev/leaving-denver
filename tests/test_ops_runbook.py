@@ -111,7 +111,6 @@ def test_the_runbook_covers_the_sealed_private_data():
         "delete the earlier Pages deployments",
         "**Decommission by 2026-11-09.**",
         "gh secret delete SELLER_SEALED --env production",
-        "--env preview",
         "content-security-policy",
         "frame-ancestors 'none'",
         "3 s or less",

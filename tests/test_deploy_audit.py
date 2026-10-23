@@ -59,9 +59,9 @@ def expected():
         "policies": [{"id": 1, "name": "main", "type": "branch"}],
     }
     return {
-        "environments": {"production": environment, "preview": json.loads(json.dumps(environment))},
+        "environments": {"production": environment},
         "secrets": ["SOME_OTHER_SECRET"],
-        "env_secrets": {"production": ["SELLER_SEALED"], "preview": ["SELLER_SEALED"]},
+        "env_secrets": {"production": ["SELLER_SEALED"]},
     }
 
 
@@ -103,7 +103,7 @@ def drift(change):
 @pytest.mark.parametrize(
     "state, reason",
     [
-        (drift(lambda s: s["environments"].pop("preview")), "preview is missing"),
+        (drift(lambda s: s["environments"].pop("production")), "production is missing"),
         (
             drift(
                 lambda s: s["environments"]["production"]["policies"].append(
@@ -113,10 +113,10 @@ def drift(change):
             "production allows",
         ),
         (
-            drift(lambda s: s["environments"]["preview"]["policies"][0].update(type="tag")),
-            "preview allows: tag:main",
+            drift(lambda s: s["environments"]["production"]["policies"][0].update(type="tag")),
+            "production allows: tag:main",
         ),
-        (drift(lambda s: s["environments"]["preview"].update(policies=[])), "allows: nothing"),
+        (drift(lambda s: s["environments"]["production"].update(policies=[])), "allows: nothing"),
         (
             drift(
                 lambda s: s["environments"]["production"]["policy"].update(protected_branches=True)
@@ -137,15 +137,13 @@ def test_drift_fails_the_audit(tmp_path, state, reason):
     assert reason in result.stderr
 
 
-@pytest.mark.parametrize("environment", ["production", "preview"])
+@pytest.mark.parametrize("environment", ["production"])
 def test_a_missing_sealed_secret_in_either_environment_warns_without_failing(tmp_path, environment):
     state = expected()
     state["env_secrets"][environment] = ["SOME_OTHER_SECRET"]
     result = audit(tmp_path, state)
     assert result.returncode == 0, result.stderr
     assert f"SELLER_SEALED is not set in {environment}" in result.stderr
-    other = "preview" if environment == "production" else "production"
-    assert f"not set in {other}" not in result.stderr
 
 
 def test_both_environments_holding_the_sealed_secret_raise_no_warning(tmp_path):

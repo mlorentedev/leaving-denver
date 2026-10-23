@@ -39,8 +39,8 @@ def test_by_nov_9_flips_the_switch_and_takes_the_listings_down():
 
 def test_the_end_deploy_is_rehearsed_on_a_preview_before_the_day():
     before = section("Before Nov 9")
-    assert "make deploy BRANCH=preview" in before  # never the default-dependent bare target
-    assert "preview.leaving-denver.pages.dev" in before
+    assert "make deploy BRANCH=candidate" in before  # never the default-dependent bare target
+    assert "candidate.leaving-denver.pages.dev" in before
     assert "scripts/smoke.sh" in before
     assert "git checkout data/inventory.yaml" in before  # the rehearsal flip is never committed
 
@@ -61,7 +61,7 @@ def test_every_secret_a_workflow_reads_is_deleted_in_both_environments():
     assert used, "no workflow secret found: the pattern is stale"
     by_nov_15 = section("By Nov 15")
     assert "gh secret delete" in by_nov_15
-    assert "for environment in production preview" in by_nov_15
+    assert "for environment in production" in by_nov_15
     for name in used | {"SELLER_SEALED"}:
         assert name in by_nov_15, f"{name} is not deleted by the runbook"
 

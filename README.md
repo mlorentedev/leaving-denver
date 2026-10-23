@@ -72,12 +72,9 @@ Only `build/public/` is uploaded to Pages.
 ### 3. Deploy (Cloudflare Pages)
 
 Every push to `main` automatically publishes the live site **after** the CI
-tests pass. Pull requests only run tests. For a manual preview (or an explicit
-production redeploy), use *Actions → ci → Run workflow* with a `branch` input:
-`main` publishes production when dispatched from `main`; any other name
-(default `preview`) creates `<branch>.leaving-denver.pages.dev`. The deploy
-job rebuilds with the real phone, runs `make check`, deploys with wrangler
-and smoke-tests the deployment (`scripts/smoke.sh`).
+tests pass. Pull requests only run tests. For an explicit production redeploy,
+use *Actions → ci → Run workflow*. The deploy job rebuilds with the real phone,
+runs `make check`, deploys with wrangler and smoke-tests the deployment (`scripts/smoke.sh`).
 The bilingual footer links the developer's GitHub profile and, on CI builds,
 the deployed commit (`GITHUB_SHA`) so the live version is identifiable.
 
@@ -86,17 +83,16 @@ One-time setup, all idempotent and run from a machine with the age key:
 ```bash
 make cf-project     # create the Pages project if missing
 make protect-main   # require the CI `test` check on main
-make ci-secrets     # restrict both deploy environments to main, scope the token, set the phone
+make ci-secrets     # restrict the deploy environment to main, scope the token, set the phone
 ```
 
 The deploy token (Cloudflare Pages: Edit, this account only) lives in
 `data/private.sops.yaml` as `cloudflare_pages_token`; the account id is
 `CF_ACCOUNT_ID` in the Makefile (Pages' `wrangler.toml` rejects it). The token
-is stored in the `production` and `preview` GitHub environments, **not** as a
-repository-wide secret. Both environments accept deployments only from `main`;
-manual previews select a Pages branch while running the trusted workflow from
-`main`. Re-run `make ci-secrets` after rotating the token. `make deploy
-BRANCH=<name>` deploys from this machine as a fallback.
+is stored in the `production` GitHub environment, **not** as a
+repository-wide secret. It accepts deployments only from `main`.
+Re-run `make ci-secrets` after rotating the token. `make deploy` deploys
+from this machine as a fallback.
 The Pages project and the Cloudflare Access application in front of `/seller/` are Terraform in
 `infra/terraform/cloudflare/` (local, gitignored state; ADR-012): `make infra-plan`, read it,
 `make infra-apply`. `make infra-fmt` (format and validate, no credentials) runs as part of

@@ -44,7 +44,7 @@ ENVELOPE_KEYS = {"v", "kdf", "iter", "salt", "iv", "ct"}
 
 # GitHub caps a secret at 48 KB (49,152 bytes); the seal refuses well before that.
 SIZE_BUDGET = 40_000
-ENVIRONMENTS = ("production", "preview")
+ENVIRONMENTS = ("production",)
 SECRET_NAME = "SELLER_SEALED"
 PASSPHRASE_WORDS = 5
 # The bitwarden id is the dotfiles secret's name; PASSPHRASE_ENV (private_data) is the variable
@@ -381,7 +381,7 @@ def save_to_bitwarden(passphrase: str) -> bool:
 
 
 def upload_secret(envelope: str) -> None:
-    """Set SELLER_SEALED in both environments (the envelope on stdin, never argv), then remove
+    """Set SELLER_SEALED in the production environment (the envelope on stdin, never argv), then remove
     any repository-level copy: a repository secret would reach every workflow."""
     for environment in ENVIRONMENTS:
         done = gh("secret", "set", SECRET_NAME, "--env", environment, stdin=envelope)

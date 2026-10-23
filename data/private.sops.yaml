@@ -17,6 +17,7 @@ floors:
     auxiliary-c-table: ENC[AES256_GCM,data:yKY=,iv:oChgMiW6hR3zqWVPN4GgzdIdBpfjGmWVfl+lgV0YfjE=,tag:JuSJ/ek2iXIvFOgoEdGw8A==,type:int]
     2019-ford-escape-sel-awd: ENC[AES256_GCM,data:2Y5AUwk=,iv:2vLK6Cs7yPtmrrhv6vjBSNfZLe89xq+OioNrzm5Lqws=,tag:61CssPPytzXWsCvnfD5gtQ==,type:int]
     lamps-pair: ENC[AES256_GCM,data:H6k=,iv:PHJG3B7F9dhBb0nZRqyva1nbDe6KwkOw3IyOBk70zGM=,tag:ATFs6SKM10L/sm2xF4G3wg==,type:float]
+    queen-bed-frame-mattress: ENC[AES256_GCM,data:js4=,iv:mXLSnr2zymTmTg8hZMow5Pbgy0p5bsE8J5AfD8+0ynQ=,tag:DL/5ZYDvStynaGNdhXebtw==,type:float]
 targets:
     sofa-sleeper: ENC[AES256_GCM,data:FIe1,iv:IjGp+I6/rrEAxh5x0YOPZMwm+f/u7IEx+ySj/KH66IM=,tag:th6MRzvD2mp0l6KuFTpTzA==,type:int]
     dell-monitor-32: ENC[AES256_GCM,data:/u4=,iv:6Y+jD3drwEF+HJO5iMRTP+sVLb+Gnv/HD6EAIoSenMg=,tag:UtU/x6gvbTcIw3LKxI0VHw==,type:int]
@@ -84,7 +85,7 @@ sops:
             N5S0b6gn+J7t3Lg9zTalfJK5VHCwzBcjg5kbjsk7dea2bNSxWE/NQA==
             -----END AGE ENCRYPTED FILE-----
           recipient: age166v8efpskctmxxes5lcqpxkj0ny3q74l3v0pswpdpa63wlkqmc8q35fkdw
-    lastmodified: "2026-10-20T00:22:32Z"
-    mac: ENC[AES256_GCM,data:xYiVJPrX3C1TyHgeM5sm4rt6YGVMylan8yfsJ1r1W/pEvS3+ZPW7POSOSG6SU/wmv672MdqTeBwaXnXm5Sg6mNUrtaszDP9B7TKZhu0GvociuK45GmhKjPjtF5ub2PMlzLyCGHccYZXx4NB4+A7UETuxO5S2abdnAJHV/x2lyIo=,iv:9Bi9avathPQkhi1yyF7DmvAfXomyg8jz7YFZr7ywFuo=,tag:FK5/zOEGC0NW+1Vdur7FVQ==,type:str]
+    lastmodified: "2026-10-23T19:03:00Z"
+    mac: ENC[AES256_GCM,data:QCtdU9OG93iynWN9xDl6B4wdvp/uXhOEryWu9To9baO74rZaWVbrLMlZZL8G3OB8bhCv1nUlvKiuzrSO4FMR/pku5edzRIcFtG0iG8nbN1XL35JlNKgGZw53dP7XMud2OrUeMXm+WqRtb8M15p0vdq93adHKt9U4/B80SPJgtJ0=,iv:xEm1s3A9oLipmsGwpoWj//Cl/qAK0Twmj+eo1LFbZ88=,tag:KhzsuYWAaEVGbfmQ6DI7HA==,type:str]
     unencrypted_suffix: _unencrypted
     version: 3.13.1

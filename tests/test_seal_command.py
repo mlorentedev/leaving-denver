@@ -208,7 +208,6 @@ def test_a_valid_passphrase_sets_the_secret_in_both_environments_on_stdin_only(
     uploads = sets(seen)
     assert [c["argv"] for c in uploads] == [
         ["secret", "set", "SELLER_SEALED", "--env", "production"],
-        ["secret", "set", "SELLER_SEALED", "--env", "preview"],
     ]
     for upload in uploads:
         envelope = seal.validate_envelope(upload["stdin"])
@@ -248,9 +247,9 @@ def test_no_repository_level_copy_means_no_delete(machine, monkeypatch):
 
 
 def test_a_failed_upload_is_an_error_not_a_success(tmp_path, monkeypatch, fixture_data):
-    calls = install_fakes(tmp_path, monkeypatch, fail_on="--env preview")
+    calls = install_fakes(tmp_path, monkeypatch, fail_on="--env production")
     Terminal(monkeypatch)
-    with pytest.raises(seal.SealError, match="preview"):
+    with pytest.raises(seal.SealError, match="production"):
         seal.run_seal()
     assert len(sets(calls())) == 2
 

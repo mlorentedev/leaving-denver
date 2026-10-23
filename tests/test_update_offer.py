@@ -171,7 +171,6 @@ def test_yes_end_to_end_sets_both_environments_then_dispatches_the_deploy(tmp_pa
     cli.cmd_reprice(SimpleNamespace(id="sofa-sleeper", price=190, on=None))
     argv = [call["argv"] for call in gh_calls()]
     assert argv[0] == ["secret", "set", "SELLER_SEALED", "--env", "production"]
-    assert argv[1] == ["secret", "set", "SELLER_SEALED", "--env", "preview"]
     assert argv[-1] == ["workflow", "run", "ci.yml", "--ref", "main", "-f", "branch=main"]
     assert secrets == [], "the passphrase was asked for exactly twice"
     assert json.loads(gh_calls()[0]["stdin"])["v"] == 1
