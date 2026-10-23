@@ -158,7 +158,7 @@ seller phone and the Pages token are never in it.
 **Seal.** `make ci-secrets` (a terminal is required; the seal refuses without one) scopes the
 deploy secrets, then seals: it decrypts `data/private.sops.yaml` in process, takes the allow-listed
 keys, asks "Passphrase (Enter to generate one):", seals
-with Node WebCrypto, and writes `SELLER_SEALED` to both environments with `gh secret set`. To
+with Node WebCrypto, and writes `SELLER_SEALED` to the production environment with `gh secret set`. To
 re-seal without the rest, run `uv run leaving-denver seal`. The envelope has to be under 40,000
 bytes (the worst case measures about 33,000). Nothing is written to disk.
 After sealing, redeploy: `gh workflow run ci.yml --ref main`.
@@ -250,7 +250,7 @@ Do not redeploy afterwards: the deploy job needs the secrets until the end page 
   at the end (#29 was closed as not planned). To change the number, run
   `make secrets` and edit `seller.phone` in `data/private.sops.yaml`, then
   `make ci-secrets` from a machine with the age key and an admin `gh`: it copies the
-  phone into the `SELLER_PHONE` secret of both environments. Commit only the encrypted
+  phone into the `SELLER_PHONE` secret of the production environment. Commit only the encrypted
   file and merge. If `make ci-secrets` ran after the merge, redeploy with
   `gh workflow run ci.yml --ref main`: a deploy uses the secret as it
   was when it started. Then test the SMS CTA on the live site and update marketplace
@@ -286,7 +286,7 @@ Repo side, nothing to do:
 - `scripts/smoke.sh` runs in CI after every deploy: against the `candidate` deployment
   before production moves, then against the canonical site. A red deploy job means
   production did not move, or is wrong: read the run, fix forward or roll back (above).
-- `make audit-deploy` reads the live settings: both environments, their single `main`
+- `make audit-deploy` reads the live settings: the production environment, its single `main`
   branch policy, and (with the owner's `gh`) no deploy secret left at the repository
   level. The `deploy-audit` workflow runs the settings part weekly.
 
