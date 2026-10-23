@@ -125,8 +125,8 @@ from this machine. It needs the age key, and it must happen before the token is 
 
 ```
 sed -i '0,/^seller:/s//seller:\n  sale_over: true/' data/inventory.yaml   # not committed
-make deploy BRANCH=preview                                # never main: the live site is untouched
-scripts/smoke.sh https://preview.leaving-denver.pages.dev # smoke OK (sale over)
+make deploy BRANCH=candidate                              # never main: the live site is untouched
+scripts/smoke.sh https://candidate.leaving-denver.pages.dev # smoke OK (sale over)
 git checkout data/inventory.yaml
 ```
 
@@ -233,10 +233,10 @@ Only after step 3 of "By Nov 9" passed. From here the CI deploy cannot run again
 `SELLER_PHONE` and the token. The deployed end page keeps serving. A later change to it needs a
 new token (ADR-008).
 
-1. Delete the GitHub secrets, in both environments. A name that was never set is only reported:
+1. Delete the GitHub secrets in the production environment. A name that was never set is only reported:
 
    ```
-   for environment in production preview; do
+   for environment in production; do
      for name in CLOUDFLARE_API_TOKEN SELLER_PHONE SELLER_SEALED; do
        gh secret delete "$name" --env "$environment" || echo "$name: not set in $environment"
      done
@@ -319,14 +319,14 @@ new token (ADR-008).
 All of these hold, run from a clone before the archive step (the secrets checks need it):
 
 ```
-# No secret is left, in either environment or at the repository level.
-for environment in production preview; do
+# No secret is left, in the production environment or at the repository level.
+for environment in production; do
   test -z "$(gh secret list --env "$environment")" && echo "$environment: no secrets"
 done
 test -z "$(gh secret list)" && echo "repository: no secrets"
 
 # No phone is served, on any address that still answers.
-for host in leaving-denver candidate.leaving-denver preview.leaving-denver; do
+for host in leaving-denver candidate.leaving-denver; do
   for page in / /es/ /seller/; do
     curl -s "https://$host.pages.dev$page" | grep -ciE '\b(sms|tel):|const _C' || true   # 0 each
   done

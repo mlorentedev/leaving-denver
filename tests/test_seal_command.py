@@ -208,7 +208,6 @@ def test_a_valid_passphrase_sets_the_secret_in_both_environments_on_stdin_only(
     uploads = sets(seen)
     assert [c["argv"] for c in uploads] == [
         ["secret", "set", "SELLER_SEALED", "--env", "production"],
-        ["secret", "set", "SELLER_SEALED", "--env", "preview"],
     ]
     for upload in uploads:
         envelope = seal.validate_envelope(upload["stdin"])
@@ -248,11 +247,11 @@ def test_no_repository_level_copy_means_no_delete(machine, monkeypatch):
 
 
 def test_a_failed_upload_is_an_error_not_a_success(tmp_path, monkeypatch, fixture_data):
-    calls = install_fakes(tmp_path, monkeypatch, fail_on="--env preview")
+    calls = install_fakes(tmp_path, monkeypatch, fail_on="--env production")
     Terminal(monkeypatch)
-    with pytest.raises(seal.SealError, match="preview"):
+    with pytest.raises(seal.SealError, match="production"):
         seal.run_seal()
-    assert len(sets(calls())) == 2
+    assert len(sets(calls())) == 1
 
 
 FIRST_PROMPT = "Passphrase (Enter to generate one): "
@@ -313,7 +312,7 @@ def test_a_typed_passphrase_still_needs_both_entries_to_match(machine, monkeypat
     terminal = Terminal(monkeypatch, secrets=(PASSPHRASE, PASSPHRASE))
     seal.run_seal()
     assert terminal.shown == [], "nothing is generated or shown for a typed passphrase"
-    assert len(sets(calls())) == 2
+    assert len(sets(calls())) == 1
 
 
 def test_a_resealing_never_generates_and_an_empty_entry_aborts(machine, monkeypatch):
@@ -338,7 +337,7 @@ def test_a_resealing_with_the_passphrase_typed_twice_seals(machine, monkeypatch)
     terminal = Terminal(monkeypatch)
     seal.run_seal(offer_generation=False)
     assert len(terminal.asked) == 2
-    assert len(sets(calls())) == 2
+    assert len(sets(calls())) == 1
 
 
 def test_the_summary_names_the_size_and_the_time_never_the_envelope(machine, monkeypatch, capsys):
@@ -404,7 +403,7 @@ def test_a_note_of_exactly_500_characters_seals(machine, monkeypatch):
     monkeypatch.setattr(seal, "decrypt_private", lambda: private)
     Terminal(monkeypatch)
     seal.run_seal()
-    assert len(sets(calls())) == 2
+    assert len(sets(calls())) == 1
 
 
 # AC5: the size
@@ -654,7 +653,7 @@ def test_a_failed_save_falls_back_to_the_terminal_and_the_typed_back_confirmatio
     out = capsys.readouterr()
     assert "Saved to Bitwarden" not in out.out
     assert phrase not in out.out + out.err
-    assert len(sets(calls())) == 2
+    assert len(sets(calls())) == 1
 
 
 def test_a_failed_save_and_a_wrong_confirmation_seal_nothing(machine_with_dotf, monkeypatch):
@@ -675,7 +674,7 @@ def test_enter_without_dotf_falls_back_to_the_terminal(machine, monkeypatch, cap
     seal.run_seal()
     assert phrase in "".join(terminal.shown)
     assert phrase not in capsys.readouterr().out
-    assert len(sets(calls())) == 2
+    assert len(sets(calls())) == 1
 
 
 def test_a_typed_passphrase_with_dotf_is_offered_a_save(machine_with_dotf, monkeypatch):
@@ -686,7 +685,7 @@ def test_a_typed_passphrase_with_dotf_is_offered_a_save(machine_with_dotf, monke
     saved = calls.dotf()
     assert [c["argv"] for c in saved] == [["secrets", "set", "SELLER_PASSPHRASE", "--yes"]]
     assert saved[0]["stdin"] == PASSPHRASE.replace(" ", "-")
-    assert len(sets(calls())) == 2
+    assert len(sets(calls())) == 1
 
 
 def test_a_typed_passphrase_is_not_saved_unless_the_owner_says_yes(machine_with_dotf, monkeypatch):
@@ -694,7 +693,7 @@ def test_a_typed_passphrase_is_not_saved_unless_the_owner_says_yes(machine_with_
     Terminal(monkeypatch, lines=("",))
     seal.run_seal()
     assert calls.dotf() == []
-    assert len(sets(calls())) == 2
+    assert len(sets(calls())) == 1
 
 
 def test_a_typed_passphrase_without_dotf_is_not_offered_a_save(machine, monkeypatch):
@@ -758,7 +757,7 @@ def test_a_blank_environment_value_means_none_and_the_prompt_runs(blank, machine
     terminal = Terminal(monkeypatch)
     seal.run_seal()
     assert len(terminal.asked) == 2
-    assert len(sets(calls())) == 2
+    assert len(sets(calls())) == 1
 
 
 def test_the_environment_passphrase_does_not_lift_the_terminal_rule(machine, monkeypatch):
@@ -789,7 +788,7 @@ def test_the_children_do_not_inherit_the_passphrase_from_the_environment(
     assert {"node", "gh"} <= set(seen)
     for name, env in seen.items():
         assert env is not None and "SELLER_PASSPHRASE" not in env, name
-    assert len(sets(calls())) == 2
+    assert len(sets(calls())) == 1
 
 
 def test_dotf_runs_without_the_passphrase_in_its_environment(machine_with_dotf, monkeypatch):
@@ -881,7 +880,7 @@ def test_the_order_is_seal_then_bitwarden_then_the_secret(machine_with_dotf, mon
     seal.run_seal()
     assert order == ["seal"]
     saved, uploaded = times(calls.dotf()), times(sets(calls()))
-    assert len(saved) == 1 and len(uploaded) == 2
+    assert len(saved) == 1 and len(uploaded) == 1
     assert saved[0] < min(uploaded), "Bitwarden is written before the secret is set"
 
 

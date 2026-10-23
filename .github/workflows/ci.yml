@@ -9,11 +9,6 @@ on:
   # Pushes to main publish production after tests. Manual dispatch remains
   # available for previews and explicit production redeploys.
   workflow_dispatch:
-    inputs:
-      branch:
-        description: "Pages branch: 'main' publishes the live site, anything else a preview"
-        required: true
-        default: preview
 
 permissions:
   contents: read
@@ -86,34 +81,26 @@ jobs:
       - run: make test
 
   deploy:
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
+    if: github.ref == 'refs/heads/main'
     # A red end-of-sale run is a broken switch: the day it flips, the end deploy fails.
     needs: [test, test-end-of-sale]
     runs-on: ubuntu-latest
-    # One deploy per Pages branch at a time; later runs wait.
     concurrency:
-      group: pages-${{ github.event_name == 'push' && 'main' || inputs.branch }}
+      group: pages-production
       cancel-in-progress: false
     environment:
-      name: ${{ github.event_name == 'push' && 'production' || inputs.branch == 'main' && 'production' || 'preview' }}
+      name: production
       url: ${{ steps.deploy.outputs.deployment-url }}
     env:
       SELLER_PHONE: ${{ secrets.SELLER_PHONE }}
       # The ciphertext of the private views (ADR-007). Sealed on the owner's machine by
       # `make ci-secrets`; this job never holds a key or any plaintext.
       SELLER_SEALED: ${{ secrets.SELLER_SEALED }}
-      # A production deploy smokes a candidate first; a dispatched preview deploys once.
-      PRODUCTION: ${{ github.event_name == 'push' || inputs.branch == 'main' }}
+      PRODUCTION: 'true'
     steps:
-      # The input reaches wrangler's command line, so only a plain branch name
-      # gets through. Production only ever gets a build of main.
-      - name: Validate branch input
-        env:
-          BRANCH: ${{ github.event_name == 'push' && 'main' || inputs.branch }}
-          REF: ${{ github.ref }}
+      - name: Require main branch
         run: |
-          [[ "$BRANCH" =~ ^[a-z0-9][a-z0-9-]{0,27}$ ]] || { echo "invalid branch: $BRANCH"; exit 1; }
-          [[ "$BRANCH" != main || "$REF" == refs/heads/main ]] || { echo "branch=main must be dispatched from main, not $REF"; exit 1; }
+          [ "${{ github.ref }}" = "refs/heads/main" ] || { echo "production must be deployed from main, not ${{ github.ref }}"; exit 1; }
 
       # The test job's placeholder must never reach a deployed page.
       - name: Require production contact
@@ -166,7 +153,6 @@ jobs:
       # The build goes to the Pages branch `candidate` and is smoked there first, so a
       # broken build stops here and production keeps serving the previous deployment.
       - id: candidate
-        if: env.PRODUCTION == 'true'
         uses: cloudflare/wrangler-action@953926a2e2182532811c01a25e53647d93bf07c0 # v4.1.3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -175,7 +161,6 @@ jobs:
           command: pages deploy --project-name=leaving-denver --branch=candidate
 
       - name: Smoke the candidate
-        if: env.PRODUCTION == 'true'
         env:
           DEPLOYMENT_URL: ${{ steps.candidate.outputs.deployment-url }}
         run: scripts/smoke.sh "$DEPLOYMENT_URL"
@@ -187,10 +172,8 @@ jobs:
           # Not a secret; same value as CF_ACCOUNT_ID in the Makefile.
           accountId: "76967f5ede1ce50efce34d90b7e94958"
           wranglerVersion: "4.141.0"
-          command: pages deploy --project-name=leaving-denver --branch=${{ github.event_name == 'push' && 'main' || inputs.branch }}
+          command: pages deploy --project-name=leaving-denver --branch=main
 
-      # Production is checked where buyers reach it; a preview at its own deployment.
+      # Production is checked where buyers reach it.
       - name: Smoke test
-        env:
-          DEPLOYMENT_URL: ${{ env.PRODUCTION == 'true' && 'https://leaving-denver.pages.dev' || steps.deploy.outputs.deployment-url }}
-        run: scripts/smoke.sh "$DEPLOYMENT_URL"
+        run: scripts/smoke.sh "https://leaving-denver.pages.dev"

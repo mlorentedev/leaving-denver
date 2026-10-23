@@ -11,7 +11,7 @@ PORT    ?= 8088
 PROJECT ?= leaving-denver
 # Where `make deploy` publishes. Anything but main is a preview deployment
 # (<branch>.<project>.pages.dev); main is the live site.
-BRANCH  ?= preview
+BRANCH  ?= main
 
 SOPS_FILE := data/private.sops.yaml
 WRANGLER  := npx --yes wrangler@4.141.0
@@ -104,8 +104,8 @@ cf-project: ## Create the Cloudflare Pages project if it does not exist (idempot
 		$(CF_ENV) $(WRANGLER) pages project create $(PROJECT) --production-branch=main --force; \
 	fi
 
-protect-deploy: ## Allow deploy secrets only from main, including manual previews
-	@set -e; for environment in production preview; do \
+protect-deploy: ## Allow deploy secrets only from main
+	@set -e; for environment in production; do \
 		gh api -X PUT "repos/{owner}/{repo}/environments/$$environment" --input .github/deployment-environment.json >/dev/null; \
 		policies="repos/{owner}/{repo}/environments/$$environment/deployment-branch-policies"; \
 		stale="$$(gh api --paginate "$$policies" --jq '.branch_policies[] | select(.name != "main" or .type != "branch") | .id')"; \
@@ -121,7 +121,7 @@ protect-deploy: ## Allow deploy secrets only from main, including manual preview
 ci-secrets: protect-deploy ## Scope the deploy token and the contact to the protected environments, then seal the private data (needs a terminal)
 	@set -e; token="$$(sops -d --extract '["cloudflare_pages_token"]' $(SOPS_FILE))"; \
 	test -n "$$token" || { echo "empty Cloudflare token" >&2; exit 1; }; \
-	for environment in production preview; do \
+	for environment in production; do \
 		printf '%s' "$$token" | gh secret set CLOUDFLARE_API_TOKEN --env "$$environment"; \
 	done; \
 	unset token; \
@@ -131,7 +131,7 @@ ci-secrets: protect-deploy ## Scope the deploy token and the contact to the prot
 	fi; \
 	phone="$$(sops -d --extract '["seller"]["phone"]' $(SOPS_FILE))"; \
 	test -n "$$phone" || { echo "empty seller phone" >&2; exit 1; }; \
-	for environment in production preview; do \
+	for environment in production; do \
 		printf '%s' "$$phone" | gh secret set SELLER_PHONE --env "$$environment"; \
 	done; \
 	unset phone; \

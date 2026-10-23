@@ -12,7 +12,7 @@ for both `/` and `/es/` (the `/seller/` page uses the same stylesheet).
 
 One-time setup (`make cf-project`, `make protect-main`, `make ci-secrets`) is in the
 README, section 3. Deploy tokens and the contact reach CI only through the `production`
-and `preview` environments, which allow the `main` workflow ref alone: a branch workflow
+environment, which allows the `main` workflow ref alone: a branch workflow
 must never get a production-capable Pages token. `make audit-deploy` checks that.
 
 ## Deploy and roll back
@@ -20,16 +20,14 @@ must never get a production-capable Pages token. `make audit-deploy` checks that
 1. Merge the intended change into `main`. The push tests and automatically
    deploys production only if the test job passes. PR runs never deploy.
 2. Find the run with `gh run list --workflow ci.yml --event push --branch main --limit 3`,
-   then use `gh run watch <run-id> --exit-status`. For a manual preview, dispatch
-   `gh workflow run ci.yml --ref main -f branch=preview`; to redeploy production
-   explicitly, use `gh workflow run ci.yml --ref main -f branch=main`. The deploy job
+   then use `gh run watch <run-id> --exit-status`. To redeploy production
+   explicitly, use `gh workflow run ci.yml --ref main`. The deploy job
    rebuilds with the real `SELLER_PHONE` and `SELLER_SEALED` and runs `make check`, which
    validates the envelope. The job fails if either secret is missing.
 3. A production deploy publishes to the Pages branch `candidate` first and runs
    `scripts/smoke.sh` against that deployment. Only if it passes does it publish to
    `main` and smoke the canonical `https://leaving-denver.pages.dev`. A failed
-   candidate smoke leaves production on the previous deployment: fix forward. A
-   manual preview publishes once and smokes its own deployment URL.
+   candidate smoke leaves production on the previous deployment: fix forward.
 4. Check `https://leaving-denver.pages.dev/` and `/es/` on a phone. Verify the
    changed content and SMS CTA on the canonical site, not just the deployment
    URL. Do not share a failed deployment.
@@ -65,7 +63,7 @@ To enable it, an administrator of the Cloudflare Zero Trust account must:
    set `ACCESS_TEAM_DOMAIN` to the HTTPS Access team origin
    (`https://<team>.cloudflareaccess.com`) and `ACCESS_AUD` to that application's
    64-character audience (`terraform -chdir=infra/terraform/cloudflare output -raw access_aud`
-   prints it; Terraform never writes the binding). Configure both production and preview environments;
+   prints it; Terraform never writes the binding). Configure the production environment;
    these values are runtime bindings, **not** fields in public inventory.
 3. Deploy from tested `main`. From an anonymous browser and a preview URL,
    request `/seller/`, `/seller/index.html`, and `/seller/seller.mjs`: none
@@ -160,10 +158,10 @@ seller phone and the Pages token are never in it.
 **Seal.** `make ci-secrets` (a terminal is required; the seal refuses without one) scopes the
 deploy secrets, then seals: it decrypts `data/private.sops.yaml` in process, takes the allow-listed
 keys, asks "Passphrase (Enter to generate one):", seals
-with Node WebCrypto, and writes `SELLER_SEALED` to both environments with `gh secret set`. To
+with Node WebCrypto, and writes `SELLER_SEALED` to the production environment with `gh secret set`. To
 re-seal without the rest, run `uv run leaving-denver seal`. The envelope has to be under 40,000
 bytes (the worst case measures about 33,000). Nothing is written to disk.
-After sealing, redeploy: `gh workflow run ci.yml --ref main -f branch=main`.
+After sealing, redeploy: `gh workflow run ci.yml --ref main`.
 
 **The passphrase and Bitwarden.** Press Enter at the prompt to have five words generated. With
 `dotf` on `PATH` they are saved to the Bitwarden login item `leaving-denver-seller` (field
@@ -206,7 +204,7 @@ the new one. Rotate the same way if the secret itself leaks.
 **Decommission by 2026-11-09.** After the car is handed over (the car deadline, `seller.vehicle_deadline`, is the latest), deploy the end page
 (`seller.sale_over: true`) and pass the live checks in [decommission.md](decommission.md). Then delete the
 earlier Pages deployments and the Access application for `/seller` (Terraform: see the decommission runbook), and only then delete the `SELLER_SEALED`
-secret from both environments (`gh secret delete SELLER_SEALED --env production`, and `--env preview`).
+secret from the production environment (`gh secret delete SELLER_SEALED --env production`).
 Do not redeploy afterwards: the deploy job needs the secrets until the end page is live.
 
 **Owner checks (cannot be run from CI).**
@@ -252,9 +250,9 @@ Do not redeploy afterwards: the deploy job needs the secrets until the end page 
   at the end (#29 was closed as not planned). To change the number, run
   `make secrets` and edit `seller.phone` in `data/private.sops.yaml`, then
   `make ci-secrets` from a machine with the age key and an admin `gh`: it copies the
-  phone into the `SELLER_PHONE` secret of both environments. Commit only the encrypted
+  phone into the `SELLER_PHONE` secret of the production environment. Commit only the encrypted
   file and merge. If `make ci-secrets` ran after the merge, redeploy with
-  `gh workflow run ci.yml --ref main -f branch=main`: a deploy uses the secret as it
+  `gh workflow run ci.yml --ref main`: a deploy uses the secret as it
   was when it started. Then test the SMS CTA on the live site and update marketplace
   listings. Push CI uses a placeholder phone, so its green check does not validate the
   production contact.
@@ -288,7 +286,7 @@ Repo side, nothing to do:
 - `scripts/smoke.sh` runs in CI after every deploy: against the `candidate` deployment
   before production moves, then against the canonical site. A red deploy job means
   production did not move, or is wrong: read the run, fix forward or roll back (above).
-- `make audit-deploy` reads the live settings: both environments, their single `main`
+- `make audit-deploy` reads the live settings: the production environment, its single `main`
   branch policy, and (with the owner's `gh`) no deploy secret left at the repository
   level. The `deploy-audit` workflow runs the settings part weekly.
 
@@ -321,7 +319,7 @@ Owner setup (dashboards; this repository cannot enable either). Both are in plac
   Web Analytics setting, then merge this PR. The CSP keeps allowing the beacon, which is harmless while it is off.
   The notes below describe how it worked (ADR-005; Terraform leaves it alone, ADR-012).
   - Pages injects the beacon only from the next deployment on. On 2026-10-01 a production
-    redeploy (`gh workflow run ci.yml --ref main -f branch=main`) was needed before it
+    redeploy (`gh workflow run ci.yml --ref main`) was needed before it
     appeared.
   - Verify with `curl -s https://leaving-denver.pages.dev/ | grep -c cloudflareinsights`
     and a test visit that shows in the dashboard.

@@ -144,9 +144,9 @@ def test_the_decommission_runbook_names_no_retired_command():
     assert "build/private" not in text
 
 
-def test_the_decommission_runbook_deletes_the_sealed_secret_in_both_environments():
+def test_the_decommission_runbook_deletes_the_sealed_secret_in_production():
     text = read("docs/runbooks/decommission.md")
-    loop = re.search(r"for environment in production preview; do\n\s+for name in ([^;]+); do", text)
+    loop = re.search(r"for environment in production; do\r?\n\s+for name in ([^;]+); do", text)
     assert loop, "the deletion loop is gone"
     assert "SELLER_SEALED" in loop.group(1).split()
     assert "gh secret delete" in text
