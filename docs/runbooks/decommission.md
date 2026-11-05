@@ -249,7 +249,16 @@ new token (ADR-008).
 
    The bitácora board token is a repository secret too, uploaded by the bitácora rollout in
    dotfiles (`.github/workflows/add-to-project.yml`, `bitacora-status.yml`):
-   `gh secret delete BITACORA_PAT`. Do **not** revoke it, since the same token serves every other
+   disable both workflows first, so no issue or PR event starts a run without the token, then
+   delete it:
+
+   ```
+   gh workflow disable add-to-project.yml
+   gh workflow disable bitacora-status.yml
+   gh secret delete BITACORA_PAT
+   ```
+
+   Do **not** revoke it, since the same token serves every other
    repository on the board. Once the repository is archived, the rollout skips it.
 
    `CLOUDFLARE_ACCOUNT_ID` is not a secret anywhere: it is the literal `CF_ACCOUNT_ID` in the
