@@ -247,8 +247,8 @@ new token (ADR-008).
    (`.github/workflows/pr-agent.yml`): `gh secret delete NAN_API_KEY`, and revoke the key where
    it was issued.
 
-   The bitácora board token is a repository secret too, uploaded by dotfiles'
-   `scripts/bitacora-rollout.sh` (`.github/workflows/add-to-project.yml`, `bitacora-status.yml`):
+   The bitácora board token is a repository secret too, uploaded by the bitácora rollout in
+   dotfiles (`.github/workflows/add-to-project.yml`, `bitacora-status.yml`):
    `gh secret delete BITACORA_PAT`. Do **not** revoke it, since the same token serves every other
    repository on the board. Once the repository is archived, the rollout skips it.
 
