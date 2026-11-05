@@ -247,6 +247,11 @@ new token (ADR-008).
    (`.github/workflows/pr-agent.yml`): `gh secret delete NAN_API_KEY`, and revoke the key where
    it was issued.
 
+   The bitácora board token is a repository secret too, uploaded by dotfiles'
+   `scripts/bitacora-rollout.sh` (`.github/workflows/add-to-project.yml`, `bitacora-status.yml`):
+   `gh secret delete BITACORA_PAT`. Do **not** revoke it, since the same token serves every other
+   repository on the board. Once the repository is archived, the rollout skips it.
+
    `CLOUDFLARE_ACCOUNT_ID` is not a secret anywhere: it is the literal `CF_ACCOUNT_ID` in the
    `Makefile` and `accountId` in `.github/workflows/ci.yml`. There is nothing to delete.
    An account id alone grants nothing.
