@@ -94,7 +94,7 @@ stands, and is the reason this ships before 2026-11-15.
   before the merge, not optional, and `decommission.md` already says so.
 - **`disposition` is a public field with a private truth.** A typo turns a sale into a giveaway in
   the published counts. Mitigation: the field is validated against a closed set (an unknown value
-  fails the build), a test asserts the four giveaways and the twelve sales, and `retro` reports
+  fails the build), a test asserts the six giveaways and the ten sales, and `retro` reports
   both counts so the two sources are compared in one run.
 - **The contact line invites mail to an address published on a page.** It is a DuckDuckGo alias
   already public in the catalog's seller data, not the personal address in the private file.
@@ -103,11 +103,12 @@ stands, and is the reason this ships before 2026-11-15.
 
 ## Acceptance criteria
 
-- [ ] **AC1 — the file tells the truth.** Every item in `data/inventory.yaml` is `Sold`; the four
-  giveaways (`dell-monitor-32`, `office-chair-ergonomic`, `dinnerware-glassware-set`,
-  `lamps-pair`) carry `disposition: giveaway` and the twelve sales do not; an unknown
-  `disposition` value fails the build. A test asserts the exact split (12 sales, 4 giveaways, 0
-  unplaced) and that no item is left `Available`.
+- [ ] **AC1 — the file tells the truth.** Every item in `data/inventory.yaml` is `Sold`; the six
+  giveaways (`air-mattress-twin-pump`, `convertible-desk`, `dell-monitor-32`,
+  `office-chair-ergonomic`, `dinnerware-glassware-set`, `lamps-pair`) carry `disposition:
+  giveaway` and the ten sales do not; an unknown `disposition` value fails the build. A test
+  asserts the exact split (10 sales, 6 giveaways, 0 unplaced) and that no item is left
+  `Available`.
 - [ ] **AC2 — the aggregate is a command.** `leaving-denver retro` prints the summary described
   above and `--json` prints it as JSON; with private data absent or unreadable it fails with a
   message that says so, and never prints a partial total that reads as a real one. Its output

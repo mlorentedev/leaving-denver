@@ -21,9 +21,10 @@ owner: manu
 
 ## Implementation
 
-- [ ] [P] [AC1] Failing test: `disposition` is one of `sale`/`giveaway`, absent means `sale`, an unknown value raises; the inventory holds 12 sales, 4 giveaways and no `Available`.
+- [ ] [P] [AC1] Failing test: `disposition` is one of `sale`/`giveaway`, absent means `sale`, an unknown value raises; the inventory holds 10 sales, 6 giveaways and no `Available`.
 - [ ] [AC1] `DISPOSITIONS` in `config.py` and the check in the item path (`site_builder`), so an unknown value fails the build.
-- [ ] [AC1] `data/inventory.yaml`: the car and the queen bed `Sold` at their real prices; the four giveaways `Sold` + `disposition: giveaway`.
+- [ ] [AC1] `data/inventory.yaml`: the car and the queen bed `Sold` at their real prices; the six giveaways
+  `Sold` + `disposition: giveaway`.
 - [ ] [P] [AC2] Failing test: `retro_summary(items, targets, floors, sales)` — the arithmetic (target present or absent, a giveaway at `0`, an unplaced item, an empty group), pure, no sops.
 - [ ] [AC2] `src/leaving_denver/retro.py` with `retro_summary` and the report text.
 - [ ] [AC2] Failing test: `leaving-denver retro` prints the summary, `--json` prints JSON, exits 1 with a clear message when the private file cannot be read, and its output holds no phone, no token and no secret (sentinels).
