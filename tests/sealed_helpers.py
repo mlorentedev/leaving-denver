@@ -186,12 +186,10 @@ def build_site(dist, monkeypatch, sealed=None):
     # lists only what is available (OPS-018). One item goes back on the market in this copy alone,
     # so the sealed and CSP tests exercise the panel instead of an empty dropdown.
     if not any(item.get("status", "Available") == "Available" for item in data["items"]):
-        example = next(
-            item
-            for item in data["items"]
-            if item["category"] != "Vehicle" and not item.get("free_with_purchase")
-        )
-        example["status"] = "Available"
+        # The car, specifically: it is the item the private fixture carries sentinels for, and the
+        # tests pick it from the listing tool by its title.
+        car = next(item for item in data["items"] if item["category"] == "Vehicle")
+        car["status"] = "Available"
     site_builder.build_public_site(data)
 
 
