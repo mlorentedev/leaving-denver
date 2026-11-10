@@ -171,6 +171,20 @@ When running `uv run leaving-denver serve`:
 
 ---
 
+## Results
+
+Sixteen items, 45 days, nothing thrown away: **10 sold, 6 given away, 86 % of the asking price
+recovered**, median 15 days per household item. Against the prices that the research predicted the
+household items recovered 65 %, so the plan was met and the price research was optimistic — the car
+went at its reserve floor on the last day of its window.
+
+The full retrospective, with what made the difference and what would change next time, is
+[the case study](docs/case-study.md). Every figure in it comes from `make retro`, which adds up the
+researched targets, the reserve floors and the realized price of every sale from the encrypted
+seller record; absolute amounts stay private.
+
+---
+
 ## Maintenance mode
 
 The build phase is over; what is left is running the sale and closing it:
