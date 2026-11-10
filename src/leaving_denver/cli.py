@@ -8,6 +8,7 @@ loopback-only preview server. Deploys go through GitHub Actions or `make deploy`
 
 import argparse
 import http.server
+import json
 import sys
 import urllib.parse
 from datetime import date
@@ -249,6 +250,37 @@ def cmd_drops(args):
     print("Rule of thumb: if an item draws no inquiries in 4-7 days, lower it to the Week 2 tier.")
 
 
+def cmd_retro(args):
+    """The sale's aggregate (OPS-018): expected against realized, by group, and the days.
+
+    Seller only, like `drops`: the totals come from the encrypted file and stay in this terminal.
+    An unreadable file is an error, never a report of zeroes that reads as a real result."""
+    from leaving_denver.private_data import decrypt_private
+    from leaving_denver.retro import render_text, retro_summary
+
+    data = load_inventory_yaml()
+    try:
+        private = decrypt_private()
+    except RuntimeError as err:
+        print(f"Error: {err}. The aggregate needs the private file; nothing was printed.")
+        sys.exit(1)
+    if not private.get("sales"):
+        print("Error: the private file holds no sales record; nothing was printed.")
+        sys.exit(1)
+    try:
+        summary = retro_summary(
+            data.get("items") or [],
+            private.get("targets") or {},
+            private.get("floors") or {},
+            private.get("sales") or {},
+            data["seller"]["catalog_opened"],
+        )
+    except (KeyError, ValueError) as err:
+        print(f"Error: {err}. Nothing was printed.")
+        sys.exit(1)
+    print(json.dumps(summary, indent=2) if args.json else render_text(summary))
+
+
 def resolve_request_path(path: str) -> Path | None:
     """Map a request path onto a file under build/public/, or None when it escapes it.
 
@@ -334,6 +366,13 @@ def main():
         help="Show the written price windows and each item's staged price tiers (seller only)",
     )
     drops_p.set_defaults(func=cmd_drops)
+
+    retro_p = subparsers.add_parser(
+        "retro",
+        help="Show what the sale recovered against its targets and floors (seller only)",
+    )
+    retro_p.add_argument("--json", action="store_true", help="Print the summary as JSON")
+    retro_p.set_defaults(func=cmd_retro)
 
     seal_p = subparsers.add_parser(
         "seal",

@@ -55,6 +55,7 @@ from leaving_denver.image_processor import (
 )
 from leaving_denver.pricing import DROP_WINDOWS
 from leaving_denver.private_data import phone_parts, seller_phone
+from leaving_denver.retro import item_disposition
 from leaving_denver.seal import validate_envelope
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
@@ -1428,9 +1429,36 @@ def write_not_found() -> None:
     (DIST_DIR / "404.html").write_text(html, encoding="utf-8")
 
 
-def build_end_site() -> None:
+def check_dispositions(data: dict[str, Any]) -> None:
+    """Every item's `disposition` is one of the two known values, in both build modes (OPS-018).
+
+    The catalog ignores the field; the end page publishes the counts it produces, and that page is
+    the only thing this repository leaves behind. A typo there is a wrong claim, so it fails the
+    build instead of quietly counting an item as sold."""
+    for item in data.get("items", []):
+        try:
+            item_disposition(item)
+        except ValueError as err:
+            raise RuntimeError(str(err)) from err
+
+
+def end_counts(items: list[dict[str, Any]]) -> dict[str, int]:
+    """What the end page states, derived from the inventory the build read: never typed."""
+    placed = [item for item in items if item.get("status") == "Sold"]
+    given = [item for item in placed if item_disposition(item) == "giveaway"]
+    # `total`, never `items`: in the template `counts.items` is the dict method, not the count.
+    return {"total": len(items), "sold": len(placed) - len(given), "given": len(given)}
+
+
+def build_end_site(full_data: dict[str, Any] | None = None) -> None:
     """The sale is over: one page per language, from the locale files and nothing else. No
-    phone, no item and no photo goes in, so none of them needs to be at hand."""
+    phone, no item and no photo goes in, so none of them needs to be at hand.
+
+    The counts come from the inventory and the contact address is the public one in its `seller`
+    block: neither is private data, so the page still builds without the age key (OPS-011 AC4)."""
+    seller = (full_data or {}).get("seller") or {}
+    counts = end_counts((full_data or {}).get("items") or [])
+    email = seller.get("email", "")
     DIST_DIR.mkdir(parents=True, exist_ok=True)
     shutil.copy2(Path(__file__).parent / "assets" / "favicon.svg", DIST_DIR / "favicon.svg")
     origin = site_url()
@@ -1448,6 +1476,8 @@ def build_end_site() -> None:
             "sale_over.html",
             locale=locale,
             t=translations,
+            counts=counts,
+            email=email,
             og=og,
             alternates=alternate_urls(origin),
             asset_prefix="" if locale == "en" else "../",
@@ -1547,7 +1577,7 @@ def write_social(public_data: dict[str, Any], origin: str) -> None:
 
 def build_public_site(full_data: dict[str, Any]) -> None:
     if sale_over(full_data):
-        build_end_site()
+        build_end_site(full_data)
         return
     DIST_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -1662,6 +1692,7 @@ def build_all() -> None:
     print("1. Loading Single Source of Truth (data/inventory.yaml)...")
     data = load_inventory_yaml()
     over = sale_over(data)
+    check_dispositions(data)
 
     if over:
         print("2. The sale is over: skipping photos (the end page has none).")

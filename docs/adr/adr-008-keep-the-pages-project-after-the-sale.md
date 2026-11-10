@@ -16,6 +16,12 @@ created: "2026-10-01"
 Accepted. It extends ADR-004 (link-preview crawlers stay allowed) and relies on ADR-007 (the sealed
 `SELLER_SEALED` secret is deleted with the others).
 
+**Amended by ADR-013 (2026-11-09):** the end page is no longer final-and-empty. It now states the
+result (counts derived from the inventory; days and recovered percentage typed in the locale
+files) and carries one contact line, offering the same construction rather than the address. The
+reasons for keeping the project, for never serving a phone and for deleting the credentials on
+2026-11-15 are unchanged, and so is the consequence that a later change needs a new token.
+
 ## Date
 
 2026-10-01

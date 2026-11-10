@@ -82,6 +82,9 @@ serve: build ## Serve the catalog and /seller/ on 127.0.0.1:$(PORT) (loopback on
 drops: ## Show the staged price-drop table (needs the sops key)
 	$(UV) run leaving-denver drops
 
+retro: ## Show what the sale recovered against its targets and floors (seller only, needs the sops key)
+	$(UV) run leaving-denver retro
+
 post: ## Record a posting or renewal: make post ID=lamps-pair CHANNEL=facebook [ON=2026-10-01]
 	@test -n "$(ID)" && test -n "$(CHANNEL)" || { echo "usage: make post ID=<item-id> CHANNEL=<facebook|craigslist|offerup|nextdoor|activebuilding|carscom> [ON=<YYYY-MM-DD>]"; exit 1; }
 	$(UV) run leaving-denver post $(ID) $(CHANNEL) $${ON:+--on "$$ON"}

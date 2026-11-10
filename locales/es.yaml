@@ -103,3 +103,13 @@ payment_methods:
 sale_over_title: La venta terminó
 sale_over_heading: La venta terminó.
 sale_over_thanks: Gracias a todos los que pasaron por aquí.
+# OPS-018: las dos cifras son escritas, no derivadas (OPS-011 AC4). Fuente: `make retro`,
+# ejecutado el 2026-11-09. Si cambian allí, cambian aquí: un test compara ambas lenguas.
+sale_over_days: "45 días"
+sale_over_days_label: De la primera publicación al último artículo
+sale_over_recovered: "86 %"
+sale_over_recovered_label: Del precio pedido, recuperado
+sale_over_result: "{total} artículos salieron de este apartamento: {sold} vendidos, {given} regalados, ninguno a la basura."
+sale_over_offer: ¿Te mudas y quieres que salga así?
+sale_over_offer_body: "Esto fue un inventario, un flujo de fotos, un plan de precios y un script para cerrar la venta, escritos para una mudanza. Si te mudas y lo quieres igual, o prefieres hacerlo tú, escríbeme: el código y el método son tuyos para leerlos."
+sale_over_offer_contact: Escríbeme

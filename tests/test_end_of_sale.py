@@ -290,3 +290,43 @@ def test_a_tests_own_inventory_keeps_its_switch(tmp_path, monkeypatch):
     own.write_text(yaml.safe_dump(end_inventory()), encoding="utf-8")
     monkeypatch.setattr(site_builder, "INVENTORY_YAML", own)
     assert site_builder.load_inventory_yaml()["seller"]["sale_over"] is True
+
+
+# AC3 of OPS-018: the end page states the result, from the inventory it read.
+
+
+def test_the_end_page_states_the_counts_the_inventory_holds(end_dir):
+    source = yaml.safe_load((DATA_DIR / "inventory.yaml").read_text(encoding="utf-8"))
+    placed = [i for i in source["items"] if i.get("status") == "Sold"]
+    given = [i for i in placed if i.get("disposition") == "giveaway"]
+    html = (end_dir / "index.html").read_text(encoding="utf-8")
+    assert 'data-role="sale-result"' in html
+    assert f"{len(source['items'])} items left this apartment" in html
+    assert f"{len(placed) - len(given)} sold, {len(given)} given away" in html
+
+
+def test_the_two_languages_publish_the_same_figures(end_dir):
+    """The days and the percentage are typed per language, so nothing but this compares them."""
+
+    def figures(page):
+        html = (end_dir / page).read_text(encoding="utf-8")
+        return sorted(re.findall(r"\d+", html))
+
+    assert figures("index.html") == figures("es/index.html")
+
+
+def test_the_end_page_offers_one_way_to_reach_the_owner(end_dir):
+    source = yaml.safe_load((DATA_DIR / "inventory.yaml").read_text(encoding="utf-8"))
+    html = (end_dir / "index.html").read_text(encoding="utf-8")
+    assert 'data-role="sale-contact"' in html
+    assert f'href="mailto:{source["seller"]["email"]}"' in html
+    assert 'href="https://github.com/mlorentedev"' in html
+
+
+def test_the_published_figures_say_where_they_came_from():
+    """Typed figures are a risk (lesson-011); the mitigation is that their source is written
+    beside them, so the next reader knows what to re-run."""
+    for name in ("en.yaml", "es.yaml"):
+        text = (DATA_DIR.parent / "locales" / name).read_text(encoding="utf-8")
+        before = text.split("sale_over_days:")[0].splitlines()[-4:]
+        assert any("make retro" in line for line in before), name

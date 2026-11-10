@@ -182,6 +182,14 @@ def build_site(dist, monkeypatch, sealed=None):
     # build's own guarantees are in tests/test_sealed_end_of_sale.py.
     data = site_builder.load_inventory_yaml()
     data["seller"].pop("sale_over", None)
+    # A scratch catalog needs something on sale: by 2026-11-09 every item is Sold, and /seller/
+    # lists only what is available (OPS-018). One item goes back on the market in this copy alone,
+    # so the sealed and CSP tests exercise the panel instead of an empty dropdown.
+    if not any(item.get("status", "Available") == "Available" for item in data["items"]):
+        # The car, specifically: it is the item the private fixture carries sentinels for, and the
+        # tests pick it from the listing tool by its title.
+        car = next(item for item in data["items"] if item["category"] == "Vehicle")
+        car["status"] = "Available"
     site_builder.build_public_site(data)
 
 

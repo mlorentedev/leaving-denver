@@ -1,0 +1,44 @@
+[
+  {
+    "id": "OPS-018-close-out-f1",
+    "behavior": "Every item in the inventory is Sold, the six giveaways are declared as such, and the published split is 10 sold and 6 given away",
+    "verification": "uv run pytest tests/test_close_out.py -q",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "OPS-018-close-out-f2",
+    "behavior": "An unknown disposition fails the build, and the end page's counts are derived from the inventory it read",
+    "verification": "uv run pytest tests/test_retro.py -q -k 'disposition or end_counts'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "OPS-018-close-out-f3",
+    "behavior": "`leaving-denver retro` prints the aggregate (expected against realized by group, plus the days), `--json` prints it as JSON, and neither prints the phone, a token or a partial total",
+    "verification": "uv run pytest tests/test_retro.py -q && uv run leaving-denver retro --json >/dev/null",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "OPS-018-close-out-f4",
+    "behavior": "The end page publishes the counts, the days, the recovered percentage and one contact line in both languages, and still carries no phone, no item and no beacon",
+    "verification": "uv run pytest tests/test_end_of_sale.py -q",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "OPS-018-close-out-f5",
+    "behavior": "The public retrospective states the result in percentages and days, cites `make retro`, holds no absolute amount, and ADR-013 amends ADR-008 in writing",
+    "verification": "uv run pytest tests/test_close_out.py -q -k 'case_study or readme or adr'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "OPS-018-close-out-f6",
+    "behavior": "The whole suite is green with the switch on, and the rehearsed candidate deployment serves the new end page with `/i/*` still redirecting",
+    "verification": "make check && scripts/smoke.sh https://candidate.leaving-denver.pages.dev",
+    "state": "pending",
+    "evidence": ""
+  }
+]
