@@ -18,6 +18,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 import pytest
+from conftest import sale_is_over
 from sealed_helpers import (
     PASSPHRASE,
     SENTINEL_ITEM,
@@ -166,7 +167,11 @@ def test_the_floor_is_the_owasp_one():
 )
 def test_the_real_envelope_passes_validation_and_is_only_in_the_seller_page():
     """AC6 in the deploy job: the secret is a valid envelope (shape, iter, size), the page the
-    deploy job built embeds it, and no other file does. Asserts booleans, never the value."""
+    deploy job built embeds it, and no other file does. Asserts booleans, never the value.
+
+    With the sale over (OPS-011) no /seller/ is built, so the guarantee is the stronger one: no
+    file holds the envelope at all. The deploy job runs this test on the day the site becomes the
+    end page, which is why it has to know which build it is reading."""
     raw = os.environ["SELLER_SEALED"]
     envelope = seal.validate_envelope(raw)
     assert envelope["iter"] >= seal.MIN_ITERATIONS
@@ -177,7 +182,7 @@ def test_the_real_envelope_passes_validation_and_is_only_in_the_seller_page():
         for p in public.rglob("*")
         if p.is_file() and envelope["ct"] in p.read_text(encoding="utf-8", errors="ignore")
     ]
-    assert holders == ["seller/index.html"]
+    assert holders == ([] if sale_is_over() else ["seller/index.html"])
 
 
 class FormFields(HTMLParser):
