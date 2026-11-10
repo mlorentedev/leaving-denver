@@ -45,3 +45,7 @@ SUPPORTED_IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".heic"}
 
 # Item lifecycle (FEAT-006). "Free" is a price attribute (free_with_purchase), not a status.
 STATUSES = ("Available", "Pending", "Sold")
+# How an item left (OPS-018): the status above says it is gone, this says whether money changed
+# hands. Optional and absent on most items, which means `sale`; a giveaway is `Sold` too, so
+# without this the published counts could not tell the two apart.
+DISPOSITIONS = ("sale", "giveaway")

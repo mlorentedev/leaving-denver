@@ -73,10 +73,12 @@ jobs:
       - run: make install
       # The runner's checkout is the scratch copy: nothing here is committed or pushed. The edit
       # is the decommission runbook's own, and the next step proves it took, so a change in the
-      # file's layout fails this job instead of silently testing the live catalog again.
+      # file's layout fails this job instead of silently testing the live catalog again. Since
+      # OPS-018 the switch is committed, so the edit only applies where it is still off: a second
+      # `sale_over` key would be a duplicate the parser accepts and a reader does not.
       - name: Turn the sale off in this checkout
         run: |
-          sed -i '0,/^seller:/s//seller:\n  sale_over: true/' data/inventory.yaml
+          grep -qE '^  sale_over: true$' data/inventory.yaml || sed -i '0,/^seller:/s//seller:\n  sale_over: true/' data/inventory.yaml
           uv run python -c 'import sys, yaml; from leaving_denver.site_builder import sale_over; sys.exit(0 if sale_over(yaml.safe_load(open("data/inventory.yaml"))) else "the switch did not take: seller.sale_over is not true")'
       - run: make test
 

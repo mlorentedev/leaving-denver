@@ -290,6 +290,29 @@ CATALOG_TESTS = {
         "test_the_close_button_closes_the_sheet_and_its_history_entry",
         "test_the_sheet_can_be_reopened_after_closing",
     ),
+    # OPS-018, the day the switch flips: these read the live catalog with items still for sale,
+    # and by 2026-11-09 every item is Sold. The sale's own close-out is tested in
+    # test_close_out.py and test_retro.py, which do not depend on anything being on sale.
+    "test_flyer.py": ("test_the_car_is_named_by_its_short_title",),
+    "test_mobile_poster.py": ("test_mobile_poster_uses_only_published_sanitized_inventory",),
+    "test_seller_private_logic.py": (
+        "test_a_drop_whose_window_has_not_started_is_not_overdue",
+        "test_facebook_renew_is_due_seven_days_after_the_latest_posting",
+        "test_the_next_drop_steps_halfway_to_the_floor_at_the_first_drop_window",
+    ),
+    "test_social.py": ("test_the_copy_names_what_is_still_for_sale",),
+    "test_status_edit.py": (
+        "test_a_refused_private_write_leaves_the_inventory_untouched",
+        "test_a_status_command_changes_exactly_one_line_of_the_real_inventory",
+        "test_the_sale_is_recorded_before_the_inventory_is_written",
+    ),
+    "test_two_deadlines.py": (
+        "test_a_flyer_with_only_the_car_has_no_for_sale_line",
+        "test_after_the_closeout_the_page_still_sells_the_pinned_item",
+        "test_the_chairs_last_day_leaves_the_page_the_cars",
+        "test_the_closeout_snippet_hides_unsold_household_items_and_nothing_else",
+        "test_the_hero_names_what_is_still_for_sale",
+    ),
     "test_verify_the_car.py": (
         "test_every_link_is_https_on_an_official_host_or_one_of_the_cars_photos",
         "test_evidence_links_to_photos_the_car_has_and_the_build_ships",
@@ -313,6 +336,21 @@ SKIPPED_DESPITE_ITS_NAME = {
         "reads the catalog page's beacon; the end page has no beacon and no number (test_end_of_sale.py)"
     ),
     "test_seller_copy.py::test_the_copy_is_singular_plain_and_phone_free": "reads /seller/, not built",
+    # OPS-018: the name says "private"; what they read is /seller/ and the live price windows.
+    # The guards that keep private data out of the public tree are test_private_isolation.py and
+    # the test_sealed_*.py suite, none of which is skipped here.
+    "test_seller_private_logic.py::test_a_drop_whose_window_has_not_started_is_not_overdue": (
+        "reads /seller/, not built"
+    ),
+    "test_seller_private_logic.py::test_facebook_renew_is_due_seven_days_after_the_latest_posting": (
+        "reads /seller/, not built"
+    ),
+    "test_seller_private_logic.py::test_the_next_drop_steps_halfway_to_the_floor_at_the_first_drop_window": (
+        "reads /seller/, not built"
+    ),
+    "test_status_edit.py::test_a_refused_private_write_leaves_the_inventory_untouched": (
+        "a refused private write guards an item still for sale, and none is left"
+    ),
 }
 
 

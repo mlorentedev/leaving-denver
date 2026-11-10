@@ -105,3 +105,15 @@ payment_methods:
 sale_over_title: The sale is over
 sale_over_heading: The sale is over.
 sale_over_thanks: Thank you to everyone who came by.
+# OPS-018. The two figures below are typed, not derived: the end build holds no private data
+# (OPS-011 AC4), and the days and the recovered percentage come from prices that only exist
+# encrypted. Source: `make retro`, run on 2026-11-09. Re-run it before changing them; the
+# Spanish page carries the same two numbers and a test compares them.
+sale_over_days: "45 days"
+sale_over_days_label: From the first listing to the last item
+sale_over_recovered: "86%"
+sale_over_recovered_label: Of the asking price, recovered
+sale_over_result: "{total} items left this apartment: {sold} sold, {given} given away, nothing thrown away."
+sale_over_offer: Moving out, and want it to go like this?
+sale_over_offer_body: This was an inventory, a photo pipeline, a price plan and a decommission script, written for one move. If you are moving and want the same, or you want to run it yourself, write to me — the code and the method are yours to read.
+sale_over_offer_contact: Write to me

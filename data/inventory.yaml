@@ -1,4 +1,7 @@
 seller:
+  # The sale is over (OPS-011, 2026-11-09): the build is one end page per language, with no
+  # phone, no item and no seller tool. This is the last deploy the credentials allow (ADR-008).
+  sale_over: true
   location: Denver Tech Center (DTC), CO 80111
   email: mlorente@duck.com
   payment_methods:
@@ -15,6 +18,9 @@ seller:
   # Two deadlines (owner, 2026-10-02): household items go by the first, the car by the second.
   household_deadline: '2026-10-23'
   vehicle_deadline: '2026-11-09'
+  # The day the catalog opened (OPS-018): the first day any item could have been listed, and the
+  # start `leaving-denver retro` counts the days from. The first commit of this repository.
+  catalog_opened: '2026-09-25'
   # The household price windows, by the day each opens. A window runs to the day before the next
   # opens, the giveaway to the day before `household_deadline`. The car has no schedule.
   # The first drop moved a week and the second was dropped (owner, 2026-10-06; #211).
@@ -261,7 +267,8 @@ items:
   condition: Used - Like New
   dimensions: 31.5" Diagonal Viewable, 1800R Curve
   color: Platinum Silver / Black
-  status: Available
+  status: Sold
+  disposition: giveaway
   primary_image: catalog/dell-monitor-32/monitor.jpg
   images:
   - catalog/dell-monitor-32/monitor.jpg
@@ -326,6 +333,7 @@ items:
   size_in: [58.6, 50.4, 29.8]
   color: Canyon Walnut Woodgrain + Black Metal
   status: Sold
+  disposition: giveaway
   primary_image: catalog/convertible-desk/desk-2.jpg
   images:
   - catalog/convertible-desk/desk-2.jpg
@@ -541,7 +549,8 @@ items:
   dimensions: 24.5" W x 25.5" D x 37.5"-41.25" H
   size_in: [24.5, 25.5, 41.25]
   color: Black Mesh & Fabric
-  status: Available
+  status: Sold
+  disposition: giveaway
   primary_image: catalog/office-chair-ergonomic/chair-2.jpg
   images:
   - catalog/office-chair-ergonomic/chair-2.jpg
@@ -645,6 +654,7 @@ items:
   dimensions: 'Twin: 39" W x 75" L x 16.5" H'
   color: Two-tone Blue / Gray Flocked Top
   status: Sold
+  disposition: giveaway
   primary_image: catalog/air-mattress-twin-pump/air-mattress.jpg
   images:
   - catalog/air-mattress-twin-pump/air-mattress.jpg
@@ -698,7 +708,8 @@ items:
   condition: Used - Good
   dimensions: Full 20-piece assorted dining service
   color: Neutral Stoneware & Clear Glass
-  status: Available
+  status: Sold
+  disposition: giveaway
   primary_image: catalog/dinnerware-glassware-set/dinnerware.jpg
   images:
   - catalog/dinnerware-glassware-set/dinnerware.jpg
@@ -810,7 +821,8 @@ items:
   condition: Used - Good
   dimensions: 'Floor lamp: 72" H, 9" round base. Table lamp: 19" H, 8" x 8" base'
   color: Gray / Brushed Nickel with White Shades
-  status: Available
+  status: Sold
+  disposition: giveaway
   specs:
   - Floor lamp with a bright upward main light (3-way switch) and an adjustable gooseneck reading light with its own switch
   - Table lamp with a brushed nickel base, a white fabric shade, a switch on the base and a built-in USB charging port
@@ -872,7 +884,7 @@ items:
   - 62
   - 40
   color: Charcoal / Dark Gray Fabric
-  status: Available
+  status: Sold
   primary_image: catalog/queen-bed-frame-mattress/bed-assembled-front.jpg
   images:
   - catalog/queen-bed-frame-mattress/bed-assembled-front.jpg
@@ -992,7 +1004,7 @@ items:
   condition: Excellent Exterior / Very Good Interior
   dimensions: Compact SUV · 103.5k Miles · Clean Title
   color: White Platinum Metallic Tri-Coat / Charcoal Black ActiveX Interior
-  status: Available
+  status: Sold
   primary_image: catalog/2019-ford-escape-sel-awd/2019_ford_escape_front_three_quarter.jpg
   images:
   - catalog/2019-ford-escape-sel-awd/2019_ford_escape_front_three_quarter.jpg

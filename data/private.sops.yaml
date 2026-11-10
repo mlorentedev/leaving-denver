@@ -65,6 +65,24 @@ sales:
     convertible-desk:
         price: ENC[AES256_GCM,data:SQ==,iv:47q8/bLboqIiPTPgJgwsmoz3HHXOcBzqFZE1IZ0PiF0=,tag:4xfrryBWhkKRzGBvGek1WA==,type:float]
         at: ENC[AES256_GCM,data:TKxHJfCffRPFog==,iv:70d2fQ4w84S+0Nd6pI/cHq7bnRQENYvGXr1EKx2K1WE=,tag:IjCwculvRl+WOefwg7tN7g==,type:str]
+    2019-ford-escape-sel-awd:
+        price: ENC[AES256_GCM,data:Nf/6uf4=,iv:elLE92LyI2E73ZH1c2th324mL4tpl7JY8GFWia+QPBw=,tag:y45aO489Z4UXnrXdIBaUIA==,type:float]
+        at: ENC[AES256_GCM,data:LOXAsT1eG1KNhQ==,iv:BwPvgEUfJk1tUbiStsaSu1EpIxT5LtjqQHVWM+01G3o=,tag:W6Pe43S3U4SnfqPSgfCVPw==,type:str]
+    queen-bed-frame-mattress:
+        price: ENC[AES256_GCM,data:3VM=,iv:wi2rzHj0bN1c4gyX3T6PpFFcWs195M3Mfh/JzKIAjvI=,tag:DbzJSm8brfESVZ0/7S/vpA==,type:float]
+        at: ENC[AES256_GCM,data:J3z0jWxIafDbvw==,iv:sX/WkAHXW9jQbYu9KUCVT7Dz5Y/TSPHkQTO+zHfBtRI=,tag:tnLkW63SX1smwBobvhbgew==,type:str]
+    dell-monitor-32:
+        price: ENC[AES256_GCM,data:gg==,iv:Qu9n+Bxu7tD57OMP3w320RZca9h9YuwFyYdYSoe3XLo=,tag:IEkXgxWyxHzvwVd9u4JsqQ==,type:float]
+        at: ENC[AES256_GCM,data:EeBWm0Y/JixkkQ==,iv:eV+GFdmWXA6JDDCAtBROaMym6QWue3j2IOB+ON1AHnk=,tag:TcAku1LfvOEx9FxPWkKDGQ==,type:str]
+    office-chair-ergonomic:
+        price: ENC[AES256_GCM,data:fA==,iv:LEEBpE9iXEYRfabqbPxlyPnZz37GMErzIHmRMUJwqXk=,tag:e2+3VXQeaalS9Av+3RmI9Q==,type:float]
+        at: ENC[AES256_GCM,data:ulqB7I4kiPMVHw==,iv:rkLY8CneYSSKlWUu4h+GWHMB9EHXdH/VddvCqMOEbEE=,tag:v14YT10LpWjZD7PGJc5yxQ==,type:str]
+    dinnerware-glassware-set:
+        price: ENC[AES256_GCM,data:Gw==,iv:9oDIO2hANYO9YqI+/Q23voyoZ0zaeQGFbr4Akx/wNq8=,tag:p3imIK0c3wQNtSSC+b4bzw==,type:float]
+        at: ENC[AES256_GCM,data:6nWDHaRvJvhfPA==,iv:EI4spECAvB3V6fZ2oWFzxiZ1znSgARXvEdiQeJoW9sU=,tag:skhV3WmmVNnAKr+/9D6X0w==,type:str]
+    lamps-pair:
+        price: ENC[AES256_GCM,data:hQ==,iv:LC44rng71RSPzumn50P3orqx6XSj50TUOXPQfnzGvok=,tag:IgIdMj4+sPA7zoSHqA1g1g==,type:float]
+        at: ENC[AES256_GCM,data:SXGiOCLW5F7ZaA==,iv:AVlZuWFvJ9nkQ3ltVgO3i/EiKmR0TRwP2XLmSHoXGvw=,tag:+CgwDiAoJ/6z6kLFyHD90g==,type:str]
 tracking:
     ikea-mattress-topper:
         price_log:
@@ -85,7 +103,7 @@ sops:
             N5S0b6gn+J7t3Lg9zTalfJK5VHCwzBcjg5kbjsk7dea2bNSxWE/NQA==
             -----END AGE ENCRYPTED FILE-----
           recipient: age166v8efpskctmxxes5lcqpxkj0ny3q74l3v0pswpdpa63wlkqmc8q35fkdw
-    lastmodified: "2026-10-23T19:03:00Z"
-    mac: ENC[AES256_GCM,data:QCtdU9OG93iynWN9xDl6B4wdvp/uXhOEryWu9To9baO74rZaWVbrLMlZZL8G3OB8bhCv1nUlvKiuzrSO4FMR/pku5edzRIcFtG0iG8nbN1XL35JlNKgGZw53dP7XMud2OrUeMXm+WqRtb8M15p0vdq93adHKt9U4/B80SPJgtJ0=,iv:xEm1s3A9oLipmsGwpoWj//Cl/qAK0Twmj+eo1LFbZ88=,tag:KhzsuYWAaEVGbfmQ6DI7HA==,type:str]
+    lastmodified: "2026-11-10T03:30:44Z"
+    mac: ENC[AES256_GCM,data:TZ9Mep/AzXtq8OilG1l4BY5DxN5TWrA4pyC6LgtJr7DPFk0U0kA81Yh9HCRA1TvhXJbnVVJnmcR70ZXsYBelxYGLPcRS05dssxh1NnREyeMpu/HKsv5tvMdAu8bN7Le+hBkwFsqO8q/t2ikeKxRewtuD+AqWgSlX8jugdANNPW0=,iv:wiRkYMf7E8lDLaFmzG7+XdpoSshjEKPO5ygUB/raA2Q=,tag:K9VpxAxwcT/L+5vAcXG8iA==,type:str]
     unencrypted_suffix: _unencrypted
     version: 3.13.1
