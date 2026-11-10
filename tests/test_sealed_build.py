@@ -30,7 +30,7 @@ from sealed_helpers import (
     open_in_node,
 )
 
-from leaving_denver import seal
+from leaving_denver import seal, site_builder
 
 SELLER_SCRIPT = (
     Path(__file__).resolve().parents[1] / "src" / "leaving_denver" / "assets" / "seller.mjs"
@@ -88,17 +88,66 @@ def test_the_seller_page_embeds_the_validated_envelope(sealed_build):
 
 
 def test_the_envelope_is_in_the_seller_page_only(sealed_build):
-    ciphertext = sealed_build["envelope"]["ct"]
-    holders = [
-        p.relative_to(sealed_build["dist"]).as_posix()
-        for p in sealed_build["dist"].rglob("*")
-        if p.is_file()
+    # `sealed_helpers.build_site` drops the switch, so this scratch build is always a catalog.
+    holders = envelope_holders(sealed_build["dist"], sealed_build["envelope"])
+    assert holders == expected_envelope_holders(sale_over=False)
+
+
+def envelope_holders(dist, envelope):
+    """The files under `dist` that carry the ciphertext or the sealed block's own marker.
+
+    Both, because a page could embed an envelope without the ciphertext matching (a re-seal) and
+    the marker is what the unlock form looks for."""
+    return [
+        path.relative_to(dist).as_posix()
+        for path in dist.rglob("*")
+        if path.is_file()
         and (
-            ciphertext in p.read_text(encoding="utf-8", errors="replace")
-            or 'id="sealed"' in p.read_text(encoding="utf-8", errors="replace")
+            envelope["ct"] in path.read_text(encoding="utf-8", errors="replace")
+            or 'id="sealed"' in path.read_text(encoding="utf-8", errors="replace")
         )
     ]
-    assert holders == ["seller/index.html"]
+
+
+def expected_envelope_holders(sale_over: bool):
+    """Where the envelope is allowed to be, defined once for every test that asks.
+
+    A catalog build has one holder: the seller page. An end build has none — there is no `/seller/`
+    to hold it — and that is the stronger of the two guarantees. Keeping the expectation here, and
+    running both modes with a throwaway envelope before any merge, is what makes the deploy job's
+    own check unable to be right in spirit and wrong about the build it reads.
+    """
+    return [] if sale_over else ["seller/index.html"]
+
+
+@pytest.mark.parametrize("sale_over", [False, True])
+def test_the_envelope_reaches_the_seller_page_and_no_other_file(tmp_path, monkeypatch, sale_over):
+    """Both build modes, with a synthetic envelope, in a job that runs before any merge.
+
+    The deploy job's assertion (the envelope is in `/seller/` and nowhere else) was right about the
+    envelope and wrong about which build it reads: it only ever ran on `main`, with the real
+    secret, and the first end build made it read a build with no `/seller/` at all. The same
+    assertion, over both modes and a throwaway envelope, is a pull-request test — and in an end
+    build the guarantee is the stronger one: no file holds it.
+    """
+    private = fixture_private()
+    private["cloudflare_pages_token"] = "cf-token-sentinel"
+    payload = seal.allowlisted_payload(private, datetime(2031, 5, 6, 7, 8, 9, tzinfo=UTC))
+    envelope = json.loads(seal.seal_with_node(payload, PASSPHRASE))
+    dist = tmp_path / "public"
+    monkeypatch.setenv("SELLER_PHONE", "+15555550100")
+    monkeypatch.setenv("SELLER_SEALED", json.dumps(envelope))
+    monkeypatch.setattr(site_builder, "DIST_DIR", dist)
+    monkeypatch.setattr(site_builder, "PUBLIC_INDEX_HTML", dist / "index.html")
+    monkeypatch.setattr(site_builder, "PUBLIC_ROBOTS_TXT", dist / "robots.txt")
+    monkeypatch.setattr(site_builder, "PUBLIC_HEADERS", dist / "_headers")
+    data = site_builder.load_inventory_yaml()
+    if sale_over:
+        data["seller"]["sale_over"] = True
+    else:
+        data["seller"].pop("sale_over", None)
+    site_builder.build_public_site(data)
+    assert envelope_holders(dist, envelope) == expected_envelope_holders(sale_over)
 
 
 def test_a_build_without_the_secret_has_no_sealed_block_and_says_so(tmp_path, monkeypatch):
@@ -177,12 +226,7 @@ def test_the_real_envelope_passes_validation_and_is_only_in_the_seller_page():
     assert envelope["iter"] >= seal.MIN_ITERATIONS
     assert len(raw.strip().encode()) <= seal.SIZE_BUDGET
     public = Path(__file__).resolve().parents[1] / "build" / "public"
-    holders = [
-        p.relative_to(public).as_posix()
-        for p in public.rglob("*")
-        if p.is_file() and envelope["ct"] in p.read_text(encoding="utf-8", errors="ignore")
-    ]
-    assert holders == ([] if sale_is_over() else ["seller/index.html"])
+    assert envelope_holders(public, envelope) == expected_envelope_holders(sale_is_over())
 
 
 class FormFields(HTMLParser):

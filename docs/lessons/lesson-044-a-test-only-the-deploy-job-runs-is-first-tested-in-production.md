@@ -36,10 +36,14 @@ to run it.
 ## Rule
 
 - **A test that reads the shipped artefact must be runnable before the merge.** If it needs a
-  secret, synthesize the secret's *shape* instead — this suite already has `seal_fixture()`, which
-  produces a real envelope for a throwaway passphrase, and its sibling test
-  (`test_the_envelope_is_in_the_seller_page_only`) builds a scratch site with it and would have
-  failed on the pull request.
+  secret, synthesize the secret's *shape* instead: `seal_fixture()` produces a real envelope for a
+  throwaway passphrase, and one test now builds both modes with one and asserts the invariant.
+- **Synthesizing the secret is not enough if the expectation only exists in the deploy job.** The
+  sibling test that already used a throwaway envelope built a *catalog* scratch — its helper drops
+  the switch — so it could never have seen the end-mode expectation, and it passed while the
+  deploy job failed. The expectation has to be **one definition** (`expected_envelope_holders`)
+  that the pre-merge test and the deploy-only test both call; then a mode-blind assertion cannot
+  exist in one of them only.
 - **A test's expectation may depend on the build mode; the mode must be an input, not an
   assumption.** `[] if sale_is_over() else ["seller/index.html"]` is honest and checkable; a bare
   `["seller/index.html"]` is an assumption about a sale that is in progress.
