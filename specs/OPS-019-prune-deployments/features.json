@@ -1,0 +1,44 @@
+[
+  {
+    "id": "OPS-019-prune-deployments-f1",
+    "behavior": "A dry run names every deployment of the project once, marks the one answering to `<project>.pages.dev` as kept, and issues no HTTP write",
+    "verification": "uv run pytest tests/test_prune_deployments.py -q -k 'dry_run or token_travels'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "OPS-019-prune-deployments-f2",
+    "behavior": "`--apply` deletes every deployment but the keeper, one call each, and a failed delete stops the run non-zero with the deployments after it left alone",
+    "verification": "uv run pytest tests/test_prune_deployments.py -q -k 'alias_holder or failed_delete'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "OPS-019-prune-deployments-f3",
+    "behavior": "When the project names no canonical deployment, or names one absent from the deployment list, the script refuses and deletes nothing, even with `--apply`",
+    "verification": "uv run pytest tests/test_prune_deployments.py -q -k 'canonical_deployment'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "OPS-019-prune-deployments-f4",
+    "behavior": "A deployment whose build has not settled is skipped rather than deleted, and pagination is followed so every page of the project is covered",
+    "verification": "uv run pytest tests/test_prune_deployments.py -q -k 'building or pagination'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "OPS-019-prune-deployments-f5",
+    "behavior": "The token travels to curl on stdin and never on argv or in the output, and a run without `CLOUDFLARE_API_TOKEN` or `CLOUDFLARE_ACCOUNT_ID` refuses before calling the API",
+    "verification": "uv run pytest tests/test_prune_deployments.py -q -k 'token or credential'",
+    "state": "pending",
+    "evidence": ""
+  },
+  {
+    "id": "OPS-019-prune-deployments-f6",
+    "behavior": "`make prune-deployments` exists and the decommission runbook's step 4 names it, keeping the dashboard path as the fallback",
+    "verification": "make -n prune-deployments >/dev/null && uv run pytest tests/test_decommission_runbook.py -q",
+    "state": "pending",
+    "evidence": ""
+  }
+]

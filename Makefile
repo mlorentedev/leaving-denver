@@ -39,7 +39,7 @@ TF_RUN = TF_DIR=$(TF_DIR) TF_TOKEN_KEY=$(TF_TOKEN_KEY) SOPS_FILE=$(SOPS_FILE) CF
 
 .DEFAULT_GOAL := help
 
-.PHONY: help install lint format build test check serve drops post reprice sold deploy cf-project ci-secrets protect-deploy protect-main audit-deploy secrets infra-init infra-ids infra-plan infra-apply infra-fmt infra-check clean
+.PHONY: help install lint format build test check serve drops post reprice sold deploy cf-project ci-secrets protect-deploy protect-main audit-deploy prune-deployments secrets infra-init infra-ids infra-plan infra-apply infra-fmt infra-check clean
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' Makefile | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
@@ -146,6 +146,13 @@ ci-secrets: protect-deploy ## Scope the deploy token and the contact to the prot
 
 audit-deploy: ## Check the live deploy settings and secrets (read-only)
 	scripts/audit-deploy.sh
+
+# Every Pages deployment keeps its own permanent URL, and an old one still serves the catalog it
+# was built from (OPS-019, ADR-008). Dry run unless APPLY=1, which deletes every deployment except
+# the one answering to <project>.pages.dev: the token comes from sops, as for `make deploy`, so it
+# never lands on argv or in this transcript.
+prune-deployments: ## Delete every Pages deployment except production's (dry run; APPLY=1 deletes)
+	APPLY=$(APPLY) $(CF_ENV) CF_PROJECT=$(PROJECT) scripts/prune-deployments.sh
 
 protect-main: ## Require the CI test check on main (idempotent; admins can still bypass)
 	gh api -X PUT repos/{owner}/{repo}/branches/main/protection --input .github/branch-protection.json >/dev/null

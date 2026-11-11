@@ -35,6 +35,10 @@ def test_by_nov_9_flips_the_switch_and_takes_the_listings_down():
     for channel in ("Facebook Marketplace", "Craigslist", "OfferUp", "Nextdoor", "flyer"):
         assert channel in by_nov_9, channel
     assert "Delete deployment" in by_nov_9
+    # OPS-019: the step is a command, with the dashboard kept as the fallback for a machine
+    # without the sops key. Both are asserted: dropping either leaves a dead end on the day.
+    assert "make prune-deployments" in by_nov_9
+    assert "make prune-deployments APPLY=1" in by_nov_9
 
 
 def test_the_end_deploy_is_rehearsed_on_a_preview_before_the_day():

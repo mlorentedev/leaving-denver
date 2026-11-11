@@ -186,10 +186,19 @@ that replaces it fail.
    ```
 
 4. Delete the old deployments. Each deploy keeps its own URL, and the old ones still serve the
-   catalog and the phone fragments. Cloudflare dashboard > Workers & Pages > `leaving-denver` >
-   Deployments: for every deployment except the current production one, open its menu and choose
-   Delete deployment. Do this before the API token is revoked in the next section, and
-   include the `candidate` and `preview` branch deployments.
+   catalog and the phone fragments. Do this before the API token is revoked in the next section:
+
+   ```
+   make prune-deployments           # dry run: names what would go, deletes nothing
+   make prune-deployments APPLY=1   # deletes every deployment except production's
+   ```
+
+   It reads the token from sops, as `make deploy` does, so it needs the age key. It never touches
+   the deployment answering to `leaving-denver.pages.dev`, skips one whose build has not settled,
+   covers the `candidate` and `preview` branch deployments, and refuses — deleting nothing — when
+   it cannot identify the production one. Without the age key, do it by hand: Cloudflare dashboard
+   > Workers & Pages > `leaving-denver` > Deployments: for every deployment except the current
+   production one, open its menu and choose Delete deployment.
 
 5. Take down every listing, and the flyer. Each one points here and shows the phone:
    - Facebook Marketplace: Marketplace > Your listings > each listing > Delete listing.
