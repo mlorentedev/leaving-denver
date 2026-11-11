@@ -190,7 +190,7 @@ that replaces it fail.
 
    ```
    make prune-deployments           # dry run: names what would go, deletes nothing
-   make prune-deployments APPLY=1   # deletes every deployment except production's
+   make prune-deployments-apply     # deletes every deployment except production's
    ```
 
    It reads the token from sops, as `make deploy` does, so it needs the age key. It never touches

@@ -92,6 +92,14 @@ findings). Each is dispositioned here, and the code carries the fix where one ap
 | CodeRabbit Major: the Make target deletes on `APPLY=false` or any mistyped value | Real | **Applied.** The recipe's `case` accepts only empty/`0`/`1` (POSIX, so BusyBox make still parses it). Test: `test_the_make_target_rejects_any_apply_value_but_0_and_1`. |
 | CodeRabbit Minor: the token/`--fail-with-body` handling in `call()` | Minor | **Applied** as part of the body-on-stderr change: the token still travels on curl's stdin config, and `--fail-with-body` is what keeps the error body available to print. |
 
+A second review, on `0557787`, raised two more, both real:
+
+| Finding | Severity | Disposition |
+|---|---|---|
+| PR-Agent: the ambient `APPLY` risk moved rather than left — make imports the environment, so an exported `APPLY=1` still reaches the recipe | Real | **Applied.** Deleting is a target of its own (`make prune-deployments-apply`); no variable selects it. Tests: the dry-run target stays dry with `APPLY=1` exported, and only the apply target deletes. |
+| PR-Agent: a `canceled` build never settles, so `--apply` would exit 3 forever and "repeat until 0 skipped" could never be satisfied | Theoretical, real consequence | **Applied.** `success`, `failure` and `canceled` are settled; only genuinely in-progress stages are skipped. Test: `test_a_canceled_deployment_is_settled_and_deleted`. |
+| PR-Agent: the runbook test's `assert "make prune-deployments" in ...` is subsumed by the `-apply` line, so deleting the dry run from the runbook left it green | Real (test quality) | **Applied.** The assertion now requires the dry run on a line of its own, and a mutation (deleting that line) turns the test red. |
+
 One finding was **not** applied: CodeRabbit's suggestion to add a `set -e`-style guard around the
 per-deployment delete is already covered — the loop's `call ... || fail` is the guard, and
 `test_a_failed_delete_stops_the_run_non_zero` pins it.

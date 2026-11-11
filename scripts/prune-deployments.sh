@@ -113,7 +113,9 @@ while IFS=$'\t' read -r id stage; do
     continue
   fi
   case "$stage" in
-    success | failure) ;;
+    # The stages a build ends in. `canceled` belongs here: it never settles, so treating it as
+    # in-progress would make "run again until 0 skipped" impossible to satisfy.
+    success | failure | canceled) ;;
     *)
       printf 'skip    %s  %s  (build in progress)\n' "$id" "$stage"
       skipped=$((skipped + 1))
@@ -134,7 +136,7 @@ deleted=0
 while IFS=$'\t' read -r id stage; do
   [ "$id" = "$keeper" ] && continue
   case "$stage" in
-    success | failure) ;;
+    success | failure | canceled) ;;
     *) continue ;;
   esac
   # ?force=true: Cloudflare refuses to delete a deployment that holds a branch alias

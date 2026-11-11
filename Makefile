@@ -151,13 +151,15 @@ audit-deploy: ## Check the live deploy settings and secrets (read-only)
 # was built from (OPS-019, ADR-008). Dry run unless APPLY=1, which deletes every deployment except
 # the one answering to <project>.pages.dev: the token comes from sops, as for `make deploy`, so it
 # never lands on argv or in this transcript.
-prune-deployments: ## Delete every Pages deployment except production's (dry run; APPLY=1 deletes)
-	@case "$(APPLY)" in \
-	  ''|0) set -- --dry-run ;; \
-	  1) set -- --apply ;; \
-	  *) echo 'prune-deployments: APPLY must be empty, 0 or 1, not "$(APPLY)"' >&2; exit 2 ;; \
-	esac; \
-	$(CF_ENV) CF_PROJECT=$(PROJECT) scripts/prune-deployments.sh "$$@"
+# Deleting is its own target rather than `APPLY=1` on the dry run: make imports the environment
+# into its variables, so a variable could turn a command typed as a dry run into one that removes
+# every deployment but production's. The target name is on the command line and nothing ambient
+# selects it (OPS-019).
+prune-deployments: ## List every Pages deployment that would be deleted, and delete nothing
+	$(CF_ENV) CF_PROJECT=$(PROJECT) scripts/prune-deployments.sh --dry-run
+
+prune-deployments-apply: ## Delete every Pages deployment except the one serving production
+	$(CF_ENV) CF_PROJECT=$(PROJECT) scripts/prune-deployments.sh --apply
 
 protect-main: ## Require the CI test check on main (idempotent; admins can still bypass)
 	gh api -X PUT repos/{owner}/{repo}/branches/main/protection --input .github/branch-protection.json >/dev/null

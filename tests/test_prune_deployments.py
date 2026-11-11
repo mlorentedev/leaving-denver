@@ -126,7 +126,7 @@ def prune(tmp_path, state, apply=False, env=None, make=None):
     }
     args = ["bash", str(SCRIPT)] + (["--apply"] if apply else [])
     if make:
-        args = ["make", "-s", "prune-deployments", *make]
+        args = ["make", "-s", make]
     result = subprocess.run(args, cwd=ROOT, env=environment, text=True, capture_output=True)
     calls = [json.loads(line) for line in (tmp_path / "calls.jsonl").read_text().splitlines()]
     return result, calls
@@ -185,11 +185,29 @@ def test_an_ambient_apply_does_not_turn_a_dry_run_into_a_delete(tmp_path):
         assert "Nothing was deleted" in result.stdout
 
 
-def test_the_make_target_rejects_any_apply_value_but_0_and_1(tmp_path):
-    result, calls = prune(tmp_path, project(), make=["APPLY=false"])
-    assert result.returncode != 0
-    assert "APPLY must be empty, 0 or 1" in result.stderr
-    assert calls == []
+def test_the_dry_run_target_stays_dry_with_an_exported_apply(tmp_path):
+    # make imports the environment into its variables, so `APPLY=1` exported for another tool used
+    # to reach the recipe. Deleting is a separate target now: nothing ambient selects it.
+    result, calls = prune(tmp_path, project(), env={"APPLY": "1"}, make="prune-deployments")
+    assert result.returncode == 0, result.stderr
+    assert deleted_ids(calls) == []
+    assert "Nothing was deleted" in result.stdout
+
+
+def test_the_apply_target_deletes_and_only_apply_does(tmp_path):
+    result, calls = prune(tmp_path, project(), make="prune-deployments-apply")
+    assert result.returncode == 0, result.stderr
+    assert sorted(deleted_ids(calls)) == ["aaa111", "ccc333", "ddd444"]
+
+
+def test_a_canceled_deployment_is_settled_and_deleted(tmp_path):
+    # A canceled build never settles: treating it as in-progress would exit 3 on every run and make
+    # "run again until 0 skipped" impossible.
+    state = project()
+    state["pages"][0].append(deployment("fff666", "2026-11-10T10:00:00Z", stage="canceled"))
+    result, calls = prune(tmp_path, state, apply=True)
+    assert result.returncode == 0, result.stderr
+    assert "fff666" in deleted_ids(calls)
 
 
 def test_a_deployment_still_building_is_skipped_and_the_run_says_so(tmp_path):

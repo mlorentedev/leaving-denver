@@ -36,8 +36,8 @@
   },
   {
     "id": "OPS-019-prune-deployments-f6",
-    "behavior": "`make prune-deployments` exists and the decommission runbook's step 4 names it, keeping the dashboard path as the fallback",
-    "verification": "make -n prune-deployments >/dev/null && uv run pytest tests/test_decommission_runbook.py -q",
+    "behavior": "`make prune-deployments` (dry run) and `make prune-deployments-apply` exist, the decommission runbook's step 4 names both on their own lines, and the dashboard path stays as the fallback",
+    "verification": "make -n prune-deployments >/dev/null && make -n prune-deployments-apply >/dev/null && uv run pytest tests/test_decommission_runbook.py -q",
     "state": "pending",
     "evidence": ""
   }
