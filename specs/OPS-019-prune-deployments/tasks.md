@@ -33,8 +33,8 @@ owner: manu
 - [x] [P] [AC5] Failing test: a project spanning two API pages is fully covered
 - [x] [AC5] Implement pagination
 - [x] [AC6] Implement the missing-env refusal and the "token never on argv" shape
-- [x] [AC7] `make prune-deployments` target (dry run by default, `APPLY=1` deletes) using the same
-      `$(CF_ENV)` token plumbing as `make deploy`
+- [x] [AC7] `make prune-deployments` (dry run) and `make prune-deployments-apply` (deletes), both
+      `.PHONY`, using the same `$(CF_ENV)` token plumbing as `make deploy`
 - [x] [AC7] `docs/runbooks/decommission.md` step 4 names the target and keeps the dashboard fallback;
       `tests/test_decommission_runbook.py` keeps both assertions
 

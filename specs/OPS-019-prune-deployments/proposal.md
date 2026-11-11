@@ -60,7 +60,7 @@ deletes every one that is not serving production:
   sops the way `make deploy` does); the script's own output names deployments, never credentials.
 
 `make prune-deployments` runs the dry run with the same token plumbing as `make deploy`, and
-`make prune-deployments APPLY=1` deletes.
+`make prune-deployments-apply` deletes.
 
 `docs/runbooks/decommission.md` step 4 becomes those two commands, with the dashboard path kept as
 the fallback for a machine that has no sops key.
@@ -112,8 +112,9 @@ the fallback for a machine that has no sops key.
   delete.
 - [ ] AC6 — the token is never printed and never appears in the process arguments; the script
   refuses to start when `CLOUDFLARE_API_TOKEN` or `CLOUDFLARE_ACCOUNT_ID` is missing.
-- [ ] AC7 — `make prune-deployments` exists, defaults to the dry run, and takes `APPLY=1` to
-  delete; the decommission runbook's step 4 names it and keeps the dashboard fallback.
+- [ ] AC7 — `make prune-deployments` (dry run) and `make prune-deployments-apply` (deletes) both
+  exist, both are `.PHONY`, and the decommission runbook's step 4 names each on a line of its own,
+  keeping the dashboard fallback.
 
 ## References
 

@@ -39,7 +39,7 @@ TF_RUN = TF_DIR=$(TF_DIR) TF_TOKEN_KEY=$(TF_TOKEN_KEY) SOPS_FILE=$(SOPS_FILE) CF
 
 .DEFAULT_GOAL := help
 
-.PHONY: help install lint format build test check serve drops post reprice sold deploy cf-project ci-secrets protect-deploy protect-main audit-deploy prune-deployments secrets infra-init infra-ids infra-plan infra-apply infra-fmt infra-check clean
+.PHONY: help install lint format build test check serve drops post reprice sold deploy cf-project ci-secrets protect-deploy protect-main audit-deploy prune-deployments prune-deployments-apply secrets infra-init infra-ids infra-plan infra-apply infra-fmt infra-check clean
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' Makefile | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'

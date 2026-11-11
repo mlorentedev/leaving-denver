@@ -38,7 +38,7 @@ $ make prune-deployments           # 242 deployments, 81 pages
 --- 
 241 to delete, 0 skipped, 1 keep. Nothing was deleted: re-run with --apply
 
-$ make prune-deployments APPLY=1
+$ make prune-deployments-apply
 prune-deployments: deleting 6e2aca84-… failed after 0 deleted: the rest were left alone
 curl: (22) The requested URL returned error: 400
 ```
@@ -50,7 +50,7 @@ parameter in the API request URL"}` for the `candidate` deployment. The script n
 stop-at-first-failure behaviour doing its job on the first real attempt.
 
 ```
-$ make prune-deployments APPLY=1
+$ make prune-deployments-apply
 241 deleted, 0 skipped, 1 keep
 
 $ make prune-deployments

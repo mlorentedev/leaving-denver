@@ -11,7 +11,7 @@ listed 242 deployments correctly, marked the right one `keep`, and then stopped 
 delete with an HTTP 400 that said nothing useful on the terminal:
 
 ```
-$ make prune-deployments APPLY=1
+$ make prune-deployments-apply
 curl: (22) The requested URL returned error: 400
 prune-deployments: deleting 6e2aca84-… failed after 0 deleted: the rest were left alone
 ```

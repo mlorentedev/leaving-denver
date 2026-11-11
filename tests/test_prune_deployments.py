@@ -285,3 +285,11 @@ def test_a_missing_credential_refuses_to_start(tmp_path, missing):
     assert result.returncode != 0
     assert missing in result.stderr
     assert calls == []
+
+
+def test_both_targets_are_phony():
+    # Without .PHONY a directory named after the target makes make print "up to date" and run
+    # nothing: the same silent no-op the target exists to prevent (PR-Agent on #271).
+    phony = next(line for line in MAKEFILE.splitlines() if line.startswith(".PHONY:"))
+    assert " prune-deployments " in phony
+    assert " prune-deployments-apply " in phony
