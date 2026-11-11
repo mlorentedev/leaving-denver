@@ -148,13 +148,13 @@ audit-deploy: ## Check the live deploy settings and secrets (read-only)
 	scripts/audit-deploy.sh
 
 # Every Pages deployment keeps its own permanent URL, and an old one still serves the catalog it
-# was built from (OPS-019, ADR-008). Dry run unless APPLY=1, which deletes every deployment except
-# the one answering to <project>.pages.dev: the token comes from sops, as for `make deploy`, so it
-# never lands on argv or in this transcript.
-# Deleting is its own target rather than `APPLY=1` on the dry run: make imports the environment
-# into its variables, so a variable could turn a command typed as a dry run into one that removes
-# every deployment but production's. The target name is on the command line and nothing ambient
-# selects it (OPS-019).
+# was built from (OPS-019, ADR-008). The token comes from sops, as for `make deploy`, so it never
+# lands on argv or in this transcript.
+#
+# Deleting is its own target rather than a variable on the dry run: make imports the environment
+# into its variable table, so `APPLY=1` exported for another tool would have turned a command typed
+# as a dry run into one that removes every deployment but production's. The target name is on the
+# command line and nothing ambient selects it.
 prune-deployments: ## List every Pages deployment that would be deleted, and delete nothing
 	$(CF_ENV) CF_PROJECT=$(PROJECT) scripts/prune-deployments.sh --dry-run
 

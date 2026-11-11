@@ -196,9 +196,10 @@ that replaces it fail.
    It reads the token from sops, as `make deploy` does, so it needs the age key. It never touches
    the deployment answering to `leaving-denver.pages.dev`, covers the `candidate` and `preview`
    branch deployments, and refuses — deleting nothing — when it cannot identify the production
-   one. A deployment whose build has not settled is skipped, and that exits **3**: its URL stays
-   reachable, so run both commands again once the build has settled, until the summary reports
-   `0 skipped` and `0 to delete`. Without the age key, do it by hand: Cloudflare dashboard
+   one. A deployment whose build has not settled is skipped; the dry run still exits 0, but
+   `make prune-deployments-apply` then exits **3**, because that URL stays reachable. Run both
+   commands again once the build has settled, until the summary reports `0 skipped` and
+   `0 to delete`. Without the age key, do it by hand: Cloudflare dashboard
    > Workers & Pages > `leaving-denver` > Deployments: for every deployment except the current
    production one, open its menu and choose Delete deployment.
 

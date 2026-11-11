@@ -100,6 +100,13 @@ A second review, on `0557787`, raised two more, both real:
 | PR-Agent: a `canceled` build never settles, so `--apply` would exit 3 forever and "repeat until 0 skipped" could never be satisfied | Theoretical, real consequence | **Applied.** `success`, `failure` and `canceled` are settled; only genuinely in-progress stages are skipped. Test: `test_a_canceled_deployment_is_settled_and_deleted`. |
 | PR-Agent: the runbook test's `assert "make prune-deployments" in ...` is subsumed by the `-apply` line, so deleting the dry run from the runbook left it green | Real (test quality) | **Applied.** The assertion now requires the dry run on a line of its own, and a mutation (deleting that line) turns the test red. |
 
+A third round, on `ac609d5`, found only documentation drift, both applied:
+
+- step 4 said a skipped build "exits 3" without saying that only the apply target does (the dry run
+  exits 0), so it now names `make prune-deployments-apply` in that sentence;
+- a comment block above the targets still promised "dry run unless APPLY=1", which nothing reads
+  any more, so it now states the target split and why.
+
 One finding was **not** applied: CodeRabbit's suggestion to add a `set -e`-style guard around the
 per-deployment delete is already covered — the loop's `call ... || fail` is the guard, and
 `test_a_failed_delete_stops_the_run_non_zero` pins it.
