@@ -152,7 +152,12 @@ audit-deploy: ## Check the live deploy settings and secrets (read-only)
 # the one answering to <project>.pages.dev: the token comes from sops, as for `make deploy`, so it
 # never lands on argv or in this transcript.
 prune-deployments: ## Delete every Pages deployment except production's (dry run; APPLY=1 deletes)
-	APPLY=$(APPLY) $(CF_ENV) CF_PROJECT=$(PROJECT) scripts/prune-deployments.sh
+	@case "$(APPLY)" in \
+	  ''|0) set -- --dry-run ;; \
+	  1) set -- --apply ;; \
+	  *) echo 'prune-deployments: APPLY must be empty, 0 or 1, not "$(APPLY)"' >&2; exit 2 ;; \
+	esac; \
+	$(CF_ENV) CF_PROJECT=$(PROJECT) scripts/prune-deployments.sh "$$@"
 
 protect-main: ## Require the CI test check on main (idempotent; admins can still bypass)
 	gh api -X PUT repos/{owner}/{repo}/branches/main/protection --input .github/branch-protection.json >/dev/null

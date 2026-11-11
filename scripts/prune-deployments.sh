@@ -22,17 +22,17 @@ usage: prune-deployments.sh [--dry-run|--apply]
   --apply     delete every deployment that is not serving production
 
 Reads CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID (both required), CF_PROJECT
-(default leaving-denver), CF_API (override the API host; used by the tests) and
-APPLY (any value but 0 applies; this is how `make prune-deployments APPLY=1`
-reaches the script without GNU make's `$(if)`, which BusyBox make cannot parse).
+(default leaving-denver) and CF_API (override the API host; used by the tests).
+The mode comes from the flag alone: no environment variable can turn a run that
+was read as a dry run into one that deletes.
+
+Exit status: 0 when nothing was left to do, 1 when the API failed, 2 on a bad
+argument, 3 when --apply finished with deployments skipped because their build
+had not settled (re-run when it has).
 EOF
 }
 
 mode=dry-run
-case "${APPLY:-}" in
-  "" | 0) ;;
-  *) mode=apply ;;
-esac
 for arg in "$@"; do
   case "$arg" in
     --dry-run) mode=dry-run ;;
@@ -60,14 +60,22 @@ fail() {
 # `success: false` answer is a failure, never a body the caller might read as a result.
 call() {
   local method="$1" url="$2" body
+  # --fail-with-body leaves the API's answer on stdout when the status is an error, so the reason
+  # (errors[].message: a revoked scope, a rate limit, an alias rule) reaches the operator instead of
+  # a bare `curl: (22)`, which is what made the first real run cost a second look at the API docs.
   if [ -n "$method" ]; then
     body=$(printf 'header = "Authorization: Bearer %s"\n' "$CLOUDFLARE_API_TOKEN" |
-      curl -sS --fail-with-body -X "$method" -K - "$url") || return 1
+      curl -sS --fail-with-body -X "$method" -K - "$url") ||
+      { printf '%s\n' "$body" >&2; return 1; }
   else
     body=$(printf 'header = "Authorization: Bearer %s"\n' "$CLOUDFLARE_API_TOKEN" |
-      curl -sS --fail-with-body -K - "$url") || return 1
+      curl -sS --fail-with-body -K - "$url") ||
+      { printf '%s\n' "$body" >&2; return 1; }
   fi
-  jq -e '.success == true' >/dev/null <<<"$body" || return 1
+  if ! jq -e '.success == true' >/dev/null <<<"$body"; then
+    printf '%s\n' "$body" >&2
+    return 1
+  fi
   printf '%s' "$body"
 }
 
@@ -140,3 +148,8 @@ done <"$list"
 
 echo "---"
 echo "$deleted deleted, $skipped skipped, 1 keep"
+if [ "$skipped" -gt 0 ]; then
+  echo "prune-deployments: $skipped deployment(s) were still building: their URLs stay reachable." >&2
+  echo "prune-deployments: run this again once they have settled, until it reports 0 skipped." >&2
+  exit 3
+fi

@@ -83,8 +83,8 @@ def deployment(dep_id, created, aliases=(), stage="success"):
 
 
 def project():
-    """Five deployments in one page: two production builds, a candidate, an old preview and one
-    still building. The project's canonical deployment is the second production build."""
+    """Four settled deployments in one page: two production builds, a candidate and an old
+    preview. The project's canonical deployment is the second production build."""
     return {
         "canonical": "bbb222",
         "pages": [
@@ -95,13 +95,19 @@ def project():
                     "ccc333", "2026-10-20T10:00:00Z", ["candidate.leaving-denver.pages.dev"]
                 ),
                 deployment("ddd444", "2026-10-05T10:00:00Z", ["feat-x.leaving-denver.pages.dev"]),
-                deployment("eee555", "2026-11-10T10:00:00Z", stage="active"),
             ]
         ],
     }
 
 
-def prune(tmp_path, state, apply=False, env=None):
+def project_with_a_building_deployment():
+    """The same project plus one still queued: its URL stays reachable, so the run must say so."""
+    state = project()
+    state["pages"][0].append(deployment("eee555", "2026-11-10T10:00:00Z", stage="active"))
+    return state
+
+
+def prune(tmp_path, state, apply=False, env=None, make=None):
     (tmp_path / "state.json").write_text(json.dumps(state), encoding="utf-8")
     (tmp_path / "calls.jsonl").write_text("", encoding="utf-8")
     stub = tmp_path / "curl"
@@ -119,6 +125,8 @@ def prune(tmp_path, state, apply=False, env=None):
         **(env or {}),
     }
     args = ["bash", str(SCRIPT)] + (["--apply"] if apply else [])
+    if make:
+        args = ["make", "-s", "prune-deployments", *make]
     result = subprocess.run(args, cwd=ROOT, env=environment, text=True, capture_output=True)
     calls = [json.loads(line) for line in (tmp_path / "calls.jsonl").read_text().splitlines()]
     return result, calls
@@ -141,12 +149,12 @@ def deleted_ids(calls):
 def test_a_dry_run_names_every_deployment_and_writes_nothing(tmp_path):
     result, calls = prune(tmp_path, project())
     assert result.returncode == 0, result.stderr
-    for dep in ("aaa111", "bbb222", "ccc333", "ddd444", "eee555"):
+    for dep in ("aaa111", "bbb222", "ccc333", "ddd444"):
         assert dep in result.stdout, dep
     keep = [line for line in result.stdout.splitlines() if line.startswith("keep")]
     assert len(keep) == 1 and "bbb222" in keep[0]
     assert deleted_ids(calls) == []
-    assert "3 to delete" in result.stdout and "1 skipped" in result.stdout
+    assert "3 to delete" in result.stdout and "0 skipped" in result.stdout
 
 
 def test_the_production_alias_holder_is_kept_and_the_rest_are_deleted(tmp_path):
@@ -167,32 +175,42 @@ def test_every_delete_asks_for_force_so_an_aliased_preview_can_go(tmp_path):
     assert urls and all("force=true" in url for url in urls), urls
 
 
-def test_apply_1_in_the_environment_is_what_the_make_target_uses(tmp_path):
-    # `make prune-deployments APPLY=1` passes the mode this way: BusyBox make cannot parse the
-    # `$(if ...)` that would have chosen the flag (lesson-035).
-    result, calls = prune(tmp_path, project(), env={"APPLY": "1"})
-    assert result.returncode == 0, result.stderr
-    assert len(deleted_ids(calls)) == 3
+def test_an_ambient_apply_does_not_turn_a_dry_run_into_a_delete(tmp_path):
+    # The mode comes from the flag alone. An APPLY exported into the calling shell for some other
+    # tool must not delete 200+ deployments that the operator read as a simulation.
+    for value in ("1", "true", "yes"):
+        result, calls = prune(tmp_path, project(), env={"APPLY": value})
+        assert result.returncode == 0, result.stderr
+        assert deleted_ids(calls) == [], value
+        assert "Nothing was deleted" in result.stdout
 
 
-def test_apply_0_in_the_environment_is_a_dry_run(tmp_path):
-    result, calls = prune(tmp_path, project(), env={"APPLY": "0"})
-    assert result.returncode == 0, result.stderr
-    assert deleted_ids(calls) == []
+def test_the_make_target_rejects_any_apply_value_but_0_and_1(tmp_path):
+    result, calls = prune(tmp_path, project(), make=["APPLY=false"])
+    assert result.returncode != 0
+    assert "APPLY must be empty, 0 or 1" in result.stderr
+    assert calls == []
 
 
-def test_a_deployment_still_building_is_skipped(tmp_path):
-    result, calls = prune(tmp_path, project(), apply=True)
+def test_a_deployment_still_building_is_skipped_and_the_run_says_so(tmp_path):
+    # CodeRabbit's Major on #271: exiting 0 with a deployment skipped reports "done" over a list
+    # with a live URL still in it. Exit 3 is the signal to run it again once the build settles.
+    result, calls = prune(tmp_path, project_with_a_building_deployment(), apply=True)
+    assert result.returncode == 3
     assert "eee555" not in deleted_ids(calls)
     assert "skip" in result.stdout and "eee555" in result.stdout
+    assert "still building" in result.stderr and "run this again" in result.stderr
 
 
 def test_a_failed_delete_stops_the_run_non_zero(tmp_path):
     state = project()
     state["fail_delete"] = ["aaa111"]
     result, calls = prune(tmp_path, state, apply=True)
-    assert result.returncode != 0
+    assert result.returncode == 1
     assert "aaa111" in result.stderr
+    # the API's own message reaches the operator: that is the difference between "it failed" and
+    # "it failed because the token lost Pages:Edit", which cost a second look on the first run.
+    assert "Not Found" in result.stderr
     # it stops there: the failure is the last call, nothing is attempted after it
     assert deleted_ids(calls) == ["aaa111"]
 

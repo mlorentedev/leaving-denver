@@ -47,7 +47,12 @@ deletes every one that is not serving production:
   `--apply`.
 - **Never delete a deploy mid-build.** A deployment whose `latest_stage.status` is neither
   `success` nor `failure` (queued, uploading, deploying) is reported as `skip (build in progress)`
-  and kept, so a deploy that started while the script ran survives.
+  and kept, so a deploy that started while the script ran survives — and the run exits **3**, not
+  0, because a URL is still reachable and "finished" would be a lie.
+- **The mode is a flag, never a variable.** No environment variable can turn a run the operator
+  read as a dry run into one that deletes; `make prune-deployments APPLY=1` maps the documented
+  value onto `--apply` and rejects every other value of `APPLY` before the token is read.
+- **A failed call says why.** The API's `errors[].message` reaches stderr.
 - **The token never reaches argv or stdout.** It is read from the environment (`make` pipes it from
   sops the way `make deploy` does); the script's own output names deployments, never credentials.
 
@@ -98,6 +103,8 @@ the fallback for a machine that has no sops key.
 - [ ] AC4 — a deployment whose build has not settled is reported as skipped and never deleted.
 - [ ] AC5 — pagination is followed: a project whose deployments span two pages is fully covered by
   the dry run.
+- [ ] AC8 — a run that skipped a deployment exits 3 and says to run it again, and an `APPLY`
+  value other than empty/`0`/`1` is refused before any API call.
 - [ ] AC6 — the token is never printed and never appears in the process arguments; the script
   refuses to start when `CLOUDFLARE_API_TOKEN` or `CLOUDFLARE_ACCOUNT_ID` is missing.
 - [ ] AC7 — `make prune-deployments` exists, defaults to the dry run, and takes `APPLY=1` to

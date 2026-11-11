@@ -79,6 +79,23 @@ $ GET …/pages/projects/leaving-denver/deployments
 The keeper is unchanged across all of it: `canonical_deployment` was `1804ac90-…` before the run and
 is the only deployment left after it.
 
+## Adversarial review dispositions
+
+CodeRabbit reviewed `3daa170` (two Majors, one Minor); PR-Agent reviewed the same head (two
+findings). Each is dispositioned here, and the code carries the fix where one applied.
+
+| Finding | Severity | Disposition |
+|---|---|---|
+| PR-Agent: apply mode selected from the ambient `APPLY` variable, so an unrelated exported `APPLY` deletes with no visible flag | Theoretical, but the right call | **Applied.** The script now takes the mode from `--apply` alone; the Make target maps `APPLY=1` onto the flag and rejects every other value before the token is read. Tests: `test_an_ambient_apply_does_not_turn_a_dry_run_into_a_delete` (three values), `test_the_make_target_rejects_any_apply_value_but_0_and_1`. |
+| PR-Agent: `call()` discards the response body on failure, so a stop reports only `curl: (22)` | Real (diagnostics) | **Applied.** The captured body goes to stderr, so `errors[].message` — what named 8000035 on the first run — reaches the operator. Test: `test_a_failed_delete_stops_the_run_non_zero` asserts the API's message, not just the status. |
+| CodeRabbit Major: a skipped deployment leaves its URL reachable while the run exits 0 | Real | **Applied.** `--apply` now exits 3 with "run this again once they have settled", and the runbook tells the operator to repeat until `0 skipped` and `0 to delete`. Test: `test_a_deployment_still_building_is_skipped_and_the_run_says_so`. |
+| CodeRabbit Major: the Make target deletes on `APPLY=false` or any mistyped value | Real | **Applied.** The recipe's `case` accepts only empty/`0`/`1` (POSIX, so BusyBox make still parses it). Test: `test_the_make_target_rejects_any_apply_value_but_0_and_1`. |
+| CodeRabbit Minor: the token/`--fail-with-body` handling in `call()` | Minor | **Applied** as part of the body-on-stderr change: the token still travels on curl's stdin config, and `--fail-with-body` is what keeps the error body available to print. |
+
+One finding was **not** applied: CodeRabbit's suggestion to add a `set -e`-style guard around the
+per-deployment delete is already covered — the loop's `call ... || fail` is the guard, and
+`test_a_failed_delete_stops_the_run_non_zero` pins it.
+
 ## Test status
 
 - `uv run pytest tests/test_prune_deployments.py tests/test_decommission_runbook.py -q` →
