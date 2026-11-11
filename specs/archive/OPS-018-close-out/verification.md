@@ -110,6 +110,15 @@ are the contract set the verdict closes: none of them changed after it, so the s
 | F3 — `retro` counts an `Available` item's price in `realized`, and `disagreements()` skips `status != "Sold"` | **Ticketed:** [#274](https://github.com/mlorentedev/leaving-denver/issues/274) — unreachable with the committed data (16 `Sold`, `disagreements: []`), so a follow-up rather than a blocker here. |
 | F4 — the end page's sentence cannot account for an unplaced item | **Ticketed:** [#275](https://github.com/mlorentedev/leaving-denver/issues/275) — same reasoning as F3; the current split pins 10/6/0. |
 
+The verdict travels with the folder; its **transcript does not**. That file replays the reviewer's
+whole session, and in this repository the session runs the seller-only commands — the transcript of
+this review carried `$10,500`, `$10,990`, the researched targets and the floors. The repository is
+public, so `review.md` (percentages and days only, checked) and `review-request.json` (digests and
+shas) are committed and `review-transcript.jsonl` stays on the machine that ran it; `.gitignore`
+now refuses it. `review.md`'s digests still match: `dotf spec digest` normalises away the `status`
+line, verified by setting `status: archived` and getting the same `proposal.md` digest
+`42918bac…` that `review-request.json` recorded before the archive.
+
 ## Archive checklist
 
 - [x] `proposal.md` frontmatter set to `status: archived`
