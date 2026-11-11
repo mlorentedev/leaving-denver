@@ -24,6 +24,7 @@ pytestmark = pytest.mark.skipif(
 )
 
 TOKEN = "stub-token-value-never-echoed"
+MAKEFILE = (ROOT / "Makefile").read_text(encoding="utf-8")
 
 # `curl` as the script uses it: the Authorization header arrives in a config on stdin (`-K -`),
 # the URL is the last argument. GET lists a page, DELETE removes one id.
@@ -107,7 +108,7 @@ def project_with_a_building_deployment():
     return state
 
 
-def prune(tmp_path, state, apply=False, env=None, make=None):
+def prune(tmp_path, state, apply=False, env=None):
     (tmp_path / "state.json").write_text(json.dumps(state), encoding="utf-8")
     (tmp_path / "calls.jsonl").write_text("", encoding="utf-8")
     stub = tmp_path / "curl"
@@ -125,8 +126,6 @@ def prune(tmp_path, state, apply=False, env=None, make=None):
         **(env or {}),
     }
     args = ["bash", str(SCRIPT)] + (["--apply"] if apply else [])
-    if make:
-        args = ["make", "-s", make]
     result = subprocess.run(args, cwd=ROOT, env=environment, text=True, capture_output=True)
     calls = [json.loads(line) for line in (tmp_path / "calls.jsonl").read_text().splitlines()]
     return result, calls
@@ -185,19 +184,28 @@ def test_an_ambient_apply_does_not_turn_a_dry_run_into_a_delete(tmp_path):
         assert "Nothing was deleted" in result.stdout
 
 
-def test_the_dry_run_target_stays_dry_with_an_exported_apply(tmp_path):
-    # make imports the environment into its variables, so `APPLY=1` exported for another tool used
-    # to reach the recipe. Deleting is a separate target now: nothing ambient selects it.
-    result, calls = prune(tmp_path, project(), env={"APPLY": "1"}, make="prune-deployments")
-    assert result.returncode == 0, result.stderr
-    assert deleted_ids(calls) == []
-    assert "Nothing was deleted" in result.stdout
+def recipe(target):
+    """One target's recipe lines, read from the Makefile. Running `make` here would need sops and
+    the age key, which CI does not have: the flag each target passes and the absence of a mode
+    variable are static facts."""
+    lines = MAKEFILE.splitlines()
+    start = next(i for i, line in enumerate(lines) if line.startswith(f"{target}:"))
+    body = []
+    for line in lines[start + 1 :]:
+        if line and not line.startswith("\t"):
+            break
+        body.append(line)
+    return "\n".join(body)
 
 
-def test_the_apply_target_deletes_and_only_apply_does(tmp_path):
-    result, calls = prune(tmp_path, project(), make="prune-deployments-apply")
-    assert result.returncode == 0, result.stderr
-    assert sorted(deleted_ids(calls)) == ["aaa111", "ccc333", "ddd444"]
+def test_deleting_is_its_own_target_and_no_variable_selects_it():
+    dry, apply = recipe("prune-deployments"), recipe("prune-deployments-apply")
+    assert "scripts/prune-deployments.sh --dry-run" in dry
+    assert "--apply" not in dry, "the dry-run target must not be able to delete"
+    assert "scripts/prune-deployments.sh --apply" in apply
+    # make imports the environment into its variable table, so a `$(APPLY)` here would let an
+    # exported APPLY=1 turn `make prune-deployments` into 241 deletions (PR-Agent on #271).
+    assert "$(APPLY)" not in dry + apply
 
 
 def test_a_canceled_deployment_is_settled_and_deleted(tmp_path):
