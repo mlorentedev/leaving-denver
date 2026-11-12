@@ -30,7 +30,8 @@
       "login": "github-actions",
       "declined_markers": [],
       "review_markers": [
-        "## PR Reviewer Guide"
+        "## PR Reviewer Guide",
+        "## Incremental PR Reviewer Guide"
       ],
       "why": "PR-Agent (.github/workflows/pr-agent.yml) runs under GITHUB_TOKEN and publishes through the COMMENTS api, so its reviews never enter reviews[]. The marker is the `review` command's own heading; `## PR Code Suggestions` is deliberately not a marker, since suggestions are not a review. Marker provenance: observed from github-actions[bot] in dotfiles and kubelab (hundreds of comments). Not yet observed here: the first green pr-agent run on a leaving-denver PR, after NAN_API_KEY is synced, is the verification."
     }
