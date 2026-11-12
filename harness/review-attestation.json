@@ -30,7 +30,8 @@
       "login": "github-actions",
       "declined_markers": [],
       "review_markers": [
-        "## PR Reviewer Guide"
+        "## PR Reviewer Guide",
+        "## Incremental PR Reviewer Guide"
       ],
       "why": "PR-Agent (.github/workflows/pr-agent.yml) runs under GITHUB_TOKEN and publishes through the COMMENTS api, so its reviews never enter reviews[]. The marker is the `review` command's own heading; `## PR Code Suggestions` is deliberately not a marker, since suggestions are not a review. Marker provenance: observed from github-actions[bot] in dotfiles and kubelab (hundreds of comments). Not yet observed here: the first green pr-agent run on a leaving-denver PR, after NAN_API_KEY is synced, is the verification."
     }
@@ -43,5 +44,17 @@
     "label": "merged-unreviewed",
     "section": "## Unreviewed merge rationale",
     "why": "Both are required, never one. Proceeding on an unreviewed PR is allowed; proceeding SILENTLY is not. The label plus the section is what forces the disclosure into the durable record instead of a chat message."
+  },
+  "classification": {
+    "prefix": "Class: ",
+    "classes": [
+      "REAL",
+      "THEORETICAL",
+      "SPECULATIVE"
+    ],
+    "reviewers": [
+      "github-actions"
+    ],
+    "why": "A finding's class is read from a whole line equal to prefix + class, never parsed out of prose; a finding with no such line, or two that disagree, is unclassified and goes to a human. .pr_agent.toml asks the reviewer for exactly these lines in extra_instructions, with the paragraph shared by every repository that calls the ci-workflows pr-agent workflow. reviewers names PR-Agent (github-actions) only, because CodeRabbit writes its own severity format. Shape copied from dotfiles (TOOL-017)."
   }
 }
