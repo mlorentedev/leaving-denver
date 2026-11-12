@@ -13,16 +13,15 @@ SHARED = re.compile(
     r"^\s+uses: mlorentedev/ci-workflows/\.github/workflows/pr-agent\.yml@[0-9a-f]{40} # v\d+\.\d+\.\d+$",
     re.MULTILINE,
 )
+# What the shared job's NaN step sets through the environment, which sits above
+# this file. max_model_tokens, ai_timeout and max_output_tokens are not set there
+# (mlorentedev/ci-workflows#88), so the toml may keep them.
 SHARED_KEYS = {
     "model",
-    "model_weak",
     "fallback_models",
     "custom_model_max_tokens",
-    "max_model_tokens",
-    "ai_timeout",
     "reasoning_effort",
     "publish_output_progress",
-    "max_output_tokens",
 }
 
 
