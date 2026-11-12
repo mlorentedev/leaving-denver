@@ -92,16 +92,36 @@ owner: manu
 
 ## Promotion candidates
 
-- [x] Lesson for the repo's `docs/lessons/`? yes:
-  `docs/lessons/lesson-043-a-percentage-of-a-mixed-total-hides-the-group-that-missed.md`
-- [x] ADR-worthy decision for the repo's `docs/adr/adr-XXX.md`? yes:
-  `docs/adr/adr-013-the-end-page-states-the-result.md`
+- [x] Lesson for the repo's `docs/lessons/`? yes: `docs/lessons/lesson-043-a-percentage-of-a-mixed-total-hides-the-group-that-missed.md`
+- [x] ADR-worthy decision for the repo's `docs/adr/adr-XXX.md`? yes: `docs/adr/adr-013-the-end-page-states-the-result.md`
 - [x] New pattern candidate for `00_meta/patterns/`? no: it is one project's close-out; the
   transferable part is the lesson above, which is repo-level.
 
+## Adversarial review dispositions
+
+Review: `review.md` in this folder — **PASS WITH GAPS**, no Blocker, no Major, four Minors
+(`nan/glm5.3-flash`, 2026-11-10, reviewed `5bc70f9`). `proposal.md`, `tasks.md` and `features.json`
+are the contract set the verdict closes: none of them changed after it, so the signature still holds.
+
+| Finding | Disposition |
+|---|---|
+| F1 — `tasks.md` is stale: every Implementation and Closing box unticked although both PRs merged | **Accepted as-is.** The boxes are part of the reviewed contract set; ticking them would change a digest the verdict closes, and the work's real state is this file plus `gh pr view 268 269`. The cost is a reader who trusts ticks over evidence, which the review named. |
+| F2 — the closing checklist requires `mypy`, which nothing runs or declares | **Ticketed:** [#273](https://github.com/mlorentedev/leaving-denver/issues/273) — add mypy to the lock, `make check` and CI, or drop the word from the template and the specs that carry it. |
+| F3 — `retro` counts an `Available` item's price in `realized`, and `disagreements()` skips `status != "Sold"` | **Ticketed:** [#274](https://github.com/mlorentedev/leaving-denver/issues/274) — unreachable with the committed data (16 `Sold`, `disagreements: []`), so a follow-up rather than a blocker here. |
+| F4 — the end page's sentence cannot account for an unplaced item | **Ticketed:** [#275](https://github.com/mlorentedev/leaving-denver/issues/275) — same reasoning as F3; the current split pins 10/6/0. |
+
+The verdict travels with the folder; its **transcript does not**. That file replays the reviewer's
+whole session, and in this repository the session runs the seller-only commands — the transcript of
+this review carried `$10,500`, `$10,990`, the researched targets and the floors. The repository is
+public, so `review.md` (percentages and days only, checked) and `review-request.json` (digests and
+shas) are committed and `review-transcript.jsonl` stays on the machine that ran it; `.gitignore`
+now refuses it. `review.md`'s digests still match: `dotf spec digest` normalises away the `status`
+line, verified by setting `status: archived` and getting the same `proposal.md` digest
+`42918bac…` that `review-request.json` recorded before the archive.
+
 ## Archive checklist
 
-- [ ] `proposal.md` frontmatter set to `status: archived`
-- [ ] Folder moved: `specs/OPS-018-close-out/` -> `specs/archive/OPS-018-close-out/`
+- [x] `proposal.md` frontmatter set to `status: archived`
+- [x] Folder moved: `specs/OPS-018-close-out/` -> `specs/archive/OPS-018-close-out/`
 - [ ] Bitácora board ticket for this spec moved to Done / closed with PR link (ADR-018)
-- [ ] Promotions above executed (if any)
+- [x] Promotions above executed (if any)

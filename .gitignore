@@ -54,3 +54,11 @@ override.tf.json
 *_override.tf
 *_override.tf.json
 !*.tfvars.example
+
+# The adversarial review's transcript replays the reviewer's whole session, and in this repository
+# that session runs the seller-only commands: `make retro`, the inventory with its floors and
+# realized prices. The repository is public, so the verdict (review.md, percentages and days only)
+# is committed and the transcript stays local. Confirmed the hard way on OPS-018's review, whose
+# transcript carried $10,500, $10,990, the targets and the floors.
+specs/**/review-transcript.jsonl
+specs/**/review-transcript.jsonl.stderr
