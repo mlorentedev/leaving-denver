@@ -35,6 +35,17 @@ def test_by_nov_9_flips_the_switch_and_takes_the_listings_down():
     for channel in ("Facebook Marketplace", "Craigslist", "OfferUp", "Nextdoor", "flyer"):
         assert channel in by_nov_9, channel
     assert "Delete deployment" in by_nov_9
+    # OPS-019: the step is a command, with the dashboard kept as the fallback for a machine
+    # without the sops key. Both are asserted: dropping either leaves a dead end on the day.
+    assert "make prune-deployments-apply" in by_nov_9
+    # The dry run must be named on a line of its own: `assert "make prune-deployments" in ...`
+    # would be subsumed by the apply line above, so deleting the dry run from the runbook left the
+    # test green (PR-Agent on #271).
+    assert [
+        line
+        for line in by_nov_9.splitlines()
+        if line.strip().startswith("make prune-deployments") and "-apply" not in line
+    ], "step 4 no longer names the dry run on its own line"
 
 
 def test_the_end_deploy_is_rehearsed_on_a_preview_before_the_day():

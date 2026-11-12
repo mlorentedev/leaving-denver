@@ -55,3 +55,6 @@ tags: [lessons, index, docs, leaving-denver]
 | [lesson-040](lesson-040-one-200-is-not-a-ready-deployment.md) | One 200 Is Not a Ready Deployment | 2026-10-07 | [ci, cloudflare, deploy, smoke, flaky] |
 | [lesson-041](lesson-041-a-command-that-starts-writing-inherits-tests-that-never-stubbed-it.md) | A Command That Starts Writing Inherits Tests That Never Stubbed It | 2026-10-08 | [testing, cli, inventory, fixtures, sops] |
 | [lesson-042](lesson-042-a-deadline-exception-belongs-in-the-automation.md) | A Deadline Exception Belongs in the Automation, Not in the Instruction | 2026-10-19 | [runbook, close-out, deadlines, inventory, testing] |
+| [lesson-043](lesson-043-a-percentage-of-a-mixed-total-hides-the-group-that-missed.md) | A Percentage of a Mixed Total Hides the Group That Missed | 2026-10-19 | [retro, data, copy, testing] |
+| [lesson-044](lesson-044-a-test-only-the-deploy-job-runs-is-first-tested-in-production.md) | A Test Only the Deploy Job Runs Is First Tested in Production | 2026-11-10 | [ci, testing, deploy, secrets, close-out] |
+| [lesson-045](lesson-045-pages-refuses-to-delete-an-aliased-deployment-without-force.md) | Pages Refuses to Delete an Aliased Deployment Without `?force=true` | 2026-11-11 | [cloudflare, pages, api, deploy, close-out, script] |

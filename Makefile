@@ -39,7 +39,7 @@ TF_RUN = TF_DIR=$(TF_DIR) TF_TOKEN_KEY=$(TF_TOKEN_KEY) SOPS_FILE=$(SOPS_FILE) CF
 
 .DEFAULT_GOAL := help
 
-.PHONY: help install lint format build test check serve drops post reprice sold deploy cf-project ci-secrets protect-deploy protect-main audit-deploy secrets infra-init infra-ids infra-plan infra-apply infra-fmt infra-check clean
+.PHONY: help install lint format build test check serve drops post reprice sold deploy cf-project ci-secrets protect-deploy protect-main audit-deploy prune-deployments prune-deployments-apply secrets infra-init infra-ids infra-plan infra-apply infra-fmt infra-check clean
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' Makefile | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
@@ -146,6 +146,20 @@ ci-secrets: protect-deploy ## Scope the deploy token and the contact to the prot
 
 audit-deploy: ## Check the live deploy settings and secrets (read-only)
 	scripts/audit-deploy.sh
+
+# Every Pages deployment keeps its own permanent URL, and an old one still serves the catalog it
+# was built from (OPS-019, ADR-008). The token comes from sops, as for `make deploy`, so it never
+# lands on argv or in this transcript.
+#
+# Deleting is its own target rather than a variable on the dry run: make imports the environment
+# into its variable table, so `APPLY=1` exported for another tool would have turned a command typed
+# as a dry run into one that removes every deployment but production's. The target name is on the
+# command line and nothing ambient selects it.
+prune-deployments: ## List every Pages deployment that would be deleted, and delete nothing
+	$(CF_ENV) CF_PROJECT=$(PROJECT) scripts/prune-deployments.sh --dry-run
+
+prune-deployments-apply: ## Delete every Pages deployment except the one serving production
+	$(CF_ENV) CF_PROJECT=$(PROJECT) scripts/prune-deployments.sh --apply
 
 protect-main: ## Require the CI test check on main (idempotent; admins can still bypass)
 	gh api -X PUT repos/{owner}/{repo}/branches/main/protection --input .github/branch-protection.json >/dev/null
