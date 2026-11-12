@@ -1,31 +1,38 @@
-"""PR-Agent's model chain: the workflow env and .pr_agent.toml name the same models
-(the env wins, the toml is what the default branch reads), and no retired model."""
+"""PR-Agent runs from the shared ci-workflows job: this repo pins the caller and keeps only
+its own review instructions. The model chain and token budgets are the shared job's, set
+through the environment, which sits above .pr_agent.toml, so a copy left in the toml
+would only drift from what actually runs."""
 
-import json
 import re
 import tomllib
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-RETIRED = {"openai/mimo-v2.5"}  # NaN retired it 2026-09-30: 401 (dotfiles AI-045, #1763)
+WORKFLOW = ROOT / ".github/workflows/pr-agent.yml"
+SHARED = re.compile(
+    r"^\s+uses: mlorentedev/ci-workflows/\.github/workflows/pr-agent\.yml@[0-9a-f]{40} # v\d+\.\d+\.\d+$",
+    re.MULTILINE,
+)
+SHARED_KEYS = {
+    "model",
+    "model_weak",
+    "fallback_models",
+    "custom_model_max_tokens",
+    "max_model_tokens",
+    "ai_timeout",
+    "reasoning_effort",
+    "publish_output_progress",
+    "max_output_tokens",
+}
 
 
-def chains():
-    toml = tomllib.loads((ROOT / ".pr_agent.toml").read_text(encoding="utf-8"))["config"]
-    workflow = (ROOT / ".github/workflows/pr-agent.yml").read_text(encoding="utf-8")
-    model = re.search(r"CONFIG__MODEL: (\S+)", workflow).group(1)
-    fallbacks = json.loads(re.search(r"CONFIG__FALLBACK_MODELS: '([^']+)'", workflow).group(1))
-    return [toml["model"], *toml["fallback_models"]], [model, *fallbacks]
+def test_the_workflow_calls_the_shared_job_pinned_by_sha():
+    workflow = WORKFLOW.read_text(encoding="utf-8")
+    assert len(SHARED.findall(workflow)) == 1
+    assert "The-PR-Agent/pr-agent" not in workflow
 
 
-def test_the_workflow_and_the_toml_name_the_same_models():
-    toml, workflow = chains()
-    assert toml == workflow
-
-
-def test_no_retired_model_and_deepseek_last():
-    chain, _ = chains()
-    assert not RETIRED & set(chain)
-    assert len(set(chain)) == len(chain)
-    # deepseek fails with an empty 200, which no fallback behind it would ever see.
-    assert chain[-1] == "openai/deepseek-v4-flash"
+def test_the_toml_leaves_the_model_chain_to_the_shared_job():
+    toml = tomllib.loads((ROOT / ".pr_agent.toml").read_text(encoding="utf-8"))
+    assert not SHARED_KEYS & set(toml.get("config", {}))
+    assert "github_action_config" not in toml

@@ -255,9 +255,11 @@ new token (ADR-008).
    done
    ```
 
-   The PR-review key is a repository secret, not an environment one
-   (`.github/workflows/pr-agent.yml`): `gh secret delete NAN_API_KEY`, and revoke the key where
-   it was issued.
+   The PR-review keys are repository secrets, not environment ones
+   (`.github/workflows/pr-agent.yml` passes them to the shared ci-workflows job):
+   `gh secret delete NAN_API_KEY` and `gh secret delete PR_AGENT_ANTHROPIC_API_KEY`, then drop
+   this repository from both keys' consumers in the dotfiles secrets registry. Revoke
+   `NAN_API_KEY` where it was issued only if no other repository uses it.
 
    The bitácora board token is a repository secret too, uploaded by the bitácora rollout in
    dotfiles (`.github/workflows/add-to-project.yml`, `bitacora-status.yml`):

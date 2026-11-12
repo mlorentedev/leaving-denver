@@ -1,51 +1,16 @@
 # PR-Agent (The-PR-Agent/pr-agent, MIT) on NaN cluster inference.
 #
-# Why this repo needs a second reviewer: see the header of
-# .github/workflows/pr-agent.yml (CodeRabbit reviewed 2 of the first 5 PRs).
+# Why this repo needs a second reviewer: measured 2026-09-26 over every PR (#1, #11,
+# #36, #40, #42), CodeRabbit posted a real review on 2, `Review limit reached` on 2 more
+# (#36, #40) and nothing on #1. Its quota is shared account-wide.
 #
-# Ported from mlorentedev/yt-metrics-cli. The model chain and budget below are
-# inherited unchanged and cite their sources by issue; the reviewer instructions and
-# the ignore list are rewritten for this repo.
+# Ported from mlorentedev/yt-metrics-cli; the reviewer instructions and the ignore list
+# are rewritten for this repo.
 
 [config]
-# `openai/` selects LiteLLM's OpenAI-compatible transport; the endpoint is NaN's, set
-# as OPENAI__API_BASE in the workflow. Nothing here talks to OpenAI.
-#
-# glm5.3-flash leads, mimo-v2.6-flash follows, deepseek-v4-flash goes last.
-#
-# NaN retired mimo-v2.5 on 2026-09-30: it hung, then answered 401 (dotfiles AI-045,
-# #1763), so every review here fell through to deepseek and shared its bucket with the
-# rest of NaN's traffic. glm5.3-flash is a member of harness/reviewer-pool.json
-# (reasoning-class, 1M context; not calibrated against a known-outcome review, and the
-# pool says so) and has its own PER-MODEL concurrency bucket (kubelab #1107/#1203), so
-# leading with it spreads load instead of queuing behind the other consumers.
-#
-# deepseek stays LAST because its characteristic failure is a 200 with an empty body
-# (it spends the output budget on the reasoning chain and never writes an answer), which
-# raises no exception, so LiteLLM never consults a fallback behind it. kubelab measured
-# that shape on run 32440498259 (#1205). A 429 or a 401 DOES raise, so the models that
-# fail that way go first.
-#
-# This is not a quality ranking. The excluded models stay excluded by name: qwen3.6/
-# gemma4 are the latency tier, and a reviewer that PASSes cheaply converts a gate into a
-# green checkmark. tests/pr-agent-config.bats holds that at dotfiles.
-model = "openai/glm5.3-flash"
-
-# Two fallbacks, each a separate NaN bucket. mimo-v2.6-flash is the pool's re-admitted
-# successor of mimo-v2.5 (planted-defect test, 2026-09-30). deepseek shares a bucket with
-# the adversarial-review pool; the trade was made at dotfiles #1149 (CI yields to the
-# gate, because the gate blocks and CI review advises).
-fallback_models = ["openai/mimo-v2.6-flash", "openai/deepseek-v4-flash"]
-
-# `model_weak` deliberately absent. Upstream defaults it to a flash tier for
-# descriptions and commit summaries; `auto_describe` is off below so it would do
-# nothing, and the model it names is the one the pool rejects here. Importing a
-# documented tension for zero behaviour is the worst of both.
-
-# NaN ids are not in LiteLLM's registry, so the budget must be stated or LiteLLM
-# assumes a small default and truncates the diff silently.
-custom_model_max_tokens = 200000
-max_model_tokens = 200000
+# The model, its fallback and the token budgets are set by the shared workflow
+# (mlorentedev/ci-workflows pr-agent.yml) through environment variables, which sit
+# above this file, so they are not repeated here.
 
 response_language = "en-US"
 
@@ -67,6 +32,11 @@ final_update_message = false
 # sixteen at dotfiles (#1072, recommendation was deletion). An instruction ignored 94 %
 # of the time is a comment, not a control.
 extra_instructions = """
+Classify each finding as REAL, THEORETICAL or SPECULATIVE. State the class as
+the first line of its issue_content, alone on that line and spelled exactly
+"Class: REAL", "Class: THEORETICAL" or "Class: SPECULATIVE". The triage reads
+only that line; a finding without it goes to a human unclassified.
+
 CI runs `make check`: ruff lint and format, a full build, and pytest against that
 build. Do not restate what those report.
 
@@ -88,7 +58,7 @@ analysis cannot see, and what matters here:
   builder but not in the templates renders empty or broken on the page.
 - a test that passes vacuously, or a guard that cannot fail the way its comment says.
 
-Grade each finding REAL, THEORETICAL or SPECULATIVE and say which. REAL needs a
+A REAL finding needs a
 concrete trace: file and line, failing input, or a command and its output. Do not flag
 an import or dependency as missing when CI installs and tests pass; trust
 pyproject.toml and uv.lock. Write in English. Conventional Commits and no AI
