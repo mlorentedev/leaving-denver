@@ -123,3 +123,22 @@ per-deployment delete is already covered — the loop's `call ... || fail` is th
 - [ ] `proposal.md` frontmatter set to `status: archived`
 - [ ] Folder moved: `specs/OPS-019-prune-deployments/` -> `specs/archive/OPS-019-prune-deployments/`
 - [ ] Bitácora board ticket closed with the PR link (ADR-018)
+
+## Promotion candidates
+
+- [x] Lesson for the repo's `docs/lessons/`? yes: `docs/lessons/lesson-045-pages-refuses-to-delete-an-aliased-deployment-without-force.md`
+- [x] ADR-worthy decision for the repo's `docs/adr/adr-XXX.md`? no: it implements ADR-008's step; no new decision.
+- [x] New pattern candidate for `00_meta/patterns/`? no: the transferable part is lesson-045, which is repo-level.
+
+## Review dispositions
+
+Verdict: **PASS**, no Blocker and no Major (`agy/gemini-3.8-flash-high`, reviewed `a17a1f3`). The
+five Minors:
+
+| Finding | Disposition |
+|---|---|
+| Predictable `/tmp` path instead of `mktemp` | Ticketed: [#284](https://github.com/mlorentedev/leaving-denver/issues/284). One-line hardening; the script only ever writes ids to it, and a symlink attack needs a local account. |
+| A second `---` delimiter when `--apply` deletes nothing | Ticketed with the same batch: [#284](https://github.com/mlorentedev/leaving-denver/issues/284). Cosmetic, output only. |
+| `total_pages` assumed numeric | Declined: `jq -r '.result_info.total_pages // 1'` already falls back to `1`, and the API's own contract types it as an integer; a malformed value would fail closed on the next call, not silently delete. |
+| AC8 was added during the review and is not registered in `features.json`/`tasks.md` | Accepted as-is: those files are the contract set the verdict closed, so editing them now invalidates the signature. Recorded here, which is where a reader of the archive looks. |
+| `proposal.md` still says `status: implementing` with AC boxes unticked | Same as above: the archive rewrites the status line, and the digest ignores it; ticking the boxes would invalidate the contract digests. |
