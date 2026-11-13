@@ -245,7 +245,19 @@ Only after step 3 of "By Nov 9" passed. From here the CI deploy cannot run again
 `SELLER_PHONE` and the token. The deployed end page keeps serving. A later change to it needs a
 new token (ADR-008).
 
-1. Delete the GitHub secrets in the production environment. A name that was never set is only reported:
+1. First make the deploy job skippable, so deleting the credentials does not turn every later push
+   to `main` red:
+
+   ```
+   gh variable set DEPLOY_ENABLED --body false
+   ```
+
+   The variable guards the `deploy` job's `if`; a job that needs a secret cannot ask for it in an
+   `if`, so without this the job fails on `Require production contact` from the next merge on. A
+   later deploy needs the variable back with new credentials.
+
+   Then delete the GitHub secrets in the production environment. A name that was never set is only
+   reported:
 
    ```
    for environment in production; do
@@ -257,7 +269,9 @@ new token (ADR-008).
 
    The PR-review keys are repository secrets, not environment ones
    (`.github/workflows/pr-agent.yml` passes them to the shared ci-workflows job):
-   `gh secret delete NAN_API_KEY` and `gh secret delete PR_AGENT_ANTHROPIC_API_KEY`, then drop
+   `gh secret delete NAN_API_KEY` and `gh secret delete PR_AGENT_ANTHROPIC_API_KEY`, then
+   `gh workflow disable pr-agent.yml` — with the keys gone the job can only fail, and its own
+   `verify-review-published.sh` turns that into a red check on every pull request. Then drop
    this repository from both keys' consumers in the dotfiles secrets registry. Revoke
    `NAN_API_KEY` where it was issued only if no other repository uses it.
 

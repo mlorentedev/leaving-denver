@@ -83,7 +83,11 @@ jobs:
       - run: make test
 
   deploy:
-    if: github.ref == 'refs/heads/main'
+    # A repository variable, not a secret: the decommission deletes SELLER_PHONE and the token
+    # ("By Nov 15"), and a job that needs them cannot ask for them in an `if` — it would just fail
+    # on every push to main. With DEPLOY_ENABLED=false the job skips and says so, and setting the
+    # variable back (with new credentials) is all a later deploy needs.
+    if: github.ref == 'refs/heads/main' && vars.DEPLOY_ENABLED != 'false'
     # A red end-of-sale run is a broken switch: the day it flips, the end deploy fails.
     needs: [test, test-end-of-sale]
     runs-on: ubuntu-latest

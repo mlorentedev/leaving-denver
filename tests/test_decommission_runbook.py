@@ -67,6 +67,21 @@ def test_the_switch_is_flipped_before_the_secrets_go():
     assert RUNBOOK.index("\n## By Nov 9") < RUNBOOK.index("\n## By Nov 15")
 
 
+def test_the_deploy_job_can_be_skipped_before_the_credentials_go():
+    """A job that needs SELLER_PHONE cannot ask for it in an `if`, so without a switch the job goes
+    red on Require production contact from the first push after the deletion."""
+    workflow = (ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8")
+    assert "vars.DEPLOY_ENABLED != 'false'" in workflow
+    by_nov_15 = section("By Nov 15")
+    assert "gh variable set DEPLOY_ENABLED --body false" in by_nov_15
+
+
+def test_the_review_workflow_is_disabled_before_its_keys_go():
+    # With both keys deleted the shared job can only fail, and verify-review-published.sh turns
+    # that into a red check on every pull request.
+    assert "gh workflow disable pr-agent.yml" in section("By Nov 15")
+
+
 def test_every_secret_a_workflow_reads_is_deleted_in_both_environments():
     used = set(re.findall(r"secrets\.([A-Z_]+)", WORKFLOWS)) - {"GITHUB_TOKEN"}
     assert used, "no workflow secret found: the pattern is stale"
