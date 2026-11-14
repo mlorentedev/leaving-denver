@@ -1,4 +1,3 @@
-cloudflare_pages_token: ENC[AES256_GCM,data:3aPKLz4JhD10K4DotZ5dNyTZ4AGwndwdySr8pvWB1oyzzY49UuIGA2l5osUxz04Rp/I6HLw=,iv:zjmpFosHB1lcMFyhPwk8eLcvQcDN0ArhBA44voWstN8=,tag:ocRjADQu51QodwwnLW/EJg==,type:str]
 seller:
     phone: ENC[AES256_GCM,data:GF6JYN0FkJCiyq6uDHe5zl0=,iv:N5xwB6/iugk822DfMAuaEXPPya5lko3J/SH+NxQPZZ8=,tag:zGmBfaTIsUNMSq/iTmGbMw==,type:str]
 floors:
@@ -32,7 +31,6 @@ targets:
     auxiliary-c-table: ENC[AES256_GCM,data:8Ys=,iv:BkrFik4UlbnuuOIEkAeJXkxqxEY5ESenmo5CouNEymo=,tag:zZB3CfucOHvgAqiBFNnSRw==,type:int]
     lamps-pair: ENC[AES256_GCM,data:eGA=,iv:+a550W3KaZNjASOpen9th9c88uomT26rwr/zOimAJDQ=,tag:iXyCiXmfAKcn2RAYYcUfyg==,type:float]
     ikea-mattress-topper: ENC[AES256_GCM,data:Ed4=,iv:akbnbR/g7fyOomRBFEQmNF+12iyHn9bMtNBy/YMUne4=,tag:hFC7JE8Gbxwo14hmWK5wYA==,type:float]
-cloudflare_terraform_token: ENC[AES256_GCM,data:BRkprCsHasj3lyB/+u/9EPia8UPWT5N2hE8Z7gCVWSsxfQt8wry/ey01EPkn0HjVtZkN6is=,iv:XmJgWzsx99u7+8XR4aZ1n8m0G2gZ/r8CgeX3Lii9pk0=,tag:bxXCXkGbW9YFWoeA3lUG1g==,type:str]
 owner_email: ENC[AES256_GCM,data:jOdszTaqCiDnQOvimuqHGv5XJB/Q,iv:kb76q//bFS+eLXRERBUz1057qE6XCTKT2m9GClNaxUo=,tag:dZHRZmK+Y+Md8JXk+70Kgg==,type:str]
 sales:
     bar-stools-pair:
@@ -103,7 +101,7 @@ sops:
             N5S0b6gn+J7t3Lg9zTalfJK5VHCwzBcjg5kbjsk7dea2bNSxWE/NQA==
             -----END AGE ENCRYPTED FILE-----
           recipient: age166v8efpskctmxxes5lcqpxkj0ny3q74l3v0pswpdpa63wlkqmc8q35fkdw
-    lastmodified: "2026-11-10T03:30:44Z"
-    mac: ENC[AES256_GCM,data:TZ9Mep/AzXtq8OilG1l4BY5DxN5TWrA4pyC6LgtJr7DPFk0U0kA81Yh9HCRA1TvhXJbnVVJnmcR70ZXsYBelxYGLPcRS05dssxh1NnREyeMpu/HKsv5tvMdAu8bN7Le+hBkwFsqO8q/t2ikeKxRewtuD+AqWgSlX8jugdANNPW0=,iv:wiRkYMf7E8lDLaFmzG7+XdpoSshjEKPO5ygUB/raA2Q=,tag:K9VpxAxwcT/L+5vAcXG8iA==,type:str]
+    lastmodified: "2026-11-14T05:22:05Z"
+    mac: ENC[AES256_GCM,data:4CJtkNWosPMLFrpBWVQiv3dMdrJnzyLnf5fI8xkmX+W4R6w38Vg43Q43JfKCS5CzCN2wW05fUhK/YCqDRJ9P3UqcJPstOwaVlLV2VUv+GwClfE9IWDktgBDchsTDachmpHpsuOYTLWqY9D5S3Fl+JiCJ3ub8alluVIhensNHgEI=,iv:ojFPHyTNOr2sKplAhFLEA9Zayvm6lS7uj39QAMfkzUg=,tag:9H8bufeuXQgeuIQG/gfLuQ==,type:str]
     unencrypted_suffix: _unencrypted
     version: 3.13.1
