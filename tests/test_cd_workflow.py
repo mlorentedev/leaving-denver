@@ -20,7 +20,10 @@ DEPLOY = WORKFLOW["jobs"]["deploy"]
 def test_main_push_deploys_production_only_after_tests():
     assert WORKFLOW["on"]["push"]["branches"] == ["main"]
     assert DEPLOY["needs"] == ["test", "test-end-of-sale"]
-    assert DEPLOY["if"] == "github.ref == 'refs/heads/main'"
+    # The repository variable is the decommission's switch: with the credentials deleted
+    # ("By Nov 15") the job can only fail on Require production contact, so it skips instead.
+    assert "github.ref == 'refs/heads/main'" in DEPLOY["if"]
+    assert "vars.DEPLOY_ENABLED != 'false'" in DEPLOY["if"]
     assert DEPLOY["environment"]["name"] == "production"
     assert DEPLOY["concurrency"]["group"] == "pages-production"
 
