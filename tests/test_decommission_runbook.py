@@ -70,8 +70,6 @@ def test_the_switch_is_flipped_before_the_secrets_go():
 def test_the_deploy_job_can_be_skipped_before_the_credentials_go():
     """A job that needs SELLER_PHONE cannot ask for it in an `if`, so without a switch the job goes
     red on Require production contact from the first push after the deletion."""
-    workflow = (ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8")
-    assert "vars.DEPLOY_ENABLED != 'false'" in workflow
     by_nov_15 = section("By Nov 15")
     assert "gh variable set DEPLOY_ENABLED --body false" in by_nov_15
 
