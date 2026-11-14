@@ -306,7 +306,19 @@ new token (ADR-008).
    and preview: Terraform never wrote them. The Pages project stays in Terraform, where
    `prevent_destroy` keeps it (ADR-008).
 
-3. Revoke the Cloudflare API tokens, and forget the email. Cloudflare dashboard > My Profile >
+3. Revoke the Cloudflare API tokens, and forget the email.
+
+   The revoke list is three, not two: the Pages deploy token, the Terraform token, and
+   `leaving-denver-analytics-read` — the user token the sale's digest used, which kubelab holds
+   (`apps.services.automation.n8n.sale_digest.analytics_token`, TTL to 2026-11-15). All three live
+   under My Profile > API Tokens; the first two are identified by permission (Pages: Edit, and
+   Access: Edit + Pages: Edit), the third by name. Nothing can list them for you: neither token
+   holds the API-tokens permission, and neither should.
+
+   Then the ciphertext of the dead tokens goes too, so the repository does not carry keys nothing
+   can use: `sops unset data/private.sops.yaml '["cloudflare_pages_token"]'` and the same for
+   `cloudflare_terraform_token`. `make deploy` and `make infra-plan` then fail at the sops read
+   with a clear error, which is the intended state: a later deploy needs a new token anyway. Cloudflare dashboard > My Profile >
    API Tokens: delete the Pages deploy token and the Terraform token (or Roll, then discard). The
    encrypted copies in `data/private.sops.yaml` are dead from
    then on; `make secrets` and delete `cloudflare_terraform_token` and `owner_email`. Delete
